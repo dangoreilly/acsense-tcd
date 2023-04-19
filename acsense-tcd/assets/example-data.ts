@@ -1,0 +1,71 @@
+import { Building } from '~/assets/types/Building';
+
+export default { 
+    "name": "Arts Building",
+    "aka": "Arts Block",
+    "buildingId": "arts-building",
+    "description": "The Arts Building contains many large lecture theatres on the ground floor as well as seating areas and a coffee shop. There are a range of different department located on the upper floors along with various seminar rooms, classrooms and offices. ",
+    "sensoryOverview": "Can be very busy and difficult to navigate in between lectures when students are moving through the space. A lot of visual and sound stimulation, combination of natural and neon lights, reflections from the floor, sounds bouncing, smells from the café.  ",
+    "sounds": "At busy times background noise, unpredictable noises, and where students gather for conversations.",
+    "lights": "Most rooms use overhead flourescent lights with little or no natural lighting.",
+    "experience": "At busy times, consistent contact with other people, especially within stairwells.",
+    "respite":"There is a sensory space located at the rear of the building towards the lift that is bookable to students.",
+    "physicalAccess": "*Accessible first and second floor entrance. \n*The Main Front Entrance is accessible due to a ramp being provided and the entrance to the coffee dock on level 1 is on level access. \n*The upper floors are served by 4 staircases at different points in the building, a platform lift and a passenger lift. \n*Accessible toilets on all floors. \n*Changing places toilet on level 2 near attendants desk. \n*All lecturer theatres at level 2 & 3 have loop systems and power automated doors.",
+    // "evacuationInfo":"- Evac Chair is on 4th Floor near stairwell D \n- Stairmate Major is on 4th Floor near room 4066 \n- Building security desk or reception 896 1157 \n- The Lift in the building is protected from the effects of a fire and can be isolated from external control",
+    "evacuationInfo":"*Evac Chair is on 4th Floor near stairwell D \n*Stairmate Major is on 4th Floor near room 4066 \n*Building security desk or reception 896 1157 \n*The Lift in the building is protected from the effects of a fire and can be isolated from external control",
+    "facilities":[
+        "Coffee dock",
+        "Printers",
+        "Student Space"
+    ],
+    "tips":[
+        "If possible plan to go through this area outside of times at the start and end of the hour (for example 10:10)",
+        "There is a lift located at the back of the building as an option to stairwells for students to use.",
+        "There are three stairwells in the Arts Building with the least busy and the far end of the building.",
+        "There is a roof garden on the fifth floor",
+        "There is enclosed high back sofas in many of the open areas on the upper floors"
+    ],
+    "openingTimes": {
+        "weekDay": {
+            "open": true,
+            "times": [8,18]
+        },
+        "sat": {
+            "open": false,
+            "times": [8,18]
+        },
+        "holidays": {
+            "open": false,
+            "times": [8,18]
+        },
+        "note":""
+    },
+    "additionalInformation":{
+        "display": false,
+        "content": ""
+    },
+    "images": {
+        "main": {
+            "url":"https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/41a35328ecd852ff7a9c1e0df713fdd3.jpg",
+            "alt":"Exterior of the Arts Building",
+        },
+        "gallery": [
+            {
+                "url":"https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/0984ca0cc76b199aea651146d36bbea2.jpg",
+                "alt":"A class room in the Arts Building with a blackboard, lectern and chairs",
+                "caption":"Room 4051"
+            },
+            {
+                "url":"https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/ccaf208e8e8e0abd498bb56e5565cca3.jpg",
+                "alt":"A large lecture theatre in the Arts Building with a stage, projector screen, lectern and chairs",
+                "caption":"The Ed Burke Theatre"
+            },
+            {
+                "url":"https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/28512b6c16839dda87f552706d113d66.jpg",
+                "alt":"Table and chairs beside a window and lockers in the Arts Building",
+                "caption":"Seating area on the 4th floor"
+            }
+        ]
+    },
+    "lastUpdated": "2023-04-10T12:00:00.000Z"
+};

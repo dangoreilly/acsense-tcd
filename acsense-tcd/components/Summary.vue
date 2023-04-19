@@ -1,0 +1,38 @@
+<template>
+    <div id="summary" class="m-3">
+        <h1>{{buildingName}}</h1>
+        
+        <p id="aka" style="display:block"><b>Also Known as:</b> {{aka}}</p>
+        
+        <div id="description">
+            <h3>Description</h3>
+            <p>{{description}}</p>
+        </div>
+        <div class="sensoryinfo">
+            <h3>Sensory Overview</h3>
+            <p>{{sensoryOverview}}</p>
+        </div>
+
+    </div>
+</template>
+
+<script lang="ts">
+
+export default {
+  props:{
+    buildingName: String,
+    aka: String,
+    description: String,
+    sensoryOverview: String,
+  }
+
+}
+</script>
+
+<style scoped>
+    #summary {
+        border-radius: 3pt;
+        padding: 1rem;
+        min-width: 25rem;
+    }
+</style>
