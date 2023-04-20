@@ -5,13 +5,14 @@
             <div class="card-header">
                 <ul class="nav nav-underline">
                     <li v-for="tab, index in contentArray" class="nav-item">
-                        <a 
-                        class="nav-link" 
+                        <p 
+                        class="nav-link"
+                        style="cursor: pointer; margin-bottom: 2px;" 
                         :class="{ 'active': activeTab === index, }"
                         @click="makeTabActive(index)"
                         href="#">
                             {{ tab.title }}
-                        </a>
+                        </p>
                     </li>
                 
                 </ul>
@@ -21,10 +22,6 @@
             class="card-body"
             :class="{ 'd-block': activeTab === index, 'd-none': activeTab !== index, }"
             :innerHTML="tab.parsedContent">
-                <!-- <p 
-                style="white-space:pre-line;" 
-                class="text-start" 
-                ></p> -->
             </div>
         </div>
     <!-- </div> -->
@@ -70,16 +67,12 @@ export default {
     }
 }
 
-useHead({
- script:[
-    {
-        src: "https://cdn.jsdelivr.net/npm/marked/marked.min.js",
-        crossorigin: "anonymous",}
-    ]
-})
-
 </script>
 
-<!-- <style>
+<style>
+/* .infobox{
+    margin: 3rem auto;
+    
+} */
 
-</style> -->
+</style>

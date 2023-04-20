@@ -1,34 +1,36 @@
 <template>
-<div>
-    <div v-if="$route.params.buildingId == building.buildingId">
-        <!-- <h1>{{building.name}}</h1>
-        <p>{{building.description}}"></p>
-        <p>{{building.buildingId}}</p> -->
-        <div class="flexrow">
-            <div 
-            style="flex:3">
-                <Summary 
-                :buildingName="building.name"
-                :aka="building.aka"
-                :description="building.description"
-                :sensoryOverview="building.sensoryOverview"
-                />
+<div style="width:100%">
+    <NavBar />
+    <div class="mainMatter">
+        <div 
+        v-if="$route.params.buildingId == building.buildingId">
+            
+            <div class="flexrow">
+                <div 
+                style="flex:3">
+                    <Summary 
+                    :buildingName="building.name"
+                    :aka="building.aka"
+                    :description="building.description"
+                    :sensoryOverview="building.sensoryOverview"
+                    />
+                </div>
+
+                <div 
+                style="flex:2">
+                    <MainPicture 
+                    :mainSrc="building.images.main.url" 
+                    :mainAlt="building.images.main.alt" />
+                </div>
             </div>
 
-            <div 
-            style="flex:2">
-                <MainPicture 
-                :mainSrc="building.images.main.url" 
-                :mainAlt="building.images.main.alt" />
-            </div>
+            <Infobox
+            :contentArray="infoBoxContent"
+            />
+            
         </div>
-
-        <Infobox
-        :contentArray="infoBoxContent"
-        />
-        
+        <p v-else>Sorry, this building doesn't exist</p>
     </div>
-    <p v-else>Sorry, this building doesn't exist</p>
 </div>
 </template>
 
@@ -46,6 +48,19 @@
     align-items: center;
     flex-wrap: nowrap;
 }
+.mainMatter {
+    max-width: 1000px;
+    margin: 0 auto;
+    margin-top: 40px;
+}
+
+html {
+    width: 100%;
+}
+
+body {
+    min-width: 100vw;
+}
 </style>
 
 <script lang="ts">
@@ -53,44 +68,46 @@
 import bld from '~/assets/example-data';
 import { Building } from '~/assets/types/Building';
 
+interface InfoBoxContentTab {
+    title: string,
+    content: string,
+}
+
 export default {
   data() {
     return {
       building: {} as Building,
+      infoBoxContent: [] as InfoBoxContentTab[],
     }
   },
   created() {
     this.building = bld;
-  },
-  computed: {
-    infoBoxContent() {
-      return [
-            {
-                title: "Sound",
-                content: this.building.sounds,
-            },
-            {
-                title: "Lights",
-                content: this.building.lights,
-            },
-            {
-                title: "Experience",
-                content: this.building.experience,
-            },
-            {
-                title: "Respite",
-                content: this.building.respite,
-            },
-            {
-                title: "Physical Access",
-                content: this.building.physicalAccess,
-            },
-            {
-                title: "Evacuation Info",
-                content: this.building.evacuationInfo,
-            },
-        ]
-    }
+    this.infoBoxContent = [
+        {
+            title: "Sound",
+            content: this.building.sounds,
+        },
+        {
+            title: "Lights",
+            content: this.building.lights,
+        },
+        {
+            title: "Experience",
+            content: this.building.experience,
+        },
+        {
+            title: "Respite",
+            content: this.building.respite,
+        },
+        {
+            title: "Physical Access",
+            content: this.building.physicalAccess,
+        },
+        {
+            title: "Evacuation Info",
+            content: this.building.evacuationInfo,
+        },
+    ]
   },
   methods: {
     
