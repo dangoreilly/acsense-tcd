@@ -1,9 +1,12 @@
 <template>
 
-    <!-- <div class="container"> -->
+    <!-- Card container -->
         <div class="card m-3">
+            <!-- Nav bar for tabs -->
             <div class="card-header">
+                <!-- Tabs -->
                 <ul class="nav nav-underline">
+
                     <li v-for="tab, index in contentArray" class="nav-item">
                         <p 
                         class="nav-link"
@@ -17,11 +20,12 @@
                 
                 </ul>
             </div>
+
             <div 
             v-for="tab, index in tabs" 
             class="card-body"
             :class="{ 'd-block': activeTab === index, 'd-none': activeTab !== index, }"
-            :innerHTML="tab.parsedContent">
+            v-html="tab.parsedContent">
             </div>
         </div>
     <!-- </div> -->
