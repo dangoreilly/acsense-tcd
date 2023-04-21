@@ -2,7 +2,8 @@
 export default defineNuxtConfig({
     routeRules: {
         '/**': {static: true},
-    }
+    },
+    css: [ "~/assets/css/style.scss" ],
 
 
 })
