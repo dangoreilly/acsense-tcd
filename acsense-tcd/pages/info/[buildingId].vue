@@ -8,7 +8,6 @@
             <div class="flexrow">
                 <div 
                 style="flex:3">
-                <p>Rev 4</p>
                     <Summary 
                     :buildingName="building.name"
                     :aka="building.aka"
