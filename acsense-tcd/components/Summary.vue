@@ -29,10 +29,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
     #summary {
         border-radius: 3pt;
         padding: 1rem;
-        min-width: 25rem;
+        min-width: min(25rem, 90vw);
     }
 </style>

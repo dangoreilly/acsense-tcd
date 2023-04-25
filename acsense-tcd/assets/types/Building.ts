@@ -13,17 +13,17 @@ type Building = {
     facilities: string[];
     tips: string[];
     openingTimes: {
-        weekDay: {
+        weekday: {
             open: boolean;
-            times: number[];
+            times: string[];
         },
         sat: {
             open: boolean;
-            times: number[];
+            times: string[];
         },
         holidays: {
             open: boolean;
-            times: number[];
+            times: string[];
         },
         note: string;
     },

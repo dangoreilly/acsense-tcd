@@ -8,6 +8,7 @@
             <div class="flexrow">
                 <div 
                 style="flex:3">
+                <p>Rev 4</p>
                     <Summary 
                     :buildingName="building.name"
                     :aka="building.aka"
@@ -21,6 +22,9 @@
                     <MainPicture 
                     :mainSrc="building.images.main.url" 
                     :mainAlt="building.images.main.alt" />
+                    
+                    <Timebox
+                    :times="building.openingTimes"/>
                 </div>
             </div>
 
@@ -53,14 +57,14 @@
     margin: 0 auto;
     margin-top: 40px;
 }
-
+/* 
 html {
     width: 100%;
 }
 
 body {
     min-width: 100vw;
-}
+} */
 </style>
 
 <script lang="ts">
@@ -137,12 +141,12 @@ useHead({
         href: "https://fonts.googleapis.com",
       }
   ],
-  meta: [
-    { charset: "utf-8"},
-    {  name: "viewport",
-      content: "width=device-width, initial-scale=1, shrink-to-fit=no"
-    }
-  ]
+//   meta: [
+//     { charset: "utf-8"},
+//     {  name: "viewport",
+//       content: "width=device-width, initial-scale=1, shrink-to-fit=no"
+//     }
+//   ]
 });
 
 

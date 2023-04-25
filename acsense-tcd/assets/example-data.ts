@@ -26,17 +26,17 @@ export default {
         "There is enclosed high back sofas in many of the open areas on the upper floors"
     ],
     "openingTimes": {
-        "weekDay": {
+        "weekday": {
             "open": true,
-            "times": [8,18]
+            "times": ["08:00","18:00"]
         },
         "sat": {
             "open": false,
-            "times": [8,18]
+            "times": ["08:00","18:00"]
         },
         "holidays": {
             "open": false,
-            "times": [8,18]
+            "times": ["08:00","18:00"]
         },
         "note":""
     },

@@ -7,7 +7,7 @@
                 <!-- Tabs -->
                 <ul class="nav nav-underline">
 
-                    <li v-for="tab, index in contentArray" class="nav-item">
+                    <li v-for="tab, index in tabs" class="nav-item infobox-tab">
                         <p 
                         class="nav-link"
                         style="cursor: pointer; margin-bottom: 2px;" 
@@ -37,14 +37,14 @@
 interface Tab {
     title: string,
     content: string,
-    parsedContent: string,
+    parsedContent?: string,
 }
 
 
 export default {
     props: {
         contentArray: {
-            type: Array as () => {title: string, content: string}[],
+            type: Array as () => Tab[],
             required: true,
         }
     },
@@ -56,6 +56,7 @@ export default {
         }
     },
     created() {
+        // Parse markdown and move the content array data into the tabs array
         this.tabs = this.contentArray.map((tab) => {
             return {
                 title: tab.title,
@@ -74,9 +75,8 @@ export default {
 </script>
 
 <style>
-/* .infobox{
-    margin: 3rem auto;
-    
-} */
+.infobox-tab{
+    transition: all 0.5s ease;
+}
 
 </style>

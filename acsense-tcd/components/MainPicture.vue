@@ -28,7 +28,7 @@ export default {
 
 <style>
 .mainPictureCard {
-    min-width: 25rem;
+    min-width: min(25rem, calc(100vw - 6rem));
     /* max-width: 650px; */
     margin: min(3rem, 3vw);
     

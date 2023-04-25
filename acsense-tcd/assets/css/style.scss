@@ -1,6 +1,32 @@
-//Overrides for Bootstrap variables
+// //Overrides for Bootstrap variables
 
-// $primary: #ffff00;
+// $custom-colours: (
+//     "ac-blue": #3F88c5
+// "ac-green": #a2f6ab
+// "danger": #ce7da5
+// $warning: #f1bb87
+// $info: #031926
+// );
 
+@import 'bootstrap/scss/bootstrap-utilities';
+
+$all-colors: map-merge-multiple($blues, $indigos, $purples, $pinks, $reds, $oranges, $yellows, $greens, $teals, $cyans);
+
+$utilities: map-merge(
+  $utilities,
+  (
+    "background-colour": map-merge(
+      map-get($utilities, "background-color"),
+      (
+        values: map-merge(
+          map-get(map-get($utilities, "background-color"), "values"),
+          (
+            $all-colors
+          ),
+        ),
+      ),
+    ),
+  )
+);
 
 @import 'bootstrap/scss/bootstrap';
