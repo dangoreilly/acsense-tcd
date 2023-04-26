@@ -2,8 +2,10 @@
 <div style="width:100%">
     <NavBar />
     <div class="mainMatter">
+        <!-- <Sidebar /> -->
         <div 
-        v-if="$route.params.buildingId == building.buildingId">
+        v-if="$route.params.buildingId == building.buildingId"
+        class="building-info">
             
             <div class="flexrow">
                 <div 
@@ -30,6 +32,25 @@
             <Infobox
             :contentArray="infoBoxContent"
             />
+
+            <div class="flexrow">
+                <div 
+                class="m-3"
+                style="flex:3">
+                    <AccessTips :tips="['Tips']" />
+                </div>
+                
+                <div 
+                class="m-3"
+                style="flex:2">
+                    <AccessTips :tips="['Rooms']" />
+
+                    <AccessTips 
+                    class="mt-3"
+                    :tips="['Gallery']" />
+
+                </div>
+            </div>
             
         </div>
         <p v-else>Sorry, this building doesn't exist</p>
@@ -45,16 +66,50 @@
     align-items: flex-start;
     flex-wrap: wrap;
 }
-.flexcol {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
+.flexcol-2 {
+    min-width: min(25rem, calc(100vw - 6rem));
 }
 .mainMatter {
     max-width: 1000px;
     margin: 0 auto;
     margin-top: 40px;
+    
+}
+
+.tips-and-links-grid {
+    display: grid;
+    grid-template-areas: 
+        "tips rooms-link"
+        "tips gallery-link";
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.tips-area {
+    grid-area: tips;
+    grid-row: 1 / 3;
+}
+
+.rooms-area {
+    grid-area: rooms-link;
+}
+
+.gallery-area {
+    grid-area: gallery-link;
+}
+
+/* @media screen and (min-width: 992px) {
+    .mainMatter {
+        display: grid;
+        grid-template-areas: "sidebar main";
+        grid-template-columns: 1fr 5fr;
+        gap: 1.5rem;
+    }
+} */
+    
+.building-info {
+    grid-area: main;
 }
 /* 
 html {
@@ -68,85 +123,99 @@ body {
 
 <script lang="ts">
 
-import bld from '~/assets/example-data';
-import { Building } from '~/assets/types/Building';
+    import bld from '~/assets/example-data';
+    import { Building } from '~/assets/types/Building';
 
-interface InfoBoxContentTab {
-    title: string,
-    content: string,
-}
-
-export default {
-  data() {
-    return {
-      building: {} as Building,
-      infoBoxContent: [] as InfoBoxContentTab[],
+    interface InfoBoxContentTab {
+        title: string,
+        content: string,
     }
-  },
-  created() {
-    this.building = bld;
-    this.infoBoxContent = [
-        {
-            title: "Sound",
-            content: this.building.sounds,
-        },
-        {
-            title: "Lights",
-            content: this.building.lights,
-        },
-        {
-            title: "Experience",
-            content: this.building.experience,
-        },
-        {
-            title: "Respite",
-            content: this.building.respite,
-        },
-        {
-            title: "Physical Access",
-            content: this.building.physicalAccess,
-        },
-        {
-            title: "Evacuation Info",
-            content: this.building.evacuationInfo,
-        },
-    ]
-  },
-  methods: {
-    
-  }
-  
-}
 
-useHead({
-  link:[
-    //   {
-    //     rel: "stylesheet",
-    //     href: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css",
-    //     integrity: "sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ",
-    //     crossorigin: "anonymous"
-    //   },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Lato&family=PT+Mono&display=swap"
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossorigin: "anonymous"
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.googleapis.com",
-      }
-  ],
-//   meta: [
-//     { charset: "utf-8"},
-//     {  name: "viewport",
-//       content: "width=device-width, initial-scale=1, shrink-to-fit=no"
-//     }
-//   ]
-});
+    export default {
+        data() {
+            return {
+            building: {} as Building,
+            infoBoxContent: [] as InfoBoxContentTab[],
+            }
+        },
+        created() {
+            this.building = bld;
+            this.infoBoxContent = [
+                {
+                    title: "Sound",
+                    content: this.building.sounds,
+                },
+                {
+                    title: "Lights",
+                    content: this.building.lights,
+                },
+                {
+                    title: "Experience",
+                    content: this.building.experience,
+                },
+                {
+                    title: "Respite",
+                    content: this.building.respite,
+                },
+                {
+                    title: "Physical Access",
+                    content: this.building.physicalAccess,
+                },
+                {
+                    title: "Evacuation Info",
+                    content: this.building.evacuationInfo,
+                },
+            ];
+        },
+        computed: {
+            // Get the theme from local storage
+            prefersDarkTheme() {
+                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+            }
+        },
+        watch: {
+            // Watch for changes to the theme
+            prefersDarkTheme(wantsDark) {
+                if (wantsDark) {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark')
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', 'light')
+                }
+            }
+        },
+        methods: {
+            // Set the theme on page load
+            setTheme() {
+                if (this.prefersDarkTheme) {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark')
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', 'light')
+                }
+            }
+        },
+        mounted() {
+            this.setTheme()
+        }
+    
+    }
+
+    useHead({
+        link:[
+            {
+                rel: "stylesheet",
+                href: "https://fonts.googleapis.com/css2?family=Lato&family=PT+Mono&Inter:wght@900&display=swap"
+            },
+            {
+                rel: "preconnect",
+                href: "https://fonts.gstatic.com",
+                crossorigin: "anonymous"
+            },
+            {
+                rel: "preconnect",
+                href: "https://fonts.googleapis.com",
+            }
+        ],
+    });
 
 
 </script>
