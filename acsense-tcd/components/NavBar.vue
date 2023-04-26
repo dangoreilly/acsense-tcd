@@ -1,13 +1,16 @@
 <template>
 
-<nav class="navbar fixed-top navbar-info-page bg-primary-subtle">
+<nav class="navbar fixed-top navbar-info-page bg-primary-subtle diagonal-gradiant">
 
     <div class="container-fluid" style="position: relative;">
 
         <a 
         class="navbar-brand nav-logo-base"
         :class="{'nav-logo-search ': searchIsActive}"
-        >Acsense</a>
+        style="font-family: 'Inter', sans-serif;"
+        >
+            <strong>acsense</strong>
+        </a>
 
         <form 
         class="d-flex me-3 search-base" 
@@ -79,6 +82,13 @@ export default {
     padding: 0 2rem;
 }
 
+/* @media screen and (min-width: 1050px) {
+    .container-fluid {
+        padding-left: 0;
+    }
+} */
+    
+
 .navbar-main-info-page {
     position: fixed !important;
     top: 0;
@@ -93,6 +103,31 @@ export default {
     overflow: hidden;
     /* max-width: 0; */
     transition: width 0.2s ease-out;
+}
+
+/* Styles for handling theme changes */
+@media screen and (prefers-color-scheme: dark) {
+    :root{
+        --gradient-blue: #032830;
+        --gradient-green: #0d503c;
+    }
+}
+@media screen and (prefers-color-scheme: light) {
+    :root{
+        --gradient-blue: #9eeaf9;
+        --gradient-green: #a6e9d5;
+    }
+}
+
+.diagonal-gradiant {
+
+    background-image: 
+        linear-gradient(
+            45deg,
+            var(--gradient-blue),
+            var(--gradient-green),
+            var(--gradient-blue)
+        ); 
 }
 
 
