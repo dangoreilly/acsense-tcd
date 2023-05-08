@@ -4,6 +4,8 @@ export default defineNuxtConfig({
         '/**': {static: true},
     },
     css: [ "~/assets/css/style.scss" ],
-
+    modules: [
+        '@vueuse/nuxt',
+      ],
 
 })
