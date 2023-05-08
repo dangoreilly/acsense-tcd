@@ -153,7 +153,7 @@ export default {
 
     .search-active{
         width: calc(100% - 2rem);
-}
+    }
 }
 
 </style>
