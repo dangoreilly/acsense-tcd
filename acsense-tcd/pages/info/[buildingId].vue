@@ -2,7 +2,6 @@
 <div style="width:100%">
     <NavBar />
     <div class="mainMatter">
-        <!-- <Sidebar /> -->
         <div 
         v-if="$route.params.buildingId == building.buildingId"
         class="building-info">
@@ -37,20 +36,26 @@
                 <div 
                 class="m-3"
                 style="flex:3">
-                    <AccessTips :tips="['Tips']" />
+                    <AccessTips :tips="building.tips" />
                 </div>
                 
                 <div 
                 class="m-3"
                 style="flex:2">
-                    <AccessTips :tips="['Rooms']" />
+                    <LinkCard>
+                        Room Information
+                    </LinkCard>
 
-                    <AccessTips 
-                    class="mt-3"
-                    :tips="['Gallery']" />
+                    <LinkCard>
+                        Building Map
+                    </LinkCard>
 
                 </div>
             </div>
+
+            <Gallery
+            :images="building.images.gallery"
+            />
             
         </div>
         <p v-else>Sorry, this building doesn't exist</p>
@@ -126,10 +131,7 @@ body {
     import bld from '~/assets/example-data';
     import { Building } from '~/assets/types/Building';
 
-    interface InfoBoxContentTab {
-        title: string,
-        content: string,
-    }
+    import { InfoBoxContentTab } from '~/assets/types/infoPageTypes';
 
     export default {
         data() {
