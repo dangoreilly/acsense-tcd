@@ -1,3 +1,5 @@
+import { Photo, OpeningTimes } from 'assets/types/infoPageTypes'
+
 type Building = {
     name: string;
     aka: string;
@@ -12,35 +14,14 @@ type Building = {
     evacuationInfo: string;
     facilities: string[];
     tips: string[];
-    openingTimes: {
-        weekday: {
-            open: boolean;
-            times: string[];
-        },
-        sat: {
-            open: boolean;
-            times: string[];
-        },
-        holidays: {
-            open: boolean;
-            times: string[];
-        },
-        note: string;
-    },
+    openingTimes: OpeningTimes,
     additionalInformation: {
         display: boolean;
         content: string;
     },
     images: {
-        main: {
-            url: string;
-            alt: string;
-        }
-        gallery: {
-            url: string;
-            alt: string;
-            caption: string;
-        }[];
+        main: Photo,
+        gallery: Photo[];
     },
     lastUpdated: string;
 };

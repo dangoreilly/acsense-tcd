@@ -34,24 +34,20 @@
 
 <script lang="ts">
 
-interface Tab {
-    title: string,
-    content: string,
-    parsedContent?: string,
-}
+import { InfoBoxContentTab } from '~/assets/types/infoPageTypes'
 
 
 export default {
     props: {
         contentArray: {
-            type: Array as () => Tab[],
+            type: Array as () => InfoBoxContentTab[],
             required: true,
         }
     },
     data() {
         return {
             activeTab: 0,
-            tabs: [] as Tab[],
+            tabs: [] as InfoBoxContentTab[],
 
         }
     },
