@@ -40,20 +40,7 @@
 
 <script lang="ts">
 
-    interface OpeningTimes {
-        weekday: {
-            open: boolean,
-            times: string[],
-        },
-        sat: {
-            open: boolean,
-            times: string[],
-        },
-        holidays: {
-            open: boolean,
-            times: string[],
-        },
-    }
+import { OpeningTimes } from 'assets/types/infoPageTypes'
 
     export default {
         props: {
@@ -76,20 +63,22 @@
 .time-container {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-evenly;
     align-items: flex-end;
     flex-wrap: wrap;
     column-gap: 2rem;
 }
-time-entry {
+
+
+
+
+/* .time-entry {
     display: flex;
     flex-direction: column;
-    /* justify-content: flex-end; */
-    /* align-items: flex-start; */
     flex-wrap: nowrap;
     margin-left: 1rem;
     margin-right: 1rem;
-}
+} */
 .time-lead {
     display: flex;
     font-weight: bold;
