@@ -2,8 +2,10 @@
 
 <div class="card access-tips-card">
     <div class="card-header">
-        Access Tips | 
-        <a class="small"> Submit a tip</a>
+        <h6 class="m-0">
+            <strong>Access Tips | </strong>
+            <a class="small"> Submit a tip</a>
+        </h6>
     </div>
     <div class="card-body">
         <ul class="list-group list-group-flush">
