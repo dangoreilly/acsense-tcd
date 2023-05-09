@@ -6,7 +6,9 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "start": "node .output/server/index.mjs"
+
   },
   "devDependencies": {
     "@vueuse/core": "^10.1.2",
@@ -18,6 +20,7 @@
   },
   "dependencies": {
     "@types/node": "^18.15.11",
-    "bootstrap": "^5.3.0-alpha3"
+    "bootstrap": "^5.3.0-alpha3",
+    "leaflet": "^1.9.3"
   }
 }
