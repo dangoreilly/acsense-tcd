@@ -1,5 +1,5 @@
 <template>
-<div class="d-flex flex-column flex-shrink-0 py-3 ps-3 border-end border-secondary-subtle bg-body-tertiary position-sticky" style="width: 280px;">
+<div class="d-flex flex-column flex-shrink-0 py-3 px-3 border-end border-secondary-subtle bg-body-tertiary position-sticky" style="width: 280px;">
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
         <svg
         class="bi bi-x-diamond-fill me-2" 
@@ -14,35 +14,15 @@
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
-        <li>
-            <a href="#" class="nav-link link-body-emphasis">
-                <i class="bi bi-graph-up"></i>
-                Analytics
-            </a>
-        <li class="nav-item">
-            <a href="#" class="nav-link link-body-emphasis">
-                <i class="bi bi-building-gear"></i>
-                Buildings
-            </a>
-        </li>
-        </li>
-        <li>
-            <a href="#" class="nav-link link-body-emphasis">
-                <i class="bi bi-brush"></i>
-                Branding
-            </a>
-        </li>
-        <li>
-            <a href="#" class="nav-link link-body-emphasis">
-                <i class="bi bi-people"></i>
-                Contributors
-            </a>
-        </li>
-        <li>
-            <a href="#" class="nav-link link-body-emphasis">
-                <i class="bi bi-card-checklist"></i>
-                Audit Logs
-            </a>
+        <!-- Highlight the active page by matching it to the activeTab prop -->
+        <li v-for="tab in tabs">
+            <NuxtLink
+            :to="tab.key" 
+            class="nav-link link-body-emphasis"
+            :class="tab.key == activeTab ? 'active' : ''">
+                <i :class="tab.icon"></i>
+                {{ tab.name }}
+            </NuxtLink>
         </li>
     </ul>
     <hr>
@@ -66,11 +46,47 @@
 export default {
     props: {
         activeTab: String,
-    }
+    },
+    data() {
+        return {
+            tabs: [
+                {
+                    name: 'Analytics',
+                    key: 'analytics',
+                    icon: 'bi bi-graph-up',
+                    link: '#'
+                },
+                {
+                    name: 'Buildings',
+                    key: 'buildings',
+                    icon: 'bi bi-building-gear',
+                    link: '#'
+                },
+                {
+                    name: 'Branding',
+                    key: 'branding',
+                    icon: 'bi bi-brush',
+                    link: '#'
+                },
+                {
+                    name: 'Contributors',
+                    key: 'contributors',
+                    icon: 'bi bi-people',
+                    link: '#'
+                },
+                {
+                    name: 'Audit Logs',
+                    key: 'logs',
+                    icon: 'bi bi-card-checklist',
+                    link: '#'
+                },
+            ]
+        }
+    },
 };
 
 useHead({
-    title: 'Admin',
+    title: 'Acsense Admin',
     meta: [
         {
             name: 'description',
