@@ -6,9 +6,19 @@
 <!-- The third column shows the new value of the field -->
 <template>
 <div>
+    <!-- Change the height and flex direction depending on view orientation -->
+    <!-- Change the background colour to show if an action is a create or delete -->
     <div class="detail-container position-sticky top-0"
-    :class="{'bg-success-subtle': selectedLog.action == 'create', 'bg-danger-subtle': selectedLog.action == 'delete'}">
-        <div class="detail d-col d-particulars">
+    :class="{
+        'bg-success-subtle': selectedLog.action == 'create', 
+        'bg-danger-subtle': selectedLog.action == 'delete',
+        'detail-container-horz': orientation == 'horizontal',
+        'detail-container-vert': orientation == 'vertical',
+        }">
+
+        <!-- Change the width depending on the view orientation -->
+        <div 
+        class="detail d-particulars d-col">
             <!-- Timestamp -->
             <div class="detail d-time">
                 <label for="timestamp" class="form-label">
@@ -39,7 +49,9 @@
             </div>
         </div>
 
-        <div class="detail d-col d-value">
+        <!-- Change the width depending on the view orientation -->
+        <div 
+        class="detail d-particulars d-col">
             <div class="detail d-oldValue">
                 <label for="oldValue" class="form-label">
                     Old Value
@@ -50,7 +62,9 @@
             </div>
         </div>
 
-        <div class="detail d-col d-value">
+        <!-- Change the width depending on the view orientation -->
+        <div 
+        class="detail d-particulars d-col">
             <div class="detail d-newValue">
                 <label for="newValue" class="form-label">
                     New Value
@@ -72,7 +86,11 @@ export default {
         selectedLog: {
             type: Object as () => LogEntry,
             required: true
-        }
+        },
+        orientation: {
+            type: String,
+            required: true,
+        },
     },
     methods: {
         getNewValue() {
@@ -94,14 +112,17 @@ export default {
 /* Temp style to visualise sections */
 .d-col {
     /* border: 1px solid black; */
-    width: 33%;
+    /* width: 33.3%; */
+    flex-grow: 1;
     height: 100%;
+    width: 100%;
     /* flex-direction: column;
     display: flex;
     justify-content: flex-start;
     align-items: flex-start; */
     
 }
+
 .d-particulars {
     /* border: 1px solid red; */
     padding-left: 1rem;
@@ -112,13 +133,7 @@ export default {
     padding-right: 0.5rem;
 }
 .d-row {
-    border: 1px solid blue;
-    display: flex;
     flex-direction: row;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 100%;
-    height: 100%;
 }
 
 label.form-label {
@@ -139,11 +154,21 @@ textarea.form-control {
 
 .detail-container {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    /* flex-direction: row; */
+    justify-content:space-evenly;
     align-items: center;
-    width: 100%;
-    height: 30vh;
+    /* width: 100%; */
+}
+
+.detail-container-vert {
+    height: 85vh; 
+    width:30vw; 
+    flex-direction: column;
+}
+.detail-container-horz {
+    height: 30vh; 
+    width: 100%; 
+    flex-direction: row;
 }
 
 </style>

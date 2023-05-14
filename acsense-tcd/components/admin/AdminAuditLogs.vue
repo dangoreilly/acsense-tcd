@@ -1,6 +1,6 @@
 <template>
-    <div class="container table-container" 
-    style="height:70vh; overflow-y: auto;">
+    <div class="container-fluid g-0 table-container" 
+    :style="orientation == 'horizontal' ? 'height:60vh;' : 'height:90vh;' ">
         <table class="table table-hover">
             <thead>
                 <tr class="sticky-header">
@@ -8,9 +8,10 @@
                     <th scope="col">User</th>
                     <th scope="col">Action</th>
                     <th scope="col">Target</th>
-                    <th scope="col">Field</th>
-                    <th scope="col" colspan="2">Old Value</th>
-                    <th scope="col" colspan="2">New Value</th>
+                    <!-- Show more detail if in horizontal view -->
+                    <th v-if="orientation == 'horizontal'" scope="col">Field</th>
+                    <th v-if="orientation == 'horizontal'" scope="col" colspan="2">Old Value</th>
+                    <th v-if="orientation == 'horizontal'" scope="col" colspan="2">New Value</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,9 +25,10 @@
                     <td>{{ log.user }}</td>
                     <td>{{ log.action }}</td>
                     <td>{{ log.target }}</td>
-                    <td>{{ log.field }}</td>
-                    <td colspan="2">{{ log.oldValue }}</td>
-                    <td colspan="2">{{ log.newValue }}</td>
+                    <!-- Show more detail if in horizontal view -->
+                    <td v-if="orientation == 'horizontal'">{{ log.field }}</td>
+                    <td v-if="orientation == 'horizontal'" colspan="2">{{ log.oldValue }}</td>
+                    <td v-if="orientation == 'horizontal'" colspan="2">{{ log.newValue }}</td>
                 </tr>
                 
             </tbody>
@@ -39,7 +41,14 @@
 export default {
     props: {
         // The selected log entry object
-        logs: []
+        logs: {
+            type: Array,
+            required: true,
+        },
+        orientation: {
+            type: String,
+            required: true,
+        },
     },
     data() {
         return {
@@ -62,6 +71,10 @@ export default {
 </script>
 
 <style>
+.table-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 table {
     width: 100%; 
     white-space: nowrap; 
