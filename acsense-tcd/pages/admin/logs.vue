@@ -1,9 +1,5 @@
 <!-- Admin page for displaying logs -->
-<!-- Includes a sidebar, a detail view for logs, and a scrollable list of logs -->
 <template>
-<!-- <main class="d-flex flex-nowrap" style="height:100vh">
-    <AdminSidebar/>
-    <div class="activityArea"> -->
     <NuxtLayout name="admin-layout" :activePage="'logs'">
         <!-- Header -->
         <div class="container-fluid border-bottom border-2 border-black mb-3 d-flex justify-content-between">
@@ -52,8 +48,6 @@
         
         </div>
     </NuxtLayout>
-    <!-- </div>
-</main> -->
 </template>
 
 <script>
