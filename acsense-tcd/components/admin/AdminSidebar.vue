@@ -54,31 +54,31 @@ export default {
                     name: 'Analytics',
                     key: 'analytics',
                     icon: 'bi bi-graph-up',
-                    link: '#'
                 },
                 {
                     name: 'Buildings',
                     key: 'buildings',
                     icon: 'bi bi-building-gear',
-                    link: '#'
+                },
+                {
+                    name: 'Map',
+                    key: 'map',
+                    icon: 'bi bi-map',
                 },
                 {
                     name: 'Branding',
                     key: 'branding',
                     icon: 'bi bi-brush',
-                    link: '#'
                 },
                 {
                     name: 'Contributors',
                     key: 'contributors',
                     icon: 'bi bi-people',
-                    link: '#'
                 },
                 {
                     name: 'Audit Logs',
                     key: 'logs',
                     icon: 'bi bi-card-checklist',
-                    link: '#'
                 },
             ]
         }
