@@ -60,6 +60,7 @@
         </div>
         <p v-else>Sorry, this building doesn't exist</p>
     </div>
+    <Footer />
 </div>
 </template>
 
@@ -156,16 +157,12 @@ body {
                     content: this.building.experience,
                 },
                 {
-                    title: "Respite",
+                    title: "Sensory Spaces",
                     content: this.building.respite,
                 },
                 {
                     title: "Physical Access",
                     content: this.building.physicalAccess,
-                },
-                {
-                    title: "Evacuation Info",
-                    content: this.building.evacuationInfo,
                 },
             ];
         },

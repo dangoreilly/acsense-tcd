@@ -11,7 +11,6 @@ type Building = {
     experience: string;
     respite: string;
     physicalAccess: string;
-    evacuationInfo: string;
     facilities: string[];
     tips: string[];
     openingTimes: OpeningTimes,

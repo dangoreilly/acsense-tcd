@@ -41,8 +41,8 @@ export default {
         "note":""
     },
     "additionalInformation":{
-        "display": false,
-        "content": ""
+        "display": true,
+        "content": "*Evac Chair is on 4th Floor near stairwell D \n*Stairmate Major is on 4th Floor near room 4066 \n*Building security desk or reception 896 1157 \n*The Lift in the building is protected from the effects of a fire and can be isolated from external control",
     },
     "images": {
         "main": {
