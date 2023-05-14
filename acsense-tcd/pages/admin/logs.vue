@@ -10,7 +10,7 @@
             <h1 class="display-6 d-flex align-items-end">
                 Logs
             </h1>
-            
+
             <!-- Buttons -->
             <div class="">
                 <!-- Change View -->
@@ -106,7 +106,7 @@ export default {
         // Generate a timestamp string for the current time
         generateTimestamp() {
             let date = new Date();
-            let timestamp = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
+            let timestamp = `${date.getFullYear()}${date.getMonth()}${date.getDate()}_${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
             return timestamp;
         }
     }
