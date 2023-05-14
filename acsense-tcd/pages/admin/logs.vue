@@ -113,24 +113,3 @@ definePageMeta({
 });
 </script>
 
-<style>
-body {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-}
-
-.activityArea {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    padding: 1rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    background-color: #F5F5F5;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-
-}
-</style>
