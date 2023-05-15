@@ -53,6 +53,12 @@
                 </div>
             </div>
 
+            <div
+            v-if="building.additionalInformation.display">
+                <AdditionalInfo 
+                :info="building.additionalInformation.content"/>
+            </div>
+
             <Gallery
             :images="building.images.gallery"
             />

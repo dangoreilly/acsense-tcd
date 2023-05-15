@@ -28,7 +28,7 @@ export default {
     "openingTimes": {
         "weekday": {
             "open": true,
-            "times": ["08:00","18:00"]
+            "times": ["08:00","22:00"]
         },
         "sat": {
             "open": false,
@@ -38,11 +38,11 @@ export default {
             "open": false,
             "times": ["08:00","18:00"]
         },
-        "note":""
+        "note":"Access is by swipe card only after 18:00 and at weekends."
     },
     "additionalInformation":{
         "display": true,
-        "content": "*Evac Chair is on 4th Floor near stairwell D \n*Stairmate Major is on 4th Floor near room 4066 \n*Building security desk or reception 896 1157 \n*The Lift in the building is protected from the effects of a fire and can be isolated from external control",
+        "content": "The Arts Building houses the [Faculty of Arts, Humanities and Social Sciences](http://ahss.tcd.ie/) and many of it's schools:\n\n*[English](https://www.tcd.ie/English/) \n*[Histories and Humanities](http://histories-humanities.tcd.ie/) \n*[Languages, Literatures and Cultural Studies](https://www.tcd.ie/langs-lits-cultures/) \n*[Linguistic, Speech and Communication Sciences](https://www.tcd.ie/slscs/) \n*[Social Sciences and Philosophy](https://www.tcd.ie/ssp/) \n*[Social Work and Social Policy](http://socialwork-socialpolicy.tcd.ie/)",
     },
     "images": {
         "main": {
