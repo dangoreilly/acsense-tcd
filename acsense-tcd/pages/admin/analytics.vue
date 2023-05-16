@@ -2,18 +2,8 @@
 <template>
     <NuxtLayout name="admin-layout" :activePage="'analytics'">
         <div>
-            <!-- <div 
-            style="font-size: 14px; padding-bottom: 14px;">
-                Stats powered by 
-                <a 
-                target="_blank" 
-                style="color: #4F46E5; text-decoration: underline;" 
-                href="https://plausible.io">
-                    Plausible Analytics
-                </a>
-            </div> -->
-
             <iframe 
+            id="plausible-embed"
             plausible-embed 
             src="https://plausible.io/share/tcdsensemap-test.ie?auth=ygLkYbc_xksHgzQ6oa0je" 
             scrolling="yes"
@@ -27,6 +17,11 @@
 </template>
 
 <script setup>
+
+onMounted(() => {
+    // Required to fix the plausible embed script from turning off scrolling for some reason
+    document.getElementById('plausible-embed').scrolling = 'yes';
+})
 
 useHead({
     script: [
