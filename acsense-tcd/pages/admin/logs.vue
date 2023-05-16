@@ -3,10 +3,21 @@
     <NuxtLayout name="admin-layout" :activePage="'logs'">
         <!-- Header -->
         <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
-            <!-- Title -->
-            <h1 class="display-6 d-flex align-items-end">
-                Logs
-            </h1>
+            <!-- Div to contain construction badge -->
+            <div class="d-flex">
+                <!-- Title -->
+                <h1 class="display-6 d-flex align-items-end">
+                    Logs
+                </h1>
+
+                <!-- Construction Badge -->
+                <div class="d-flex align-items-center m-3 fs-5">
+                    <span class="badge rounded-pill text-bg-success">
+                        Demonstration
+                    </span>
+                </div>
+
+            </div>
 
             <!-- Buttons -->
             <div class="">
