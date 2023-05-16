@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid g-0 table-container" 
+    <div class="g-0 table-container" 
     :style="orientation == 'horizontal' ? 'height:60vh;' : 'height:90vh;' ">
         <table class="table table-hover">
             <thead>

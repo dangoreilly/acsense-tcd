@@ -2,7 +2,7 @@
 <template>
     <NuxtLayout name="admin-layout" :activePage="'logs'">
         <!-- Header -->
-        <div class="container-fluid border-bottom border-2 border-black mb-3 d-flex justify-content-between">
+        <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
             <!-- Title -->
             <h1 class="display-6 d-flex align-items-end">
                 Logs

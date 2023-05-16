@@ -161,7 +161,7 @@ textarea.form-control {
 }
 
 .detail-container-vert {
-    height: 85vh; 
+    height: 100%; 
     width:30vw; 
     flex-direction: column;
 }
