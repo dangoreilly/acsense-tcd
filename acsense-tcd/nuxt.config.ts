@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
     routeRules: {
         '/**': {static: true},
+        '/admin': {redirect:'/admin/analytics'},
     },
     css: [ "~/assets/css/style.scss"],
     modules: [
