@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     css: [ "~/assets/css/style.scss"],
     modules: [
         '@vueuse/nuxt',
+        '@nuxt/content',
       ],
     components: [
         { path: '~/components/admin'},
