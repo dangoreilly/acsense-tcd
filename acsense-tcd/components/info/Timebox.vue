@@ -1,7 +1,7 @@
 <template>
 
-    <div class="time-card card px-2">
-        <div class="time-container pt-2">
+    <div class="time-card card">
+        <div class="time-container pt-2 mx-2">
 
             <div class="time-entry">
                 <div class="time-lead">
@@ -34,6 +34,10 @@
             </div>
 
         </div>
+        <!-- Render the footer if there's a note; there won't always be one -->
+        <div class="card-footer" v-if="times.note.length > 0">
+            {{ times.note }}
+        </div>
     </div>
 
 </template>
@@ -63,10 +67,18 @@ import { OpeningTimes } from 'assets/types/infoPageTypes'
 .time-container {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: flex-end;
     flex-wrap: wrap;
     column-gap: 2rem;
+    padding-left: auto;
+    padding-right: auto;
+}
+
+@media screen and (min-width: 415px) {
+    .time-container {
+        justify-content: space-evenly;
+    }
 }
 
 

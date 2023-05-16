@@ -17,6 +17,7 @@ export interface OpeningTimes {
         open: boolean,
         times: string[],
     },
+    note: string,
 }
 
 export interface InfoBoxContentTab {
