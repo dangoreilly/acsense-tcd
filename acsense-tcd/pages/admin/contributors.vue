@@ -17,7 +17,7 @@
 
         </div>
         <!-- Main Matter -->
-        <div style="overflow-y: auto; overflow-x: hidden;">
+        <div class="mainMatter-admin">
             <!-- Use a ContentDoc as a quick way to insert a summary -->
             <ContentDoc path="/contributors" />
 

@@ -38,4 +38,10 @@ body {
     justify-content: flex-start;
 
 }
+
+.mainMatter-admin{
+    overflow-y: auto; 
+    overflow-x: hidden;
+    width: 100%;
+}
 </style>

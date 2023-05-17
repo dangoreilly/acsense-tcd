@@ -21,7 +21,7 @@
             </div>
 
             <div v-for="col in cols" class="col border border-end border-1">
-              <label>  
+              <label class="checkBoxGrid">  
                 <span class="col-header">{{ col.name }}</span>
                 <input 
                 type="checkbox" 
@@ -50,7 +50,7 @@
             </div>
 
             <div v-for="col in cols" class="col border border-end border-1">
-              <label>
+              <label class="checkBoxGrid">
                 <input 
                 type="checkbox" 
                 v-model="selection"
@@ -251,7 +251,7 @@ export default {
 </script>
 
 <style>
-  label, .col-header { 
+  label.checkBoxGrid, .col-header { 
        display: block;
        text-align: center;
     }
