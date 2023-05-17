@@ -2,7 +2,7 @@
     <div id="summary" class="m-3">
         <h1>{{buildingName}}</h1>
         
-        <p id="aka" style="display:block"><b>Also Known as:</b> {{aka}}</p>
+        <p v-if="aka" id="aka" style="display:block"><b>Also Known as:</b> {{aka}}</p>
         
         <div id="description">
             <h3>Description</h3>
@@ -20,10 +20,22 @@
 
 export default {
   props:{
-    buildingName: String,
-    aka: String,
-    description: String,
-    sensoryOverview: String,
+    buildingName: {
+        type: String,
+        required: true,
+    },
+    aka: {
+        type: String,
+        required: false,
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    sensoryOverview: {
+        type: String,
+        required: true,
+    },
   }
 
 }

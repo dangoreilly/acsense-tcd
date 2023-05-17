@@ -37,7 +37,7 @@
 
                     <!-- Aka -->
                     <div class="mb-3">
-                        <label for="AkaInput" class="form-label">AKA</label>
+                        <label for="AkaInput" class="form-label">AKA <small>(optional)</small></label>
                         <input id="AkaInput" type="text" class="form-control" 
                         v-model="building.aka">
                     </div>
