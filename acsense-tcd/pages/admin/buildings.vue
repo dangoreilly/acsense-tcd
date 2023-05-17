@@ -50,7 +50,7 @@
                     </div>
 
                     <!-- Sensory Overview -->
-                    <div class="mb-3">
+                    <div class="mb-3 mt-3">
                         <label for="senseOverviewInput" class="form-label">Sensory Overview</label>
                         <textarea class="form-control" id="senseOverviewInput" rows="4" 
                         v-model="building.sensoryOverview"></textarea>
@@ -68,7 +68,7 @@
             </div>
         
             <!-- Opening Times -->
-            <div class="row">
+            <div class="row mt-2">
                 <div class="col d-flex flex-column">
                     <!-- Weekdays -->
                     <div class="row">
