@@ -9,7 +9,15 @@
             <p>{{description}}</p>
         </div>
         <div class="sensoryinfo">
-            <h3>Sensory Overview</h3>
+            <h3 class="d-flex">
+                <span>Sensory Overview </span>
+                <a 
+                class="link-offset-2 link-underline link-underline-opacity-0"
+                href="https://www.tcd.ie/disability/services/sensory-support/"
+                target="_blank">
+                    <i class="fs-6 mx-2 bi bi-info-circle"></i>
+                </a>
+            </h3>
             <p>{{sensoryOverview}}</p>
         </div>
 
