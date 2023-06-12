@@ -11,7 +11,7 @@
                         <p 
                         class="nav-link"
                         style="cursor: pointer; margin-bottom: 2px;" 
-                        :class="{ 'active': activeTab === index, }"
+                        :class="{ 'active': activeInfoTab === index, }"
                         @click="makeTabActive(index)"
                         href="#">
                             {{ tab.title }}
@@ -24,7 +24,7 @@
             <div 
             v-for="tab, index in tabs" 
             class="card-body"
-            :class="{ 'd-block': activeTab === index, 'd-none': activeTab !== index, }"
+            :class="{ 'd-block': activeInfoTab === index, 'd-none': activeInfoTab !== index, }"
             v-html="tab.parsedContent">
             </div>
         </div>
@@ -42,11 +42,15 @@ export default {
         contentArray: {
             type: Array as () => InfoBoxContentTab[],
             required: true,
-        }
+        },
+        activeInfoTab: {
+            type: Number,
+            required: true,
+        },
     },
     data() {
         return {
-            activeTab: 0,
+            // activeTab: 0,
             tabs: [] as InfoBoxContentTab[],
 
         }
@@ -63,7 +67,8 @@ export default {
     },
     methods: {
         makeTabActive(index: number) {
-            this.activeTab = index;
+            // this.activeTab = index;
+            this.$emit('tabChanged', index);
         }
     }
 }

@@ -30,6 +30,8 @@
 
             <Infobox
             :contentArray="infoBoxContent"
+            :activeInfoTab="activeInfoBoxTab"
+            @tabChanged="activeInfoBoxTab = $event"
             />
 
             <div class="flexrow">
@@ -145,6 +147,7 @@ body {
             return {
             building: {} as Building,
             infoBoxContent: [] as InfoBoxContentTab[],
+            activeInfoBoxTab: 0,
             }
         },
         created() {

@@ -68,7 +68,7 @@
             </div>
         
             <!-- Opening Times -->
-            <div class="row mt-2">
+            <div class="row mt-3"><label class="form-label d-block">Opening Times</label>
                 <div class="col d-flex flex-column">
                     <!-- Weekdays -->
                     <div class="row">
@@ -146,20 +146,26 @@
             </div>
 
             <!-- Infobox -->
-
-            <!-- <div class="row">
+            <div class="row mt-3">
                 <div class="col">
                     <AdminInfobox
                     :contentArray="infoBoxContent"
-                    @contentChanged="updateInfoBoxContent"
+                    :activeInfoTab="activeInfoBoxTab"
+                    @tabChanged="activeInfoBoxTab = $event"
+                    @contentChanged="updateInfoBoxContent($event)"
+                    @modalOpen="markdownModalOpen = $event"
                     />
                 </div>
                 <div class="col">
                     <Infobox
                     :contentArray="infoBoxContent"
+                    :activeInfoTab="activeInfoBoxTab"
+                    @tabChanged="activeInfoBoxTab = $event"
+                    @contentChanged="updateInfoBoxContent($event)"
                     />
                 </div>
-            </div> -->
+            </div>
+            
 
         <!-- Tips -->
 
@@ -167,6 +173,10 @@
 
 
         </div>
+        <AdminMarkdownModal 
+        :modalOpen="markdownModalOpen" 
+        @modalClose="markdownModalOpen = false"
+        />
 
     </NuxtLayout>
 </template>
@@ -183,7 +193,8 @@
             return {
             building: {} as Building,
             infoBoxContent: [] as InfoBoxContentTab[],
-            activeInfoTab: 0,
+            activeInfoBoxTab: 0,
+            markdownModalOpen: false,
             }
         },
         created() {
