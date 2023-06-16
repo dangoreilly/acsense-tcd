@@ -14,6 +14,7 @@
 
         <form 
         class="d-flex me-3 search-base" 
+        v-if="!searchBarDisabled"
         role="search"
         @submit.prevent="print(searchBoxContent)"
         :class="{'search-active': searchIsActive}">
@@ -50,6 +51,9 @@
 <script lang="ts">
 
 export default {
+    props: {
+        searchBarDisabled: Boolean,
+    },
     data() {
         return {
             searchIsActive: false,

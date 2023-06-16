@@ -1,75 +1,71 @@
 <template>
-<div style="width:100%">
-    <NavBar />
-    <div class="mainMatter">
-        <div 
-        v-if="$route.params.buildingId == building.buildingId"
-        class="building-info">
-            
-            <div class="flexrow">
-                <div 
-                style="flex:3">
-                    <Summary 
-                    :buildingName="building.name"
-                    :aka="building.aka"
-                    :description="building.description"
-                    :sensoryOverview="building.sensoryOverview"
-                    />
-                </div>
-
-                <div 
-                style="flex:2">
-                    <MainPicture 
-                    :mainSrc="building.images.main.url" 
-                    :mainAlt="building.images.main.alt" />
-                    
-                    <Timebox
-                    :times="building.openingTimes"/>
-                </div>
+<NuxtLayout name="info-layout">
+    <div 
+    v-if="$route.params.buildingId == building.buildingId"
+    class="building-info">
+        
+        <div class="flexrow">
+            <div 
+            style="flex:3">
+                <Summary 
+                :buildingName="building.name"
+                :aka="building.aka"
+                :description="building.description"
+                :sensoryOverview="building.sensoryOverview"
+                />
             </div>
 
-            <Infobox
-            :contentArray="infoBoxContent"
-            :activeInfoTab="activeInfoBoxTab"
-            @tabChanged="activeInfoBoxTab = $event"
-            />
-
-            <div class="flexrow">
-                <div 
-                class="m-3"
-                style="flex:3">
-                    <AccessTips :tips="building.tips" />
-                </div>
+            <div 
+            style="flex:2">
+                <MainPicture 
+                :mainSrc="building.images.main.url" 
+                :mainAlt="building.images.main.alt" />
                 
-                <div 
-                class="m-3"
-                style="flex:2">
-                    <LinkCard>
-                        Room Information
-                    </LinkCard>
-
-                    <LinkCard>
-                        Building Map
-                    </LinkCard>
-
-                </div>
+                <Timebox
+                :times="building.openingTimes"/>
             </div>
-
-            <div
-            v-if="building.additionalInformation.display">
-                <AdditionalInfo 
-                :info="building.additionalInformation.content"/>
-            </div>
-
-            <Gallery
-            :images="building.images.gallery"
-            />
-            
         </div>
-        <p v-else>Sorry, this building doesn't exist</p>
+
+        <Infobox
+        :contentArray="infoBoxContent"
+        :activeInfoTab="activeInfoBoxTab"
+        @tabChanged="activeInfoBoxTab = $event"
+        />
+
+        <div class="flexrow">
+            <div 
+            class="m-3"
+            style="flex:3">
+                <AccessTips :tips="building.tips" />
+            </div>
+            
+            <div 
+            class="m-3"
+            style="flex:2">
+                <LinkCard>
+                    Room Information
+                </LinkCard>
+
+                <LinkCard>
+                    Building Map
+                </LinkCard>
+
+            </div>
+        </div>
+
+        <div
+        v-if="building.additionalInformation.display">
+            <AdditionalInfo 
+            :info="building.additionalInformation.content"/>
+        </div>
+
+        <Gallery
+        :images="building.images.gallery"
+        />
+        
     </div>
-    <Footer />
-</div>
+    <p v-else>Sorry, this building doesn't exist</p>
+</NuxtLayout>
 </template>
 
 <style>
