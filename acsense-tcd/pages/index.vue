@@ -3,10 +3,11 @@
     
     </template>
     
+
+    <script setup>
     //Script setup needed for UseHead
     // The index page is very different to the rest of the script
     // so there's no qualms with using the composition API here, instead of the Options API
-    <script setup>
     useHead({
         title: 'Accessibility Map',
         meta: [
