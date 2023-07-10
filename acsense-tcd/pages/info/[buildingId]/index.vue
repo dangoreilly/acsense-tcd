@@ -42,12 +42,14 @@
             <div 
             class="m-3"
             style="flex:2">
-                <LinkCard>
-                    Room Information
+            <NuxtLink :to="linkToRooms">
+                <LinkCard :title="'Room Info'">
+                    Information about the capacity and accessibility of some of the rooms in this building
                 </LinkCard>
+            </NuxtLink>
 
-                <LinkCard>
-                    Building Map
+                <LinkCard :title="'Floor Plans'">
+                    Coming Soon
                 </LinkCard>
 
             </div>
@@ -144,6 +146,7 @@ body {
             building: {} as Building,
             infoBoxContent: [] as InfoBoxContentTab[],
             activeInfoBoxTab: 0,
+            linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
             }
         },
         created() {
