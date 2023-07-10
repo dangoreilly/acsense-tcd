@@ -1,7 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     routeRules: {
-        '/**': {static: true},
+        // '/info/*': {ssr: true},
+        // '/': {static: true},
+        // '/admin/*': {ssr: true},
         '/admin': {redirect:'/admin/analytics'},
     },
     css: [ "~/assets/css/style.scss"],
