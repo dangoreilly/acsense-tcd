@@ -5,7 +5,7 @@ type Building = {
     aka: string;
     buildingId: string;
     description: string;
-    sensoryOverview: string;
+    sensoryAreas?: Object[];
     sounds: string;
     lights: string;
     experience: string;

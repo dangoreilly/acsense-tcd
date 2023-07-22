@@ -11,7 +11,7 @@
                 :buildingName="building.name"
                 :aka="building.aka"
                 :description="building.description"
-                :sensoryOverview="building.sensoryOverview"
+                :sensoryAreas="building.sensoryAreas"
                 />
             </div>
 
@@ -136,6 +136,7 @@ body {
 <script lang="ts">
 
     import bld from '~/assets/example-data';
+    import areas from '~/assets/example-area-data';
     import { Building } from '~/assets/types/Building';
 
     import { InfoBoxContentTab } from '~/assets/types/infoPageTypes';
@@ -151,6 +152,7 @@ body {
         },
         created() {
             this.building = bld;
+            this.building.sensoryAreas = areas;
             this.infoBoxContent = [
                 {
                     title: "Sound",
