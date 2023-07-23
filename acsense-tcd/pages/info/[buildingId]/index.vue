@@ -49,7 +49,7 @@
                 </NuxtLink>
 
                 
-                <NuxtLink :to="linkToRooms">
+                <NuxtLink :to="linkToInternalMap">
                     <button type="button" class="btn btn-primary btn-lg w-75">Internal Map</button>
                 </NuxtLink>
 
@@ -176,6 +176,7 @@ body {
             infoBoxContent: [] as InfoBoxContentTab[],
             activeInfoBoxTab: 0,
             linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
+            linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
             }
         },
         created() {
