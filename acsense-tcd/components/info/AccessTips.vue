@@ -45,4 +45,11 @@ export default {
     bottom: 1rem;
     right: 1rem;
 }
+
+@media screen and (max-width: 768px) {
+    .access-tips-card {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+}
 </style>

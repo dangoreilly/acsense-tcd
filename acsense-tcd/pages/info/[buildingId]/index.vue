@@ -20,9 +20,9 @@
                 <MainPicture 
                 :mainSrc="building.images.main.url" 
                 :mainAlt="building.images.main.alt" />
+
+                <AccessTips :tips="building.tips" />
                 
-                <Timebox
-                :times="building.openingTimes"/>
             </div>
         </div>
 
@@ -36,21 +36,22 @@
             <div 
             class="m-3"
             style="flex:3">
-                <AccessTips :tips="building.tips" />
+                <Timebox
+                :times="building.openingTimes"/>
             </div>
             
             <div 
-            class="m-3"
-            style="flex:2">
-            <NuxtLink :to="linkToRooms">
-                <LinkCard :title="'Room Info'">
-                    Information about the capacity and accessibility of some of the rooms in this building
-                </LinkCard>
-            </NuxtLink>
+            class="d-grid gap-2 col-6 m-auto"
+            style="flex:2; ">
 
-                <LinkCard :title="'Floor Plans'">
-                    Coming Soon
-                </LinkCard>
+                <NuxtLink :to="linkToRooms">
+                    <button type="button" class="btn btn-primary btn-lg w-75">Room info</button>
+                </NuxtLink>
+
+                
+                <NuxtLink :to="linkToRooms">
+                    <button type="button" class="btn btn-primary btn-lg w-75">Internal Map</button>
+                </NuxtLink>
 
             </div>
         </div>
@@ -133,6 +134,33 @@ body {
 } */
 </style>
 
+<script setup lang="ts">
+    useHead({
+        title: 'Accessibility Map',
+        meta: [
+            {
+                name: 'description',
+                content: 'An interactive map of Trinity College Dublin, showing accessibility information for buildings and rooms.',
+            },
+            {
+                name: 'keywords',
+                content: 'Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
+            },
+            {
+                name: 'viewport',
+                content: 'width=device-width, initial-scale=1.0',
+            },
+        ],
+        link: [
+            {
+                rel:"stylesheet",
+                href:"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            },
+        ],
+    });
+
+</script>
+
 <script lang="ts">
 
     import bld from '~/assets/example-data';
@@ -154,20 +182,20 @@ body {
             this.building = bld;
             this.building.sensoryAreas = areas;
             this.infoBoxContent = [
+                // {
+                //     title: "Sound",
+                //     content: this.building.sounds,
+                // },
+                // {
+                //     title: "Lights",
+                //     content: this.building.lights,
+                // },
                 {
-                    title: "Sound",
-                    content: this.building.sounds,
-                },
-                {
-                    title: "Lights",
-                    content: this.building.lights,
-                },
-                {
-                    title: "Experience",
+                    title: "Sensory Experience",
                     content: this.building.experience,
                 },
                 {
-                    title: "Sensory Spaces",
+                    title: "Wayfinding",
                     content: this.building.respite,
                 },
                 {

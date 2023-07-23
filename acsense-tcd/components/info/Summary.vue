@@ -24,35 +24,64 @@
                     <tbody>
                         <tr v-for="area in sensoryAreas">
                             <th>
-                                <img :src="area.url" :alt="area.type" width="10px"/>
+                                <img :src="area.url" :alt="area.type" style="width: 2rem;"/>
                             </th>
+
                             <td>{{ area.Name }}</td>
-                            <td>
-                                <span class="badge rounded-pill text-bg-warning" title="Capacity">
-                                    <i class="fa-solid fa-chair"></i> 
-                                    {{area.capacity > 0 ? area.capacity : '?'}}
-                                </span>
-                                <span 
-                                class="badge rounded-pill" 
-                                :class="{'text-bg-success': area.electrical_outlets, 'text-bg-danger': !area.electrical_outlets}" 
-                                title="{{area.electrical_outlets ? '' : 'No '}}Plug Sockets">
-                                    <i class="fa-solid fa-plug"></i>
-                                </span>
-                                <span class="badge rounded-pill text-bg-{{area.food_drink_allowed ? 'success' : 'danger'}}" title="Food and Drink {{area.food_drink_allowed ? 'Allowed' : 'not Allowed'}}">
-                                    <i class="fa-solid fa-utensils"></i></span>
-                                <span class="badge rounded-pill text-bg-{{area.kettle ? 'success' : 'danger'}}" title="{{area.kettle ? '' : 'No '}}Kettle">
-                                    <i class="fa-solid fa-mug-saucer"></i></span>
-                                <span class="badge rounded-pill text-bg-{{area.microwave ? 'success' : 'danger'}}" title="{{area.microwave ? '' : 'No ''}}Microwave">
-                                    <i class="fa-solid fa-radiation"></i>
-                                </span>
-                                <span class="badge rounded-pill text-bg-{{area.wheelchair_accessible ? 'success' : 'danger'}}" title="{{area.wheelchair_accessible ? '' : 'No '}}Wheelchair Access">
-                                    <i class="fa-solid fa-wheelchair"></i>
-                                </span>
+
+                            <td style="display: flex; flex-direction: column; min-width: 8rem;">
+
+                                <div style="align-items: end;">
+
+                                    <span class="badge rounded-pill text-bg-warning mx-1" title="Capacity">
+                                        <i class="fa-solid fa-chair"></i>
+                                        {{area.capacity > 0 ? area.capacity : '?'}}
+                                    </span>
+
+                                    <span 
+                                    class="badge rounded-pill mx-1" 
+                                    :class="{'text-bg-success': area.electrical_outlets, 'text-bg-danger': !area.electrical_outlets}" 
+                                    :title="(area.electrical_outlets ? '' : 'No ') + 'Plug Sockets'">
+                                        <i class="fa-solid fa-plug"></i>
+                                    </span>
+
+                                    <span 
+                                    class="badge rounded-pill mx-1" 
+                                    :class="{'text-bg-success': area.food_drink_allowed, 'text-bg-danger': !area.food_drink_allowed}" 
+                                    :title="'Food and Drink ' + (area.food_drink_allowed ? '' : 'not') + 'Allowed'">
+                                        <i class="fa-solid fa-utensils"></i>
+                                    </span>
+
+                                </div>
+                                <div style="align-items: end;">
+
+                                    <span 
+                                    class="badge rounded-pill mx-1" 
+                                    :class="{'text-bg-success': area.kettle, 'text-bg-danger': !area.kettle}" 
+                                    :title="(area.kettle ? '' : 'No ') + 'Kettle Available'">
+                                        <i class="fa-solid fa-mug-saucer"></i>
+                                    </span>
+
+                                    <span 
+                                    class="badge rounded-pill mx-1" 
+                                    :class="{'text-bg-success': area.microwave, 'text-bg-danger': !area.microwave}" 
+                                    :title="(area.microwave ? '' : 'No ') + 'Microwave Available'">
+                                        <i class="fa-solid fa-radiation"></i>
+                                    </span>
+
+                                    <span 
+                                    class="badge rounded-pill mx-1" 
+                                    :class="{'text-bg-success': area.wheelchair_accessible, 'text-bg-danger': !area.wheelchair_accessible}" 
+                                    :title="(area.wheelchair_accessible ? '' : 'No ') + 'Wheelchair Access'">
+                                        <i class="fa-solid fa-wheelchair"></i>
+                                    </span>
+
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            <p>This building has no student spaces</p>
+            <!-- <p>This building has no student spaces</p> -->
             </div>
         </div>
 
@@ -95,5 +124,11 @@ export default {
         border-radius: 3pt;
         padding: 1rem;
         min-width: min(25rem, 90vw);
+    }
+    #svg-icon {
+        width: 1rem;
+        height: 1em;
+        fill: white;
+        color: white;
     }
 </style>
