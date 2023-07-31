@@ -3,68 +3,71 @@
     <div 
     v-if="$route.params.buildingId == building.buildingId"
     class="building-info">
-        
-        <div class="flexrow">
-            <div 
-            style="flex:3">
-                <Summary 
-                :buildingName="building.name"
-                :aka="building.aka"
-                :description="building.description"
-                :sensoryAreas="building.sensoryAreas"
-                />
-            </div>
 
-            <div 
-            style="flex:2">
-                <MainPicture 
-                :mainSrc="building.images.main.url" 
-                :mainAlt="building.images.main.alt" />
-
-                <AccessTips :tips="building.tips" />
-                
-            </div>
+        <div class="info-page-title" style="grid-area: title;">
+            <h1>{{building.name}}</h1>
+            <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
+        </div>
+            
+        <div id="description" style="grid-area: desc; justify-self: start;">
+            <h3>Description</h3>
+            <p>{{building.description}}</p>
+        </div>
+            
+        <div style="grid-area: sense-areas; align-self: end;">
+            <SenseSpaces 
+            :sensoryAreas="building.sensoryAreas"
+            />
         </div>
 
-        <Infobox
-        :contentArray="infoBoxContent"
-        :activeInfoTab="activeInfoBoxTab"
-        @tabChanged="activeInfoBoxTab = $event"
-        />
+        <div style="grid-area: main-photo;">
+            <MainPicture 
+            :mainSrc="building.images.main.url" 
+            :mainAlt="building.images.main.alt" />
+        </div>
 
-        <div class="flexrow">
-            <div 
-            class="m-3"
-            style="flex:3">
-                <Timebox
-                :times="building.openingTimes"/>
-            </div>
+        <div style="grid-area: tips;">
+            <AccessTips :tips="building.tips" />
             
-            <div 
-            class="d-grid gap-2 col-6 m-auto"
-            style="flex:2; ">
+        </div>
 
-                <NuxtLink :to="linkToRooms">
-                    <button type="button" class="btn btn-primary btn-lg w-75">Room info</button>
-                </NuxtLink>
+        <div style="grid-area: tabs;">
+            <Infobox
+            :contentArray="infoBoxContent"
+            :activeInfoTab="activeInfoBoxTab"
+            @tabChanged="activeInfoBoxTab = $event"
+            />
+        </div>
 
+        <div style="grid-area: open-times; justify-self: start; align-self: start;">
+            <Timebox
+            :times="building.openingTimes"/>
+        </div>
                 
-                <NuxtLink :to="linkToInternalMap">
-                    <button type="button" class="btn btn-primary btn-lg w-75">Internal Map</button>
-                </NuxtLink>
-
-            </div>
+        <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
+            <NuxtLink :to="linkToRooms">
+                <button type="button" class="btn btn-primary btn-lg w-100 h-75">Room info</button>
+            </NuxtLink>
+        </div>
+            
+        <div class="link-button" style="grid-area: floorplan; align-self: center; justify-self: stretch;">
+            <NuxtLink :to="linkToInternalMap">
+                <button type="button" class="btn btn-primary btn-lg w-100">Internal Map</button>
+            </NuxtLink>
         </div>
 
         <div
+        style="grid-area: additional-info;"
         v-if="building.additionalInformation.display">
             <AdditionalInfo 
             :info="building.additionalInformation.content"/>
         </div>
 
-        <Gallery
-        :images="building.images.gallery"
-        />
+        <div style="grid-area: gallery;">
+            <Gallery
+            :images="building.images.gallery"
+            />
+        </div>
         
     </div>
     <p v-else>Sorry, this building doesn't exist</p>
@@ -72,16 +75,6 @@
 </template>
 
 <style>
-.flexrow {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-}
-.flexcol-2 {
-    min-width: min(25rem, calc(100vw - 6rem));
-}
 .mainMatter {
     max-width: 1000px;
     margin: 0 auto;
@@ -89,40 +82,90 @@
     
 }
 
-.tips-and-links-grid {
-    display: grid;
-    grid-template-areas: 
-        "tips rooms-link"
-        "tips gallery-link";
-    grid-template-columns: 3fr 2fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 1.5rem;
+.mainPictureCard {
+    min-width: min(25rem, calc(100vw - 6rem));
+    margin: 0 min(3rem, 3vw) 0 min(3rem, 3vw);
+}
+.time-card {
+    margin-top: 1rem;
 }
 
-.tips-area {
-    grid-area: tips;
-    grid-row: 1 / 3;
-}
-
-.rooms-area {
-    grid-area: rooms-link;
-}
-
-.gallery-area {
-    grid-area: gallery-link;
-}
-
-/* @media screen and (min-width: 992px) {
-    .mainMatter {
-        display: grid;
-        grid-template-areas: "sidebar main";
-        grid-template-columns: 1fr 5fr;
-        gap: 1.5rem;
+    .infotabs {
+        margin: 2rem 0 2rem 0;
     }
-} */
-    
+
+.link-button {
+    padding: 0.5rem;
+}
+
+.link-button-top {
+    padding-top: 0.5rem;
+}
+
 .building-info {
-    grid-area: main;
+    display: grid;
+    padding-top: 2rem;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 
+        [row1] 6rem
+        [row2] auto 
+        [row3] auto
+        [row4] auto
+        [row5] auto 
+        [row6] auto 
+        [row7] auto 
+        [row8] auto 
+        [row9] auto;
+    grid-template-areas: 
+        "title title main-photo main-photo"
+        "desc desc main-photo main-photo"
+        "sense-areas sense-areas open-times open-times"
+        "tabs tabs tabs tabs"
+        "tips tips tips rooms"
+        "tips tips tips floorplan"
+        "additional-info additional-info additional-info additional-info"
+        "gallery gallery gallery gallery";
+}
+@media screen and (max-width: 992px){
+    .building-info {
+        padding: 1rem;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas: 
+            "title"
+            "main-photo"
+            "desc"
+            "tabs"
+            "sense-areas"
+            "open-times"
+            "tips"
+            "rooms"
+            "floorplan"
+            "additional-info"
+            "gallery";
+    }
+    
+    .mainPictureCard {
+        margin: min(3rem, 3vw);
+    }
+
+    
+    .time-card {
+        margin: 0;
+    }
+
+    .link-button-top {
+        padding-top: 1rem;
+    }
+
+    .infotabs {
+        margin: 0 0 1rem 0;
+    }
+    
+    .access-tips-card {
+        margin: 1rem 0 1rem 0;
+    }
+
 }
 /* 
 html {

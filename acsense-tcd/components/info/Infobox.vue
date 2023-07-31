@@ -1,7 +1,7 @@
 <template>
 
     <!-- Card container -->
-        <div class="card m-3">
+        <div class="infotabs card">
             <!-- Nav bar for tabs -->
             <div class="card-header">
                 <!-- Tabs -->

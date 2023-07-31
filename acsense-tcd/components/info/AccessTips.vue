@@ -37,7 +37,7 @@ export default {
 .access-tips-card {
     height: 100%;
     position: relative;
-    min-width: min(25rem, 90vw);
+    /* min-width: min(25rem, 90vw); */
 }
 
 .access-button-position {
