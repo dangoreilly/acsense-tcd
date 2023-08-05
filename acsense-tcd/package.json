@@ -19,6 +19,7 @@
     "sass-loader": "^13.2.2"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.31.0",
     "@types/node": "^18.15.11",
     "bootstrap": "^5.3.0-alpha3",
     "bootstrap-icons": "^1.10.5",

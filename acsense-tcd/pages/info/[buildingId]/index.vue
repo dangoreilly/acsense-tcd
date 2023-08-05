@@ -1,11 +1,11 @@
 <template>
 <NuxtLayout name="info-layout">
     <div 
-    v-if="$route.params.buildingId == building.buildingId"
+    v-if="building"
     class="building-info">
 
         <div class="info-page-title" style="grid-area: title;">
-            <h1>{{building.name}}</h1>
+            <h1>{{building.display_name}}</h1>
             <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
         </div>
             
@@ -16,7 +16,7 @@
             
         <div style="grid-area: sense-areas; align-self: end;">
             <SenseSpaces 
-            :sensoryAreas="building.sensoryAreas"
+            :sensoryAreas="sensoryAreas"
             />
         </div>
 
@@ -41,7 +41,7 @@
 
         <div style="grid-area: open-times; justify-self: start; align-self: start;">
             <Timebox
-            :times="building.openingTimes"/>
+            :times="building.opening_times"/>
         </div>
                 
         <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
@@ -58,9 +58,9 @@
 
         <div
         style="grid-area: additional-info;"
-        v-if="building.additionalInformation.display">
+        v-if="building.furtherinfo_display">
             <AdditionalInfo 
-            :info="building.additionalInformation.content"/>
+            :info="building.further_info"/>
         </div>
 
         <div style="grid-area: gallery;">
@@ -202,6 +202,7 @@ body {
         ],
     });
 
+
 </script>
 
 <script lang="ts">
@@ -215,38 +216,40 @@ body {
     export default {
         data() {
             return {
-            building: {} as Building,
-            infoBoxContent: [] as InfoBoxContentTab[],
+            building: {} as any,
+            infoBoxContent: [] as any,
             activeInfoBoxTab: 0,
             linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
             linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
             }
         },
         created() {
-            this.building = bld;
-            this.building.sensoryAreas = areas;
-            this.infoBoxContent = [
-                // {
-                //     title: "Sound",
-                //     content: this.building.sounds,
-                // },
-                // {
-                //     title: "Lights",
-                //     content: this.building.lights,
-                // },
-                {
-                    title: "Sensory Experience",
-                    content: this.building.experience,
+            Promise.resolve(this.getBuildingData()).then(
+                (building) => {
+                    console.log(this.building)
+                    this.infoBoxContent = [
+                        {
+                            title: "Sensory Experience",
+                            content: this.building.sense_exp,
+                            display: this.building.sense_exp_disp
+                        },
+                        {
+                            title: "Wayfinding",
+                            content: this.building.wayfinding,
+                            display: this.building.wayfinding_disp
+                        },
+                        {
+                            title: "Physical Access",
+                            content: this.building.phys_access,
+                            display: this.building.phys_access_disp
+                        },
+                    ]
                 },
-                {
-                    title: "Wayfinding",
-                    content: this.building.respite,
-                },
-                {
-                    title: "Physical Access",
-                    content: this.building.physicalAccess,
-                },
-            ];
+            )
+            // .then((r) => console.log(this.building));
+            // console.log(this.building);
+            this.sensoryAreas = areas;
+            
         },
         computed: {
             // Get the theme from local storage
@@ -272,6 +275,38 @@ body {
                 } else {
                     document.documentElement.setAttribute('data-bs-theme', 'light')
                 }
+            },
+            setInfoBoxContent(){
+                this.infoBoxContent = [
+                {
+                    title: "Sensory Experience",
+                    content: this.building.sense_exp,
+                    display: this.building.sense_exp_disp
+                },
+                {
+                    title: "Wayfinding",
+                    content: this.building.wayfinding,
+                    display: this.building.wayfinding_disp
+                },
+                {
+                    title: "Physical Access",
+                    content: this.building.phys_access,
+                    display: this.building.phys_access_disp
+                },
+            ];
+            },
+            async getBuildingData() {
+                const building = await useFetch('/api/get/building/' + this.$route.params.buildingId);
+                // Clone it to avoid proxy nonsense
+                this.building = JSON.parse(JSON.stringify(building.data.value));
+                // Add hard coded images for now
+                this.building.images = bld.images;
+
+                // Set the info box content
+                this.setInfoBoxContent();
+
+                // console.warn("Building data:")
+                console.log(this.building);
             }
         },
         mounted() {
