@@ -16,7 +16,7 @@
             
         <div style="grid-area: sense-areas; align-self: end;">
             <SenseSpaces 
-            :sensoryAreas="sensoryAreas"
+            :sensoryAreas="building.student_spaces"
             />
         </div>
 
@@ -248,7 +248,6 @@ body {
             )
             // .then((r) => console.log(this.building));
             // console.log(this.building);
-            this.sensoryAreas = areas;
             
         },
         computed: {
