@@ -41,30 +41,57 @@
 
 <script>
 
+import { createClient } from '@supabase/supabase-js'
+
+
+
 export default {
   data() {
     return {
       username: '',
       password: '',
-      social_override: false,
+      social_override: true,
+      supabase: {},
     }
   },
   created() {
     // For debugging purposes, you can bypass the social login by adding ?bypass=true to the URL.
     // This will allow for a quick login without having to use Google or Microsoft.
-    this.checkSocialOverride();
+    // this.checkSocialOverride(); // Uncomment this line to hide the social login bypass
+
+    // to login
+    this.createSupabaseClient()
+
   },
   methods: {
-    checkSocialOverride() {
-      if (this.$route.query.bypass) {
-        this.social_override = true;
-      }
+    async createSupabaseClient() {
+        const _sb = await useFetch('/api/get/supabasepublickey/')
+        let sb = _sb.data.value;
+        this.supabase = createClient(sb.url, sb.key);
     },
-    login() {
-      // Implement your login logic here, for example, send the data to the server or perform authentication.
-      // For this example, we'll just display the entered username and password in the console.
-      console.log('Username:', this.username);
-      console.log('Password:', this.password);
+
+    checkSocialOverride() {
+        this.social_override = this.$route.query.bypass
+    },
+
+    async login() {
+        const { user, error } = await this.supabase.auth.signInWithPassword({
+        email: this.username,
+        password: this.password,
+        })
+        // console.log(data, error)
+
+        if (error) {
+            alert(error.message)
+        } else {
+            console.log(user)
+            // Set the session data and redirect to the admin page.
+            const { data, error } = this.supabase.auth.setSession({
+                access_token: "access_token",
+                refresh_token: "refresh_token",
+            })
+            this.$router.push('/admin/analytics')
+        }
     },
     loginWithGoogle() {
       // Implement your Google login logic here.

@@ -49,20 +49,12 @@
                         v-model="building.description"></textarea>
                     </div>
 
-                    <!-- Sensory Overview -->
-                    <div class="mb-3 mt-3">
-                        <label for="senseOverviewInput" class="form-label">Sensory Overview</label>
-                        <textarea class="form-control" id="senseOverviewInput" rows="4" 
-                        v-model="building.sensoryOverview"></textarea>
-                    </div>
-
                 </div>
                 <div class="col">
                     <Summary 
                     :buildingName="building.name"
                     :aka="building.aka"
                     :description="building.description"
-                    :sensoryOverview="building.sensoryOverview"
                     />
                 </div>
             </div>
@@ -253,8 +245,12 @@
 
             // This function adds a log entry to the database
             logChange() {},
-        }
+        },
     }
+
+    definePageMeta({
+        middleware: 'auth'
+    })
 
 
 </script>
