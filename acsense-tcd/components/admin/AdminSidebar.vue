@@ -48,7 +48,7 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl as string, supabaseKey as string)
 
-const { data: { user } } = await supabase.auth.getUser()
+// const { data: { user } } = await supabase.auth.getUser()
 
 export default {
     props: {
@@ -57,7 +57,7 @@ export default {
     data() {
         return {
 
-            currentUser: user,
+            // currentUser: user,
 
             tabs: [
                 {
