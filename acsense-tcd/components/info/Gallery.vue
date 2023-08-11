@@ -18,7 +18,7 @@
                 :src="i.url" 
                 class="card-img galleryPictureImg"
                 :alt="i.alt">
-                <div class="card-body p-2">
+                <div v-if="i.caption" class="card-body p-2">
                     <p class="card-text">{{ i.caption }}</p>
                 </div>
             </div>
@@ -54,7 +54,7 @@
                     <img :src="modalPicture.url" class="ing-fluid modalPictureImg" :alt="modalPicture.alt">
                 </div>
                 <!-- Caption -->
-                <div class="modal-footer">
+                <div v-if="modalPicture.caption" class="modal-footer">
                     <p class="text-center">{{ modalPicture.caption }}</p>
                 </div>
 

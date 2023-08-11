@@ -22,8 +22,9 @@
 
         <div style="grid-area: main-photo;">
             <MainPicture 
-            :mainSrc="building.images.main.url" 
-            :mainAlt="building.images.main.alt" />
+            :mainSrc="building.primary_pic" 
+            mainAlt="building.primary_pic_altText" 
+            />
         </div>
 
         <div style="grid-area: tips;">
@@ -58,14 +59,14 @@
 
         <div
         style="grid-area: additional-info;"
-        v-if="building.furtherinfo_display">
+        v-if="building.furtherinfo_disp">
             <AdditionalInfo 
             :info="building.further_info"/>
         </div>
 
         <div style="grid-area: gallery;">
             <Gallery
-            :images="building.images.gallery"
+            :images="building.gallery_images"
             />
         </div>
         
@@ -207,7 +208,7 @@ body {
 
 <script lang="ts">
 
-    import bld from '~/assets/example-data';
+    // import bld from '~/assets/example-data';
     import areas from '~/assets/example-area-data';
     import { Building } from '~/assets/types/Building';
 
@@ -226,7 +227,7 @@ body {
         created() {
             Promise.resolve(this.getBuildingData()).then(
                 (building) => {
-                    console.log(this.building)
+                    // console.log(this.building)
                     this.infoBoxContent = [
                         {
                             title: "Sensory Experience",
@@ -298,9 +299,7 @@ body {
                 const building = await useFetch('/api/get/building/' + this.$route.params.buildingId);
                 // Clone it to avoid proxy nonsense
                 this.building = JSON.parse(JSON.stringify(building.data.value));
-                // Add hard coded images for now
-                this.building.images = bld.images;
-
+                
                 // Set the info box content
                 this.setInfoBoxContent();
 

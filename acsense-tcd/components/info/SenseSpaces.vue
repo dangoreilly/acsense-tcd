@@ -15,10 +15,10 @@
                 <tbody>
                     <tr v-for="area in sensoryAreas">
                         <th>
-                            <img :src="area.url" :alt="area.type" style="width: 2rem;"/>
+                            <img :src="area.icon" :alt="area.type" style="width: 2rem;"/>
                         </th>
 
-                        <td>{{ area.Name }}</td>
+                        <td>{{ area.name }}</td>
 
                         <td style="display: flex; flex-direction: column; min-width: 8rem;">
 
@@ -73,7 +73,10 @@
                     </tr>
                 </tbody>
             </table>
-        <!-- <p>This building has no student spaces</p> -->
+        </div>
+
+        <div v-else>
+            <p>This building has no student spaces</p>
         </div>
     </div>
 </template>
@@ -83,18 +86,6 @@ import {sensoryArea} from '~/assets/types/sensoryArea'
 
 export default {
   props:{
-    buildingName: {
-        type: String,
-        required: true,
-    },
-    aka: {
-        type: String,
-        required: false,
-    },
-    description: {
-        type: String,
-        required: true,
-    },
     sensoryAreas: {
         type: Array as () => sensoryArea[],
         required: true,

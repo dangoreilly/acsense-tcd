@@ -1,5 +1,6 @@
 type sensoryArea = {
-    "Name": string,
+    "name": string,
+    "stylised_name": string,
     "location": string,
     "type": string,
     "Description": string,
@@ -11,7 +12,7 @@ type sensoryArea = {
     "kettle": boolean,
     "microwave": boolean,
     "coordinates": [number, number],
-    "url": string,
+    "icon": string,
 }
 
 export {sensoryArea}
