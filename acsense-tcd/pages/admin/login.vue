@@ -64,14 +64,27 @@ export default {
         // const supabaseKey = runtimeConfig.public.supabaseKey;
         // console.log(supabaseUrl);
         // console.log(supabaseKey);
-        this.createSupabaseClient()
+        this.checkIfLoggedIn()
 
   },
   methods: {
-    async createSupabaseClient() {
+    async checkIfLoggedIn() {
         
-        this.supabase = createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
-        // console.log(this.supabase);
+        // Create the client
+        // It will also be used for logging in eventually.
+        this.supabase = await createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
+        
+        // Check if there's an active session.
+        const { data, error } = await this.supabase.auth.getSession()
+  
+        console.log(data)
+
+        if (data.session) {
+            // Redirect to admin page
+            console.log("user is logged in")
+            return navigateTo('/admin/analytics'); 
+        }
+        console.log("user is not logged in")
     },
 
     checkSocialOverride() {
