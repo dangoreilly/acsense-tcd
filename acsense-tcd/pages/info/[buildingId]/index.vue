@@ -22,8 +22,8 @@
 
         <div style="grid-area: main-photo;">
             <MainPicture 
-            :mainSrc="building.primary_pic" 
-            mainAlt="building.primary_pic_altText" 
+            :mainSrc="building.primary_image_url" 
+            :mainAlt="building.primary_image_alt" 
             />
         </div>
 
