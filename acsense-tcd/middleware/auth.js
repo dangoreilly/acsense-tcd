@@ -1,22 +1,30 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-
-
 export default defineNuxtRouteMiddleware( async (to, from) => {
-    // console.log("Auth middleware running...")
-    const { data: { user } } = await supabase.auth.getUser()
+
+    console.log("User navigating to " + to.path + " from " + from.path);
+    const runtimeConfig = useRuntimeConfig()
+
+    const supabaseUrl = runtimeConfig.public.supabaseUrl;
+    const supabaseKey = runtimeConfig.public.supabaseKey;
+    // cosnole.log({supabaseUrl, supabaseKey})
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    console.log("Auth middleware running...")
+    const { data, error } = await supabase.auth.getSession()
+
+    console.log("Session Data")
+    console.log(data);
+    console.error("Error: " + error);
   
-    if (!user) {
+    if (!data.session) {
       // Redirect to login or restricted access page
+        console.log("User is not logged in, redirecting to login page");
       return navigateTo('/admin/login'); // Change this to your login page route
     }
 
-    console.log("User is logged in: " + user.email);
+    console.log("User is logged in: " + data.session.user.email);
 
-    return navigateTo(to.path);
+    // return navigateTo(to.path);
 
   });

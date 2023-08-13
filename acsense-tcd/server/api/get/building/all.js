@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+const supabaseKey = useRuntimeConfig().public.supabaseKey;
+// console.log({supabaseUrl, supabaseKey});
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 // The all buildings endpoint will only return the primary building data

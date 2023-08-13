@@ -55,19 +55,23 @@ export default {
     }
   },
   created() {
-    // For debugging purposes, you can bypass the social login by adding ?bypass=true to the URL.
-    // This will allow for a quick login without having to use Google or Microsoft.
-    // this.checkSocialOverride(); // Uncomment this line to hide the social login bypass
-
-    // to login
-    this.createSupabaseClient()
+        // For debugging purposes, you can bypass the social login by adding ?bypass=true to the URL.
+        // This will allow for a quick login without having to use Google or Microsoft.
+        // this.checkSocialOverride(); // Uncomment this line to hide the social login bypass
+        // to login, unless the URL contains ?bypass=true.
+        // const runtimeConfig = useRuntimeConfig()
+        // const supabaseUrl = runtimeConfig.public.supabaseUrl;
+        // const supabaseKey = runtimeConfig.public.supabaseKey;
+        // console.log(supabaseUrl);
+        // console.log(supabaseKey);
+        this.createSupabaseClient()
 
   },
   methods: {
     async createSupabaseClient() {
-        const _sb = await useFetch('/api/get/supabasepublickey/')
-        let sb = _sb.data.value;
-        this.supabase = createClient(sb.url, sb.key);
+        
+        this.supabase = createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
+        // console.log(this.supabase);
     },
 
     checkSocialOverride() {
@@ -75,22 +79,24 @@ export default {
     },
 
     async login() {
-        const { user, error } = await this.supabase.auth.signInWithPassword({
-        email: this.username,
-        password: this.password,
+        const { data, error } = await this.supabase.auth.signInWithPassword({
+        email: "acsense-test-user@tcd.ie",//this.username,
+        password: "TCDsense1592",//this.password,
         })
-        // console.log(data, error)
+
+        console.log(data)
 
         if (error) {
             alert(error.message)
         } else {
-            console.log(user)
+            console.log(data.user.email)
             // Set the session data and redirect to the admin page.
-            const { data, error } = this.supabase.auth.setSession({
-                access_token: "access_token",
-                refresh_token: "refresh_token",
-            })
-            this.$router.push('/admin/analytics')
+            // const { data, error } = this.supabase.auth.setSession({
+            //     access_token: "access_token",
+            //     refresh_token: "refresh_token",
+            // })
+            // this.$router.push('/admin/analytics')
+            navigateTo('/admin/analytics')
         }
     },
     loginWithGoogle() {

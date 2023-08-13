@@ -15,5 +15,13 @@ export default defineNuxtConfig({
         { path: '~/components/admin'},
         { path: '~/components/info'},
         '~/components'
-    ]
+    ],
+    runtimeConfig: {
+        // Will be available in both server and client-side
+        public: {
+            // override with env var
+            supabaseUrl: process.env.NUXT_SUPABASE_URL,
+            supabaseKey: process.env.NUXT_SUPABASE_KEY,
+        }
+    }
 })
