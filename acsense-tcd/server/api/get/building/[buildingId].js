@@ -11,6 +11,11 @@ export default defineEventHandler(async (event) => {
 
     // Get the primary building data
     let building_response_data = await getBuildingData(buildingId);
+
+    if (building_response_data.length == 0) {
+        return null
+    }
+
     let building = building_response_data[0];
 
     // Get any student spaces associated with the building
@@ -35,6 +40,7 @@ async function getBuildingData(buildingId) {
         throw error
     }
     // console.log("Building found: " + building[0].display_name + " (" + building[0].canonical + ")");
+    
     return building;
 }
 
