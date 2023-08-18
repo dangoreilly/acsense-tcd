@@ -45,17 +45,17 @@
             :times="building.opening_times"/>
         </div>
                 
-        <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
+        <!-- <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
             <NuxtLink :to="linkToRooms">
                 <button type="button" class="btn btn-primary btn-lg w-100 h-75">Room info</button>
             </NuxtLink>
-        </div>
+        </div> -->
             
-        <div class="link-button" style="grid-area: floorplan; align-self: center; justify-self: stretch;">
+        <!-- <div class="link-button" style="grid-area: floorplan; align-self: center; justify-self: stretch;">
             <NuxtLink :to="linkToInternalMap">
                 <button type="button" class="btn btn-primary btn-lg w-100">Internal Map</button>
             </NuxtLink>
-        </div>
+        </div> -->
 
         <div
         style="grid-area: additional-info;"
@@ -122,8 +122,8 @@
         "desc desc main-photo main-photo"
         "sense-areas sense-areas open-times open-times"
         "tabs tabs tabs tabs"
-        "tips tips tips rooms"
-        "tips tips tips floorplan"
+        "tips tips tips tips"
+        ". . . ." /* ". rooms floorplan ." */
         "additional-info additional-info additional-info additional-info"
         "gallery gallery gallery gallery";
 }
@@ -140,8 +140,8 @@
             "sense-areas"
             "open-times"
             "tips"
-            "rooms"
-            "floorplan"
+            /* "rooms" */
+            /* "floorplan" */
             "additional-info"
             "gallery";
     }
@@ -209,7 +209,7 @@ body {
 <script lang="ts">
 
     // import bld from '~/assets/example-data';
-    import areas from '~/assets/example-area-data';
+    // import areas from '~/assets/example-area-data';
     import { Building } from '~/assets/types/Building';
 
     import { InfoBoxContentTab } from '~/assets/types/infoPageTypes';
@@ -225,30 +225,11 @@ body {
             }
         },
         created() {
-            Promise.resolve(this.getBuildingData()).then(
-                (building) => {
-                    // console.log(this.building)
-                    this.infoBoxContent = [
-                        {
-                            title: "Sensory Experience",
-                            content: this.building.sense_exp,
-                            display: this.building.sense_exp_disp
-                        },
-                        {
-                            title: "Wayfinding",
-                            content: this.building.wayfinding,
-                            display: this.building.wayfinding_disp
-                        },
-                        {
-                            title: "Physical Access",
-                            content: this.building.phys_access,
-                            display: this.building.phys_access_disp
-                        },
-                    ]
-                },
-            )
-            // .then((r) => console.log(this.building));
-            // console.log(this.building);
+            // Set dummy variables to stop components from crashing
+            this.building.student_spaces = [];
+            // Grab the building data from the server and transform it 
+            // into the format we need
+            this.getBuildingData()
             
         },
         computed: {
@@ -296,15 +277,23 @@ body {
             ];
             },
             async getBuildingData() {
-                const building = await useFetch('/api/get/building/' + this.$route.params.buildingId);
-                // Clone it to avoid proxy nonsense
-                this.building = JSON.parse(JSON.stringify(building.data.value));
-                
-                // Set the info box content
-                this.setInfoBoxContent();
+                const response = await useFetch('/api/get/building/' + this.$route.params.buildingId);
 
+                console.log("Response for buildingID:");
+                console.log(response.data.value);
+                if (response.data.value != null) {
+
+                    // Clone it to avoid proxy nonsense
+                    this.building = JSON.parse(JSON.stringify(response.data.value));
+                    
+                    // Set the info box content
+                    this.setInfoBoxContent();
+                }
+                else {
+                    console.log("No building data found");
+                }
                 // console.warn("Building data:")
-                console.log(this.building);
+                // console.log(this.building);
             }
         },
         mounted() {
