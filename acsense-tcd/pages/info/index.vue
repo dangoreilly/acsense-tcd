@@ -90,6 +90,12 @@ Make sure the search with the url param converst dashes to spaces -->
                 });
             },
 
+            normaliseSearchTerm(searchTerm) {
+                // replace dashes and %20 with spaces
+                searchTerm = searchTerm.replace(/-|%20/g, ' ');
+                return searchTerm;
+            },
+
             buildingSearch() {
                 // Declare variables
                 var i; 
