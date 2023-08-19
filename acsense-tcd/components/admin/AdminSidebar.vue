@@ -36,7 +36,7 @@
                 <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z"/>
                 <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
             </svg>
-            <strong class="ps-3">{{currentUser}}</strong>
+            <strong class="ps-3">{{currentUser.email}}</strong>
         </a>
     </div>
 </div>
@@ -97,33 +97,37 @@ export default {
         }
     },
     created() {
-        this.currentUser = this.getCurrentUser();
+        this.getCurrentUser();
     },
     methods: {
-        logout() {
-            supabase.auth.signOut()
-            navigateTo('/')
+        async logout() {
+            console.log("User logging out")
+            const {error} =  await this.supabase.auth.signOut()
+            if (error) {
+                console.log(error)
+            }
+            navigateTo('./login')
         },
 
         async getCurrentUser() {
             
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            const supabase = createClient(supabaseUrl, supabaseKey)
+            this.supabase = createClient(supabaseUrl, supabaseKey)
 
-            const { data, error } = await supabase.auth.getSession()
+            const { data, error } = await this.supabase.auth.getSession()
             console.log("Session Data:")
             console.log(data);
 
             if (!error && data.session) {
                 console.log("Setting current user: " + data.session.user.email)
-                return data.session.user.email
+                this.currentUser = data.session.user
             }
 
             else {
                 console.log(error)
-                console.log("Auth bypassed")
-                return "AUTH BYPASS"
+                console.log("Auth bypassed?")
+                this.currentUser.email = "AUTH BYPASS";
             }
         }
     }
