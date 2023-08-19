@@ -27,7 +27,8 @@
             />
         </div>
 
-        <div style="grid-area: tips;">
+        <div style="grid-area: tips;"
+        v-if="building.tips">
             <AccessTips :tips="building.tips" />
             
         </div>
@@ -40,7 +41,8 @@
             />
         </div>
 
-        <div style="grid-area: open-times; justify-self: start; align-self: start;">
+        <div style="grid-area: open-times; justify-self: start; align-self: start;"
+        v-if="building.opening_times">
             <Timebox
             :times="building.opening_times"/>
         </div>
@@ -64,7 +66,8 @@
             :info="building.further_info"/>
         </div>
 
-        <div style="grid-area: gallery;">
+        <div style="grid-area: gallery;"
+        v-if="building.gallery_images">
             <Gallery
             :images="building.gallery_images"
             />
@@ -279,9 +282,7 @@ body {
             async getBuildingData() {
                 const response = await useFetch('/api/get/building/' + this.$route.params.buildingId);
 
-                console.log("Response for buildingID:");
-                console.log(response.data.value);
-                if (response.data.value != null) {
+                if (response.data.value != "" && response.data.value != null) {
 
                     // Clone it to avoid proxy nonsense
                     this.building = JSON.parse(JSON.stringify(response.data.value));
@@ -291,10 +292,12 @@ body {
                 }
                 else {
                     console.log("No building data found");
+                    // Redirect 
+                    this.$router.push('./?search=' + this.$route.params.buildingId);
                 }
                 // console.warn("Building data:")
                 // console.log(this.building);
-            }
+            },
         },
         mounted() {
             this.setTheme()
