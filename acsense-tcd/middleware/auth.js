@@ -13,9 +13,9 @@ export default defineNuxtRouteMiddleware( async (to, from) => {
     console.log("Auth middleware running...")
     const { data, error } = await supabase.auth.getSession()
 
-    console.log("Session Data")
-    console.log(data);
-    console.error("Error: " + error);
+    // console.log("Session Data")
+    // console.log(data);
+    // console.error("Error: " + error);
   
     if (!data.session) {
       // Redirect to login or restricted access page
