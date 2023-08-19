@@ -97,19 +97,16 @@ export default {
         password: "TCDsense1592",//this.password,
         })
 
-        console.log(data)
-
         if (error) {
+
             alert(error.message)
+            console.log(error)
+
         } else {
-            console.log(data.user.email)
-            // Set the session data and redirect to the admin page.
-            // const { data, error } = this.supabase.auth.setSession({
-            //     access_token: "access_token",
-            //     refresh_token: "refresh_token",
-            // })
-            // this.$router.push('/admin/analytics')
+
+            console.log("user logged in as " + data.user.email)
             navigateTo('/admin/analytics')
+            
         }
     },
     loginWithGoogle() {
