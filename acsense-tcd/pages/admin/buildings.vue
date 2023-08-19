@@ -1,175 +1,183 @@
 <!-- Admin page for displaying logs -->
 <!-- TODO: Turn these inputs into components for maintainability -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'buildings'">
-        <!-- Header -->
-        <div class="border-bottom border-2 border-black mb-3 d-flex">
-            <!-- Title -->
-            <h1 class="display-6 d-flex align-items-end">
-                Building Management
-            </h1>
+    <NuxtLayout name="admin-layout" :activePage="'buildings'" >
+        <main class="d-flex flex-nowrap" style="height:100vh">
 
-            <!-- Construction Badge -->
-            <div class="d-flex align-items-center m-3 fs-5">
-                <span class="badge rounded-pill text-bg-info">
-                    Partial Demonstration
-                </span>
-            </div>
+            <!-- Sidebar for building selection -->
+            <AdminBuildingSelector />
+            <!-- Main section for editing -->
+            <div class="pt-1 px-4" style="overflow-y: auto;">
 
-        </div>
+                <!-- Header -->
+                <div class="border-bottom border-2 border-black mb-3 d-flex">
+                    <!-- Title -->
+                    <h1 class="display-6 d-flex align-items-end">
+                        Building Management
+                    </h1>
 
-        <!-- Main Matter -->
-        <div class="mainMatter-admin">
-            <!-- Two columns -->
-            <!-- Column 1 contains input boxes -->
-            <!-- Column 2 contains infoPage components -->
-            <!-- The input boxes are paired to the components to allow for live editing -->
-            <!-- The input boxes and components are left aligned in their respective colum -->
-        
-            <!-- <Summary> (and building selection dropdown) -->
-            <div class="row">
-                <div class="col d-flex flex-column">
-                    <!-- Building Name -->
-                    <select class="form-select mb-3">
-                        <!-- <option selected disabled>Select a building to edit</option> -->
-                        <option :value="building.buildingId">{{ building.name }}</option>
-                    </select>
-
-                    <!-- Aka -->
-                    <div class="mb-3">
-                        <label for="AkaInput" class="form-label">AKA <small>(optional)</small></label>
-                        <input id="AkaInput" type="text" class="form-control" 
-                        v-model="building.aka">
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-3">
-                        <label for="descInput" class="form-label">Description</label>
-                        <textarea class="form-control" id="descInput" rows="4" 
-                        v-model="building.description"></textarea>
+                    <!-- Construction Badge -->
+                    <div class="d-flex align-items-center m-3 fs-5">
+                        <span class="badge rounded-pill text-bg-info">
+                            Partial Demonstration
+                        </span>
                     </div>
 
                 </div>
-                <div class="col">
-                    <Summary 
-                    :buildingName="building.name"
-                    :aka="building.aka"
-                    :description="building.description"
-                    />
-                </div>
-            </div>
-        
-            <!-- Opening Times -->
-            <div class="row mt-3"><label class="form-label d-block">Opening Times</label>
-                <div class="col d-flex flex-column">
-                    <!-- Weekdays -->
+
+                <!-- Main Matter -->
+                <div class="mainMatter-admin">
+                    <!-- Two columns -->
+                    <!-- Column 1 contains input boxes -->
+                    <!-- Column 2 contains infoPage components -->
+                    <!-- The input boxes are paired to the components to allow for live editing -->
+                    <!-- The input boxes and components are left aligned in their respective colum -->
+                
+                    <!-- <Summary> (and building selection dropdown) -->
                     <div class="row">
-                        <div class="col">
-                            <label for="weekDay-checkbox" >Weekdays</label>
-                            <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
-                            v-model="building.openingTimes.weekday.open" />
+                        <div class="col d-flex flex-column">
+                            <!-- Building Name -->
+                            <select class="form-select mb-3">
+                                <!-- <option selected disabled>Select a building to edit</option> -->
+                                <option :value="building.buildingId">{{ building.name }}</option>
+                            </select>
+
+                            <!-- Aka -->
+                            <div class="mb-3">
+                                <label for="AkaInput" class="form-label">AKA <small>(optional)</small></label>
+                                <input id="AkaInput" type="text" class="form-control" 
+                                v-model="building.aka">
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="descInput" class="form-label">Description</label>
+                                <textarea class="form-control" id="descInput" rows="4" 
+                                v-model="building.description"></textarea>
+                            </div>
+
                         </div>
                         <div class="col">
-                            <label for="weekDay-open">Opening Time</label>
-                            <input type="time" id="weekDay-open" class="form-control"
-                            v-model="building.openingTimes.weekday.times[0]" 
-                            :disabled="!building.openingTimes.weekday.open"/>
-                        </div>
-                        <div class="col">
-                            <label for="weekDay-open">Closing Time</label>
-                            <input type="time" id="weekDay-open" class="form-control"
-                            v-model="building.openingTimes.weekday.times[1]" 
-                            :disabled="!building.openingTimes.weekday.open"/>
-                        </div>
-                    </div>
-                    <!-- Saturdays -->
-                    <div class="row">
-                        <div class="col">
-                            <label for="sat-checkbox">Saturday</label>
-                            <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
-                            v-model="building.openingTimes.sat.open" />
-                        </div>
-                        <div class="col">
-                            <label for="sat-open">Opening Time</label>
-                            <input type="time" id="sat-open" class="form-control"
-                            v-model="building.openingTimes.sat.times[0]" 
-                            :disabled="!building.openingTimes.sat.open"/>
-                        </div>
-                        <div class="col">
-                            <label for="sat-close">Closing Time</label>
-                            <input type="time" id="sat-close" class="form-control"
-                            v-model="building.openingTimes.sat.times[1]" 
-                            :disabled="!building.openingTimes.sat.open"/>
+                            <Summary 
+                            :buildingName="building.name"
+                            :aka="building.aka"
+                            :description="building.description"
+                            />
                         </div>
                     </div>
-                    <!-- Sundays -->
-                    <div class="row">
-                        <div class="col">
-                            <label for="sunday-checkbox">Sunday & Public Holidays</label>
-                            <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
-                            v-model="building.openingTimes.holidays.open" />
+                
+                    <!-- Opening Times -->
+                    <div class="row mt-3"><label class="form-label d-block">Opening Times</label>
+                        <div class="col d-flex flex-column">
+                            <!-- Weekdays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="weekDay-checkbox" >Weekdays</label>
+                                    <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
+                                    v-model="building.openingTimes.weekday.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="weekDay-open">Opening Time</label>
+                                    <input type="time" id="weekDay-open" class="form-control"
+                                    v-model="building.openingTimes.weekday.times[0]" 
+                                    :disabled="!building.openingTimes.weekday.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="weekDay-open">Closing Time</label>
+                                    <input type="time" id="weekDay-open" class="form-control"
+                                    v-model="building.openingTimes.weekday.times[1]" 
+                                    :disabled="!building.openingTimes.weekday.open"/>
+                                </div>
+                            </div>
+                            <!-- Saturdays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="sat-checkbox">Saturday</label>
+                                    <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
+                                    v-model="building.openingTimes.sat.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="sat-open">Opening Time</label>
+                                    <input type="time" id="sat-open" class="form-control"
+                                    v-model="building.openingTimes.sat.times[0]" 
+                                    :disabled="!building.openingTimes.sat.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="sat-close">Closing Time</label>
+                                    <input type="time" id="sat-close" class="form-control"
+                                    v-model="building.openingTimes.sat.times[1]" 
+                                    :disabled="!building.openingTimes.sat.open"/>
+                                </div>
+                            </div>
+                            <!-- Sundays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="sunday-checkbox">Sunday & Public Holidays</label>
+                                    <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
+                                    v-model="building.openingTimes.holidays.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="sunday-open">Opening Time</label>
+                                    <input type="time" id="sunday-open" class="form-control"
+                                    v-model="building.openingTimes.holidays.times[0]" 
+                                    :disabled="!building.openingTimes.holidays.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="sunday-close">Closing Time</label>
+                                    <input type="time" id="sunday-close" class="form-control"
+                                    v-model="building.openingTimes.holidays.times[1]" 
+                                    :disabled="!building.openingTimes.holidays.open"/>
+                                </div>
+                            </div>
+
+                            <!-- Note -->
+                            <div class="mt-3">
+                                <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
+                                <input id="timeNoteInput" type="text" class="form-control" 
+                                v-model="building.openingTimes.note">
+                            </div>
                         </div>
+
                         <div class="col">
-                            <label for="sunday-open">Opening Time</label>
-                            <input type="time" id="sunday-open" class="form-control"
-                            v-model="building.openingTimes.holidays.times[0]" 
-                            :disabled="!building.openingTimes.holidays.open"/>
-                        </div>
-                        <div class="col">
-                            <label for="sunday-close">Closing Time</label>
-                            <input type="time" id="sunday-close" class="form-control"
-                            v-model="building.openingTimes.holidays.times[1]" 
-                            :disabled="!building.openingTimes.holidays.open"/>
+                            <Timebox
+                                :times="building.openingTimes"/>
                         </div>
                     </div>
 
-                    <!-- Note -->
-                    <div class="mt-3">
-                        <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
-                        <input id="timeNoteInput" type="text" class="form-control" 
-                        v-model="building.openingTimes.note">
+                    <!-- Infobox -->
+                    <div class="row mt-3">
+                        <div class="col">
+                            <AdminInfobox
+                            :contentArray="infoBoxContent"
+                            :activeInfoTab="activeInfoBoxTab"
+                            @tabChanged="activeInfoBoxTab = $event"
+                            @contentChanged="updateInfoBoxContent($event)"
+                            @modalOpen="markdownModalOpen = $event"
+                            />
+                        </div>
+                        <div class="col">
+                            <Infobox
+                            :contentArray="infoBoxContent"
+                            :activeInfoTab="activeInfoBoxTab"
+                            @tabChanged="activeInfoBoxTab = $event"
+                            @contentChanged="updateInfoBoxContent($event)"
+                            />
+                        </div>
                     </div>
-                </div>
+                    
 
-                <div class="col">
-                    <Timebox
-                        :times="building.openingTimes"/>
+                <!-- Tips -->
+
+                <!-- Additional Information -->
+
+
                 </div>
+                <AdminMarkdownModal 
+                :modalOpen="markdownModalOpen" 
+                @modalClose="markdownModalOpen = false"
+                />
             </div>
-
-            <!-- Infobox -->
-            <div class="row mt-3">
-                <div class="col">
-                    <AdminInfobox
-                    :contentArray="infoBoxContent"
-                    :activeInfoTab="activeInfoBoxTab"
-                    @tabChanged="activeInfoBoxTab = $event"
-                    @contentChanged="updateInfoBoxContent($event)"
-                    @modalOpen="markdownModalOpen = $event"
-                    />
-                </div>
-                <div class="col">
-                    <Infobox
-                    :contentArray="infoBoxContent"
-                    :activeInfoTab="activeInfoBoxTab"
-                    @tabChanged="activeInfoBoxTab = $event"
-                    @contentChanged="updateInfoBoxContent($event)"
-                    />
-                </div>
-            </div>
-            
-
-        <!-- Tips -->
-
-        <!-- Additional Information -->
-
-
-        </div>
-        <AdminMarkdownModal 
-        :modalOpen="markdownModalOpen" 
-        @modalClose="markdownModalOpen = false"
-        />
-
+        </main>
     </NuxtLayout>
 </template>
 
