@@ -4,7 +4,7 @@
             <!-- Highlight the active page by matching it to the activeBuilding -->
             <li v-for="building in buildings" style="max-width: 100%;">
                 <div
-                @click="activeBuilding = building; $emit('activeBuildingChanged', building.canonical)"
+                @click="changeBuilding(building)"
                 class="nav-link link-body-emphasis text-decoration-none building-selection"
                 :class="{'bg-yellow-300': building.canonical === activeBuilding.canonical}"
                 style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
@@ -94,6 +94,12 @@
                     this.activeBuilding = buildings[0];
                     this.$emit('activeBuildingChanged', this.activeBuilding.canonical);
                 }
+            },
+
+            changeBuilding(building) {
+                this.activeBuilding = building;
+                this.$emit('activeBuildingChanged', this.activeBuilding.canonical);
+                console.log("Changing building to " + this.activeBuilding.canonical);
             }
         }
     };
