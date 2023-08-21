@@ -241,6 +241,38 @@
                         </div>
                     </div>
 
+                    <!-- Gallery -->
+                    <div class="row">
+                        <h3 class="mt-3">Gallery Images</h3>
+                        <table class="table w-100 mx-2">
+                            <thead>
+                                <tr>
+                                    <th scope="col">File</th>
+                                    <th scope="col">Alt Text</th>
+                                    <th scope="col">Caption</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="image in building.gallery">
+                                    <td style="white-space: nowrap; text-overflow: ellipsis; overflow: clip; max-width: 400px;">
+                                        <a :href="image.url" target="_blank"> {{ image.url }}</a>
+                                    </td>
+                                    <td><input type="text" placeholder="Alt Text" v-model="image.alt"></td>
+                                    <td><input type="text" placeholder="Caption" v-model="image.caption"></td>
+                                    <td><button class="btn btn-danger" type="button">Remove</button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="file" id="myFile" name="newGalleryImage"></td>
+                                    <td><input type="text" placeholder="Alt Text"></td>
+                                    <td><input type="text" placeholder="Caption"></td>
+                                    <td><button class="btn btn-success" type="button">Add</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
                 </div>
                 <AdminMarkdownModal 
                 :modalOpen="markdownModalOpen" 
@@ -264,7 +296,7 @@ import {createClient} from '@supabase/supabase-js';
             }
         },
         created() {
-            // Initialise the supabase client using the 
+            // Initialise the supabase client
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
             this.supabase = createClient(supabaseUrl, supabaseKey)
@@ -349,27 +381,52 @@ import {createClient} from '@supabase/supabase-js';
 
             // This function fetches the building from the database based on it's canonical name
             async getBuilding(canonical){
+                console.log("Fetching building: " + canonical);
 
                 // Fetch the building from the database
                 // Since we are using the canonical name, we should only get one result
                 let { data: bld, error } = await this.supabase
                     .from('buildings')
                     .select('*')
+                    .eq('canonical', canonical)
                 if (error) {
                     console.error(error)
                     alert(error.message)
                     throw error
                 }
                 else {
-                    // Deep copy the building object so we have comparison data
+                    
                     // Fill in the gaps with sensible defaults, but only on hot copy
                     // This will highlight to the user when a field is about to be set to a default
                     this.building = this.fillInTheGaps( JSON.parse( JSON.stringify(bld[0]) ) );
-                    this.building_clean = JSON.parse(JSON.stringify(bld[0]));
-                    console.log(this.building);
+
+                    // Grab all the images for this building, attach them to the building object
+                    this.building.gallery = await this.getGallery(canonical);
+
+                    // Deep copy the building object so we have comparison data
+                    this.building_clean = JSON.parse(JSON.stringify(this.building));
+
                 }
                 
             },
+
+            // this function fetches all the images for a given building
+            async getGallery(canonical){
+                let { data: imgs, error } = await this.supabase
+                    .from('building_gallery_images')
+                    .select('*')
+                    .eq('building', canonical)
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    return imgs;
+                }
+            },
+
+
             // Once a building has been fetched, this function will fill in any gaps in object data
             // For example, if a building has no opening times, this function will add sensible defaults
             // and will generate a full empty template for new buildings
