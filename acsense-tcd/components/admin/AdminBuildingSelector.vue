@@ -2,18 +2,21 @@
     <div class="d-flex flex-column flex-shrink-0 py-3 px-3 border-end border-secondary-subtle bg-body-tertiary position-sticky" style="width: 200px; overflow-y: auto;">
         <ul class="nav nav-pills flex-column mb-auto">
             <!-- Highlight the active page by matching it to the activeBuilding -->
-            <li v-for="building in buildings">
+            <li v-for="building in buildings" style="max-width: 100%;">
                 <div
-                @click="$emit('update:activeBuilding', building)"
+                @click="activeBuilding = building; $emit('activeBuildingChanged', building.canonical)"
                 class="nav-link link-body-emphasis text-decoration-none building-selection"
-                :class="{'bg-yellow-300': building.canonical === activeBuilding.canonical}">
-                    {{building.canonical}}
+                :class="{'bg-yellow-300': building.canonical === activeBuilding.canonical}"
+                style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
+                :title="building.display_name">
+                    <span>{{building.display_name}}</span> <br>
+                    <span class="font-monospace" style="font-size: 0.8rem;">{{ building.canonical }}</span>
                 </div>
             </li>
         </ul>
         <hr>
         <div class="input-group">
-            <input id="new-building" type="text" class="form-control" placeholder="new-building" aria-label="New Building" aria-describedby="button-addon2"
+            <input id="new-building" type="text" class="form-control" placeholder="new-buildingID" aria-label="New Building" aria-describedby="button-addon2"
             v-model="newBuildingID">
             <button 
             :disabled="!newBuildingIDValid" 
@@ -25,7 +28,7 @@
             </button>
             
         </div>
-        <div class="form-text">Must be at least 5 letters</div>
+        <div class="form-text" style="font-size: 0.75em;">buildingID cannot be updated</div>
     </div>
     </template>
     
@@ -81,14 +84,15 @@
 
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
-                    .select('*')
+                    .select('display_name, canonical')
                 if (error) {
                     console.log(error)
                     throw error
                 }
                 else {
-                    this.buildings = buildings
-                    this.activeBuilding = buildings[0]
+                    this.buildings = buildings;
+                    this.activeBuilding = buildings[0];
+                    this.$emit('activeBuildingChanged', this.activeBuilding.canonical);
                 }
             }
         }

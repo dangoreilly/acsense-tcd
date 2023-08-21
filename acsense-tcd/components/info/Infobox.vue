@@ -1,14 +1,15 @@
 <template>
 
     <!-- Card container -->
-        <div class="infotabs card">
+        <div class="infotabs card" v-if="anyTabs">
             <!-- Nav bar for tabs -->
             <div class="card-header">
                 <!-- Tabs -->
                 <ul class="nav nav-underline">
 
-                    <li v-for="tab, index in tabs" class="nav-item infobox-tab">
+                    <li v-for="tab, index in contentArray" class="nav-item infobox-tab">
                         <p 
+                        v-if="tab.display"
                         class="nav-link"
                         style="cursor: pointer; margin-bottom: 2px;" 
                         :class="{ 'active': activeInfoTab === index, }"
@@ -22,37 +23,45 @@
             </div>
 
             <div 
-            v-for="tab, index in tabs" 
+            v-for="tab, index in contentArray" 
             class="card-body"
             :class="{ 'd-block': activeInfoTab === index, 'd-none': activeInfoTab !== index, }"
-            v-html="tab.parsedContent">
+            v-html="mdParser(tab.content)">
             </div>
         </div>
     <!-- </div> -->
 
 </template>
 
-<script lang="ts">
+<script>
 
-import { InfoBoxContentTab } from '~/assets/types/infoPageTypes'
+// import { InfoBoxContentTab } from '~/assets/types/infoPageTypes'
 
 
 export default {
     props: {
         contentArray: {
-            type: Array as () => InfoBoxContentTab[],
-            required: true,
-        },
-        activeInfoTab: {
-            type: Number,
+            type: Array,
             required: true,
         },
     },
     data() {
         return {
-            // activeTab: 0,
-            tabs: [] as InfoBoxContentTab[],
+            activeInfoTab: 0,
+            // tabs: [],
 
+        }
+    },
+    computed: {
+        anyTabs() {
+            // Loop through all the tabs and return true if any have display marked as true
+            for (let i = 0; i < this.contentArray.length; i++) {
+                if (this.contentArray[i].display) {
+                    return true;
+                }
+            }
+            // if none have display marked as true, return false
+            return false;
         }
     },
     created() {
@@ -62,13 +71,24 @@ export default {
                 title: tab.title,
                 content: tab.content,
                 parsedContent: mdParser(tab.content),
+                display: tab.display,
             }
         })
+
+        // Cycle through tabs
+        // Set the first tab that is marked as display to be active
+        for (let i = 0; i < this.contentArray.length; i++) {
+            if (this.contentArray[i].display) {
+                this.activeInfoTab = i;
+                break;
+            }
+        }
+
     },
     methods: {
-        makeTabActive(index: number) {
-            // this.activeTab = index;
-            this.$emit('tabChanged', index);
+        makeTabActive(index) {
+            this.activeInfoTab = index;
+            // this.$emit('tabChanged', index);
         }
     }
 }

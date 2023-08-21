@@ -5,7 +5,8 @@
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for building selection -->
-            <AdminBuildingSelector />
+            <AdminBuildingSelector 
+            @activeBuildingChanged="getBuilding($event)"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4" style="overflow-y: auto;">
 
@@ -13,20 +14,21 @@
                 <div class="border-bottom border-2 border-black mb-3 d-flex">
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
-                        Building Management
+                        Building Management | <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">{{ building.canonical }}</span>
                     </h1>
 
-                    <!-- Construction Badge -->
-                    <div class="d-flex align-items-center m-3 fs-5">
+                    <!--Construction Badge -->
+                    <!-- <div class="d-flex align-items-center m-3 fs-5">
                         <span class="badge rounded-pill text-bg-info">
                             Partial Demonstration
                         </span>
-                    </div>
+                    </div> -->
 
                 </div>
 
                 <!-- Main Matter -->
-                <div class="mainMatter-admin">
+                <!-- Don't render anything until some data has been pulled -->
+                <div class="mainMatter-admin" v-if="building.display_name">
                     <!-- Two columns -->
                     <!-- Column 1 contains input boxes -->
                     <!-- Column 2 contains infoPage components -->
@@ -34,13 +36,14 @@
                     <!-- The input boxes and components are left aligned in their respective colum -->
                 
                     <!-- <Summary> (and building selection dropdown) -->
-                    <div class="row">
+                    <div class="row border-b">
                         <div class="col d-flex flex-column">
                             <!-- Building Name -->
-                            <select class="form-select mb-3">
-                                <!-- <option selected disabled>Select a building to edit</option> -->
-                                <option :value="building.buildingId">{{ building.name }}</option>
-                            </select>
+                            <div class="mb-3">
+                                <label for="TitleInput" class="form-label">Building Name</label>
+                                <input id="TitleInput" type="text" class="form-control" 
+                                v-model="building.display_name">
+                            </div>
 
                             <!-- Aka -->
                             <div class="mb-3">
@@ -58,16 +61,20 @@
 
                         </div>
                         <div class="col">
-                            <Summary 
-                            :buildingName="building.name"
-                            :aka="building.aka"
-                            :description="building.description"
-                            />
+                            <div class="info-page-title" style="grid-area: title;">
+                                <h1>{{building.display_name}}</h1>
+                                <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
+                            </div>
+                                
+                            <div id="description" style="grid-area: desc; justify-self: start;">
+                                <h3>Description</h3>
+                                <p>{{building.description}}</p>
+                            </div>
                         </div>
                     </div>
                 
                     <!-- Opening Times -->
-                    <div class="row mt-3"><label class="form-label d-block">Opening Times</label>
+                    <div class="row mt-3 border-b"><label class="form-label d-block">Opening Times</label>
                         <div class="col d-flex flex-column">
                             <!-- Weekdays -->
                             <div class="row">
@@ -145,31 +152,94 @@
                     </div>
 
                     <!-- Infobox -->
-                    <div class="row mt-3">
+                    <div class="row mt-3 border-b">
                         <div class="col">
-                            <AdminInfobox
-                            :contentArray="infoBoxContent"
-                            :activeInfoTab="activeInfoBoxTab"
-                            @tabChanged="activeInfoBoxTab = $event"
-                            @contentChanged="updateInfoBoxContent($event)"
-                            @modalOpen="markdownModalOpen = $event"
-                            />
+                            <!-- Sensory -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="building.sense_exp_display" id="SenseDisplay">
+                                    <label class="form-check-label" for="SenseDisplay">
+                                        Sensory Experience
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="4" 
+                                v-model="building.sense_exp"></textarea>
+                            </div>
+                            <!-- Wayfinding -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="building.wayfinding_disp" id="WayfindDisplay">
+                                    <label class="form-check-label" for="WayfindDisplay">
+                                        Wayfinding
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="4" 
+                                v-model="building.wayfinding"></textarea>
+                            </div>
+                            <!-- Physical -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="building.phys_access_disp" id="PhysicalDisplay">
+                                    <label class="form-check-label" for="PhysicalDisplay">
+                                        Physical Experience
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="4" 
+                                v-model="building.phys_access"></textarea>
+                            </div>
                         </div>
+
                         <div class="col">
                             <Infobox
                             :contentArray="infoBoxContent"
-                            :activeInfoTab="activeInfoBoxTab"
-                            @tabChanged="activeInfoBoxTab = $event"
-                            @contentChanged="updateInfoBoxContent($event)"
                             />
                         </div>
                     </div>
                     
+                    <!-- Tips -->
+                    <div class="row mt-3 border-b">
+                        <!-- Edit -->
+                        <div class="col">
+                            <!-- Loop through the tips as text inputs -->
+                            <div class="mb-3">
+                                <div v-for="(tip, index) in building.tips" :key="index" class="input-group mb-2">
+                                    <input type="text" class="form-control" v-model="building.tips[index]" placeholder="New Tip">
+                                    <button class="btn btn-warning" type="button" @click="removeTip(index)">Remove</button>
+                                </div>
+                                <!-- Button to add a new tip -->
+                                <button class="btn btn-success" type="button" @click="addTip()">Add Tip</button>
+                            </div>
+                            
+                        </div>
+                        <!-- Display -->
+                        <div class="col">
+                            <AccessTips :tips="building.tips" />
+                        </div>
+                    </div>
 
-                <!-- Tips -->
 
                 <!-- Additional Information -->
-
+                    <div class="row mt-3 border-b">
+                        <!-- Edit -->
+                        <div class="col">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" v-model="building.furtherinfo_disp" id="furtherInfoDisplay">
+                                <label class="form-check-label" for="furtherInfoDisplay">
+                                    Further Information
+                                </label>
+                            </div>
+                            <textarea class="form-control" id="descInput" rows="4" 
+                            v-model="building.further_info"></textarea>
+                        </div>
+                        <!-- Display -->
+                        <div class="col">
+                            <div
+                            v-if="building.furtherinfo_disp">
+                                <AdditionalInfo 
+                                :info="building.further_info"/>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
                 <AdminMarkdownModal 
@@ -181,60 +251,47 @@
     </NuxtLayout>
 </template>
 
-<script lang="ts">
-
-    import bld from '~/assets/example-data';
-    import { Building } from '~/assets/types/Building';
-
-    import { InfoBoxContentTab } from '~/assets/types/infoPageTypes';
+<script>
+import {createClient} from '@supabase/supabase-js';
 
     export default {
         data() {
             return {
-            building: {} as Building,
-            infoBoxContent: [] as InfoBoxContentTab[],
-            activeInfoBoxTab: 0,
-            markdownModalOpen: false,
+                building: {},
+                building_clean: {},
+                markdownModalOpen: false,
+                supabase: {},
             }
         },
         created() {
-            // Deep copy the building object to avoid changing the original
-            this.building = JSON.parse(JSON.stringify(bld));
-            this.infoBoxContent = [
-                {
-                    title: "Sound",
-                    content: this.building.sounds,
-                },
-                {
-                    title: "Lights",
-                    content: this.building.lights,
-                },
-                {
-                    title: "Experience",
-                    content: this.building.experience,
-                },
-                {
-                    title: "Sensory Spaces",
-                    content: this.building.respite,
-                },
-                {
-                    title: "Physical Access",
-                    content: this.building.physicalAccess,
-                },
-            ];
+            // Initialise the supabase client using the 
+            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            this.supabase = createClient(supabaseUrl, supabaseKey)
+            
+        },
+        computed: {
+            infoBoxContent() {
+                return [
+                    {
+                        title: "Sensory Experience",
+                        content: this.building.sense_exp || "No information provided",
+                        display: this.building.sense_exp_display || false
+                    },
+                    {
+                        title: "Wayfinding",
+                        content: this.building.wayfinding || "No information provided",
+                        display: this.building.wayfinding_disp || false
+                    },
+                    {
+                        title: "Physical Access",
+                        content: this.building.phys_access || "No information provided",
+                        display: this.building.phys_access_disp || false
+                    },
+                ];
+            }
         },
         methods: {
-            // This function is called when the user changes the content of the infoBox
-            // Because of the way the infobox is handled, we need to update the building object manually
-            updateInfoBoxContent(newContent: InfoBoxContentTab[]) {
-                this.infoBoxContent = newContent;
-                this.building.sounds = this.infoBoxContent[0].content;
-                this.building.lights = this.infoBoxContent[1].content;
-                this.building.experience = this.infoBoxContent[2].content;
-                this.building.respite = this.infoBoxContent[3].content;
-                this.building.physicalAccess = this.infoBoxContent[4].content;
-            },
-
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             saveBuilding() {},
@@ -251,8 +308,114 @@
             // It returns a list of the fields that have been changed
             getChanges() {},
 
+            // Attempts to create a new building with the given canonical name
+            async newBuilding(canonical) {
+                // Check if the building already exists
+                let { data: bld, error } = await this.supabase
+                    .from('buildings')
+                    .select('*')
+                    .eq('canonical', canonical)
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // If the building already exists, return false
+                    if (bld.length > 0) {
+                        return false;
+                    }
+                    // If the building does not exist, create it
+                    else {
+                        let { data: bld, error } = await this.supabase
+                            .from('buildings')
+                            .insert([
+                                { canonical: canonical }
+                            ])
+                        if (error) {
+                            console.error(error)
+                            alert(error.message)
+                            throw error
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+                }
+            },
+
             // This function adds a log entry to the database
             logChange() {},
+
+            // This function fetches the building from the database based on it's canonical name
+            async getBuilding(canonical){
+
+                // Fetch the building from the database
+                // Since we are using the canonical name, we should only get one result
+                let { data: bld, error } = await this.supabase
+                    .from('buildings')
+                    .select('*')
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // Deep copy the building object so we have comparison data
+                    // Fill in the gaps with sensible defaults, but only on hot copy
+                    // This will highlight to the user when a field is about to be set to a default
+                    this.building = this.fillInTheGaps( JSON.parse( JSON.stringify(bld[0]) ) );
+                    this.building_clean = JSON.parse(JSON.stringify(bld[0]));
+                    console.log(this.building);
+                }
+                
+            },
+            // Once a building has been fetched, this function will fill in any gaps in object data
+            // For example, if a building has no opening times, this function will add sensible defaults
+            // and will generate a full empty template for new buildings
+            // Protects against render errors when fields are updated
+            fillInTheGaps(b){
+
+                // Deep copy the building
+                let gapsFilled = JSON.parse( JSON.stringify(b) );
+
+                // Cycle through every section of the model
+                // If no data exists, populate with a sensible default
+                // Display Name
+                if (!b.display_name) gapsFilled.display_name = "Building Name";
+                // Description
+                if (!b.description) gapsFilled.description = "Descritpion";
+                
+                // Opening Times
+                if (!b.openingTimes) gapsFilled.openingTimes = {
+                    weekday: {
+                        open: false,
+                        times: ["08:00", "17:00"],
+                    },
+                    sat: {
+                        open: false,
+                        times: ["08:00", "17:00"],
+                    },
+                    holidays: {
+                        open: false,
+                        times: ["08:00", "17:00"],
+                    },
+                    note: "",
+                }
+                  
+                return gapsFilled;
+
+            },
+            
+            // This function adds a new tip to the building
+            addTip() {
+                this.building.tips.push("");
+            },
+
+            // This function removes a tip from the building
+            removeTip(index) {
+                this.building.tips.splice(index, 1);
+            },
         },
     }
 

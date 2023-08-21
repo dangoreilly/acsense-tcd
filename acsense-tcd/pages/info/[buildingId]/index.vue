@@ -262,22 +262,22 @@ body {
             },
             setInfoBoxContent(){
                 this.infoBoxContent = [
-                {
-                    title: "Sensory Experience",
-                    content: this.building.sense_exp,
-                    display: this.building.sense_exp_disp
-                },
-                {
-                    title: "Wayfinding",
-                    content: this.building.wayfinding,
-                    display: this.building.wayfinding_disp
-                },
-                {
-                    title: "Physical Access",
-                    content: this.building.phys_access,
-                    display: this.building.phys_access_disp
-                },
-            ];
+                    {
+                        title: "Sensory Experience",
+                        content: this.building.sense_exp,
+                        display: this.building.sense_exp_disp
+                    },
+                    {
+                        title: "Wayfinding",
+                        content: this.building.wayfinding,
+                        display: this.building.wayfinding_disp
+                    },
+                    {
+                        title: "Physical Access",
+                        content: this.building.phys_access,
+                        display: this.building.phys_access_disp
+                    },
+                ];
             },
             async getBuildingData() {
                 const response = await useFetch('/api/get/building/' + this.$route.params.buildingId);
