@@ -81,19 +81,19 @@
                                 <div class="col">
                                     <label for="weekDay-checkbox" >Weekdays</label>
                                     <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
-                                    v-model="building.openingTimes.weekday.open" />
+                                    v-model="building.opening_times.weekday.open" />
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Opening Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
-                                    v-model="building.openingTimes.weekday.times[0]" 
-                                    :disabled="!building.openingTimes.weekday.open"/>
+                                    v-model="building.opening_times.weekday.times[0]" 
+                                    :disabled="!building.opening_times.weekday.open"/>
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Closing Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
-                                    v-model="building.openingTimes.weekday.times[1]" 
-                                    :disabled="!building.openingTimes.weekday.open"/>
+                                    v-model="building.opening_times.weekday.times[1]" 
+                                    :disabled="!building.opening_times.weekday.open"/>
                                 </div>
                             </div>
                             <!-- Saturdays -->
@@ -101,19 +101,19 @@
                                 <div class="col">
                                     <label for="sat-checkbox">Saturday</label>
                                     <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
-                                    v-model="building.openingTimes.sat.open" />
+                                    v-model="building.opening_times.sat.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sat-open">Opening Time</label>
                                     <input type="time" id="sat-open" class="form-control"
-                                    v-model="building.openingTimes.sat.times[0]" 
-                                    :disabled="!building.openingTimes.sat.open"/>
+                                    v-model="building.opening_times.sat.times[0]" 
+                                    :disabled="!building.opening_times.sat.open"/>
                                 </div>
                                 <div class="col">
                                     <label for="sat-close">Closing Time</label>
                                     <input type="time" id="sat-close" class="form-control"
-                                    v-model="building.openingTimes.sat.times[1]" 
-                                    :disabled="!building.openingTimes.sat.open"/>
+                                    v-model="building.opening_times.sat.times[1]" 
+                                    :disabled="!building.opening_times.sat.open"/>
                                 </div>
                             </div>
                             <!-- Sundays -->
@@ -121,19 +121,19 @@
                                 <div class="col">
                                     <label for="sunday-checkbox">Sunday & Public Holidays</label>
                                     <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
-                                    v-model="building.openingTimes.holidays.open" />
+                                    v-model="building.opening_times.holidays.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sunday-open">Opening Time</label>
                                     <input type="time" id="sunday-open" class="form-control"
-                                    v-model="building.openingTimes.holidays.times[0]" 
-                                    :disabled="!building.openingTimes.holidays.open"/>
+                                    v-model="building.opening_times.holidays.times[0]" 
+                                    :disabled="!building.opening_times.holidays.open"/>
                                 </div>
                                 <div class="col">
                                     <label for="sunday-close">Closing Time</label>
                                     <input type="time" id="sunday-close" class="form-control"
-                                    v-model="building.openingTimes.holidays.times[1]" 
-                                    :disabled="!building.openingTimes.holidays.open"/>
+                                    v-model="building.opening_times.holidays.times[1]" 
+                                    :disabled="!building.opening_times.holidays.open"/>
                                 </div>
                             </div>
 
@@ -141,13 +141,13 @@
                             <div class="mt-3">
                                 <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
                                 <input id="timeNoteInput" type="text" class="form-control" 
-                                v-model="building.openingTimes.note">
+                                v-model="building.opening_times.note">
                             </div>
                         </div>
 
                         <div class="col">
                             <Timebox
-                                :times="building.openingTimes"/>
+                                :times="building.opening_times"/>
                         </div>
                     </div>
 
@@ -444,7 +444,7 @@ import {createClient} from '@supabase/supabase-js';
                 if (!b.description) gapsFilled.description = "Descritpion";
                 
                 // Opening Times
-                if (!b.openingTimes) gapsFilled.openingTimes = {
+                if (!b.opening_times) gapsFilled.opening_times = {
                     weekday: {
                         open: false,
                         times: ["08:00", "17:00"],
