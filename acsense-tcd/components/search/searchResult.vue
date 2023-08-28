@@ -26,9 +26,11 @@ export default{
 
     methods: {
         redirect() {
-            this.$router.push({
-                path: '/info/' + this.building.canonical,
-            });
+            // this.$router.push({
+            //     path: '/info/' + this.building.canonical,
+            // });
+            // navigateTo('/info/' + this.building.canonical);
+            window.location.href = '/info/' + this.building.canonical;
         },
         // highlight(text) {
         //     let inputText = document.getElementById("inputText");
