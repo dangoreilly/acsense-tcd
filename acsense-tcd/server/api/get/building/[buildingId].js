@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
     }
 
     let building = building_response_data[0];
+    // console.log(building);
 
     // Get any student spaces associated with the building
     let spaces_response_data = await getSpacesForBuilding(buildingId);
@@ -39,7 +40,7 @@ async function getBuildingData(buildingId) {
         console.log(error)
         throw error
     }
-    // console.log("Building found: " + building[0].display_name + " (" + building[0].canonical + ")");
+    console.log("Building found: " + building[0].display_name + " (" + building[0].canonical + ")");
     
     return building;
 }
@@ -59,6 +60,7 @@ async function getSpacesForBuilding(buildingId) {
     // Generate the stylised name for the space
 
     let styles = await getSpaceStyles();
+    // let styles = {};
     // console.log(styles);
 
     spaces.forEach(space => {
@@ -66,7 +68,12 @@ async function getSpacesForBuilding(buildingId) {
         // console.log(space)
         
         if (space.icon_override == null || space.icon_override == "") {
-            space.icon = styles[space.type].icon;
+            try {
+                space.icon = styles[space.type].icon;
+            }
+            catch {
+                space.icon = "https://ugc.production.linktr.ee/NVwLsH4FRFy1QpkGH8wB_TCD%20Sense%20Logo.png";
+            }
         }
     });
 
@@ -96,8 +103,18 @@ function getSpaceStyledTitle(styles, area){
         "Quiet Space": ["🟣","🌺"],  
     }
 
-    let _colour = key[area.type][0];
-    let _emoji = key[area.type][1];
+    let _colour = "🟤";
+    let _emoji = "🏠";
+
+    try {
+        _colour = key[area.type][0];
+        _emoji = key[area.type][1];
+    }
+    catch {
+        console.error("No style found for '" + area.type + "'");
+    }
+
+    console.log(`${_colour} ${area.name} ${_emoji}`);
 
     return `${_colour} ${area.name} ${_emoji}`;
 
