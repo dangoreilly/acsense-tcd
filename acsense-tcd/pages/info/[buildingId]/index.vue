@@ -28,7 +28,7 @@
         </div>
 
         <div style="grid-area: tips;"
-        v-if="building.tips">
+        v-if="building.tips.length >0">
             <AccessTips :tips="building.tips" />
             
         </div>
@@ -67,7 +67,7 @@
         </div>
 
         <div style="grid-area: gallery;"
-        v-if="building.gallery_images">
+        v-if="building.gallery_images.length > 0">
             <Gallery
             :images="building.gallery_images"
             />
@@ -264,17 +264,17 @@ body {
                 this.infoBoxContent = [
                     {
                         title: "Sensory Experience",
-                        content: this.building.sense_exp,
-                        display: this.building.sense_exp_disp
+                        content: this.building.sense_exp || "No information available",
+                        display: this.building.sense_exp_display
                     },
                     {
                         title: "Wayfinding",
-                        content: this.building.wayfinding,
+                        content: this.building.wayfinding || "No information available",
                         display: this.building.wayfinding_disp
                     },
                     {
                         title: "Physical Access",
-                        content: this.building.phys_access,
+                        content: this.building.phys_access || "No information available",
                         display: this.building.phys_access_disp
                     },
                 ];
