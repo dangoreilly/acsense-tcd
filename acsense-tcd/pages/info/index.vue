@@ -15,7 +15,7 @@
         </div>
         <!-- Results section -->
         <div class="border-top mt-2 pt-1"> 
-            <searchResult v-for="building in buildings_list" :building_raw="building" :searchterm="search" :key="building.buildingId" />
+            <searchResult v-for="building in sorted_list" :building="building" :searchterm="search" :key="building.canonical" />
         </div>
     </NuxtLayout>
 </template>
@@ -52,14 +52,14 @@ Make sure the search with the url param converst dashes to spaces -->
 
 <script>
 
-    import buildings_list from '~/assets/buildings_list';
+    import {createClient} from '@supabase/supabase-js';
     import Fuse from 'fuse.js';
 
     const fuse_options = {
         includeScore: true,
         keys: [ 
-            {name:'properties.buildingName', weight:3},
-            {name:'properties.aka', weight:1},
+            {name:'display_name', weight:3},
+            {name:'aka', weight:1},
             // {name:'ZoomedInLabel', weight:1},
             // {name:'ZoomedOutLabel', weight:1}
         ]
@@ -70,18 +70,64 @@ Make sure the search with the url param converst dashes to spaces -->
         data() {
             return {
                 search: '',
-                buildings_list: buildings_list,
-                fuse: new Fuse(buildings_list, fuse_options)
+                buildings_list: [],
+                sorted_list: [],
             }
         },
-        created:
-            function () {
+        created() {
+            this.getListOfBuildings()
+            this.checkForSearchParam()
+        },
+        mounted() {
+            // Once there's a list to check, check it
+            // this.buildingSearch()
+        },
+        methods: {
+
+            checkForSearchParam() {
+                // Check if there is a search param
+                if (this.$route.query.search) {
+                    // If there is, set the search bar to that value
+                    this.search = this.normaliseSearchTerm(this.$route.query.search);
+                }
+            },
+
+            initList () {
                 for (let i = 0; i < this.buildings_list.length; i++) {
                     this.buildings_list[i].show = true;
                 }
             },
+            
+            async getListOfBuildings() {
+                
+                const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+                const supabaseKey = useRuntimeConfig().public.supabaseKey;
+                this.supabase = createClient(supabaseUrl, supabaseKey)
+    
+                // Select All buildings from supabase
+                // Assign them the buildings array
 
-        methods: {
+                let { data: buildings, error } = await this.supabase
+                    .from('buildings')
+                    .select('display_name, canonical, description, aka')
+                if (error) {
+                    console.log(error)
+                    throw error
+                }
+                else {
+                    // Add them to the buildings list
+                    this.buildings_list = buildings;
+                    // copy to the list for displaying the results
+                    this.sorted_list = buildings;
+
+                    console.log(buildings);
+                    // Add a show property to each building, so that it can later be controlled with the search function
+                    this.initList();
+                    // Create a Fuse instance for searching
+                    this.fuse = new Fuse(this.buildings_list, fuse_options);
+                }
+                
+            },
 
             searchSubmit() {
                 this.$router.push({
@@ -105,10 +151,11 @@ Make sure the search with the url param converst dashes to spaces -->
                 
                 //Use the static generated Fuse instance to get a list of matches
                 let result = this.fuse.search(this.search)
+                console.log(result)
 
                 //convert that Fuse instance to an array of IDs for filtering
                 for (i = 0; i < result.length; i++){
-                    filter.push(result[i].item.properties.bldID);
+                    filter.push(result[i].item.canonical);
                 }
 
                 // console.log(filter);
@@ -135,19 +182,20 @@ Make sure the search with the url param converst dashes to spaces -->
                     for (i = 0; i < li.length; i++) {
 
                         
-                        if (filter.includes(li[i].id)) {
+                        if (filter.includes(li[i].canonical)) {
                             li[i].show = true;
-                            li[i].score = result.find(r => r.item.bldID == li[i].bldID).score;
+                            li[i].score = result.find(r => r.item.canonical == li[i].canonical).score;
                         } 
                         else {
                             li[i].show = false;
                         }
                     }
 
-                    //Then loop through again and sort based on scores
-                    this.sortList_byScore();
-                    console.log(this.buildings_list);
-
+                    // Map the filtered list to the sorted list for display
+                    this.sorted_list = [];
+                    for (i = 0; i < filter.length; i++) {
+                        this.sorted_list.push(this.buildings_list.find(b => b.canonical == filter[i]));
+                    }
                 }
 
             },
@@ -175,7 +223,7 @@ Make sure the search with the url param converst dashes to spaces -->
                 while (switching) {
                     // Start by saying: no switching is done:
                     switching = false;
-                    b = this.buildings_list
+                    b = this.sorted_list
                     
                     // Loop through all list items:
                         for (i = 0; i < (b.length - 1); i++) {
@@ -187,7 +235,7 @@ Make sure the search with the url param converst dashes to spaces -->
                             switch place with the current item: */
                             if (b[i].score > b[i+1].dscore) {
 
-                                /* If next item is alphabetically lower than current item,
+                                /* If next item has higher score than current item,
                                 mark as a switch and break the loop: */
                                 shouldSwitch = true;
                                 break;
@@ -202,6 +250,8 @@ Make sure the search with the url param converst dashes to spaces -->
                     switching = true;
                     }
                 }
+                console.log(b)
+                console.log(this.sorted_list)
             },
             sortList_byAlphabet() {
 
@@ -224,7 +274,7 @@ Make sure the search with the url param converst dashes to spaces -->
 
                             /* Check if the next item should
                             switch place with the current item: */
-                            if (b[i].properties.name > b[i+1].properties.name) {
+                            if (b[i].display_name > b[i+1].display_name) {
 
                                 /* If next item is alphabetically lower than current item,
                                 mark as a switch and break the loop: */

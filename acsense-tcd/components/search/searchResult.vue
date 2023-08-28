@@ -1,20 +1,20 @@
 <template>
 <div v-if="building.show" class="card mx-3 my-1 searchresult" @click="redirect()">
     <div class="card-body">
-        <h5 class="card-title">{{ building.name }}</h5>
+        <h5 class="card-title">{{ building.display_name }}</h5>
         <h6 v-if="building.aka" class="card-subtitle mb-2 text-body-secondary">{{building.aka}}</h6>
         <p style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{building.description}}</p>
     </div>
 </div>
 </template>
 
-<script lang="ts">
+<script>
 
 // import { Building } from '~/assets/types/Building';
 
 export default{
     props: {
-        building_raw: {
+        building: {
             type: Object,
             required: true,
         },
@@ -24,28 +24,6 @@ export default{
         },
     },
 
-    data() {
-        return {
-            building: {
-                name: this.building_raw.properties.Name,
-                aka: this.building_raw.properties.aka,
-                description: this.building_raw.properties.Description,
-                show: this.building_raw.show,
-                canonical: this.building_raw.properties.bldID,
-            },
-        }      
-    },
-    watch: {
-        building_raw: {
-            handler: function (val, oldVal) {
-                this.building.show = val.show;
-            },
-            deep: true,
-        },
-    },
-    // created: function () {
-    //     console.log(this.building);
-    // },
     methods: {
         redirect() {
             this.$router.push({
