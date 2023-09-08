@@ -41,10 +41,17 @@
             />
         </div>
 
+        <!-- If time data exists, render it. If it doesn't, render a placeholder -->
         <div style="grid-area: open-times; justify-self: start; align-self: start;"
         v-if="building.opening_times">
             <Timebox
             :times="building.opening_times"/>
+        </div>
+        <!-- In theory, this placeholder should be temporary. But theoretically temporary things tend to be practically permanent... -->
+        <div v-else style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
+            <div class="time-card card  pt-2 mx-2 px-3">
+                <p><em>Opening times not available for this building</em></p>
+            </div>
         </div>
                 
         <!-- <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">

@@ -23,43 +23,45 @@
                         <td style="display: flex; flex-direction: column; min-width: 8rem;">
 
                             <div style="align-items: end;">
-
-                                <span class="badge rounded-pill text-bg-warning mx-1" title="Capacity">
-                                    <i class="fa-solid fa-chair"></i>
-                                    {{area.capacity > 0 ? area.capacity : '?'}}
+                                <!-- Seating -->
+                                <span 
+                                class="badge rounded-pill mx-1" 
+                                :class="{'text-bg-success': area.seating, 'text-bg-danger': !area.seating}" 
+                                :title="(area.seating ? '' : 'No ') + 'Seating Available'">
+                                    <img class="svg-icon" src="/images/icons/chair-solid.svg" width="12" height="12">
                                 </span>
-
+                                <!-- Electrical Sockets -->
                                 <span 
                                 class="badge rounded-pill mx-1" 
                                 :class="{'text-bg-success': area.electrical_outlets, 'text-bg-danger': !area.electrical_outlets}" 
                                 :title="(area.electrical_outlets ? '' : 'No ') + 'Plug Sockets'">
                                     <img class="svg-icon" src="/images/icons/plug-solid.svg" width="12" height="12">
                                 </span>
-
+                                <!-- Food and Drink allowed -->
                                 <span 
                                 class="badge rounded-pill mx-1" 
                                 :class="{'text-bg-success': area.food_drink_allowed, 'text-bg-danger': !area.food_drink_allowed}" 
                                 :title="'Food and Drink ' + (area.food_drink_allowed ? '' : 'not') + 'Allowed'">
-                                    <i class="fa-solid fa-utensils"></i>
+                                    <img class="svg-icon" src="/images/icons/utensils-solid.svg" width="12" height="12">
                                 </span>
 
                             </div>
                             <div style="align-items: end;">
-
+                                <!-- Kettle provided -->
                                 <span 
                                 class="badge rounded-pill mx-1" 
                                 :class="{'text-bg-success': area.kettle, 'text-bg-danger': !area.kettle}" 
                                 :title="(area.kettle ? '' : 'No ') + 'Kettle Available'">
-                                    <i class="fa-solid fa-mug-saucer"></i>
+                                    <img class="svg-icon" src="/images/icons/kettle.svg" width="12" height="12">
                                 </span>
-
+                                <!-- Microwave provided -->
                                 <span 
                                 class="badge rounded-pill mx-1" 
                                 :class="{'text-bg-success': area.microwave, 'text-bg-danger': !area.microwave}" 
                                 :title="(area.microwave ? '' : 'No ') + 'Microwave Available'">
-                                    <i class="fa-solid fa-radiation"></i>
+                                    <img class="svg-icon" src="/images/icons/microwave.svg" width="12" height="12">
                                 </span>
-
+                                <!-- Wheelchair Accessible -->
                                 <span 
                                 class="badge rounded-pill mx-1" 
                                 :class="{'text-bg-success': area.wheelchair_accessible, 'text-bg-danger': !area.wheelchair_accessible}" 
