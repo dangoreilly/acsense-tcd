@@ -129,6 +129,9 @@
                 body: true,
             },
             {
+                src: 'https://unpkg.com/@supabase/supabase-js@2',
+            },
+            {
                 src: '/javascript/mapFunctions.js',
             },
             {
@@ -173,9 +176,9 @@
         /* @import url("~/assets/css/leaflet.css"); */
 
         :root{
-            --primary-label-opacity: 1;
+            /* --primary-label-opacity: 1;
             --secondary-label-opacity: 0;
-            --tertiary-label-opacity: 0;
+            --tertiary-label-opacity: 0; */
             transition: opacity 0.5s ease-in-out;
         }
 
@@ -183,12 +186,18 @@
 
         .primary-label {
             opacity: var(--primary-label-opacity);
+            transition: opacity 0.5s ease-in-out;
+            /* display: var(--primary-label-display); */
         }
         .secondary-label {
             opacity: var(--secondary-label-opacity);
+            transition: opacity 0.5s ease-in-out;
+            /* display: var(--primary-label-display); */
         }
         .tertiary-label {
             opacity: var(--tertiary-label-opacity);
+            transition: opacity 0.5s ease-in-out;
+            /* display: var(--primary-label-display); */
         }
 
     </style>

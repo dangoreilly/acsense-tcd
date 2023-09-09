@@ -8,111 +8,119 @@ function getAppropriateInitialView() {
     return INTIAL_VIEW_WEB;
 }
 
-function addOverlays(map){
+function addOverlays(){
     let bounds = [
         [53.34586316412621, -6.247154474258424],
         [53.341654914498974, -6.261670589447022]
     ];
     let overlays = [];
     overlays.push( L.imageOverlay('images/Overworld_1.svg', bounds).addTo(map));
-    overlays.push( L.imageOverlay('images/Overworld_terrain.svg', bounds));
+    // overlays.push( L.imageOverlay('images/Overworld_terrain.svg', bounds));
 
     return overlays;
 }
 
 
-function addMovementPaths(map){
+function addMovementPaths(){
     console.log("addMovementPaths() not implemented yet");
 }
 
 
-function addBuildings(map){
+async function addBuildings(){
 
-    let artsBlock = {
-        "name": "Arts Building",
-        "aka": "Arts Block",
-        "buildingId": "arts-building",
-        "description": "The Arts Building contains many large lecture theatres on the ground floor as well as seating areas and a coffee shop. There are a range of different department located on the upper floors along with various seminar rooms, classrooms and offices. ",
-        "geometry": null,
-        "primaryMapLabel": "Arts Building1",
-        "secondaryMapLabel": "Arts Building2",
-        "tertiaryMapLabel": "Arts Building3",
+    // Empty array to hold the layer groups
+    let building_geojsons = [];
+    // Get buildings from supabase
+    let { data: bld, error } = await this.supabase
+        .from('buildings')
+        .select('canonical, display_name, always_display, aka, description, map_label_1, map_label_2, map_label_3, geometry')
+
+    if (error) {
+        console.error(error)
+        alert(error.message)
+        throw error
     }
-    // Hardcoded arts block
-    artsBlock.geometry = L.polygon([
-        {lat: 53.34355252139788, lng: -6.257875263690949},
-        {lat: 53.343541312153604, lng: -6.257419288158418},
-        {lat: 53.34339078773066, lng: -6.257430016994477},
-        {lat: 53.34339078773066, lng: -6.257330775260926},
-        {lat: 53.34342601689857, lng: -6.257328093051911},
-        {lat: 53.343422814248136, lng: -6.257156431674958},
-        {lat: 53.343381179770724, lng: -6.25716045498848},
-        {lat: 53.343377977116916, lng: -6.257041096687318},
-        {lat: 53.343176209443094, lng: -6.257057189941407},
-        {lat: 53.343152189418355, lng: -6.256181448698044},
-        {lat: 53.3431153586874, lng: -6.25618413090706},
-        {lat: 53.34311696002419, lng: -6.256235092878343},
-        {lat: 53.34300166362171, lng: -6.2562377750873575},
-        {lat: 53.34300486630377, lng: -6.256292760372163},
-        {lat: 53.3429840488661, lng: -6.256292760372163},
-        {lat: 53.3429680354456, lng: -6.2563370168209085},
-        {lat: 53.34293440724294, lng: -6.2563490867614755},
-        {lat: 53.34294081261692, lng: -6.2565623223781595},
-        {lat: 53.3429095864097, lng: -6.256606578826905},
-        {lat: 53.34291439044307, lng: -6.25679299235344},
-        {lat: 53.34298565020783, lng: -6.256882846355439},
-        {lat: 53.34296483276077, lng: -6.256906986236573},
-        {lat: 53.34296723477439, lng: -6.257062554359437},
-        {lat: 53.34299525825687, lng: -6.257089376449586},
-        {lat: 53.342993656915525, lng: -6.257129609584809},
-        {lat: 53.34301687635933, lng: -6.257156431674958},
-        {lat: 53.34302168038062, lng: -6.25747561454773},
-        {lat: 53.34305050449693, lng: -6.2574729323387155},
-        {lat: 53.343051305166554, lng: -6.257537305355073},
-        {lat: 53.343092139297205, lng: -6.257569491863252},
-        {lat: 53.34309293996607, lng: -6.257640570402145},
-        {lat: 53.34310895333965, lng: -6.257653981447221},
-        {lat: 53.34311776069258, lng: -6.257950365543366},
-        {lat: 53.34314658474395, lng: -6.257947683334351},
-        {lat: 53.34314738541177, lng: -6.257999986410142},
-        {lat: 53.34317300677391, lng: -6.258024126291276},
-        {lat: 53.343173807441225, lng: -6.258076429367065},
-        {lat: 53.34320743545506, lng: -6.258072406053544},
-        {lat: 53.34320263145471, lng: -6.257942318916322},
-        {lat: 53.34324346544045, lng: -6.257939636707307},
-        {lat: 53.34324346544045, lng: -6.257885992527009}
-    ], buildingStyle()).addTo(map);
+    else {
+        // console.log(bld)
+        // Loop through buildings
+        bld.forEach(building => {
+            try {
+                // Convert building to a valid GeoJSON object
+                let building_geojson = {
+                    "type": "Feature",
+                    "properties": {
+                        "canonical": building.canonical,
+                        "name": building.display_name,
+                        "aka": building.aka,
+                        "always_display": building.always_display || false,
+                        "description": building.description,
+                        "map_label_1": building.map_label_1,
+                        "map_label_2": building.map_label_2,
+                        "map_label_3": building.map_label_3,
+                    },
+                    "geometry": {
+                        "coordinates": building.geometry.coordinates,
+                        "type": "Polygon"
+                    }
+                }
+                // Add the building to the array
+                // Check manually that there are actually coordinates in the array first though, otherwise it will crash
+                // And for some reason it isn't being caught by the try/catch
+                if (building.geometry.coordinates.length > 0)
+                    building_geojsons.push(building_geojson);
+            }
+            catch (error) {
+                console.error("Error adding " + building.canonical + " to map")
+                console.error(error)
+            }
+        });
 
-    addLabelAndModalToBuilding(artsBlock, map);
-    addHighlightToBuilding(artsBlock, map);
+        // Need to use geojson group to avoid the mouseover event triggering on every building
+
+        var buildings_geojson_array = L.geoJSON(building_geojsons, {
+            style: buildingStyle,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+    }
     
 }
 
-function addHighlightToBuilding(building, map){
+function onEachFeature(feature, layer) {
+    addLabelAndModalToBuilding(feature, layer);
+    addHighlightToBuilding(feature, layer);
+}
 
-    map.on('mouseover', function(e) { 
+
+function addHighlightToBuilding(feature, layer){
+    let building = feature.properties;
+    // console.log(layer);
+
+    layer.on('mouseover', function(e) { 
         // Highlight the feature that the mouse is over
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            building.geometry.bringToFront();
+            // layer.bringToFront();
         }
-        building.geometry.setStyle(highlightFeature());
+        console.log("Mouseover event on " + building.canonical)
+        e.target.setStyle(highlightFeature());
     });
-    map.on('mouseout', function(e) { 
+    layer.on('mouseout', function(e) { 
         // Reset the style, otherwise it will stay highlighted
-        building.geometry.setStyle(buildingStyle());
+        layer.setStyle(buildingStyle(feature));
     });
 };
 
-function buildingStyle() {
+function buildingStyle(layer) {
+    // console.log(layer.properties)
+    // if (layer.properties.always_display) console.log(layer);
+    // else console.log(layer.properties.canonical + " not always display");
 
     return {
-
         fillColor: '#0087A2',
         weight: 1,
         opacity: 0,
         color: '#FCE891',
         dashArray: '0',
-        fillOpacity: 0,
+        fillOpacity: layer.properties.always_display ? 1 : 0,
         noClip:true
     };
 }
@@ -135,44 +143,71 @@ function updateLabels(currentZoom, zoomMin, zoomMax){
     // and the "Secondary" (zoom > LOWER) or "Tertiary" (zoom < UPPER) label is shown
     if (currentZoom <= zoomMin){ 
 
-        r.style.setProperty('--primary-label-visibility', '0');
-        r.style.setProperty('--secondary-label-visibility', '0');
-        r.style.setProperty('--tertiary-label-visibility', '1');
+        r.style.setProperty('--primary-label-opacity', '0');
+        r.style.setProperty('--secondary-label-opacity', '0');
+        r.style.setProperty('--tertiary-label-opacity', '1');
         if (DEBUG) console.log("tertiary Label active");
 
     }
     else if (currentZoom >= zoomMax){ 
 
-        r.style.setProperty('--primary-label-visibility', '1');
-        r.style.setProperty('--secondary-label-visibility', '0');
-        r.style.setProperty('--tertiary-label-visibility', '0');
+        r.style.setProperty('--primary-label-opacity', '1');
+        r.style.setProperty('--secondary-label-opacity', '0');
+        r.style.setProperty('--tertiary-label-opacity', '0');
         if (DEBUG) console.log("primary Label active");
 
     }
     else { 
 
-        r.style.setProperty('--primary-label-visibility', '0');
-        r.style.setProperty('--secondary-label-visibility', '1');
-        r.style.setProperty('--tertiary-label-visibility', '0');
+        r.style.setProperty('--primary-label-opacity', '0');
+        r.style.setProperty('--secondary-label-opacity', '1');
+        r.style.setProperty('--tertiary-label-opacity', '0');
         if (DEBUG) console.log("secondary Label active");
 
     }
 }
 
-function addLabelAndModalToBuilding(building, map){
+function addLabelAndModalToBuilding(feature, layer){
+
+    let building = feature.properties;
+    // console.log(building)
+
+    // console.log(feature)
+    // console.log(layer)
 
     // Add the labels
-    let primaryLabelContent = "<p align='center' class='primary-label'>" + building.primaryMapLabel.replace(/([\\])/g, '<br>') + " </p>";
-    let secondaryLabelContent = "<p align='center'  class='secondary-label'>" + building.secondaryMapLabel.replace(/([\\])/g, '<br>') + " </p>";
-    let tertiaryLabelContent = "<p align='center' class='tertiary-label'>" + building.tertiaryMapLabel.replace(/([\\])/g, '<br>') + " </p>";
+    let primaryLabelContent = "";
+    let secondaryLabelContent = "";
+    let tertiaryLabelContent = "";
 
-    building.geometry.bindTooltip(primaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).addTo(map);
-    // building.geometry.bindTooltip(secondaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
+    if (building.map_label_1 != null){
+        // Generate the content
+        primaryLabelContent = "<p align='center' class='primary-label'>" + building.map_label_1 + " </p>";
+        // Add it to the map
+        addToolTipToBuilding(layer, primaryLabelContent);
+        // layer.bindTooltip(primaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).addTo(map);
+    }
+    if (building.map_label_2 != null){
+        // Generate the content
+        secondaryLabelContent = "<p align='center'  class='secondary-label'>" + building.map_label_2 + " </p>";
+        // Add it to the map
+        addToolTipToBuilding(layer, secondaryLabelContent);
+        // layer.bindTooltip(secondaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
+    }
+    if (building.map_label_3 != null){
+        // Generate the content
+        tertiaryLabelContent = "<p align='center' class='tertiary-label'>" + building.map_label_3 + " </p>";
+        // Add it to the map
+        // addToolTipToBuilding(layer, tertiaryLabelContent);
+    }
+
+    
+    
     // building.geometry.bindTooltip(tertiaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
 
 
     // Add the modal
-    building.geometry.on('click', function (e){
+    layer.on('click', function (e){
 
         console.log("Building clicked");
 
@@ -182,7 +217,7 @@ function addLabelAndModalToBuilding(building, map){
 
         let modal_info_button = {
             text: "More Info",
-            link: `/info/${building.buildingId}`,
+            link: `/info/${building.canonical}`,
             // disabled: !feature.properties.infoPageEnabled
         }
         
@@ -213,22 +248,34 @@ function addLabelAndModalToBuilding(building, map){
     });
 }
 
-function getSensoryAreaTitle(area){
-    let key = {
-        "Social Space": ["🟡","😄"],
-        "Study Space": ["🔵","📚"], 
-        "Respite Room": ["🟠","🧡"],
-        "Quiet Space": ["🟣","🌺"],  
-    }
+function addToolTipToBuilding(layer, content){
 
-    let _colour = key[area.type][0];
-    let _emoji = key[area.type][1];
-
-    return `${_colour} ${area.Name} ${_emoji}`;
+    // Create a tooltip object with the given content and class
+    let label = L.tooltip( {direction: "top", offset:[0,-20], opacity:1, permanent: true})
+        .setContent(content);
+    // Add it to the map at the given layer location
+    label.setLatLng(layer.getBounds().getCenter())
+        .addTo(map)
+        .openTooltip();
 
 }
 
-function addSensoryAreas(map){
+// function getSensoryAreaTitle(area){
+//     let key = {
+//         "Social Space": ["🟡","😄"],
+//         "Study Space": ["🔵","📚"], 
+//         "Respite Room": ["🟠","🧡"],
+//         "Quiet Space": ["🟣","🌺"],  
+//     }
+
+//     let _colour = key[area.type][0];
+//     let _emoji = key[area.type][1];
+
+//     return `${_colour} ${area.Name} ${_emoji}`;
+
+// }
+
+function addSensoryAreas(){
     let areas = [
         {
             "Name": "SU Kitchen",
@@ -352,14 +399,16 @@ function addSensoryAreas(map){
 
 }
 
-function addControls(map, sensoryAreas){
+function addControls(_map, selectables){
+
+    console.log("adding controls")
     // Add the controls to the map
     let info = L.control({position:"bottomleft"});
     let search = L.control({position:"bottomright"});
     let layers = L.control({position:"topright"});
 
     //Info Box and Main Campus Button
-    info.onAdd = function (map) {
+    info.onAdd = function (_map) {
 
         this.button = L.DomUtil.create('div', 'info'); // create a div with a class "info"
         this.button.value = "i";
@@ -371,7 +420,7 @@ function addControls(map, sensoryAreas){
     };
 
     //Link to Search
-    search.onAdd = function (map) {
+    search.onAdd = function (_map) {
 
         this.button = L.DomUtil.create('div', 'search'); // create a div with a class "info"
         this.button.value = "i";
@@ -383,9 +432,9 @@ function addControls(map, sensoryAreas){
 
     layers = L.control.layers(null, selectables);
     
-    layers.addTo(map);
-    info.addTo(map);
-    search.addTo(map);
+    layers.addTo(_map);
+    info.addTo(_map);
+    search.addTo(_map);
 }
 
 

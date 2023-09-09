@@ -40,7 +40,7 @@ async function getBuildingData(buildingId) {
         console.log(error)
         throw error
     }
-    console.log("Building found: " + building[0].display_name + " (" + building[0].canonical + ")");
+    // console.log("Building found: " + building[0].display_name + " (" + building[0].canonical + ")");
     
     return building;
 }
@@ -114,7 +114,7 @@ function getSpaceStyledTitle(styles, area){
         console.error("No style found for '" + area.type + "'");
     }
 
-    console.log(`${_colour} ${area.name} ${_emoji}`);
+    // console.log(`${_colour} ${area.name} ${_emoji}`);
 
     return `${_colour} ${area.name} ${_emoji}`;
 

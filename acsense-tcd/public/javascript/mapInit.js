@@ -20,10 +20,18 @@ const INTIAL_VIEW_MOBILE = [
 // Debug can be enabled with a URL parameter
 var DEBUG = false;
 
+// Initialise Supabase as a global variable so we can access it from anywhere
+const supabaseUrl = "https://hadxekyuhdhfnfhsfrcx.supabase.co"
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhZHhla3l1aGRoZm5maHNmcmN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODMxNzk2MjUsImV4cCI6MTk5ODc1NTYyNX0.yxQ1f1X4hILKFxZw40tfy3XHKFkHiTgcNWK_neTzqSo"
+var supabase = supabase.createClient(supabaseUrl, supabaseKey)
+
+// Initialise the map as a global variable so we can access it from anywhere
+var map;
+
 //---------------------------------------------------------------------------------//
 function initialiseMap() {
     // Initialise the map
-    var map = L.map('map', {
+    map = L.map('map', {
         zoomSnap: 0.25,
         zoomDelta: 0.25,
         maxZoom: 20,
@@ -65,15 +73,15 @@ function initialiseMap() {
     }
 
     // Add the buildings to the map
-    let buildings = addBuildings(map);
+    let buildings = addBuildings();
 
     // Add the Sensory areas to the map
     // Capture the return value in a variable
     // This is so we can add them to the map controls later
-    let sensoryAreas = addSensoryAreas(map);
+    let sensoryAreas = addSensoryAreas();
     
     // Add movement paths to the map
-    let movementPaths = addMovementPaths(map);
+    let movementPaths = addMovementPaths();
 
     // Prepare the selectables array
     // This is used to populate the map controls
@@ -84,7 +92,7 @@ function initialiseMap() {
 
     // Listen to the map for zoom changes and update the labels accordingly
     map.on('zoomend', function() {
-        // updateLabels(map.getZoom(), LABEL_PRIMARY_RANGE_UPPER, LABEL_PRIMARY_RANGE_LOWER);
+        updateLabels(map.getZoom(), zoomMin=LABEL_PRIMARY_RANGE_UPPER, zoomMax=LABEL_PRIMARY_RANGE_LOWER);
     });
 
     // check for debug, and if so, add the geoman editor
@@ -104,14 +112,14 @@ function initialiseMap() {
 
 }
 
-makeLayerArray = function(overlays, sensoryAreas) {
+function makeLayerArray(overlays, sensoryAreas) {
 
     // Prepare the selectables array
     // Hardcoded for the demonstration on 10/7/23
-    console.log(sensoryAreas);
+    // console.log(sensoryAreas);
 
     return selectables = {
-        "Terrain": overlays[1],
+        // "Terrain": overlays[1],
         "Social Space": sensoryAreas[0],
         "Study Space": sensoryAreas[1], 
         "Respite Room": sensoryAreas[2],
