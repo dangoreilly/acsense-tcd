@@ -11,18 +11,22 @@
             <div class="pt-1 px-4" style="overflow-y: auto;">
 
                 <!-- Header -->
-                <div class="border-bottom border-2 border-black mb-3 d-flex">
+                <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
                         Building Management | <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">{{ building.canonical }}</span>
                     </h1>
 
-                    <!--Construction Badge -->
-                    <!-- <div class="d-flex align-items-center m-3 fs-5">
-                        <span class="badge rounded-pill text-bg-info">
-                            Partial Demonstration
+                    <!-- Construction Badge -->
+                    <div class="d-flex align-items-center m-3 fs-5">
+                        <span 
+                        @click="saveBuilding()"
+                        :disabled="!isBuildingChanged()"
+                        class="badge rounded-pill text-bg-info" 
+                        style="cursor: pointer;">
+                            Save Changes
                         </span>
-                    </div> -->
+                    </div>
 
                 </div>
 
@@ -326,7 +330,42 @@ import {createClient} from '@supabase/supabase-js';
         methods: {
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
-            saveBuilding() {},
+            saveBuilding() {
+
+                // Update the whole building object
+
+                // Loop through the gallery images, and update them individually
+
+            },
+
+            // Function to add a new gallery image to the building
+            async addGalleryImage() {
+                // Get the file from the input
+                const file = document.getElementById("myFile").files[0];
+                // Upload the file to the storage bucket
+                // Get the URL of the uploaded file
+                const { data, error } = await this.supabase.storage
+                .from('gallery-images')
+                .upload(`${this.building.id}_${file.name}`, file)
+                // Add the image to the gallery
+                this.building.gallery.push({
+                    url: data.Location,
+                    alt: "",
+                    caption: "",
+                })
+            },
+
+            // Function to remove a gallery image from the building
+            async removeGalleryImage(index) {
+                // Get the URL of the image to be removed
+                const url = this.building.gallery[index].url;
+                // Remove the image from the gallery
+                this.building.gallery.splice(index, 1);
+                // Delete the image from the storage bucket
+                const { data, error } = await this.supabase.storage
+                .from('gallery-images')
+                .remove([url])
+            },
 
             // This function is called when the user clicks the "Cancel" button
             // It will revert the building to the state it was in when the page was loaded
@@ -339,6 +378,14 @@ import {createClient} from '@supabase/supabase-js';
             // This function compares the current state of the building against the state it was in when the page was loaded
             // It returns a list of the fields that have been changed
             getChanges() {},
+
+
+            // This function compares the current state of the building against the state it was in when the page was loaded
+            // It returns TRUE if the building has been changed, and FALSE if it has not
+            isBuildingChanged() {
+                // Just check equivalency of the whole building object to the clean copy
+                return JSON.stringify(this.building) !== JSON.stringify(this.building_clean);
+            },
 
             // Attempts to create a new building with the given canonical name
             async newBuilding(canonical) {
