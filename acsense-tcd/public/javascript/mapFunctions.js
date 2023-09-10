@@ -85,6 +85,13 @@ async function addBuildings(){
     
 }
 
+/**
+ * Runs on each feature in the GeoJSON layer
+ * Adds the label and modal to the building
+ * And adds the highlight effect on mouseover
+ * @param {L.feature} feature 
+ * @param {L.layer} layer 
+ */
 function onEachFeature(feature, layer) {
     addLabelAndModalToBuilding(feature, layer);
     addHighlightToBuilding(feature, layer);
