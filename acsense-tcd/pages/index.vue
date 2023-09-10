@@ -200,4 +200,9 @@
             /* display: var(--primary-label-display); */
         }
 
+        .sense-icon {
+            opacity: var(--sense-icon-opacity);
+            transition: opacity 0.5s ease-in-out;
+        }
+
     </style>
