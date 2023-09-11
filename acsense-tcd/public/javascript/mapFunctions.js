@@ -153,6 +153,9 @@ function updateLabels(currentZoom, zoomMin, zoomMax){
         r.style.setProperty('--primary-label-opacity', '0');
         r.style.setProperty('--secondary-label-opacity', '0');
         r.style.setProperty('--tertiary-label-opacity', '1');
+
+        r.style.setProperty('--sense-icon-opacity', '0');
+
         if (DEBUG) console.log("tertiary Label active");
 
     }
@@ -161,6 +164,9 @@ function updateLabels(currentZoom, zoomMin, zoomMax){
         r.style.setProperty('--primary-label-opacity', '1');
         r.style.setProperty('--secondary-label-opacity', '0');
         r.style.setProperty('--tertiary-label-opacity', '0');
+
+        r.style.setProperty('--sense-icon-opacity', '1');
+
         if (DEBUG) console.log("primary Label active");
 
     }
@@ -169,6 +175,9 @@ function updateLabels(currentZoom, zoomMin, zoomMax){
         r.style.setProperty('--primary-label-opacity', '0');
         r.style.setProperty('--secondary-label-opacity', '1');
         r.style.setProperty('--tertiary-label-opacity', '0');
+
+        r.style.setProperty('--sense-icon-opacity', '1');
+
         if (DEBUG) console.log("secondary Label active");
 
     }
@@ -282,109 +291,133 @@ function addToolTipToBuilding(layer, content){
 
 // }
 
-function addSensoryAreas(){
-    let areas = [
-        {
-            "Name": "SU Kitchen",
-            "type": "Social Space",
-            "Description": "Kitchen available to all",
-            "capacity": 0,
-            "electrical_outlets": true,
-            "food_drink_allowed": true,
-            "indoors": true,
-            "wheelchair_accessible": false,
-            "kettle": true,
-            "microwave": true,
-            "coordinates": [53.34462, -6.25889 ],
-            "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/fada674505fcc8875fe2a99d47ca15b8.png",
-        },
-        {
-            "Name": "College Health Respite Room",
-            "type": "Respite Room",
-            "Description": "The Respite Room can be accessed by asking the building receptionist for the keys, you can also book them online at https://www.tcd.ie/disability/support-and-resources/respite-space/",
-            "capacity": 0,
-            "electrical_outlets": true,
-            "food_drink_allowed": false,
-            "indoors": true,
-            "wheelchair_accessible": true,
-            "kettle": false,
-            "microwave": false,
-            "coordinates": [53.34501, -6.25536],
-            "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/b6a89a5c93184bc6c7ebfa4d9f1a3e95.png",
-        },
-        {
-            "Name": "Wild Garden Seating",
-            "type": "Quiet Space",
-            "Description": "This is located between College Park and the Rugby Pitch and has semi-circular seating for a small group.",
-            "capacity": 4,
-            "electrical_outlets": false,
-            "food_drink_allowed": true,
-            "indoors": false,
-            "wheelchair_accessible": false,
-            "kettle": false,
-            "microwave": false,
-            "coordinates": [53.34342, -6.252797 ],
-            "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/af336358b4f02d197667d15237723ff0.png",
-        },
-        {
-            "Name": "Sports Centre Respite Room",
-            "type": "Respite Room",
-            "Description": "The Respite Room can be accessed by asking the building receptionist for the keys, you can also book them online at https://www.tcd.ie/disability/support-and-resources/respite-space/",
-            "capacity": 0,
-            "electrical_outlets": false,
-            "food_drink_allowed": false,
-            "indoors": true,
-            "wheelchair_accessible": true,
-            "kettle": false,
-            "microwave": false,
-            "coordinates": [53.34406, -6.25008 ],
-            "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/b6a89a5c93184bc6c7ebfa4d9f1a3e95.png",
-        },
-        {
-            "Name": "AAP Cafe",
-            "type": "Social Space",
-            "Description": "Small cafe with seating, coffee and snacks",
-            "capacity": 0,
-            "electrical_outlets": false,
-            "food_drink_allowed": true,
-            "indoors": true,
-            "wheelchair_accessible": true,
-            "kettle": false,
-            "microwave": false,
-            "coordinates": [53.34482, -6.25502 ],
-            "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/fada674505fcc8875fe2a99d47ca15b8.png",
-        },
-        {
-            "Name": "Freeman Library",
-            "type": "Study Space",
-            "Description": "Library only available to Geo-sciences students",
-            "capacity": 0,
-            "electrical_outlets": false,
-            "food_drink_allowed": false,
-            "indoors": true,
-            "wheelchair_accessible": false,
-            "kettle": false,
-            "microwave": false,
-            "coordinates": [53.3439, -6.25507 ],
-            "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/890ea12ae6439456c7d985a0996d5beb.png",
-        },
-    ]
+async function addSensoryAreas(){
+    // let areas = [
+    //     {
+    //         "Name": "SU Kitchen",
+    //         "type": "Social Space",
+    //         "Description": "Kitchen available to all",
+    //         "capacity": 0,
+    //         "electrical_outlets": true,
+    //         "food_drink_allowed": true,
+    //         "indoors": true,
+    //         "wheelchair_accessible": false,
+    //         "kettle": true,
+    //         "microwave": true,
+    //         "coordinates": [53.34462, -6.25889 ],
+    //         "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/fada674505fcc8875fe2a99d47ca15b8.png",
+    //     },
+    //     {
+    //         "Name": "College Health Respite Room",
+    //         "type": "Respite Room",
+    //         "Description": "The Respite Room can be accessed by asking the building receptionist for the keys, you can also book them online at https://www.tcd.ie/disability/support-and-resources/respite-space/",
+    //         "capacity": 0,
+    //         "electrical_outlets": true,
+    //         "food_drink_allowed": false,
+    //         "indoors": true,
+    //         "wheelchair_accessible": true,
+    //         "kettle": false,
+    //         "microwave": false,
+    //         "coordinates": [53.34501, -6.25536],
+    //         "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/b6a89a5c93184bc6c7ebfa4d9f1a3e95.png",
+    //     },
+    //     {
+    //         "Name": "Wild Garden Seating",
+    //         "type": "Quiet Space",
+    //         "Description": "This is located between College Park and the Rugby Pitch and has semi-circular seating for a small group.",
+    //         "capacity": 4,
+    //         "electrical_outlets": false,
+    //         "food_drink_allowed": true,
+    //         "indoors": false,
+    //         "wheelchair_accessible": false,
+    //         "kettle": false,
+    //         "microwave": false,
+    //         "coordinates": [53.34342, -6.252797 ],
+    //         "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/af336358b4f02d197667d15237723ff0.png",
+    //     },
+    //     {
+    //         "Name": "Sports Centre Respite Room",
+    //         "type": "Respite Room",
+    //         "Description": "The Respite Room can be accessed by asking the building receptionist for the keys, you can also book them online at https://www.tcd.ie/disability/support-and-resources/respite-space/",
+    //         "capacity": 0,
+    //         "electrical_outlets": false,
+    //         "food_drink_allowed": false,
+    //         "indoors": true,
+    //         "wheelchair_accessible": true,
+    //         "kettle": false,
+    //         "microwave": false,
+    //         "coordinates": [53.34406, -6.25008 ],
+    //         "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/b6a89a5c93184bc6c7ebfa4d9f1a3e95.png",
+    //     },
+    //     {
+    //         "Name": "AAP Cafe",
+    //         "type": "Social Space",
+    //         "Description": "Small cafe with seating, coffee and snacks",
+    //         "capacity": 0,
+    //         "electrical_outlets": false,
+    //         "food_drink_allowed": true,
+    //         "indoors": true,
+    //         "wheelchair_accessible": true,
+    //         "kettle": false,
+    //         "microwave": false,
+    //         "coordinates": [53.34482, -6.25502 ],
+    //         "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/fada674505fcc8875fe2a99d47ca15b8.png",
+    //     },
+    //     {
+    //         "Name": "Freeman Library",
+    //         "type": "Study Space",
+    //         "Description": "Library only available to Geo-sciences students",
+    //         "capacity": 0,
+    //         "electrical_outlets": false,
+    //         "food_drink_allowed": false,
+    //         "indoors": true,
+    //         "wheelchair_accessible": false,
+    //         "kettle": false,
+    //         "microwave": false,
+    //         "coordinates": [53.3439, -6.25507 ],
+    //         "url": "https://tcd-sense-map-assets.fra1.digitaloceanspaces.com/890ea12ae6439456c7d985a0996d5beb.png",
+    //     },
+    // ]
 
-    let areas_sorted = {
-        "Social Space": [],
-        "Study Space": [],
-        "Respite Room": [],
-        "Quiet Space": [],
-    };
+    // let areas_sorted = {
+    //     "Social Space": [],
+    //     "Study Space": [],
+    //     "Respite Room": [],
+    //     "Quiet Space": [],
+    // };
+
+    // Get the student spaces from the database
+    let areas = await getAreas();
+
+    // Get the area types from the database
+    let area_types = await getAreaStyles();
+    console.log(area_types)
+
+    // Init an object to hold the sorted areas as arrays
+    let areas_sorted = {};
+    // Loop through the area types and add them to the object
+    area_types.forEach(area_type => {
+        areas_sorted[area_type.category] = [];
+    });
 
     // First we need to sort the areas into their respective groups
     areas.forEach(area => {
 
-        let myIcon = L.icon({iconUrl: area.url, iconSize: [50, 50]});
+        // Figure out what the icon will be by matching the area type to the area type in the area_types array
+        let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
 
-        let marker = L.marker(area.coordinates, {icon: myIcon});
+        // Create the icon object
+        // The className is used to make the icon fade in and out when the zoom changes
+        let myIcon = L.icon({
+            iconUrl: icon_url, 
+            iconSize: [50, 50], 
+            className: "sense-icon"
+        });
+
+        // Create the marker object
+        let marker = L.marker(area.location, {icon: myIcon});
         marker.on('click', function (e){
-
+            // When the marker is clicked, open the modal to display the area info
             openAreaModal(area);
 
         });
@@ -401,21 +434,79 @@ function addSensoryAreas(){
         areas_grouped.push(L.layerGroup(value).addTo(map));
     }
     
+    // Create an object to hold the layer groups for the control
+    let areas_grouped_object = {};
+    // Loop through the layer groups and add them to the object
+    areas_grouped.forEach((layer_group, index) => {
+        areas_grouped_object[area_types[index].category] = layer_group;
+    });
+
+    // Add the layer groups to the map controls
+    addLayerControl(areas_grouped_object);
+
     // Return an array of layer groups
     return areas_grouped;
 
 }
+/**
+ * Retrieves the styles from the database
+ * @async
+ * @returns {JSON} The styles from the database
+ */
+async function getAreaStyles(){
 
-function addControls(_map, selectables){
+    let {data, error} = await this.supabase.from('space_styles').select('*');
+    if (error) {
+        console.error(error)
+        alert(error.message)
+        throw error
+    }
+    else {
+        // console.log(styles)
+        return data;
+    }
 
-    console.log("adding controls")
+}
+
+/**
+ * Retrieves the Student Spaces from the database
+ * @async
+ * @returns {JSON} The spaces from the database
+ */
+async function getAreas(){
+
+    let {data, error} = await this.supabase.from('spaces').select('*');
+    if (error) {
+        console.error(error)
+        alert(error.message)
+        throw error
+    }
+    else {
+        // console.log(spaces)
+        return data;
+    }
+
+}
+
+
+
+function makeLayerArray(area_types, sensory_areas) {
+
+    // Prepare the selectables array
+    // 
+    
+}
+
+function addControlButtons(){
+
+    // console.log("adding controls")
     // Add the controls to the map
     let info = L.control({position:"bottomleft"});
     let search = L.control({position:"bottomright"});
-    let layers = L.control({position:"topright"});
+    
 
     //Info Box and Main Campus Button
-    info.onAdd = function (_map) {
+    info.onAdd = function (map) {
 
         this.button = L.DomUtil.create('div', 'info'); // create a div with a class "info"
         this.button.value = "i";
@@ -427,7 +518,7 @@ function addControls(_map, selectables){
     };
 
     //Link to Search
-    search.onAdd = function (_map) {
+    search.onAdd = function (map) {
 
         this.button = L.DomUtil.create('div', 'search'); // create a div with a class "info"
         this.button.value = "i";
@@ -437,11 +528,18 @@ function addControls(_map, selectables){
         return this.button;
     };
 
-    layers = L.control.layers(null, selectables);
     
-    layers.addTo(_map);
-    info.addTo(_map);
-    search.addTo(_map);
+    info.addTo(map);
+    search.addTo(map);
+}
+
+function addLayerControl(area_types){
+    
+    let layers = L.control({position:"topright"});
+    
+    layers = L.control.layers(null, area_types);
+    
+    layers.addTo(map);
 }
 
 

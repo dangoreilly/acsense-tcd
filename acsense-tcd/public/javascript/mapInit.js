@@ -76,8 +76,6 @@ function initialiseMap() {
     let buildings = addBuildings();
 
     // Add the Sensory areas to the map
-    // Capture the return value in a variable
-    // This is so we can add them to the map controls later
     let sensoryAreas = addSensoryAreas();
     
     // Add movement paths to the map
@@ -88,7 +86,7 @@ function initialiseMap() {
     let selectables = makeLayerArray(overlays, sensoryAreas);
 
     // Add the controls
-    let controls = addControls(map, selectables);
+    let controls = addControlButtons();
 
     // Listen to the map for zoom changes and update the labels accordingly
     map.on('zoomend', function() {
@@ -110,21 +108,6 @@ function initialiseMap() {
     }
 
 
-}
-
-function makeLayerArray(overlays, sensoryAreas) {
-
-    // Prepare the selectables array
-    // Hardcoded for the demonstration on 10/7/23
-    // console.log(sensoryAreas);
-
-    return selectables = {
-        // "Terrain": overlays[1],
-        "Social Space": sensoryAreas[0],
-        "Study Space": sensoryAreas[1], 
-        "Respite Room": sensoryAreas[2],
-        "Quiet Space": sensoryAreas[3],
-    };
 }
 
 //---------------------------------------------------------------------------------//
