@@ -70,7 +70,7 @@
                     
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="welcomeModalOpen = false">Close</button>
-                        <a role="button" href='https://www.tcd.ie/disability/services/tcdsense.php' class="btn btn-secondary" >About TCDSense</a>
+                        <!-- <a role="button" href='https://www.tcd.ie/disability/services/tcdsense.php' class="btn btn-secondary" >About TCDSense</a> -->
                     </div>
                 
                 </div>
