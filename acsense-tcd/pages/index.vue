@@ -40,7 +40,7 @@
                         <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
                     </div>
 
-                    <div class="modal-body" style="align-self: baseline;"></div>
+                    <div class="modal-body" style="align-self: baseline; max-height: 70vh; overflow-y: auto;"></div>
 
                     <div class="modal-footer" style="justify-content: center"></div>
                 
