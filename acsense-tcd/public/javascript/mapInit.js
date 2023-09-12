@@ -93,6 +93,9 @@ function initialiseMap() {
         updateLabels(map.getZoom(), zoomMin=LABEL_PRIMARY_RANGE_UPPER, zoomMax=LABEL_PRIMARY_RANGE_LOWER);
     });
 
+    // Update the labels on the map
+    updateLabels(map.getZoom(), zoomMin=LABEL_PRIMARY_RANGE_UPPER, zoomMax=LABEL_PRIMARY_RANGE_LOWER);
+
     // check for debug, and if so, add the geoman editor
     if (DEBUG) {
         map.pm.addControls({  
