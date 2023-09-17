@@ -161,7 +161,8 @@ i {
 }
 
 .admin-sidebar {
-    width: 60px;
+    /* width: 60px; */
+    width: 280px;
     transition: width 0.4s ease-in-out;
     overflow-x: hidden;
     text-overflow: ellipsis;
@@ -173,9 +174,9 @@ i {
     /* display: none; */
 }
 
-.admin-sidebar:hover {
+/* .admin-sidebar:hover {
     width: 280px;
-}
+} */
 /* .admin-sidebar:hover .admin-sidebar-span {
     opacity: 1;
     display: inline;
