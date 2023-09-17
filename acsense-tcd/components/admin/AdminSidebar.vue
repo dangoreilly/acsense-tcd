@@ -20,8 +20,10 @@
             :to="tab.key" 
             class="nav-link link-body-emphasis"
             :class="tab.key == activeTab ? 'active' : ''">
-                <i :class="tab.icon"></i>
-                <span class="admin-sidebar-span">{{ tab.name }}</span>
+                <span class="admin-sidebar-span">
+                    <i :class="tab.icon"></i>
+                    {{ tab.name }}
+                </span>
             </NuxtLink>
         </li>
     </ul>
@@ -116,11 +118,11 @@ export default {
             this.supabase = createClient(supabaseUrl, supabaseKey)
 
             const { data, error } = await this.supabase.auth.getSession()
-            console.log("Session Data:")
-            console.log(data);
+            // console.log("Session Data:")
+            // console.log(data);
 
             if (!error && data.session) {
-                console.log("Setting current user: " + data.session.user.email)
+                // console.log("Setting current user: " + data.session.user.email)
                 this.currentUser = data.session.user
             }
 
@@ -165,14 +167,17 @@ i {
     text-overflow: ellipsis;
 }
 .admin-sidebar-span {
-    opacity: 0;
+    /* opacity: 0; */
+    white-space: nowrap;
     transition: opacity 0.4s ease-in-out;
+    /* display: none; */
 }
 
 .admin-sidebar:hover {
     width: 280px;
 }
-.admin-sidebar:hover .admin-sidebar-span {
+/* .admin-sidebar:hover .admin-sidebar-span {
     opacity: 1;
-}
+    display: inline;
+} */
 </style>
