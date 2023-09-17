@@ -20,7 +20,8 @@
                 </div>
 
                 <!-- Main Matter -->
-                <div class="mainMatter-admin">
+                <!-- Only render if the space has loaded -->
+                <div class="mainMatter-admin" v-if="space">
 
                     <!-- Two columns -->
                     <!-- Column 1 contains input boxes -->
@@ -107,15 +108,89 @@
                         </div>
                     </div>
 
+                    <!-- Map Preview-->
+                    <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="space.location">
+                        <!-- Space type and location -->
+                        <div>    
+                            <!-- Lat and long inputs -->
+                            <div>
+                                <div class="mb-3">
+                                    <label for="lat" class="form-label">Latitude</label>
+                                    <input 
+                                    type="text" 
+                                    id="lat"
+                                    class="form-control"
+                                    placeholder="Latitude"
+                                    v-model="space.location[0]" 
+                                    disabled>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="long" class="form-label">Longitude</label>
+                                    <input 
+                                    type="text" 
+                                    id="long" 
+                                    class="form-control"
+                                    placeholder="Longitude"
+                                    v-model="space.location[1]"  
+                                    disabled>
+                                </div>
+                            </div>
+                            <div id="space-placement-map" style="height: 600px; padding-top: 30px;" @load="spaceSelectMapInit()"></div>
+                        </div>
+                    </div>
+
                 </div>
-                <AdminMarkdownModal 
+
+                <!-- <AdminMarkdownModal 
                 :modalOpen="markdownModalOpen" 
                 @modalClose="markdownModalOpen = false"
-                />
+                /> -->
+
             </div>
         </main>
     </NuxtLayout>
 </template>
+
+<script setup>
+    
+//Script setup needed for UseHead
+import '~/assets/css/leaflet.css'
+
+useHead({
+
+    link: [
+        {
+            rel:"stylesheet",
+            href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
+        },
+    ],
+    script: [
+        {
+            src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+            integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+            crossorigin: "",
+        },
+        {
+            src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
+            body: true,
+        },
+        // {
+        //     src: '/javascript/mapInit.js',
+        //     body: true,
+        // },
+        // {
+        //     src: 'https://unpkg.com/@supabase/supabase-js@2',
+        // },
+        {
+            src: '/javascript/adminMapFunctions.js',
+        },
+    ]
+});
+
+
+
+</script>
 
 <script>
 import {createClient} from '@supabase/supabase-js';
