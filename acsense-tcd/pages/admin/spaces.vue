@@ -111,7 +111,8 @@
                     <!-- Map Preview-->
                     <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="space.location">
                         <!-- Space type and location -->
-                        <div>    
+                        <!-- Inputs -->
+                        <div style="grid-area: 'input';" class="me-2">    
                             <!-- Lat and long inputs -->
                             <div>
                                 <div class="mb-3">
@@ -136,8 +137,33 @@
                                     disabled>
                                 </div>
                             </div>
-                            <div id="space-placement-map" style="height: 600px; padding-top: 30px;" @load="spaceSelectMapInit()"></div>
+                            <!-- Space Type -->
+                            <div class="mb-3">
+                                <label for="spaceType" class="form-label">Space Type</label>
+                                <select 
+                                class="form-select" 
+                                id="spaceType" 
+                                @update="updateSpaceIcon()"
+                                v-model="space.type">
+                                    <option disabled value="">Select Space Type</option>
+                                    <option 
+                                    v-for="type in space_types"
+                                    :key="type.category"
+                                    :value="type.category">
+                                    {{ type.category }}
+                                    </option>
+                                </select>
+
+                                <!-- Icon Display -->
+                                <div class="mt-3">
+                                    <img 
+                                    :src="getImageForSpaceType(space.type)" 
+                                    style="width: 100%;">
+                                </div>
+                            </div>
                         </div>
+                        <!-- Map -->
+                        <div  id="space-placement-map" style="height: 600px; padding-top: 30px; grid-area: 'input';"></div>
                     </div>
 
                 </div>
@@ -202,6 +228,7 @@ import {createClient} from '@supabase/supabase-js';
                 space_clean: {},
                 markdownModalOpen: false,
                 supabase: {},
+                space_types: [],
             }
         },
         created() {
@@ -210,39 +237,14 @@ import {createClient} from '@supabase/supabase-js';
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
             this.supabase = createClient(supabaseUrl, supabaseKey)
-            // Grab all the spaces
-            // this.getSpaces();
+            // Grab all the space types
+            this.getSpaceTypes();
+            // Init the space select map
+            // spaceSelectMapInit();
         },
+        // mounted() {
+        // },
         methods: {
-            // This function fetches All the spaces from the database
-            // async getSpaces(){
-
-            //     // Fetch the building from the database
-            //     // Since we are using the canonical name, we should only get one result
-            //     let { data: spaces, error } = await this.supabase
-            //         .from('spaces')
-            //         .select('*')
-            //     if (error) {
-            //         console.error(error)
-            //         alert(error.message)
-            //         throw error
-            //     }
-            //     else {
-                    
-            //         // Fill in the gaps with sensible defaults, but only on hot copy
-            //         // This will highlight to the user when a field is about to be set to a default
-            //         // this.spaces = this.fillInTheGaps( JSON.parse( JSON.stringify(bld[0]) ) );
-
-            //         // Assign the space data to the space object
-            //         this.space = spaces;
-
-            //         // Deep copy the space objects so we have comparison data
-            //         this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
-
-            //     }
-                
-            // },
-
             // This function fetches the student space from the database based on it's canonical name
             async getStudentSpace(canonical){
                 console.log("Fetching space: " + canonical);
@@ -266,8 +268,73 @@ import {createClient} from '@supabase/supabase-js';
                     // Deep copy the space object so we have comparison data
                     this.space_clean = JSON.parse(JSON.stringify(this.space));
 
+                    // Update the map to show the space
+                    this.loadSpaceToMap();
+
                 }
                 
+            },
+
+            async getSpaceTypes(){
+                // Fetch the space types from the database
+                let { data: space_types, error } = await this.supabase
+                    .from('space_styles')
+                    .select('*')
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // Update the space object with the new data
+                    console.log("Space types:")
+                    console.log(space_types);
+                    this.space_types = space_types;
+                }
+            },
+
+            getImageForSpaceType(type){
+                // Cycle through space types
+                // When the category field matches the input, return the image
+                // If there are no matches, return the placeholder image
+                for (let i = 0; i < this.space_types.length; i++) {
+                    if (this.space_types[i].category == type){
+                        return this.space_types[i].icon;
+                    }
+                }    
+                return '/images/red-dot.png';
+            },
+
+            async updateSpaceIcon(){
+                // Update the space icon on the map
+                // This function is called when the space type is changed
+                // It will update the icon on the map to match the new space type
+                console.log("Updating map icon")
+                let newIcon = this.getImageForSpaceType(this.space.type);
+
+                
+                // Wait for this function to have loaded
+                while (typeof spaceSelectMapUpdateIcon !== "function") {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                spaceSelectMapUpdateIcon(newIcon);
+            },
+
+            async loadSpaceToMap(){
+                // When the space selection is changed, this function is called
+                // It will update the marker's location to the space's location
+                // It will also update the icon to match the space type
+
+                // Update the marker's location
+                // Wait for this function to have loaded
+                while (typeof spaceSelectMapUpdateMarkerLocation !== "function") {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                spaceSelectMapUpdateMarkerLocation(this.space.location);
+
+                // Update the marker's icon
+                this.updateSpaceIcon();
             },
 
             // This function is called when the user clicks the "Save" button
@@ -299,5 +366,13 @@ import {createClient} from '@supabase/supabase-js';
 </script>
 
 <style>
+
+.map-section{
+    /* Define the grid to give enough room for the map */
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-areas: "input map";
+    grid-template-rows: auto;
+}
 
 </style>
