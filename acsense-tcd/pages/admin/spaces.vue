@@ -239,8 +239,6 @@ import {createClient} from '@supabase/supabase-js';
             this.supabase = createClient(supabaseUrl, supabaseKey)
             // Grab all the space types
             this.getSpaceTypes();
-            // Init the space select map
-            // spaceSelectMapInit();
         },
         // mounted() {
         // },
@@ -314,9 +312,15 @@ import {createClient} from '@supabase/supabase-js';
 
                 
                 // Wait for this function to have loaded
-                while (typeof spaceSelectMapUpdateIcon !== "function") {
+                while (typeof spaceSelectMapUpdateIcon !== "function" ) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
+                // Wait for the leaflet object L to have loaded
+                while (typeof L === "undefined") {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                // If Leaflet is loaded and the function is defined, we're ready to rock
                 spaceSelectMapUpdateIcon(newIcon);
             },
 
@@ -330,6 +334,12 @@ import {createClient} from '@supabase/supabase-js';
                 while (typeof spaceSelectMapUpdateMarkerLocation !== "function") {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
+                // Wait for the leaflet object L to have loaded
+                while (typeof L === "undefined") {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                // If Leaflet is loaded and the function is defined, we're ready to rock
 
                 spaceSelectMapUpdateMarkerLocation(this.space.location);
 

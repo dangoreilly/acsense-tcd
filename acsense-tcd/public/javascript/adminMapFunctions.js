@@ -58,7 +58,7 @@ function setInputValues() {
     document.getElementById('long').value = space_map.getCenter().lng;
 }
 
-function spaceSelectMapUpdateIcon(newIconUrl){
+async function spaceSelectMapUpdateIcon(newIconUrl){
     // Take in the url for a new icon and update the icon on the map
 
     if (newIconUrl == null){
@@ -70,10 +70,15 @@ function spaceSelectMapUpdateIcon(newIconUrl){
         iconSize: [50, 50], 
     });
 
+    // Wait for the center marker to be created
+    while (typeof center_marker == 'undefined') {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
     center_marker.setIcon(newIcon);
 }
 
-function spaceSelectMapUpdateMarkerLocation(_newlocation){
+async function spaceSelectMapUpdateMarkerLocation(_newlocation){
     // Take in the new location and update the marker on the map
     // Unless the new location is [0,0], in which case move the marker
         // to a sensible default location
@@ -84,6 +89,11 @@ function spaceSelectMapUpdateMarkerLocation(_newlocation){
     // If the new location is not [0,0], update the location
     if (_newlocation[0] != 0 && _newlocation[1] != 0){
         newlocation = _newlocation;
+    }
+
+    // Wait for the center marker to be created
+    while (typeof center_marker == 'undefined') {
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     // Update the marker location and the map view
