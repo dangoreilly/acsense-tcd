@@ -211,6 +211,9 @@ useHead({
         {
             src: '/javascript/adminMapFunctions.js',
         },
+        {
+            src: '/javascript/mapFunctions.js',
+        },
     ]
 });
 

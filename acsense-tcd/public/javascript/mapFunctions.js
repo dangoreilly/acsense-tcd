@@ -290,8 +290,12 @@ function addToolTipToBuilding(layer, content){
 //     return `${_colour} ${area.Name} ${_emoji}`;
 
 // }
-
-async function addSensoryAreas(){
+/**
+ * 
+ * @param {boolean} [clickable=true] Whether or not the areas should be clickable 
+ * @returns 
+ */
+async function addSensoryAreas( clickable = true ){
 
     // Get the student spaces from the database
     let areas = await getAreas();
@@ -323,11 +327,14 @@ async function addSensoryAreas(){
 
         // Create the marker object
         let marker = L.marker(area.location, {icon: myIcon, alt: area.name});
-        marker.on('click', function (e){
-            // When the marker is clicked, open the modal to display the area info
-            openAreaModal(area);
 
-        });
+        // Unless disabled, Add the onclick modal
+        if (clickable){
+            marker.on('click', function (e){
+                // When the marker is clicked, open the modal to display the area info
+                openAreaModal(area);
+            });
+        }
 
         if (area.type in areas_sorted){
             areas_sorted[area.type].push(marker);

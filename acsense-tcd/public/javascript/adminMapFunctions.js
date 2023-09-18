@@ -102,6 +102,59 @@ async function spaceSelectMapUpdateMarkerLocation(_newlocation){
 
 }
 
+async function addBuildings_noInteration(){
+
+    // Empty array to hold the layer groups
+    let building_geojsons = [];
+    // Get buildings from supabase
+    let { data: bld, error } = await supabase
+        .from('buildings')
+        .select('canonical, always_display, geometry')
+
+    if (error) {
+        console.error(error)
+        alert(error.message)
+        throw error
+    }
+    else {
+        // console.log(bld)
+        // Loop through buildings
+        bld.forEach(building => {
+            try {
+                // Convert building to a valid GeoJSON object
+                let building_geojson = {
+                    "type": "Feature",
+                    "properties": {
+                        "canonical": building.canonical,
+                        "always_display": building.always_display || false,
+                    },
+                    "geometry": {
+                        "coordinates": building.geometry.coordinates,
+                        "type": "Polygon"
+                    }
+                }
+                // Add the building to the array
+                // Check manually that there are actually coordinates in the array first though, otherwise it will crash
+                // And for some reason it isn't being caught by the try/catch
+                if (building.geometry.coordinates.length > 0)
+                    building_geojsons.push(building_geojson);
+            }
+            catch (error) {
+                console.error("Error adding " + building.canonical + " to map")
+                console.error(error)
+            }
+        });
+
+        // Need to use geojson group to avoid the mouseover event triggering on every building
+
+        var buildings_geojson_array = L.geoJSON(building_geojsons, {
+            style: buildingStyle,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+    }
+    
+}
+
 function addMapDetails(){
     // Get the overlays, satellite buildings and spaces for the map
     // Add them to the map to give a better reference for the user
