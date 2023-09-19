@@ -6,7 +6,7 @@
                 <div class="card-body">
                     <h2 class="card-title text-center">Acsense Login</h2>
 
-                    <form @submit.prevent="login" v-if="social_override">
+                    <form @submit.prevent="login">
 
                         <div class="form-group">
                             <input v-model="username" type="text" class="form-control my-1" placeholder="Username" required>
@@ -16,22 +16,6 @@
                         <button type="submit" class="btn btn-primary btn-block w-100 mt-1">Login</button>
                     
                     </form>
-
-                    <div v-if="social_override" class="text-center mt-3">or</div>
-                    <div class="mt-3">
-                        <!-- <button class="btn btn-outline-light btn-block w-100 my-1" @click="loginWithGoogle">Google</button>
-                        <button class="btn btn-outline-light btn-block w-100 my-1" @click="loginWithMicrosoft">Microsoft</button> -->
-                        <img src="/images/icons/btn_google_signin_light_normal_web.png" 
-                        class="mx-auto d-block my-1 mw-100"
-                        style="cursor: pointer;" 
-                        @click="loginWithGoogle"
-                        alt="Sign in with Google">
-                        <img src="/images/icons/ms-symbollockup_signin_light.png" 
-                        class="mx-auto d-block my-1 mw-100"
-                        style="cursor: pointer;" 
-                        @click="loginWithMicrosoft"
-                        alt="Sign in with Microsoft">
-                    </div>
                 </div>
             </div>
         </div>
@@ -93,8 +77,8 @@ export default {
 
     async login() {
         const { data, error } = await this.supabase.auth.signInWithPassword({
-        email: "acsense-test-user@tcd.ie",//this.username,
-        password: "TCDsense1592",//this.password,
+        email: this.username,
+        password: this.password,
         })
 
         if (error) {
