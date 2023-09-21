@@ -6,32 +6,21 @@
                 <div class="card-body">
                     <h2 class="card-title text-center">Reset Password</h2>
 
-                    <form @submit.prevent="login" v-if="social_override">
+                    <form @submit.prevent="resetPassword">
 
                         <div class="form-group">
-                            <input v-model="username" type="text" class="form-control my-1" placeholder="Username" required>
-                            <input v-model="password" type="password" class="form-control my-1" placeholder="Password" required>
+                            <input v-model="username" type="text" class="form-control my-3" placeholder="Email" required>
+                            <input v-model="password" type="password" class="form-control my-1" placeholder="New Password" required>
+                            <input v-model="password_confirm" type="password" class="form-control my-1" placeholder="Re-Type your new password" required>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-block w-100 mt-1">Login</button>
+                        <button 
+                        type="submit" 
+                        class="btn btn-primary btn-block w-100 mt-3"
+                        :disabled="!validPassword()">
+                        Reset Password</button>
                     
                     </form>
-
-                    <div v-if="social_override" class="text-center mt-3">or</div>
-                    <div class="mt-3">
-                        <!-- <button class="btn btn-outline-light btn-block w-100 my-1" @click="loginWithGoogle">Google</button>
-                        <button class="btn btn-outline-light btn-block w-100 my-1" @click="loginWithMicrosoft">Microsoft</button> -->
-                        <img src="/images/icons/btn_google_signin_light_normal_web.png" 
-                        class="mx-auto d-block my-1 mw-100"
-                        style="cursor: pointer;" 
-                        @click="loginWithGoogle"
-                        alt="Sign in with Google">
-                        <img src="/images/icons/ms-symbollockup_signin_light.png" 
-                        class="mx-auto d-block my-1 mw-100"
-                        style="cursor: pointer;" 
-                        @click="loginWithMicrosoft"
-                        alt="Sign in with Microsoft">
-                    </div>
                 </div>
             </div>
         </div>
@@ -41,9 +30,9 @@
 
 <script setup>
 
-definePageMeta({
-  middleware: ['auth'],
-});
+// definePageMeta({
+//   middleware: ['auth'],
+// });
 
 </script>
 
@@ -58,6 +47,7 @@ export default {
     return {
       username: '',
       password: '',
+      password_confirm: '',
       social_override: true,
       supabase: {},
     }
@@ -76,10 +66,11 @@ export default {
 
   },
   methods: {
+
     async checkIfLoggedIn() {
         
         // Create the client
-        // It will also be used for logging in eventually.
+        // It will also be used for resetting the password.
         this.supabase = await createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
         
         // Check if there's an active session.
@@ -87,23 +78,14 @@ export default {
   
         console.log(data)
 
-        if (data.session) {
-            // Redirect to admin page
-            console.log("user is logged in")
+        if (!data.session) {
+            // Redirect to login page
             return navigateTo('/admin/analytics'); 
         }
-        console.log("user is not logged in")
     },
 
-    checkSocialOverride() {
-        this.social_override = this.$route.query.bypass
-    },
-
-    async login() {
-        const { data, error } = await this.supabase.auth.signInWithPassword({
-        email: "acsense-test-user@tcd.ie",//this.username,
-        password: "TCDsense1592",//this.password,
-        })
+    async resetPassword() {
+        const { data, error } = await this.supabase.auth.updateUser({password: this.password})
 
         if (error) {
 
@@ -112,18 +94,15 @@ export default {
 
         } else {
 
-            console.log("user logged in as " + data.user.email)
-            navigateTo('/admin/analytics')
+            // console.log("user logged in as " + data.user.email)
+            navigateTo('/admin/login')
             
         }
     },
-    loginWithGoogle() {
-      // Implement your Google login logic here.
-      console.log('Login with Google');
-    },
-    loginWithMicrosoft() {
-      // Implement your Microsoft login logic here.
-      console.log('Login with Microsoft');
+
+    validPassword() {
+        // We don't care much about security, 
+        return this.password.length > 7 && this.password == this.password_confirm
     },
   }
 }
