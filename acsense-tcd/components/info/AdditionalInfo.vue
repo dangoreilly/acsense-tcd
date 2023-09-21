@@ -2,7 +2,7 @@
 <template>
 <div class="mx-3 p-3">
     <h3>Further Information & Links</h3>
-    <div v-html="parsedContent"></div>
+    <div v-html="mdParser(info)"></div>
 </div>
 </template>
 
