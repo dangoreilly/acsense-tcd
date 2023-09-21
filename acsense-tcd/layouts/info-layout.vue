@@ -1,20 +1,29 @@
 <template>
     <div style="width:100%">
         <NavBar :searchBarDisabled="searchBarDisabled"/>
-        <div class="mainMatter">
-            <slot></slot>
-        </div>
+        <!-- <div class="mainMatterBox"> -->
+            <div class="mainMatter">
+                <slot></slot>
+            </div>
+        <!-- </div> -->
         <Footer />
     </div>
     </template>
     
     <style>
     .mainMatter {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 0 auto;
         margin-top: 56px;
         min-height: 100vh;
         
+        padding-inline: 50px;
+        box-shadow: 0 30px 40px rgba(0,0,0,.1);
+    }
+    @media (prefers-color-scheme: dark) {
+        .mainMatter {
+        box-shadow: 0 30px 40px rgba(255,255,255,.1);
+        }
     }
     </style>
     
