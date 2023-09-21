@@ -81,7 +81,7 @@
                     // Add the spaces to the spaces array, sorted by canonical
                     this.spaces = this.sortArrayOfObjectsByKey(spaces, "canonical");
                     // Set the active space to the first space in the array
-                    this.activeSpace = spaces[0];
+                    this.activeSpace = this.spaces[0];
                     this.$emit('activeSpaceChanged', this.activeSpace.canonical);
                 }
             },
