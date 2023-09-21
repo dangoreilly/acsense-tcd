@@ -8,7 +8,7 @@
             <AdminBuildingSelector 
             @activeBuildingChanged="getBuilding($event)"/>
             <!-- Main section for editing -->
-            <div class="pt-1 px-4" style="overflow-y: auto;">
+            <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
                 <!-- Header -->
                 <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
