@@ -5,7 +5,7 @@ var space_map;
 var center_marker;
 var spaces = [];
 
-async function spaceSelectMapInit() {
+async function spaceSelectMapInit(locationUpdateCallback) {
 
     console.log("spaceSelectMapInit()");
     // Set the initial view to the values in the lat and long inputs
@@ -43,23 +43,20 @@ async function spaceSelectMapInit() {
 
     //When the movement is finished, update the lat and long inputs
     space_map.on('dragend', function(e) {
-        setInputValues();
+        // setInputValues();
+        newlocation = [space_map.getCenter().lat, space_map.getCenter().lng];
+        locationUpdateCallback(newlocation);
     });
     space_map.on('zoomend', function(e) {
-        setInputValues();
+        // setInputValues();
+        newlocation = [space_map.getCenter().lat, space_map.getCenter().lng];
+        locationUpdateCallback(newlocation);
     });
-}
-
-
-function setInputValues() {
-    // Update the lat and long inputs to the current view
-    // console.log("setInputValues()");
-    document.getElementById('lat').value = space_map.getCenter().lat;
-    document.getElementById('long').value = space_map.getCenter().lng;
 }
 
 async function spaceSelectMapUpdateIcon(newIconUrl){
     // Take in the url for a new icon and update the icon on the map
+    console.log("spaceSelectMapUpdateIcon()")
 
     if (newIconUrl == null){
         newIconUrl = "/images/red-dot.png";
@@ -168,4 +165,4 @@ function addMapDetails(){
 }
 
 // Initialise the map
-spaceSelectMapInit();
+// spaceSelectMapInit();

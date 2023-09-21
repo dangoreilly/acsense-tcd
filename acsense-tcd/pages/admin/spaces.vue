@@ -242,10 +242,25 @@ import {createClient} from '@supabase/supabase-js';
             this.supabase = createClient(supabaseUrl, supabaseKey)
             // Grab all the space types
             this.getSpaceTypes();
+
+            this.mapInit();
+
         },
         // mounted() {
         // },
         methods: {
+            async mapInit(){
+                // Initialise the map
+                // Wait for this function to have loaded
+                while (typeof spaceSelectMapInit !== "function") {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                // Once the function is loaded, we can call it
+                // This function will initialise the map and add the marker
+                // We provide a callback function to update the space's location when the marker is moved
+                spaceSelectMapInit(this.updateSpaceLocation);
+            },
+
             // This function fetches the student space from the database based on it's canonical name
             async getStudentSpace(canonical){
                 console.log("Fetching space: " + canonical);
@@ -292,6 +307,12 @@ import {createClient} from '@supabase/supabase-js';
                     console.log(space_types);
                     this.space_types = space_types;
                 }
+            },
+
+            SpaceHasBeenChanged(){
+                // This function checks the current state of the space against the state it was in when the page was loaded
+                // It returns true if the space has been changed, and false if it has not
+                return JSON.stringify(this.space) != JSON.stringify(this.space_clean);
             },
 
             getImageForSpaceType(type){
@@ -350,6 +371,11 @@ import {createClient} from '@supabase/supabase-js';
                 this.updateSpaceIcon();
             },
 
+            // Function to be passed to the marker on init
+            updateSpaceLocation(newLocation){
+                this.space.location = newLocation;
+            },
+
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             saveSpace() {},
@@ -357,10 +383,6 @@ import {createClient} from '@supabase/supabase-js';
             // This function is called when the user clicks the "Cancel" button
             // It will revert the building to the state it was in when the page was loaded
             cancelChanges() {},
-
-            // This function checks the current state of the building against the state it was in when the page was loaded
-            // It returns true if the building has been changed, and false if it has not
-            isSpaceChanged() {},
 
             // This function compares the current state of the building against the state it was in when the page was loaded
             // It returns a list of the fields that have been changed
