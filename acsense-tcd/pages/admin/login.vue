@@ -9,7 +9,7 @@
                     <form @submit.prevent="login">
 
                         <div class="form-group">
-                            <input v-model="username" type="text" class="form-control my-1" placeholder="Username" required>
+                            <input v-model="username" type="text" class="form-control my-1" placeholder="Email" required>
                             <input v-model="password" type="password" class="form-control my-1" placeholder="Password" required>
                         </div>
 
