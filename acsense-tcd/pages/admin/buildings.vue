@@ -14,7 +14,14 @@
                 <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
-                        Building Management | <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">{{ building.canonical }}</span>
+                        Building Management | 
+                        <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">
+                            <NuxtLink 
+                            :to="'/info/' + building.canonical"
+                            class="link-dark text-decoration-none">
+                                {{ building.canonical }}
+                            </NuxtLink>
+                        </span>
                     </h1>
 
                     <!-- Construction Badge -->
@@ -216,9 +223,13 @@
                             
                         </div>
                         <!-- Display -->
-                        <div class="col">
+                        <div class="col" v-if="building.tips.length > 0">
                             <AccessTips :tips="building.tips" />
                         </div>
+                        <div class="col" v-else>
+                            <p><em> &lt;&lt; Tip box will not display >> </em></p>
+                        </div>
+                        
                     </div>
 
 
