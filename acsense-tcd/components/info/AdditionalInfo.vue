@@ -1,6 +1,6 @@
 <!-- Parse the AdditionalInfo and display it -->
 <template>
-<div class="mx-3 p-3">
+<div class="mx-3 p-3 mb-5">
     <h3>Further Information & Links</h3>
     <div v-html="mdParser(info)"></div>
 </div>
