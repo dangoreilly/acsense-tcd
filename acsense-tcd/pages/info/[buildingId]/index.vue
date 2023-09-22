@@ -101,9 +101,9 @@
     margin-top: 1rem;
 }
 
-    .infotabs {
-        margin: 2rem 0 2rem 0;
-    }
+.infotabs {
+    margin: 2rem 0 2rem 0;
+}
 
 .link-button {
     padding: 0.5rem;
