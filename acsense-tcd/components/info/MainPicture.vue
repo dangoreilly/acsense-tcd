@@ -43,5 +43,6 @@ export default {
 .mainPictureImg{
     border-bottom-right-radius: 0.5rem;
     border-top-left-radius: 0.5rem;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.3), -5px -5px 15px rgba(0,0,0,0.1);
 }
 </style>
