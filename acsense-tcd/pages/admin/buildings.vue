@@ -26,13 +26,32 @@
 
                     <!-- Construction Badge -->
                     <div class="d-flex align-items-center m-3 fs-5">
-                        <span 
-                        @click="saveBuilding()"
-                        :disabled="!isBuildingChanged()"
+                        <!-- <span 
+                        @click="updateSpace()"
+                        :disabled="!spaceHasBeenChanged"
                         class="badge rounded-pill text-bg-info" 
                         style="cursor: pointer;">
                             Save Changes
-                        </span>
+                        </span> -->
+                        <div class="btn-group" role="group">
+                            <button 
+                            type="button" 
+                            class="btn" 
+                            :class="buildingHasBeenChanged ? 'btn-success' : 'btn-outline-secondary'"
+                            @click="updateBuilding()"
+                            :disabled="!buildingHasBeenChanged">
+                                Save Changes
+                            </button>
+
+                            <button 
+                            type="button" 
+                            class="btn"
+                            :class="buildingHasBeenChanged ? 'btn-warning' : 'btn-outline-secondary'"
+                            @click="cancelChanges()"
+                            :disabled="!buildingHasBeenChanged">
+                                Cancel
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -257,7 +276,7 @@
                     </div>
 
                     <!-- Gallery -->
-                    <div class="row">
+                    <div class="row" style="display: none;">
                         <h3 class="mt-3">Gallery Images</h3>
                         <table class="table w-100 mx-2">
                             <thead>
@@ -336,7 +355,14 @@ import {createClient} from '@supabase/supabase-js';
                         display: this.building.phys_access_disp || false
                     },
                 ];
-            }
+            },
+            spaceHasBeenChanged() {
+                // This function compares the current state of the space against the state it was in when the page was loaded
+                // console.log("Checking if space has been changed")
+                // console.log(this.space)
+                // console.log(this.space_clean)
+                return JSON.stringify(this.building) !== JSON.stringify(this.building_clean);
+            },
         },
         methods: {
             // This function is called when the user clicks the "Save" button
