@@ -154,6 +154,7 @@
         border-top-left-radius: 0.5rem;
         margin:auto;
         cursor: pointer;
+        box-shadow: 10px 10px 15px rgba(0,0,0,0.15);
         
     }
     .galleryPictureCard * {
@@ -173,6 +174,7 @@
         border-top-left-radius: 0.5rem;
         height: 100%;
         width: 100%; 
+        max-height: 90vh;
 
         overflow:auto; 
         /* object-fit: contain; */ 
