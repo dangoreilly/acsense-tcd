@@ -26,13 +26,6 @@
 
                     <!-- Construction Badge -->
                     <div class="d-flex align-items-center m-3 fs-5">
-                        <!-- <span 
-                        @click="updateSpace()"
-                        :disabled="!spaceHasBeenChanged"
-                        class="badge rounded-pill text-bg-info" 
-                        style="cursor: pointer;">
-                            Save Changes
-                        </span> -->
                         <div class="btn-group" role="group">
                             <button 
                             type="button" 
@@ -356,22 +349,54 @@ import {createClient} from '@supabase/supabase-js';
                     },
                 ];
             },
-            spaceHasBeenChanged() {
-                // This function compares the current state of the space against the state it was in when the page was loaded
-                // console.log("Checking if space has been changed")
-                // console.log(this.space)
-                // console.log(this.space_clean)
+            buildingHasBeenChanged() {
+                // This function compares the current state of the building against the state it was in when the page was loaded
                 return JSON.stringify(this.building) !== JSON.stringify(this.building_clean);
             },
         },
         methods: {
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
-            saveBuilding() {
+            async updateBuilding() {
 
-                // Update the whole building object
+                // Create an empty object to store the update query
+                // Only contains the things we want to update
+                let update_vehicle = {
+                    display_name: this.building.display_name,
+                    description: this.building.description,
+                    aka: this.building.aka,
+                    opening_times: this.building.opening_times,
+                    sense_exp: this.building.sense_exp,
+                    sense_exp_display: this.building.sense_exp_display,
+                    wayfinding: this.building.wayfinding,
+                    wayfinding_disp: this.building.wayfinding_disp,
+                    phys_access: this.building.phys_access,
+                    phys_access_disp: this.building.phys_access_disp,
+                    further_info: this.building.further_info,
+                    furtherinfo_disp: this.building.furtherinfo_disp,
+                    tips: this.building.tips,
+                }
 
-                // Loop through the gallery images, and update them individually
+                // Update the building in the database
+                const { data, error } = await this.supabase
+                    .from('buildings')
+                    .update(update_vehicle)
+                    .eq('UUID', this.building.UUID)
+                    .select()
+                
+                // If there is an error, log it
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // If the update was successful, update the clean building object
+                    this.building_clean = JSON.parse(JSON.stringify(this.building));
+                    alert(this.building.display_name + " updated successfully")
+                    console.log(data)
+                }
+
 
             },
 
@@ -406,11 +431,20 @@ import {createClient} from '@supabase/supabase-js';
 
             // This function is called when the user clicks the "Cancel" button
             // It will revert the building to the state it was in when the page was loaded
-            cancelChanges() {},
+            cancelChanges() {
+
+                // Deep copy the building_clean object back into the building object
+                this.building = JSON.parse(JSON.stringify(this.building_clean));
+
+            },
 
             // This function checks the current state of the building against the state it was in when the page was loaded
             // It returns true if the building has been changed, and false if it has not
-            isBuildingChanged() {},
+            isBuildingChanged() {
+
+                return JSON.parse(JSON.stringify(this.building)) == JSON.parse(JSON.stringify(this.building_clean));
+
+            },
 
             // This function compares the current state of the building against the state it was in when the page was loaded
             // It returns a list of the fields that have been changed
