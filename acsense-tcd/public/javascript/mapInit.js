@@ -67,7 +67,7 @@ function initialiseMap() {
     // We should also put a limit on the file size of the SVGs
 
     // Add the SVGs to the map
-    let overlays = addOverlays(map);
+    let overlays = addOverlays(supabase_client, map);
 
     // Add the overlay resize handles, if we're in debug mode and have the overlay flag set
     if (DEBUG && window.location.href.includes("overlay")) {

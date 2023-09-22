@@ -11,11 +11,40 @@
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
                 <!-- Header -->
-                <div class="border-bottom border-2 border-black mb-3 d-flex">
+                <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
                         Space Management | <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">{{ space.canonical }}</span>
                     </h1>
+
+                    <div class="d-flex align-items-center m-3 fs-5">
+                        <!-- <span 
+                        @click="updateSpace()"
+                        :disabled="!spaceHasBeenChanged"
+                        class="badge rounded-pill text-bg-info" 
+                        style="cursor: pointer;">
+                            Save Changes
+                        </span> -->
+                        <div class="btn-group" role="group">
+                            <button 
+                            type="button" 
+                            class="btn" 
+                            :class="spaceHasBeenChanged ? 'btn-success' : 'btn-outline-secondary'"
+                            @click="updateSpace()"
+                            :disabled="!spaceHasBeenChanged">
+                                Save Changes
+                            </button>
+
+                            <button 
+                            type="button" 
+                            class="btn"
+                            :class="spaceHasBeenChanged ? 'btn-warning' : 'btn-outline-secondary'"
+                            @click="cancelChanges()"
+                            :disabled="!spaceHasBeenChanged">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -99,6 +128,22 @@
                                         </label>
                                     </div>
                                 </div>
+                            </div>
+                            <!-- Building selector -->
+                            <div class="row ms-1 pt-2 border-top mt-2">
+                                <label for="buildingSelect" class="form-label">Building</label>
+                                <select 
+                                class="form-select" 
+                                id="buildingSelect" 
+                                v-model="space.building">
+                                    <option value="null">None</option>
+                                    <option 
+                                    v-for="bld in buildings"
+                                    :key="bld.canonical"
+                                    :value="bld.canonical">
+                                    {{ bld.display_name }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
 
@@ -232,19 +277,35 @@ import {createClient} from '@supabase/supabase-js';
                 markdownModalOpen: false,
                 supabase: {},
                 space_types: [],
+                buildings: [], 
+                user: {},
             }
         },
         created() {
+
 
             // Initialise the supabase client
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
             this.supabase = createClient(supabaseUrl, supabaseKey)
+            // Get the user's api key
+            this.user = this.getUserData();
             // Grab all the space types
             this.getSpaceTypes();
+            // Grab all the buildings
+            this.getBuildingList();
 
             this.mapInit();
 
+        },
+        computed: {
+            spaceHasBeenChanged() {
+                // This function compares the current state of the space against the state it was in when the page was loaded
+                // console.log("Checking if space has been changed")
+                // console.log(this.space)
+                // console.log(this.space_clean)
+                return JSON.stringify(this.space) !== JSON.stringify(this.space_clean);
+            },
         },
         // mounted() {
         // },
@@ -258,7 +319,14 @@ import {createClient} from '@supabase/supabase-js';
                 // Once the function is loaded, we can call it
                 // This function will initialise the map and add the marker
                 // We provide a callback function to update the space's location when the marker is moved
-                spaceSelectMapInit(this.updateSpaceLocation);
+                spaceSelectMapInit(this.updateSpaceLocation, this.supabase);
+            },
+
+            async getUserData(){
+                
+                const { data, error } = await this.supabase.auth.getSession()
+
+                return data;
             },
 
             // This function fetches the student space from the database based on it's canonical name
@@ -291,6 +359,24 @@ import {createClient} from '@supabase/supabase-js';
                 
             },
 
+            async getBuildingList(){
+                // Fetch the building list from the database
+                let { data: buildings, error } = await this.supabase
+                    .from('buildings')
+                    .select('canonical, display_name, UUID')
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // Update the space object with the new data
+                    // console.log("Buildings:")
+                    // console.log(buildings);
+                    this.buildings = sortArrayOfObjectsByKey(buildings, "display_name");
+                }
+            },
+
             async getSpaceTypes(){
                 // Fetch the space types from the database
                 let { data: space_types, error } = await this.supabase
@@ -307,12 +393,6 @@ import {createClient} from '@supabase/supabase-js';
                     console.log(space_types);
                     this.space_types = space_types;
                 }
-            },
-
-            SpaceHasBeenChanged(){
-                // This function checks the current state of the space against the state it was in when the page was loaded
-                // It returns true if the space has been changed, and false if it has not
-                return JSON.stringify(this.space) != JSON.stringify(this.space_clean);
             },
 
             getImageForSpaceType(type){
@@ -378,11 +458,70 @@ import {createClient} from '@supabase/supabase-js';
 
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
-            saveSpace() {},
+            async updateSpace() {
+
+                // Create an empty object to store the update query
+                // Only contains the things we want to update
+                let update_vehicle = {
+                    name: this.space.name,
+                    description: this.space.description,
+                    type: this.space.type,
+                    seating: this.space.seating,
+                    outlets: this.space.outlets,
+                    food_drink_allowed: this.space.food_drink_allowed,
+                    microwave: this.space.microwave,
+                    kettle: this.space.kettle,
+                    wheelchair: this.space.wheelchair,
+                    building_uuid: this.space.building_uuid,
+                    building: this.space.building,
+                    location: this.space.location,
+                }
+
+                // Match the building's UUID to the building's canonical name, since that wasn't done earlier
+                // This is needed for the update query
+                for (let i = 0; i < this.buildings.length; i++) {
+                    if (this.buildings[i].canonical == this.space.building){
+                        update_vehicle.building_uuid = this.buildings[i].UUID;
+                    }
+                }
+
+                // Update the space in the database
+                const { data, error } = await this.supabase
+                    .from('spaces')
+                    .update(update_vehicle)
+                    .eq('UUID', this.space.UUID)
+                    .select()
+                
+                // If there is an error, log it
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // If the update was successful, update the clean space object
+                    this.space_clean = JSON.parse(JSON.stringify(this.space));
+                    alert(this.space.name + " updated successfully")
+                    console.log(data)
+                }
+            },
 
             // This function is called when the user clicks the "Cancel" button
             // It will revert the building to the state it was in when the page was loaded
-            cancelChanges() {},
+            cancelChanges() {
+
+                // console.log("Current copy:")
+                // console.log(JSON.parse(JSON.stringify(this.space)))
+
+                // console.log("Clean copy:")
+                // console.log(JSON.parse(JSON.stringify(this.space_clean)))
+
+                // Deep copy the space_clean object back into the space object
+                this.space = JSON.parse(JSON.stringify(this.space_clean));
+
+                // Update the map to show the space
+                this.loadSpaceToMap();
+            },
 
             // This function compares the current state of the building against the state it was in when the page was loaded
             // It returns a list of the fields that have been changed

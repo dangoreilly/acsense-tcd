@@ -8,14 +8,33 @@ function getAppropriateInitialView() {
     return INTIAL_VIEW_WEB;
 }
 
-function addOverlays(){
-    let bounds = [
-        [53.345891563474524, -6.247142876377488],
-        [53.341642339905164, -6.261688887313245]
-    ];
+async function addOverlays(supabase_client, _map){
+    // let bounds = [
+    //     [53.345891563474524, -6.247142876377488],
+    //     [53.341642339905164, -6.261688887313245]
+    // ];
     let overlays = [];
-    overlays.push( L.imageOverlay('images/Overworld_1.svg', bounds).addTo(map));
+    // overlays.push( L.imageOverlay('images/Overworld_1.svg', bounds).addTo(map));
     // overlays.push( L.imageOverlay('images/Overworld_terrain.svg', bounds));
+
+    // Get the overlays from the database
+    let { data: overlays_arr, error } = await supabase_client
+        .from('overlays')
+        .select('*')
+
+    if (error) {
+        console.error(error)
+        alert(error.message)
+        throw error
+    }
+    else {
+        // Once we have the overlays, add them to the map
+        // And add them to the array to return
+        overlays_arr.forEach(overlay => {
+            // console.log(overlay)
+            overlays.push( L.imageOverlay(overlay.url, overlay.bounds).addTo(_map) );
+        });
+    }
 
     return overlays;
 }

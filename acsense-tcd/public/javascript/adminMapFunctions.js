@@ -5,7 +5,7 @@ var space_map;
 var center_marker;
 var spaces = [];
 
-async function spaceSelectMapInit(locationUpdateCallback) {
+async function spaceSelectMapInit(locationUpdateCallback, supabase_client) {
 
     console.log("spaceSelectMapInit()");
     // Set the initial view to the values in the lat and long inputs
@@ -52,6 +52,13 @@ async function spaceSelectMapInit(locationUpdateCallback) {
         newlocation = [space_map.getCenter().lat, space_map.getCenter().lng];
         locationUpdateCallback(newlocation);
     });
+
+    // Add the buildings to the map
+    addBuildings_noInteration(supabase_client);
+
+    // Add the overlays to the map
+    addOverlays(supabase_client, space_map);
+
 }
 
 async function spaceSelectMapUpdateIcon(newIconUrl){
@@ -99,12 +106,12 @@ async function spaceSelectMapUpdateMarkerLocation(_newlocation){
 
 }
 
-async function addBuildings_noInteration(){
+async function addBuildings_noInteration(supabase_client){
 
     // Empty array to hold the layer groups
     let building_geojsons = [];
     // Get buildings from supabase
-    let { data: bld, error } = await supabase
+    let { data: bld, error } = await supabase_client
         .from('buildings')
         .select('canonical, always_display, geometry')
 
@@ -146,8 +153,8 @@ async function addBuildings_noInteration(){
 
         var buildings_geojson_array = L.geoJSON(building_geojsons, {
             style: buildingStyle,
-            onEachFeature: onEachFeature
-        }).addTo(map);
+            // onEachFeature: onEachFeature
+        }).addTo(space_map);
     }
     
 }
