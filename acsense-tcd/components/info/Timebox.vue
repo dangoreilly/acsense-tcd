@@ -1,7 +1,9 @@
 <template>
 
     <div class="time-card card">
-        <div class="time-container pt-2 mx-2">
+        <!-- If there are any opening times, render the box -->
+        <div v-if="times.weekday.open || times.sat.open || times.holidays.open"
+        class="time-container pt-2 mx-2">
 
             <div class="time-entry">
                 <div class="time-lead">
@@ -33,6 +35,11 @@
                 </div>
             </div>
 
+        </div>
+        <!-- If there is no open times, Say no times are available -->
+        <!-- We'll assume it isn't true that the building is just never open -->
+        <div v-else class="pt-2 mx-2 px-3">
+            <p><em>Opening times not available for this building</em></p>
         </div>
         <!-- Render the footer if there's a note; there won't always be one -->
         <div class="card-footer" v-if="times.note.length > 0">
