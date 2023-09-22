@@ -23,10 +23,11 @@ var DEBUG = false;
 // Initialise Supabase as a global variable so we can access it from anywhere
 const supabaseUrl = "https://hadxekyuhdhfnfhsfrcx.supabase.co"
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhZHhla3l1aGRoZm5maHNmcmN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODMxNzk2MjUsImV4cCI6MTk5ODc1NTYyNX0.yxQ1f1X4hILKFxZw40tfy3XHKFkHiTgcNWK_neTzqSo"
-var supabase = supabase.createClient(supabaseUrl, supabaseKey)
+var supabase_client = supabase.createClient(supabaseUrl, supabaseKey)
 
 // Initialise the map as a global variable so we can access it from anywhere
 var map;
+var global_buildings;
 
 //---------------------------------------------------------------------------------//
 function initialiseMap() {
@@ -68,7 +69,8 @@ function initialiseMap() {
     // Add the SVGs to the map
     let overlays = addOverlays(map);
 
-    if (DEBUG) {
+    // Add the overlay resize handles, if we're in debug mode and have the overlay flag set
+    if (DEBUG && window.location.href.includes("overlay")) {
         makeOverlayResizeble(map, overlays[0]);
     }
 

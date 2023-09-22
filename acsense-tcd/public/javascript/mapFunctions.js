@@ -10,8 +10,8 @@ function getAppropriateInitialView() {
 
 function addOverlays(){
     let bounds = [
-        [53.34586316412621, -6.247154474258424],
-        [53.341654914498974, -6.261670589447022]
+        [53.345891563474524, -6.247142876377488],
+        [53.341642339905164, -6.261688887313245]
     ];
     let overlays = [];
     overlays.push( L.imageOverlay('images/Overworld_1.svg', bounds).addTo(map));
@@ -31,7 +31,7 @@ async function addBuildings(){
     // Empty array to hold the layer groups
     let building_geojsons = [];
     // Get buildings from supabase
-    let { data: bld, error } = await this.supabase
+    let { data: bld, error } = await supabase_client
         .from('buildings')
         .select('canonical, display_name, always_display, aka, description, map_label_1, map_label_2, map_label_3, geometry')
 
@@ -81,6 +81,10 @@ async function addBuildings(){
             style: buildingStyle,
             onEachFeature: onEachFeature
         }).addTo(map);
+
+        global_buildings = buildings_geojson_array;
+
+        return buildings_geojson_array;
     }
     
 }
@@ -93,8 +97,16 @@ async function addBuildings(){
  * @param {L.layer} layer 
  */
 function onEachFeature(feature, layer) {
-    addLabelAndModalToBuilding(feature, layer);
-    addHighlightToBuilding(feature, layer);
+    // Check for the url param nointeraction and if it exists, don't add the label or modal
+    if (!window.location.href.includes("nointeraction")){
+        addLabelAndModalToBuilding(feature, layer);
+        addHighlightToBuilding(feature, layer);
+    }
+    else if(window.location.href.includes("servicekey")){
+        let serviceKey = window.location.href.split("servicekey=")[1];
+        updateOnMove(feature, layer, serviceKey);
+
+    }
 }
 
 
@@ -120,6 +132,20 @@ function buildingStyle(layer) {
     // console.log(layer.properties)
     // if (layer.properties.always_display) console.log(layer);
     // else console.log(layer.properties.canonical + " not always display");
+
+    // Check for a display override url flag
+    // If it exists, Draw red outlines instead of default style
+    if (window.location.href.includes("outlines")){
+        return {
+            fillColor: '#0087A2',
+            weight: 1,
+            opacity: 1,
+            color: '#FF0000',
+            dashArray: '0',
+            fillOpacity: 0,
+            noClip:true
+        };
+    }
 
     return {
         fillColor: '#0087A2',
@@ -302,7 +328,7 @@ async function addSensoryAreas( clickable = true ){
 
     // Get the area types from the database
     let area_types = await getAreaStyles();
-    console.log(area_types)
+    // console.log(area_types)
 
     // Init an object to hold the sorted areas as arrays
     let areas_sorted = {};
@@ -369,7 +395,7 @@ async function addSensoryAreas( clickable = true ){
  */
 async function getAreaStyles(){
 
-    let {data, error} = await this.supabase.from('space_styles').select('*');
+    let {data, error} = await supabase_client.from('space_styles').select('*');
     if (error) {
         console.error(error)
         alert(error.message)
@@ -389,7 +415,7 @@ async function getAreaStyles(){
  */
 async function getAreas(){
 
-    let {data, error} = await this.supabase.from('spaces').select('*');
+    let {data, error} = await this.supabase_client.from('spaces').select('*');
     if (error) {
         console.error(error)
         alert(error.message)
