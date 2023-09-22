@@ -25,6 +25,15 @@
         box-shadow: 0 30px 40px rgba(255,255,255,.1);
         }
     }
+
+    @media screen and (max-width: 992px){    
+        .mainMatter {
+            max-width: 1000px;
+        
+            padding-inline: 0px;
+        }
+    }
+
     </style>
     
     <script lang="ts">
