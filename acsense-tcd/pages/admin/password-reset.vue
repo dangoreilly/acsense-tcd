@@ -50,6 +50,7 @@ export default {
       password_confirm: '',
       social_override: true,
       supabase: {},
+      accessToken: '',
     }
   },
   created() {
@@ -78,9 +79,33 @@ export default {
   
         console.log(data)
 
-        if (!data.session) {
-            // Redirect to login page
-            return navigateTo('/admin/analytics'); 
+        // if (checkForAccessToken()) {
+        //     // User is resetting password from mail
+        //     // Prefill email field from url params
+        //     this.username = url.searchParams.get("email");
+
+        // }
+
+        if (data.session) {
+            this.username = data.session.user.email 
+        }
+    },
+
+    checkForAccessToken() {
+        // Check if there's an access token in the URL
+        // If there is, set the access token and return true
+        // If there isn't, return false
+
+        // Get the access token from the URL
+        let url = new URL(window.location.href);
+        let accessToken = url.searchParams.get("access_token");
+        if (accessToken) {
+            // Set the access token
+            this.accessToken = accessToken;
+            return true;
+        }
+        else {
+            return false;
         }
     },
 
