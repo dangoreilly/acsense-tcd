@@ -52,6 +52,18 @@ export default {
 
         }
     },
+    watch: {
+        contentArray: {
+            handler() {
+                // Check that the active tab is still valid
+                // If not, set the first valid tab to be active
+                if (!this.contentArray[this.activeInfoTab].display) {
+                    this.firstValidTab();
+                }
+            },
+            deep: true,
+        }
+    },
     computed: {
         anyTabs() {
             // Loop through all the tabs and return true if any have display marked as true
@@ -75,20 +87,25 @@ export default {
             }
         })
 
-        // Cycle through tabs
         // Set the first tab that is marked as display to be active
-        for (let i = 0; i < this.contentArray.length; i++) {
-            if (this.contentArray[i].display) {
-                this.activeInfoTab = i;
-                break;
-            }
-        }
+        this.firstValidTab();
 
     },
     methods: {
         makeTabActive(index) {
             this.activeInfoTab = index;
             // this.$emit('tabChanged', index);
+        },
+
+        firstValidTab() {
+            // Cycle through tabs
+            // Set the first tab that is marked as display to be active
+            for (let i = 0; i < this.contentArray.length; i++) {
+                if (this.contentArray[i].display) {
+                    this.activeInfoTab = i;
+                    break;
+                }
+            }
         }
     }
 }
