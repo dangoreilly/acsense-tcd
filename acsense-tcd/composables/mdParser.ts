@@ -3,6 +3,9 @@
 
 export default function (md: string) {
   
+    // Protect from null input
+    if (!md || md == '') return '';
+
     //ul
     md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
     md = md.replace(/^(\*.+)\s*\n([^\*])/gm, '$1\n</ul>\n\n$2');
