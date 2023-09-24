@@ -2,7 +2,8 @@
 <NuxtLayout name="info-layout">
     <div 
     v-if="building"
-    class="building-info">
+    class="building-info"
+    :class="infoBoxDisplays ? 'infobox-display' : 'infobox-no-display'">
 
         <div class="info-page-title" style="grid-area: title;">
             <h1>{{building.display_name}}</h1>
@@ -33,6 +34,7 @@
             
         </div>
 
+        
         <div style="grid-area: tabs;">
             <Infobox
             :contentArray="infoBoxContent"
@@ -42,14 +44,17 @@
         </div>
 
         <!-- If time data exists, render it. If it doesn't, render a placeholder -->
-        <div style="grid-area: open-times; justify-self: start; align-self: start;"
+        <div style="grid-area: open-times;  align-self: center;"
+        class="my-4"
         v-if="building.opening_times">
             <Timebox
             :times="building.opening_times"/>
         </div>
         <!-- In theory, this placeholder should be temporary. But theoretically temporary things tend to be practically permanent... -->
         <div v-else style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
-            <div class="time-card card  pt-2 mx-2 px-3">
+            <div 
+            class="time-card card  pt-2 mx-2 px-3" 
+            style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
                 <p><em>Opening times not available for this building</em></p>
             </div>
         </div>
@@ -67,6 +72,7 @@
         </div> -->
 
         <div
+        class="mt-3"
         style="grid-area: additional-info;"
         v-if="building.furtherinfo_disp">
             <AdditionalInfo 
@@ -130,13 +136,38 @@
     grid-template-areas: 
         "title title main-photo main-photo"
         "desc desc main-photo main-photo"
-        "sense-areas sense-areas open-times open-times"
-        "tabs tabs tabs tabs"
+        "sense-areas sense-areas sense-areas sense-areas"
+        "tabs tabs open-times open-times"
         "tips tips tips tips"
         ". . . ." /* ". rooms floorplan ." */
         "additional-info additional-info additional-info additional-info"
         "gallery gallery gallery gallery";
 }
+
+.infobox-display {
+    grid-template-areas: 
+        "title title main-photo main-photo"
+        "desc desc main-photo main-photo"
+        "sense-areas sense-areas sense-areas sense-areas"
+        "tabs tabs open-times open-times"
+        "tips tips tips tips"
+        ". . . ." /* ". rooms floorplan ." */
+        "additional-info additional-info additional-info additional-info"
+        "gallery gallery gallery gallery";
+}
+
+.infobox-no-display {
+    grid-template-areas: 
+        "title title main-photo main-photo"
+        "desc desc main-photo main-photo"
+        "sense-areas sense-areas sense-areas sense-areas"
+        ". open-times open-times ."
+        "tips tips tips tips"
+        ". . . ." /* ". rooms floorplan ." */
+        "additional-info additional-info additional-info additional-info"
+        "gallery gallery gallery gallery";
+}
+
 @media screen and (max-width: 992px){
     .building-info {
         padding: 1rem;
@@ -246,6 +277,19 @@ body {
             // Get the theme from local storage
             prefersDarkTheme() {
                 return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+            },
+
+            // Check if any of the infobox tabs are set to display
+            // This will change the class of the whole page to make the infobox tabs visible
+            infoBoxDisplays() {
+                // Returns true if any of the infobox tabs are set to display
+                for (let i = 0; i < this.infoBoxContent.length; i++) {
+                    if (this.infoBoxContent[i].display) {
+                        return true;
+                    }
+                }
+                // If none of them are set to display, return false
+                return false;
             }
         },
         watch: {
