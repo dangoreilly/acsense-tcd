@@ -268,32 +268,105 @@
                         </div>
                     </div>
 
+                    <!-- Map Preview-->
+                    <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="building.geometry" style="display: none;">
+                        <!-- Space type and location -->
+                        <!-- Inputs -->
+                        <div style="grid-area: 'input';" class="me-2">    
+                            <!-- Lat and long inputs -->
+                            <div class="mb-3">
+                                <label for="coordinates">Building Shape</label>
+                                <textarea 
+                                class="form-control" 
+                                id="coordinates" 
+                                rows="4" 
+                                v-model="building.further_info">
+                                </textarea>
+                                
+                            </div>
+                            <!-- Display Settings -->
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" v-model="building.always_display" id="always_display">
+                                <label class="form-check-label" for="always_display">
+                                    Always Display
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Map -->
+                        <div  id="building-placement-map" style="height: 600px; padding-top: 30px; grid-area: 'input';"></div>
+                    </div>
+                    <p></p>
                     <!-- Gallery -->
-                    <div class="row" style="display: none;">
+                    <div class="row">
                         <h3 class="mt-3">Gallery Images</h3>
+
                         <table class="table w-100 mx-2">
                             <thead>
                                 <tr>
                                     <th scope="col">File</th>
-                                    <th scope="col">Alt Text</th>
+                                    <th scope="col">Alt Text <span class="fw-normal text-danger text-small">*Required</span></th>
                                     <th scope="col">Caption</th>
                                     <th scope="col"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="image in building.gallery">
+                                <tr v-for="(image, index) in gallery">
                                     <td style="white-space: nowrap; text-overflow: ellipsis; overflow: clip; max-width: 400px;">
                                         <a :href="image.url" target="_blank"> {{ image.url }}</a>
                                     </td>
                                     <td><input type="text" placeholder="Alt Text" v-model="image.alt"></td>
                                     <td><input type="text" placeholder="Caption" v-model="image.caption"></td>
-                                    <td><button class="btn btn-danger" type="button">Remove</button></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <!-- Save -->
+                                            <!-- To be a valid edit, alt must be provided -->
+                                            <button 
+                                            type="button" 
+                                            class="btn" 
+                                            :class="galleryImageHasBeenChanged(index) ? 'btn-success' : 'btn-outline-secondary'"
+                                            @click="updateGalleryImage(index)"
+                                            :disabled="!(galleryImageHasBeenChanged(index) && image.alt.length > 0)">
+                                                Save Changes
+                                            </button>
+                                            <!-- Cancel -->
+                                            <button 
+                                            type="button" 
+                                            class="btn"
+                                            :class="galleryImageHasBeenChanged(index) ? 'btn-warning' : 'btn-outline-secondary'"
+                                            @click="revertGalleryImage(index)"
+                                            :disabled="!galleryImageHasBeenChanged(index)">
+                                                Cancel
+                                            </button>
+                                            <!-- Delete -->
+                                            <button 
+                                            class="btn btn-danger" 
+                                            type="button" 
+                                            title="This cannot be undone"
+                                            @click="removeGalleryImage(index, image.url)">Remove</button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td><input type="file" id="myFile" name="newGalleryImage"></td>
-                                    <td><input type="text" placeholder="Alt Text"></td>
-                                    <td><input type="text" placeholder="Caption"></td>
-                                    <td><button class="btn btn-success" type="button">Add</button></td>
+                                    <td>
+                                        <input 
+                                        type="file" 
+                                        id="myFile" 
+                                        name="newGalleryImage" 
+                                        accept="image/png, image/jpg, image/jpeg"
+                                        @change="handleFileUpload">
+                                    </td>
+                                    <td><input type="text" placeholder="Alt Text" v-model="newGalleryImage.alt"></td>
+                                    <td><input type="text" placeholder="Caption" v-model="newGalleryImage.caption"></td>
+                                    <td>
+                                        <!-- The add button will only become active when a file has been uploaded, and alt text have been provided -->
+                                        <button 
+                                        class="btn btn-success" 
+                                        type="button"
+                                        @click="addGalleryImage()"
+                                        :disabled="!(newGalleryImage.selectedFile && newGalleryImage.alt.length > 0)">
+                                            Add
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -310,6 +383,49 @@
     </NuxtLayout>
 </template>
 
+<script setup>
+    
+//Script setup needed for UseHead
+import '~/assets/css/leaflet.css'
+
+useHead({
+
+    link: [
+        {
+            rel:"stylesheet",
+            href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
+        },
+    ],
+    script: [
+        {
+            src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+            integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+            crossorigin: "",
+        },
+        {
+            src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
+            body: true,
+        },
+        // {
+        //     src: '/javascript/mapInit.js',
+        //     body: true,
+        // },
+        // {
+        //     src: 'https://unpkg.com/@supabase/supabase-js@2',
+        // },
+        {
+            src: '/javascript/adminMapFunctions.js',
+        },
+        {
+            src: '/javascript/mapFunctions.js',
+        },
+    ]
+});
+
+
+
+</script>
+
 <script>
 import {createClient} from '@supabase/supabase-js';
 
@@ -318,8 +434,15 @@ import {createClient} from '@supabase/supabase-js';
             return {
                 building: {},
                 building_clean: {},
+                gallery: [],
+                gallery_clean: [],
                 markdownModalOpen: false,
                 supabase: {},
+                newGalleryImage: {
+                    selectedFile: null,
+                    alt: "",
+                    caption: "",
+                },
             }
         },
         created() {
@@ -327,6 +450,8 @@ import {createClient} from '@supabase/supabase-js';
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
             this.supabase = createClient(supabaseUrl, supabaseKey)
+
+            // this.mapInit();
             
         },
         computed: {
@@ -353,8 +478,22 @@ import {createClient} from '@supabase/supabase-js';
                 // This function compares the current state of the building against the state it was in when the page was loaded
                 return JSON.stringify(this.building) !== JSON.stringify(this.building_clean);
             },
+            
         },
         methods: {
+            // Create the map
+            async mapInit(){
+                // Initialise the map
+                // Wait for this function to have loaded
+                while (typeof buildingSelectMapInit !== "function") {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                // Once the function is loaded, we can call it
+                // This function will initialise the map and add the marker
+                // We provide a callback function to update the space's location when the marker is moved
+                buildingSelectMapInit(this.updateBuildingGeometry, this.supabase);
+            },
+
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             async updateBuilding() {
@@ -366,15 +505,20 @@ import {createClient} from '@supabase/supabase-js';
                     description: this.building.description,
                     aka: this.building.aka,
                     opening_times: this.building.opening_times,
+
                     sense_exp: this.building.sense_exp,
                     sense_exp_display: this.building.sense_exp_display,
                     wayfinding: this.building.wayfinding,
                     wayfinding_disp: this.building.wayfinding_disp,
                     phys_access: this.building.phys_access,
                     phys_access_disp: this.building.phys_access_disp,
+
                     further_info: this.building.further_info,
                     furtherinfo_disp: this.building.furtherinfo_disp,
                     tips: this.building.tips,
+
+                    always_display: this.building.always_display,
+                    coordinates: this.building.coordinates,
                 }
 
                 // Update the building in the database
@@ -406,27 +550,87 @@ import {createClient} from '@supabase/supabase-js';
                 const file = document.getElementById("myFile").files[0];
                 // Upload the file to the storage bucket
                 // Get the URL of the uploaded file
-                const { data, error } = await this.supabase.storage
+                const { data, error:upload_error } = await this.supabase.storage
                 .from('gallery-images')
-                .upload(`${this.building.id}_${file.name}`, file)
-                // Add the image to the gallery
-                this.building.gallery.push({
-                    url: data.Location,
-                    alt: "",
-                    caption: "",
-                })
+                .upload(`${this.building.canonical}/${file.name}`, file)
+                if (upload_error) {
+                    console.error(upload_error)
+                    alert(upload_error.message)
+                    throw upload_error
+                }
+                console.log(data)
+                // Create a new image object
+                let newImage = {
+                    url: "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/gallery-images/" + data.path,
+                    alt: this.newGalleryImage.alt,
+                    caption: this.newGalleryImage.caption,
+                }
+
+                // Add the image to the database
+                let { data: img, error:db_insert_error } = await this.supabase
+                    .from('building_gallery_images')
+                    .insert([
+                        { 
+                            building: this.building.canonical,
+                            url: newImage.url,
+                            alt: newImage.alt,
+                            caption: newImage.caption,
+                        }
+                    ])
+
+                if (db_insert_error) {
+                    console.error(db_insert_error)
+                    alert(db_insert_error.message)
+                    throw db_insert_error
+                }
+                // Add a copy of the image to the gallery array
+                this.gallery.push(JSON.parse(JSON.stringify(newImage)))
+                // And to the clean gallery
+                this.gallery_clean.push(JSON.parse(JSON.stringify(newImage)))
+                
+
+            },
+            handleFileUpload(event) {
+                this.newGalleryImage.selectedFile = event.target.files[0];
             },
 
             // Function to remove a gallery image from the building
-            async removeGalleryImage(index) {
-                // Get the URL of the image to be removed
-                const url = this.building.gallery[index].url;
-                // Remove the image from the gallery
-                this.building.gallery.splice(index, 1);
+            async removeGalleryImage(index, url) {
+                // Remove the image from the gallery array
+                this.gallery.splice(index, 1);
+                // And from the clean copy
+                this.gallery_clean.splice(index, 1);
+                
+                // Remove the database entry
+                const { data:db_response, error:db_error } = await this.supabase
+                .from('building_gallery_images')
+                .delete()
+                .eq('url', url)
+
+                if (db_error) {
+                    console.error(db_error)
+                    alert(db_error.message)
+                    throw db_error
+                }
+                console.log(db_response)
+
+                // Get the path by subtracting the supabase url from the image url
+                let path = url.replace(this.supabase.storageUrl + "/object/public/gallery-images/", "");
+                console.log(path)
                 // Delete the image from the storage bucket
-                const { data, error } = await this.supabase.storage
+                const { data:storage_response, error:storage_error } = await this.supabase.storage
                 .from('gallery-images')
-                .remove([url])
+                .remove([path])
+
+                if (storage_error) {
+                    console.error(storage_error)
+                    alert(storage_error.message)
+                    throw storage_error
+                }
+                console.log("storage_response")
+                console.log(storage_response)
+
+                alert("Image deleted successfully")
             },
 
             // This function is called when the user clicks the "Cancel" button
@@ -438,25 +642,9 @@ import {createClient} from '@supabase/supabase-js';
 
             },
 
-            // This function checks the current state of the building against the state it was in when the page was loaded
-            // It returns true if the building has been changed, and false if it has not
-            isBuildingChanged() {
-
-                return JSON.parse(JSON.stringify(this.building)) == JSON.parse(JSON.stringify(this.building_clean));
-
-            },
-
             // This function compares the current state of the building against the state it was in when the page was loaded
             // It returns a list of the fields that have been changed
             getChanges() {},
-
-
-            // This function compares the current state of the building against the state it was in when the page was loaded
-            // It returns TRUE if the building has been changed, and FALSE if it has not
-            isBuildingChanged() {
-                // Just check equivalency of the whole building object to the clean copy
-                return JSON.stringify(this.building) !== JSON.stringify(this.building_clean);
-            },
 
             // Attempts to create a new building with the given canonical name
             async newBuilding(canonical) {
@@ -519,10 +707,13 @@ import {createClient} from '@supabase/supabase-js';
                     this.building = this.fillInTheGaps( JSON.parse( JSON.stringify(bld[0]) ) );
 
                     // Grab all the images for this building, attach them to the building object
-                    this.building.gallery = await this.getGallery(canonical);
+                    this.getGallery(canonical);
 
                     // Deep copy the building object so we have comparison data
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
+                    
+                    // Update the map to show the building
+                    // this.loadBuildingToMap();
 
                 }
                 
@@ -540,8 +731,20 @@ import {createClient} from '@supabase/supabase-js';
                     throw error
                 }
                 else {
-                    return imgs;
+                    // console.log(imgs);
+                    this.gallery = JSON.parse(JSON.stringify(imgs));
+                    this.gallery_clean = JSON.parse(JSON.stringify(imgs));
                 }
+            },
+            galleryImageHasBeenChanged(index){
+                // Check the gallery images array against the clean copy
+                return JSON.stringify(this.gallery[index]) !== JSON.stringify(this.gallery_clean[index]);
+            },
+
+            revertGalleryImage(index){
+                // Deep copy the clean copy back into the gallery
+                this.gallery[index] = JSON.parse(JSON.stringify(this.gallery_clean[index]));
+
             },
 
 
@@ -602,5 +805,13 @@ import {createClient} from '@supabase/supabase-js';
 </script>
 
 <style>
+
+.map-section{
+    /* Define the grid to give enough room for the map */
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-areas: "input map";
+    grid-template-rows: auto;
+}
 
 </style>
