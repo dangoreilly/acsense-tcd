@@ -51,7 +51,7 @@
             :times="building.opening_times"/>
         </div>
         <!-- In theory, this placeholder should be temporary. But theoretically temporary things tend to be practically permanent... -->
-        <div v-else style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
+        <div v-else style="grid-area: open-times; align-self: center; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
             <div 
             class="time-card card  pt-2 mx-2 px-3" 
             style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
