@@ -182,7 +182,7 @@
             transition: opacity 0.5s ease-in-out;
         }
 
-        #map { height: 100vh; }
+        #map { height: 100dvh; }
 
         .primary-label {
             opacity: var(--primary-label-opacity);
