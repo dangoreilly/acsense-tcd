@@ -258,7 +258,7 @@
                                 <div
                                 class="badge rounded-pill mx-1 facility-icon text-bg-success"
                                 title="Wheelchair Access">
-                                    <img class="svg-icon" src="/images/icons/microwave.svg">
+                                    <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
                                 </div>
                                 <div>
                                     <!-- Facility -->
