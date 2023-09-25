@@ -58,8 +58,9 @@
                     <!-- The input boxes are paired to the components to allow for live editing -->
                     <!-- The input boxes and components are left aligned in their respective colum -->
                 
-                    <!-- <Summary> (and building selection dropdown) -->
+                    <!-- <Summary> -->
                     <div class="row border-b">
+                        <!-- Input -->
                         <div class="col d-flex flex-column">
                             <!-- Building Name -->
                             <div class="mb-3">
@@ -75,29 +76,58 @@
                                 v-model="building.aka">
                             </div>
 
-                            <!-- Description -->
+                            <!-- Primary Image -->
                             <div class="mb-3">
-                                <label for="descInput" class="form-label">Description</label>
-                                <textarea class="form-control" id="descInput" rows="4" 
-                                v-model="building.description"></textarea>
+                                <label for="PrimaryImageInput" class="form-label">Primary Image</label>
+                                <input id="PrimaryImageInput" type="file" class="form-control" 
+                                @change="handlePrimaryImageSelect">
                             </div>
-
+                            <!-- Primary image alt text -->
+                            <div class="mb-3">
+                                <label for="PrimaryImageAltInput" class="form-label">Primary Image Alt Text</label>
+                                <input id="PrimaryImageAltInput" type="text" class="form-control" 
+                                v-model="building.primary_image_alt">
+                            </div>
                         </div>
+
+                        <!-- Preview -->
                         <div class="col">
+                            <!-- Name -->
                             <div class="info-page-title" style="grid-area: title;">
                                 <h1>{{building.display_name}}</h1>
                                 <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
                             </div>
-                                
-                            <div id="description" style="grid-area: desc; justify-self: start;">
-                                <h3>Description</h3>
-                                <p>{{building.description}}</p>
-                            </div>
+
+                            <!-- Primary Image -->
+                            <div class="mb-3">
+                                <!-- MainPicure component preprocesses for null image, so we can't use it -->
+                                <!-- Because we want to dynamically change the image and alt text -->
+                                <img 
+                                class="primary-image-preview"
+                                :src="building.primary_image_url"
+                                :alt="building.primary_image_alt">
+                            </div>    
                         </div>
                     </div>
+
+                                <!-- Description -->
+                    <div class="row border-bottom mb-3">
+                        <!-- Input -->
+                        <div class="col">
+                            <label for="descInput" class="form-label">Description</label>
+                            <textarea class="form-control" id="descInput" rows="4" 
+                            v-model="building.description"></textarea>
+                        </div>
+                        <!-- Preview -->
+                        <div class="col" id="description" style="grid-area: desc; justify-self: start;">
+                            <h3>Description</h3>
+                            <p>{{building.description}}</p>
+                        </div>
+                    </div>
+                           
                 
                     <!-- Opening Times -->
-                    <div class="row mt-3 border-b"><label class="form-label d-block">Opening Times</label>
+                    <div class="row mt-3 pb-3 border-bottom"><label class="form-label d-block">Opening Times</label>
                         <div class="col d-flex flex-column">
                             <!-- Weekdays -->
                             <div class="row">
@@ -175,7 +205,7 @@
                     </div>
 
                     <!-- Infobox -->
-                    <div class="row mt-3 border-b">
+                    <div class="row mt-3 border-bottom">
                         <div class="col">
                             <!-- Sensory -->
                             <div class="mb-3">
@@ -220,7 +250,7 @@
                     </div>
                     
                     <!-- Tips -->
-                    <div class="row mt-3 border-b">
+                    <div class="row mt-3 pb-3 border-bottom">
                         <!-- Edit -->
                         <div class="col">
                             <!-- Loop through the tips as text inputs -->
@@ -521,6 +551,24 @@ import {createClient} from '@supabase/supabase-js';
                     coordinates: this.building.coordinates,
                 }
 
+                // If the primary image has been changed, upload the new image and update the url
+                try {
+                    if (document.getElementById("PrimaryImageInput").files[0]) {
+                        // If the primary image has been changed, upload the new image and update the url, and the alt
+                        // If uploading the primary image fails, we don't want to update the alt
+                        update_vehicle.primary_image_url = await this.uploadNewPrimaryImage();
+                        update_vehicle.primary_image_alt = this.building.primary_image_alt;
+                    }
+                    else{
+                        // If the primary image has not been changed, update the alt
+                    }
+                }
+                catch (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+
                 // Update the building in the database
                 const { data, error } = await this.supabase
                     .from('buildings')
@@ -541,6 +589,39 @@ import {createClient} from '@supabase/supabase-js';
                     console.log(data)
                 }
 
+
+            },
+
+            handlePrimaryImageSelect(evt) { 
+                // Get the file from the input
+                // Set the primary image to the file to preview
+                const file = evt.target.files[0];
+                this.building.primary_image_url = URL.createObjectURL(file);
+            },
+
+            async uploadNewPrimaryImage(){
+                // Get the file object from the primary image upload input
+                // Upsert to the storage bucket as the canonical name
+                // TODO: Check if the file already exists under a different extension, and if so, delete it
+
+                // Get the file
+                let file = document.getElementById("PrimaryImageInput").files[0];
+                // Get the file extension
+                let extension = file.name.split('.').pop();
+                
+                // Build the new url for the file
+                let newUrl = this.supabase.storageUrl + "/object/public/primary-images/" + this.building.canonical + "." + extension;
+
+                // Upload the file to the storage bucket
+                const { data, error:upload_error } = await this.supabase.storage
+                .from('primary-images')
+                .upload(`${this.building.canonical}.${extension}`, file)
+                if (upload_error) {
+                    console.error(upload_error)
+                    return error
+                }
+
+                return newUrl;
 
             },
 
@@ -639,6 +720,9 @@ import {createClient} from '@supabase/supabase-js';
 
                 // Deep copy the building_clean object back into the building object
                 this.building = JSON.parse(JSON.stringify(this.building_clean));
+
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
 
             },
 
@@ -812,6 +896,14 @@ import {createClient} from '@supabase/supabase-js';
     grid-template-columns: 1fr 3fr;
     grid-template-areas: "input map";
     grid-template-rows: auto;
+}
+
+.primary-image-preview{
+    border-bottom-right-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.3), -5px -5px 15px rgba(0,0,0,0.1);
+    width: min(25rem, calc(100vw - 6rem));
+    margin: 0 min(3rem, 3vw) 0 min(3rem, 3vw);
 }
 
 </style>
