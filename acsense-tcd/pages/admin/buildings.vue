@@ -620,6 +620,9 @@ import {createClient} from '@supabase/supabase-js';
                     console.error(upload_error)
                     return error
                 }
+                
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
 
                 return newUrl;
 
