@@ -41,11 +41,11 @@
                 <!-- Electrical Sockets -->
                 <div style="grid-area: sockets;"
                 class="badge rounded-pill mx-1 facility-icon" 
-                :class="{'text-bg-success': area.electrical_outlets, 'text-bg-danger': !area.electrical_outlets}" 
-                :title="(area.electrical_outlets ? '' : 'No ') + 'Plug Sockets'">
+                :class="{'text-bg-success': area.outlets, 'text-bg-danger': !area.outlets}" 
+                :title="(area.outlets ? '' : 'No ') + 'Plug Sockets'">
                     <img class="svg-icon" src="/images/icons/plug-solid.svg">
                     <!-- Strikethrough for RG blindness -->
-                    <img v-if="!area.electrical_outlets" class="svg-icon-sash" src="/images/icons/sash.svg">
+                    <img v-if="!area.outlets" class="svg-icon-sash" src="/images/icons/sash.svg">
                 </div>
                 <!-- Food and Drink allowed -->
                 <div style="grid-area: food;"
@@ -78,11 +78,11 @@
                 <!-- Wheelchair Accessible -->
                 <div style="grid-area: wheelchair;"
                 class="badge rounded-pill mx-1 facility-icon" 
-                :class="{'text-bg-success': area.wheelchair_accessible, 'text-bg-danger': !area.wheelchair_accessible}" 
-                :title="(area.wheelchair_accessible ? '' : 'No ') + 'Wheelchair Access'">
+                :class="{'text-bg-success': area.wheelchair, 'text-bg-danger': !area.wheelchair}" 
+                :title="(area.wheelchair ? '' : 'No ') + 'Wheelchair Access'">
                     <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
                     <!-- Strikethrough for RG blindness -->
-                    <img v-if="!area.wheelchair_accessible" class="svg-icon-sash" src="/images/icons/sash.svg">
+                    <img v-if="!area.wheelchair" class="svg-icon-sash" src="/images/icons/sash.svg">
                 </div>
                 <!-- Dividing line, display on all but the last -->
                 <hr 
