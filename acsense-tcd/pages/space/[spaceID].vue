@@ -2,48 +2,48 @@
     <NuxtLayout name="info-layout">
         <div 
         v-if="space"
-        class="building-info">
+        class="space-info">
     
             <div class="info-page-title" style="grid-area: title;">
-                <h1>{{building.display_name}}</h1>
-                <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
+                <h1>{{space.name}}</h1>
+                <p style="display:block"><em>{{space.type}}</em></p>
             </div>
                 
             <div id="description" style="grid-area: desc; justify-self: start;">
                 <h3>Description</h3>
-                <p>{{building.description}}</p>
-            </div>
-                
-            <div style="grid-area: sense-areas; align-self: end;">
-                <SenseSpaces 
-                :sensoryAreas="building.student_spaces"
-                />
+                <p>{{space.description}}</p>
             </div>
     
             <div style="grid-area: main-photo;">
                 <MainPicture 
-                :mainSrc="building.primary_image_url" 
-                :mainAlt="building.primary_image_alt" 
+                :mainSrc="space.primary_image_url" 
+                :mainAlt="space.primary_image_alt" 
+                />
+            </div>
+                
+            <div style="grid-area: facilties; align-self: end;">
+                <Facilities 
+                :space="space"
                 />
             </div>
     
-            <div style="grid-area: tips;">
+            <!-- <div style="grid-area: tips;">
                 <AccessTips :tips="building.tips" />
                 
-            </div>
+            </div> -->
     
-            <div style="grid-area: tabs;">
+            <!-- <div style="grid-area: tabs;">
                 <Infobox
                 :contentArray="infoBoxContent"
                 :activeInfoTab="activeInfoBoxTab"
                 @tabChanged="activeInfoBoxTab = $event"
                 />
-            </div>
+            </div> -->
     
-            <div style="grid-area: open-times; justify-self: start; align-self: start;">
+            <!-- <div style="grid-area: open-times; justify-self: start; align-self: start;">
                 <Timebox
-                :times="building.opening_times"/>
-            </div>
+                :times="space.opening_times"/>
+            </div> -->
                     
             <!-- <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
                 <NuxtLink :to="linkToRooms">
@@ -57,18 +57,18 @@
                 </NuxtLink>
             </div> -->
     
-            <div
+            <!-- <div
             style="grid-area: additional-info;"
-            v-if="building.furtherinfo_disp">
+            v-if="space.furtherinfo_disp">
                 <AdditionalInfo 
-                :info="building.further_info"/>
-            </div>
+                :info="space.further_info"/>
+            </div> -->
     
-            <div style="grid-area: gallery;">
+            <!-- <div style="grid-area: gallery;">
                 <Gallery
-                :images="building.gallery_images"
+                :images="gallery_images"
                 />
-            </div>
+            </div> -->
             
         </div>
         <p v-else>Sorry, this Student Space doesn't exist</p>
@@ -103,10 +103,10 @@
         padding-top: 0.5rem;
     }
     
-    .building-info {
+    .space-info {
         display: grid;
         padding-top: 2rem;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
         grid-template-rows: 
             [row1] 6rem
             [row2] auto 
@@ -118,17 +118,16 @@
             [row8] auto 
             [row9] auto;
         grid-template-areas: 
-            "title title main-photo main-photo"
-            "desc desc main-photo main-photo"
-            "sense-areas sense-areas open-times open-times"
-            "tabs tabs tabs tabs"
-            "tips tips tips tips"
-            ". . . ." /* ". rooms floorplan ." */
-            "additional-info additional-info additional-info additional-info"
-            "gallery gallery gallery gallery";
+            "title main-photo"
+            "desc main-photo"
+            "facilties facilties"
+            /* "tabs tabs tabs tabs"
+            "tips tips tips tips" */
+            /* "additional-info additional-info additional-info additional-info" */
+            /* "gallery gallery gallery gallery"; */
     }
     @media screen and (max-width: 992px){
-        .building-info {
+        .space-info {
             padding: 1rem;
             grid-template-columns: 1fr;
             grid-template-rows: auto;
@@ -136,205 +135,135 @@
                 "title"
                 "main-photo"
                 "desc"
-                "tabs"
-                "sense-areas"
-                "open-times"
+                "facilties"
                 "tips"
-                /* "rooms" */
-                /* "floorplan" */
-                "additional-info"
-                "gallery";
+                /* "additional-info" */
+                /* "gallery"; */
         }
-        
-        .mainPictureCard {
-            margin: min(3rem, 3vw);
-        }
-    
-        
-        .time-card {
-            margin: 0;
-        }
-    
-        .link-button-top {
-            padding-top: 1rem;
-        }
-    
-        .infotabs {
-            margin: 0 0 1rem 0;
-        }
-        
-        .access-tips-card {
-            margin: 1rem 0 1rem 0;
+
+        #description{
+            margin-top: 1.5rem;
         }
     
     }
-    /* 
-    html {
-        width: 100%;
-    }
-    
-    body {
-        min-width: 100vw;
-    } */
     </style>
     
-    <script setup lang="ts">
-        useHead({
-            title: 'Accessibility Map',
-            meta: [
-                {
-                    name: 'description',
-                    content: 'An interactive map of Trinity College Dublin, showing accessibility information for buildings and rooms.',
-                },
-                {
-                    name: 'keywords',
-                    content: 'Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
-                },
-                {
-                    name: 'viewport',
-                    content: 'width=device-width, initial-scale=1.0',
-                },
-            ],
-            link: [
-                {
-                    rel:"stylesheet",
-                    href:"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-                },
-            ],
-        });
-    
-    
-    </script>
-    
-    <script lang="ts">
-    
-        // import bld from '~/assets/example-data';
-        import areas from '~/assets/example-area-data';
-        import { Building } from '~/assets/types/Building';
-    
-        import { InfoBoxContentTab } from '~/assets/types/infoPageTypes';
-    
-        export default {
-            data() {
-                return {
-                building: {} as any,
-                infoBoxContent: [] as any,
-                activeInfoBoxTab: 0,
-                linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
-                linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
-                }
+<script setup>
+    useHead({
+        title: 'Student Space',
+        meta: [
+            {
+                name: 'description',
+                content: 'Information about the sensory spaces of Trinity College Dublin',
             },
-            created() {
-                Promise.resolve(this.getBuildingData()).then(
-                    (building) => {
+            {
+                name: 'keywords',
+                content: 'Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
+            },
+            {
+                name: 'viewport',
+                content: 'width=device-width, initial-scale=1.0',
+            },
+        ],
+    });
 
-                        if (building === undefined) {
-                            navigateTo("./");
-                        }
-                        // console.log(this.building)
-                        this.infoBoxContent = [
-                            {
-                                title: "Sensory Experience",
-                                content: this.building.sense_exp,
-                                display: this.building.sense_exp_disp
-                            },
-                            {
-                                title: "Wayfinding",
-                                content: this.building.wayfinding,
-                                display: this.building.wayfinding_disp
-                            },
-                            {
-                                title: "Physical Access",
-                                content: this.building.phys_access,
-                                display: this.building.phys_access_disp
-                            },
-                        ]
-                    },
-                )
-                // .then((r) => console.log(this.building));
-                // console.log(this.building);
+
+</script>
+    
+
+<script>
+import {createClient} from '@supabase/supabase-js';
+
+    export default {
+        data() {
+            return {
+                space: {},
+                supabase: {},
+                space_types: [],
+                space_icon: "",
+            }
+        },
+        created() {
+
+            // Initialise the supabase client
+            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            this.supabase = createClient(supabaseUrl, supabaseKey)
+
+            // Load the list of space types from the database
+            this.getSpaceTypes();
+            
+            // Load and render the space from the database
+            this.getStudentSpace(this.$route.params.spaceID);
+
+        },
+        methods: {
+            // This function fetches the student space from the database based on it's canonical name
+            async getStudentSpace(canonical){
+                // console.log("Fetching space: " + canonical);
+
+                // Fetch the space from the database
+                // Since we are using the canonical name, we should only get one result
+                let { data: space, error } = await this.supabase
+                    .from('spaces')
+                    .select('*')
+                    .eq('canonical', canonical)
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+
+                    // If there are no results, navigate to the search page
+                    if (space.length == 0){
+                        this.$router.push('/info/?search=' + this.$route.params.spaceId);
+                    }
+                    
+                    // Update the space object with the new data
+                    this.space = space[0];
+
+                    // Get the icon for the space type
+
+                }
                 
             },
-            computed: {
-                // Get the theme from local storage
-                prefersDarkTheme() {
-                    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+
+
+            async getSpaceTypes(){
+                // Fetch the space types from the database
+                let { data: space_types, error } = await this.supabase
+                    .from('space_styles')
+                    .select('*')
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // Update the space object with the new data
+                    // console.log("Space types:")
+                    // console.log(space_types);
+                    this.space_types = space_types;
                 }
             },
-            watch: {
-                // Watch for changes to the theme
-                prefersDarkTheme(wantsDark) {
-                    if (wantsDark) {
-                        document.documentElement.setAttribute('data-bs-theme', 'dark')
-                    } else {
-                        document.documentElement.setAttribute('data-bs-theme', 'light')
+
+            getImageForSpaceType(type){
+                // Cycle through space types
+                // When the category field matches the input, return the image
+                // If there are no matches, return the placeholder image
+                for (let i = 0; i < this.space_types.length; i++) {
+                    if (this.space_types[i].category == type){
+                        return this.space_types[i].icon;
                     }
-                }
+                }    
+
+                // TODO: Get a more sensible default image
+                return '/images/red-dot.png';
             },
-            methods: {
-                // Set the theme on page load
-                setTheme() {
-                    if (this.prefersDarkTheme) {
-                        document.documentElement.setAttribute('data-bs-theme', 'dark')
-                    } else {
-                        document.documentElement.setAttribute('data-bs-theme', 'light')
-                    }
-                },
-                setInfoBoxContent(){
-                    this.infoBoxContent = [
-                    {
-                        title: "Sensory Experience",
-                        content: this.building.sense_exp,
-                        display: this.building.sense_exp_disp
-                    },
-                    {
-                        title: "Wayfinding",
-                        content: this.building.wayfinding,
-                        display: this.building.wayfinding_disp
-                    },
-                    {
-                        title: "Physical Access",
-                        content: this.building.phys_access,
-                        display: this.building.phys_access_disp
-                    },
-                ];
-                },
-                async getBuildingData() {
-                    const building = await useFetch('/api/get/building/' + this.$route.params.buildingId);
-                    // Clone it to avoid proxy nonsense
-                    this.building = JSON.parse(JSON.stringify(building.data.value));
-                    
-                    // Set the info box content
-                    this.setInfoBoxContent();
-    
-                    // console.warn("Building data:")
-                    console.log(this.building);
-                }
-            },
-            mounted() {
-                this.setTheme()
-            }
-        
-        }
-    
-        useHead({
-            link:[
-                {
-                    rel: "stylesheet",
-                    href: "https://fonts.googleapis.com/css2?family=Lato&family=PT+Mono&Inter:wght@900&display=swap"
-                },
-                {
-                    rel: "preconnect",
-                    href: "https://fonts.gstatic.com",
-                    crossorigin: "anonymous"
-                },
-                {
-                    rel: "preconnect",
-                    href: "https://fonts.googleapis.com",
-                }
-            ],
-        });
-    
-    
-    </script>
+        },
+    }
+
+
+</script>
     
