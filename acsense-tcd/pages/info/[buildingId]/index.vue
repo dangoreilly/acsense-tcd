@@ -6,7 +6,9 @@
     :class="infoBoxDisplays ? 'infobox-display' : 'infobox-no-display'">
 
         <div class="info-page-title" style="grid-area: title;">
+
             <h1>{{building.display_name}}</h1>
+
             <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
         </div>
             
@@ -124,7 +126,7 @@
     padding-top: 2rem;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 
-        [row1] 6rem
+        [row1] auto
         [row2] auto 
         [row3] auto
         [row4] auto
