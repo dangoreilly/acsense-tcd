@@ -274,21 +274,20 @@
     </div>
 </template>
 
-<script lang="ts">
-import {sensoryArea} from '~/assets/types/sensoryArea'
+<script>
 import {createClient} from '@supabase/supabase-js';
 
 export default {
   props:{
     sensoryAreas: {
-        type: Array as () => sensoryArea[],
+        type: Array,
         required: true,
     },
   },
   data() {
     return {
         senseAreasExist: this.sensoryAreas.length > 0,
-        spaceIcons: [] as {icon: string, category: string}[]
+        spaceIcons: [],
     }
   },
     mounted() {
