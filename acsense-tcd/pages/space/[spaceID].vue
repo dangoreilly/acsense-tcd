@@ -217,7 +217,7 @@ import {createClient} from '@supabase/supabase-js';
 
                     // If there are no results, navigate to the search page
                     if (space.length == 0){
-                        this.$router.push('/info/?search=' + this.$route.params.spaceId);
+                        this.$router.push('/info/?search=' + this.$route.params.spaceID);
                     }
                     
                     // Update the space object with the new data
