@@ -2,6 +2,7 @@
     <div
     class="card mx-3 my-1 searchresult"
     :class="result.type"    
+    :style="{'background-color': (result.colour || '#dfdfdf') + '1b'}"
     @click="redirect()">
         <!-- Building card -->
         <div v-if="result.type == 'building'" class="card-body">
@@ -11,8 +12,7 @@
         </div>
         <!-- Space card -->
         <div v-else 
-        class="card-body"
-        :style="{'box-shadow': '2px 2px 3px 0px ' + result.colour} + '6b'">
+        class="card-body">
             <h5 class="card-title">{{ result.name }}</h5>
             <h6 v-if="result.building" class="card-subtitle mb-2 text-body-secondary">{{result.building_display_name}}</h6>
             <div class="space-card-body">
@@ -138,7 +138,7 @@ export default{
 <style>
 
 .building {
-    background-color: rgb(255, 252, 240);
+    background-color: #dfdfdf66;
 }
 
 .svg-icon {
@@ -180,7 +180,7 @@ export default{
 
 
 .space {
-    background-color: rgb(240, 255, 254);
+    background-color: rgba(240, 255, 254);
 }
 
 .searchresult {
@@ -189,7 +189,8 @@ export default{
 }
 
 .searchresult:hover {
-    background-color: rgb(230, 249, 255);
+    /* background-color: rgb(230, 249, 255); */
+    box-shadow: inset 0px 0px 2px 2px rgba(2, 0, 117, 0.301);
 }
 
 </style>
