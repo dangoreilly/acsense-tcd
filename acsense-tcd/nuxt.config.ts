@@ -16,12 +16,18 @@ export default defineNuxtConfig({
         { path: '~/components/info'},
         '~/components'
     ],
+    app: {
+        head: {
+            link: [{ rel: 'icon', type: 'image/svg', href: '/TCDSenseMapFavicon.svg' }]
+        }
+    },
     runtimeConfig: {
         // Will be available in both server and client-side
         public: {
             // override with env var
             supabaseUrl: process.env.NUXT_SUPABASE_URL,
             supabaseKey: process.env.NUXT_SUPABASE_KEY,
+            supabaseServiceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
         }
     }
 })
