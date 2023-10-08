@@ -13,8 +13,13 @@
             v-model="searchTerm"
             style="font-size: 1.5rem;">
         </div>
+
+        <!-- Placeholder results -->
+        <div class="border-top mt-2 pt-1" v-if="sorted_list.length < 1"> 
+            <searchResultPlaceholder v-for="(n, index) in 8" :key="index" :index="index"/>
+        </div>
         <!-- Results section -->
-        <div class="border-top mt-2 pt-1"> 
+        <div class="border-top mt-2 pt-1" v-else> 
             <searchResult v-for="result in sorted_list" :result="result" :searchterm="searchTerm" />
         </div>
     </NuxtLayout>
@@ -25,7 +30,7 @@ Make sure the search with the url param converst dashes to spaces -->
 
 <script setup>
     useHead({
-        title: 'Acsense - Search',
+        title: 'TCD Sense Map - Search',
         meta: [
             // {
             //     name: 'description',
@@ -314,48 +319,7 @@ Make sure the search with the url param converst dashes to spaces -->
                 }
 
             },
-        
-            sortList_byScore() {
 
-                var i, switching, b, shouldSwitch;
-                let holder;
-
-                switching = true;
-                /* Make a loop that will continue until
-                no switching has been done: */
-                while (switching) {
-                    // Start by saying: no switching is done:
-                    switching = false;
-                    b = this.sorted_list
-                    
-                    // Loop through all list items:
-                        for (i = 0; i < (b.length - 1); i++) {
-
-                            // Start by saying there should be no switching:
-                            shouldSwitch = false;
-
-                            /* Check if the next item should
-                            switch place with the current item: */
-                            if (b[i].score > b[i+1].score) {
-
-                                /* If next item has higher score than current item,
-                                mark as a switch and break the loop: */
-                                shouldSwitch = true;
-                                break;
-                            }
-                        }
-                    if (shouldSwitch) {
-                    // Have to deep copy the objects to avoid reference errors
-                    holder = JSON.parse(JSON.stringify(b[i]));
-                    b[i] = JSON.parse(JSON.stringify(b[i+1]));
-                    b[i+1] = JSON.parse(JSON.stringify(holder));
-
-                    switching = true;
-                    }
-                }
-                // console.log(b)
-                // console.log(this.sorted_list)
-            },
             sortList_byAlphabet() {
 
                 var list, i, switching, b, shouldSwitch;
