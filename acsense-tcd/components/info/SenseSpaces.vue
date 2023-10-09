@@ -20,7 +20,9 @@
         <div v-if="senseAreasExist">
             <span>There {{sensoryAreas.length > 1 ? "are" : "is"}} {{sensoryAreas.length}} Student Spaces in this building:</span>
 
-            <div v-for="(area, index) in sensoryAreas" class="space-row py-2">
+            <a :href="'/space/' + area.canonical"
+            v-for="(area, index) in sensoryAreas" 
+            class="space-row py-2 link-body-emphasis link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
                 <div style="grid-area: icon;">
                     <img :src="area.icon" :alt="area.type" style="width: 2.5rem; margin-right: .25rem;"/>
                 </div>
@@ -88,7 +90,7 @@
                 <hr 
                 v-if="index < sensoryAreas.length - 1"
                 style="grid-area: hr;" class="border-info-light opacity-50 border border-2 mt-3 mb-0">
-            </div>
+            </a>
         </div>
 
         <div v-else>
