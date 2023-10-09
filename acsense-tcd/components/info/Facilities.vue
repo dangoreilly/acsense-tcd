@@ -285,12 +285,11 @@ export default {
     justify-items: center;
     grid-gap: 3rem;
     /* padding-top: 2rem; */
-    grid-template-columns:  1fr 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-columns:  1fr 1fr 1fr;
+    grid-template-rows: auto auto;
     grid-template-areas: 
-        "seating sockets"
-        "food kettle"
-        "microwave wheelchair";
+        "seating sockets food"
+        "kettle microwave wheelchair";
 }
 
 @media screen and (max-width: 675px){
