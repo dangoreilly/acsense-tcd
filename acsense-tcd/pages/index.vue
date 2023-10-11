@@ -42,7 +42,7 @@
 
                     <div class="modal-body" style="align-self: baseline; max-height: 70vh; overflow-y: auto;"></div>
 
-                    <div class="modal-footer" style="justify-content: center"></div>
+                    <div class="modal-footer space-modal-badge-container" style="justify-content: center"></div>
                 
                 </div>
             </div>
@@ -203,6 +203,45 @@
         .sense-icon {
             opacity: var(--sense-icon-opacity);
             transition: opacity 0.5s ease-in-out;
+        }
+
+        .svg-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            vertical-align: middle;
+            fill: currentColor;
+            width: 1.5rem;
+        }
+        .svg-icon-sash {
+            position: absolute;
+            top: 31%;
+            left: -30%;
+            opacity: 0.8;
+            /* transform: translate(-50%, -50%); */
+            rotate: 45deg;
+            vertical-align: middle;
+            fill: currentColor;
+            width: 2.4rem;
+        }
+
+        .facility-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            position: relative;
+            /* padding: 0.25rem; */
+        }
+
+        .space-modal-badge-container {
+            display: grid;
+            /* width: 100%; */
+            /* padding-top: 2rem; */
+            grid-template-columns:  auto auto auto auto auto auto;
+            grid-template-rows: auto auto;
+            grid-template-areas: 
+                "seating sockets food kettle microwave wheelchair"
+                "btn btn btn btn btn btn";
         }
 
     </style>
