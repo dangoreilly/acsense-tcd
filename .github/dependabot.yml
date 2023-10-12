@@ -7,5 +7,6 @@ version: 2
 updates:
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/acsense-tcd" # Location of package manifests
+    target-branch: "dev" # Branch to create pull requests against (optional, defaults to default branch)
     schedule:
       interval: "weekly"
