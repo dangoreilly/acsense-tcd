@@ -128,7 +128,7 @@ Make sure the search with the url param converst dashes to spaces -->
                     this.searchTerm = this.normaliseSearchTerm(this.$route.query.search);
 
                     // And search for it, is the sort list is available
-                    while (this.sort_list.length == 0){
+                    while (this.sorted_list.length == 0){
                         await new Promise(r => setTimeout(r, 100));
                     }
 

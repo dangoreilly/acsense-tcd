@@ -17,6 +17,7 @@
         class="d-flex me-3 search-base" 
         v-if="!searchBarDisabled"
         role="search"
+        @submit.prevent="submitSearch()"
         :class="{'search-active': searchIsActive}">
 
             <div 
