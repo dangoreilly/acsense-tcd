@@ -148,6 +148,7 @@
     </script>
 
     <script>
+    import {createClient} from '@supabase/supabase-js';
 
     export default {
         data() {
@@ -156,6 +157,20 @@
                     MainContent: "This map provides information about the sensory environments in different areas of Trinity. It also provides physical access information for buildings across campus. Click on each building or use the search bar in bottom corner to find your desired building.",
                 },
                 welcomeModalOpen: true,
+                map_config_object: {
+                    INTIAL_VIEW_MOBILE: [
+                        [53.34631744552114, -6.255028994837502],
+                        [53.34163690316516, -6.258745992827823]
+                    ],
+                    INTIAL_VIEW_WEB: [
+                        [53.345568, -6.259428],
+                        [53.341853, -6.249477]
+                    ],
+                    LABEL_PRIMARY_RANGE_LOWER: 18,
+                    LABEL_PRIMARY_RANGE_UPPER: 17,
+                    DEBUG: false,
+                },
+                supabase: null,
             }
         },
         methods: {
@@ -165,7 +180,34 @@
                 mapModal.style.display = "none";
                 areaModal.style.display = "none";
                 // mapModal.classList.remove('show');
+            },
+            checkDebug() {
+                // Check if the URL contains a debug parameter
+                // If so, set the DEBUG variable to true
+                // This will enable the debug function
+                let urlParams = new URLSearchParams(globalThis.location.search);
+                
+                this.map_config_object.DEBUG = urlParams.has('debug');
+            },
+            async waitThenInitialiseMap(map_config_object, supabase) {
+                // Wait until the initialiseMap function is available
+                while (typeof initialiseMap !== "function") {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                // Initialise the map
+                initialiseMap(map_config_object, supabase);
             }
+        },
+        mounted() {
+            // Initialise Supabase
+            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            this.supabase = createClient(supabaseUrl, supabaseKey);
+            // Check the debug status
+            this.checkDebug();
+            // Initialise the map
+            this.waitThenInitialiseMap(this.map_config_object, this.supabase);
+
         },
     }
 

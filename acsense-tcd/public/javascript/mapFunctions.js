@@ -1,11 +1,11 @@
-function getAppropriateInitialView() {
+function getAppropriateInitialView(config) {
     // Check if the device is mobile (by checking if the screen is portrait)
     // If so, return the mobile view
     // Otherwise, return the web view
     if (window.innerHeight > window.innerWidth) {
-        return INTIAL_VIEW_MOBILE;
+        return config.INTIAL_VIEW_MOBILE;
     }
-    return INTIAL_VIEW_WEB;
+    return config.INTIAL_VIEW_WEB;
 }
 
 async function addOverlays(supabase_client, _map){
@@ -45,7 +45,7 @@ function addMovementPaths(){
 }
 
 
-async function addBuildings(){
+async function addBuildings(supabase_client, map){
 
     // Empty array to hold the layer groups
     let building_geojsons = [];
@@ -101,7 +101,10 @@ async function addBuildings(){
             onEachFeature: onEachFeature
         }).addTo(map);
 
-        global_buildings = buildings_geojson_array;
+        // global_buildings = buildings_geojson_array;
+
+        // Add their labels
+        addLabelsToMap(map, bld);
 
         return buildings_geojson_array;
     }
@@ -118,7 +121,7 @@ async function addBuildings(){
 function onEachFeature(feature, layer) {
     // Check for the url param nointeraction and if it exists, don't add the label or modal
     if (!window.location.href.includes("nointeraction")){
-        addLabelAndModalToBuilding(feature, layer);
+        addModalToBuilding(feature, layer);
         addHighlightToBuilding(feature, layer);
     }
     else if(window.location.href.includes("servicekey")){
@@ -201,8 +204,6 @@ function updateLabels(currentZoom, zoomMin, zoomMax){
 
         r.style.setProperty('--sense-icon-opacity', '0');
 
-        if (DEBUG) console.log("tertiary Label active");
-
     }
     else if (currentZoom >= zoomMax){ 
 
@@ -211,8 +212,6 @@ function updateLabels(currentZoom, zoomMin, zoomMax){
         r.style.setProperty('--tertiary-label-opacity', '0');
 
         r.style.setProperty('--sense-icon-opacity', '1');
-
-        if (DEBUG) console.log("primary Label active");
 
     }
     else { 
@@ -223,49 +222,58 @@ function updateLabels(currentZoom, zoomMin, zoomMax){
 
         r.style.setProperty('--sense-icon-opacity', '1');
 
-        if (DEBUG) console.log("secondary Label active");
-
     }
 }
 
-function addLabelAndModalToBuilding(feature, layer){
+// Loop over the buildings and add the labels to the map at their geometric center
+function addLabelsToMap(map, buildings){
 
-    let building = feature.properties;
-    // console.log(building)
-
-    // console.log(feature)
-    // console.log(layer)
-
-    // Add the labels
+    // Init variables
+    let building = {};
     let primaryLabelContent = "";
     let secondaryLabelContent = "";
     let tertiaryLabelContent = "";
 
-    if (building.map_label_1 != null){
-        // Generate the content
-        primaryLabelContent = "<p align='center' class='primary-label'>" + building.map_label_1 + " </p>";
-        // Add it to the map
-        addToolTipToBuilding(layer, primaryLabelContent);
-        // layer.bindTooltip(primaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).addTo(map);
-    }
-    if (building.map_label_2 != null){
-        // Generate the content
-        secondaryLabelContent = "<p align='center'  class='secondary-label'>" + building.map_label_2 + " </p>";
-        // Add it to the map
-        addToolTipToBuilding(layer, secondaryLabelContent);
-        // layer.bindTooltip(secondaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
-    }
-    if (building.map_label_3 != null){
-        // Generate the content
-        tertiaryLabelContent = "<p align='center' class='tertiary-label'>" + building.map_label_3 + " </p>";
-        // Add it to the map
-        // addToolTipToBuilding(layer, tertiaryLabelContent);
+    for(let i = 0; i < buildings.length; i++){
+        // Get the current building
+        building = buildings[i];
+
+        // Init the label content
+        primaryLabelContent = "";
+        secondaryLabelContent = "";
+        tertiaryLabelContent = "";
+
+
+        if (building.map_label_1 != null){
+            // Generate the content
+            primaryLabelContent = "<p align='center' class='primary-label'>" + building.map_label_1 + " </p>";
+            // Add it to the map
+            addToolTipToBuilding(building.geometry.coordinates, primaryLabelContent, map);
+            // layer.bindTooltip(primaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).addTo(map);
+        }
+        if (building.map_label_2 != null){
+            // Generate the content
+            secondaryLabelContent = "<p align='center'  class='secondary-label'>" + building.map_label_2 + " </p>";
+            // Add it to the map
+            addToolTipToBuilding(building.geometry.coordinates, secondaryLabelContent, map);
+            // layer.bindTooltip(secondaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
+        }
+        if (building.map_label_3 != null){
+            // Generate the content
+            tertiaryLabelContent = "<p align='center' class='tertiary-label'>" + building.map_label_3 + " </p>";
+            // Add it to the map
+            // addToolTipToBuilding(layer, tertiaryLabelContent);
+        }
     }
 
-    
-    
+}
+
+function addModalToBuilding(feature, layer){
+
+    let building = feature.properties;
+    // console.log(building)
+
     // building.geometry.bindTooltip(tertiaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
-
 
     // Add the modal
     layer.on('click', function (e){
@@ -309,16 +317,44 @@ function addLabelAndModalToBuilding(feature, layer){
     });
 }
 
-function addToolTipToBuilding(layer, content){
+function addToolTipToBuilding(building_coordinates, content, map){
 
     // Create a tooltip object with the given content and class
     let label = L.tooltip( {direction: "top", offset:[0,-20], opacity:1, permanent: true})
         .setContent(content);
     // Add it to the map at the given layer location
-    label.setLatLng(layer.getBounds().getCenter())
+    label.setLatLng(getGeometricCenter(building_coordinates))
         .addTo(map)
         .openTooltip();
 
+}
+
+function getGeometricCenter(_coordinates){
+
+    // Because geoJSON is a weird standard
+    let coordinates = _coordinates[0];
+
+    // Init the min and max values
+    let min_lat = 180.0;
+    let min_lng = 180.0;
+    let max_lat = -180.0;
+    let max_lng = -180.0;
+
+    // Loop through the coordinates and find the min and max values
+    coordinates.forEach(coordinate => {
+        if (coordinate[1] < min_lat) min_lat = coordinate[1];
+        if (coordinate[1] > max_lat) max_lat = coordinate[1];
+        if (coordinate[0] < min_lng) min_lng = coordinate[0];
+        if (coordinate[0] > max_lng) max_lng = coordinate[0];
+    });
+
+    // Calculate the geometric center
+    let lat = (min_lat + max_lat) / 2;
+    let lng = (min_lng + max_lng) / 2;
+
+    // console.log([lat, lng])
+
+    return [lat, lng];
 }
 
 // function getSensoryAreaTitle(area){
@@ -340,13 +376,13 @@ function addToolTipToBuilding(layer, content){
  * @param {boolean} [clickable=true] Whether or not the areas should be clickable 
  * @returns 
  */
-async function addSensoryAreas( clickable = true ){
+async function addSensoryAreas(supabase_client, map, clickable = true){
 
     // Get the student spaces from the database
-    let areas = await getAreas();
+    let areas = await getAreas(supabase_client);
 
     // Get the area types from the database
-    let area_types = await getAreaStyles();
+    let area_types = await getAreaStyles(supabase_client);
     // console.log(area_types)
 
     // Init an object to hold the sorted areas as arrays
@@ -401,7 +437,7 @@ async function addSensoryAreas( clickable = true ){
     });
 
     // Add the layer groups to the map controls
-    addLayerControl(areas_grouped_object);
+    addLayerControl(areas_grouped_object, map);
 
     // Return an array of layer groups
     return areas_grouped;
@@ -412,7 +448,7 @@ async function addSensoryAreas( clickable = true ){
  * @async
  * @returns {JSON} The styles from the database
  */
-async function getAreaStyles(){
+async function getAreaStyles(supabase_client){
 
     let {data, error} = await supabase_client.from('space_styles').select('*');
     if (error) {
@@ -432,9 +468,9 @@ async function getAreaStyles(){
  * @async
  * @returns {JSON} The spaces from the database
  */
-async function getAreas(){
+async function getAreas(supabase_client){
 
-    let {data, error} = await this.supabase_client.from('spaces').select('*');
+    let {data, error} = await supabase_client.from('spaces').select('*');
     if (error) {
         console.error(error)
         alert(error.message)
@@ -456,7 +492,7 @@ function makeLayerArray(area_types, sensory_areas) {
     
 }
 
-function addControlButtons(){
+function addControlButtons(map){
 
     // console.log("adding controls")
     // Add the controls to the map
@@ -492,7 +528,7 @@ function addControlButtons(){
     search.addTo(map);
 }
 
-function addLayerControl(area_types){
+function addLayerControl(area_types, map){
     
     let layers = L.control({position:"topright"});
     
