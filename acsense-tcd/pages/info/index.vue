@@ -121,8 +121,8 @@ Make sure the search with the url param converst dashes to spaces -->
 
             async checkForSearchParam() {
                 // Check if there is a search param
-                console.log("Checking for search param")
-                console.log(this.$route.query.search)
+                // console.log("Checking for search param")
+                // console.log(this.$route.query.search)
                 if (this.$route.query.search) {
                     // If there is, set the search bar to that value
                     this.searchTerm = this.normaliseSearchTerm(this.$route.query.search);
@@ -290,7 +290,7 @@ Make sure the search with the url param converst dashes to spaces -->
 
                 //Use the static generated Fuse instance to get a list of matches
                 let result = fuse.search(this.searchTerm)
-                console.log(result)
+                // console.log(result)
 
                 // Check there is a result
                 // If there's no result and no text in the textbox, show everything except the apology
