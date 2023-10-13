@@ -139,7 +139,12 @@
             },
             {
                 src: '/javascript/modalFunctions.js',
-            }
+            },
+            {
+                src: 'https://plausible.io/js/script.js',
+                defer: true,
+                'data-domain': "tcdsensemap.ie"
+            },
         ]
     });
 

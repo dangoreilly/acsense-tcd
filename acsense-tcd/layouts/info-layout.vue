@@ -53,8 +53,15 @@
             {
                 rel: "preconnect",
                 href: "https://fonts.googleapis.com",
-            }
+            },
         ],
+        script: [
+            {
+                src: 'https://plausible.io/js/script.js',
+                defer: true,
+                'data-domain': "tcdsensemap.ie"
+            },
+        ]
     });
 
 </script>
