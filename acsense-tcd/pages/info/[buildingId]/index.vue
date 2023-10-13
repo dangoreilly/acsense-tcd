@@ -221,14 +221,14 @@ body {
 } */
 </style>
 
-<script setup lang="ts">
+<script setup>
     useHead({
-        title: 'Accessibility Map',
+        title: 'TCD Sense - Building Info',
         meta: [
-            {
-                name: 'description',
-                content: 'An interactive map of Trinity College Dublin, showing accessibility information for buildings and rooms.',
-            },
+            // {
+            //     name: 'description',
+            //     content: 'An interactive map of Trinity College Dublin, showing accessibility information for buildings and rooms.',
+            // },
             {
                 name: 'keywords',
                 content: 'Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
@@ -238,33 +238,38 @@ body {
                 content: 'width=device-width, initial-scale=1.0',
             },
         ],
-        link: [
-            {
-                rel:"stylesheet",
-                href:"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            },
-        ],
     });
 
 
 </script>
 
-<script lang="ts">
+<script>
 
     // import bld from '~/assets/example-data';
     // import areas from '~/assets/example-area-data';
-    import { Building } from '~/assets/types/Building';
+    // import { Building } from '~/assets/types/Building';
 
-    import { InfoBoxContentTab } from '~/assets/types/infoPageTypes';
+    // import { InfoBoxContentTab } from '~/assets/types/infoPageTypes';
 
     export default {
         data() {
             return {
-            building: {} as any,
-            infoBoxContent: [] as any,
+            building: {},
+            infoBoxContent: [],
             activeInfoBoxTab: 0,
             linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
             linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
+            }
+        },
+        head() {
+            return {
+                title: this.building.display_name + ' - TCD Sense',
+                meta: [
+                    {
+                        name: 'description',
+                        content: 'Access information for ' + this.building.display_name + ' (Trinity College Dublin), showing accessibility information for buildings and rooms.',
+                    },
+                ],
             }
         },
         created() {
@@ -342,6 +347,11 @@ body {
                     
                     // Set the info box content
                     this.setInfoBoxContent();
+
+                    // Set the page title
+                    let newhead = this.building.display_name + ' - TCD Sense';
+                    this.$head.title = newhead;
+                    document.title = newhead;
                 }
                 else {
                     console.log("No building data found");
@@ -358,23 +368,23 @@ body {
     
     }
 
-    useHead({
-        link:[
-            {
-                rel: "stylesheet",
-                href: "https://fonts.googleapis.com/css2?family=Lato&family=PT+Mono&Inter:wght@900&display=swap"
-            },
-            {
-                rel: "preconnect",
-                href: "https://fonts.gstatic.com",
-                crossorigin: "anonymous"
-            },
-            {
-                rel: "preconnect",
-                href: "https://fonts.googleapis.com",
-            }
-        ],
-    });
+    // useHead({
+    //     link:[
+    //         {
+    //             rel: "stylesheet",
+    //             href: "https://fonts.googleapis.com/css2?family=Lato&family=PT+Mono&Inter:wght@900&display=swap"
+    //         },
+    //         {
+    //             rel: "preconnect",
+    //             href: "https://fonts.gstatic.com",
+    //             crossorigin: "anonymous"
+    //         },
+    //         {
+    //             rel: "preconnect",
+    //             href: "https://fonts.googleapis.com",
+    //         }
+    //     ],
+    // });
 
 
 </script>
