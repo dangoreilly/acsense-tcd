@@ -11,18 +11,18 @@
   },
   "devDependencies": {
     "@nuxt/content": "^2.6.0",
-    "@vueuse/core": "^10.1.2",
+    "@vueuse/core": "^10.5.0",
     "@vueuse/nuxt": "^10.1.2",
     "node-sass": "^8.0.0",
-    "nuxt": "^3.3.3",
+    "nuxt": "^3.7.4",
     "sass": "^1.62.0",
     "sass-loader": "^13.2.2"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.31.0",
+    "@supabase/supabase-js": "^2.38.0",
     "@types/node": "^18.15.11",
-    "bootstrap": "^5.3.0-alpha3",
-    "bootstrap-icons": "^1.10.5",
+    "bootstrap": "^5.3.2",
+    "bootstrap-icons": "^1.11.1",
     "fuse.js": "^6.6.2",
     "leaflet": "^1.9.3"
   }
