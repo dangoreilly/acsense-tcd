@@ -5,7 +5,7 @@
             <iframe 
             id="plausible-embed"
             plausible-embed 
-            src="https://plausible.io/share/tcdsensemap-test.ie?auth=ygLkYbc_xksHgzQ6oa0je" 
+            src="https://plausible.io/share/tcdsensemap.ie?auth=ygLkYbc_xksHgzQ6oa0je" 
             scrolling="yes"
             frameborder="0" 
             loading="lazy" 
