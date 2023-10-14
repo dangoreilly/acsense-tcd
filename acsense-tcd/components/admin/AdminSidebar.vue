@@ -58,6 +58,7 @@ export default {
     data() {
         return {
             currentUser: "null",
+            session: "null",
             tabs: [
                 {
                     name: 'Analytics',
@@ -85,11 +86,11 @@ export default {
                 //     key: 'branding',
                 //     icon: 'bi bi-brush',
                 // },
-                // {
-                //     name: 'Contributors',
-                //     key: 'contributors',
-                //     icon: 'bi bi-people',
-                // },
+                {
+                    name: 'Contributors',
+                    key: 'contributors',
+                    icon: 'bi bi-people',
+                },
                 // {
                 //     name: 'Audit Logs',
                 //     key: 'logs',
@@ -124,6 +125,7 @@ export default {
             if (!error && data.session) {
                 // console.log("Setting current user: " + data.session.user.email)
                 this.currentUser = data.session.user
+                this.session = data.session
             }
 
             else {

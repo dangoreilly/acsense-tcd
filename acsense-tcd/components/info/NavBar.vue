@@ -8,7 +8,7 @@
         class="navbar-brand nav-logo-base"
         :class="{'nav-logo-search ': searchIsActive}"
         style="font-family: 'Inter', sans-serif; cursor: pointer;"
-        @click="$router.push('/info')"
+        @click="$router.push('/')"
         >
             <strong>acsense</strong>
         </a>
@@ -17,7 +17,7 @@
         class="d-flex me-3 search-base" 
         v-if="!searchBarDisabled"
         role="search"
-        @submit.prevent="print(searchBoxContent)"
+        @submit.prevent="submitSearch()"
         :class="{'search-active': searchIsActive}">
 
             <div 
@@ -74,7 +74,7 @@ export default {
     // },
     methods: {
         submitSearch() {
-            this.$router.push('./?search=' + this.searchBoxContent);
+            this.$router.push('/info/?search=' + this.searchBoxContent);
         }
     }
 }
