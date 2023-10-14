@@ -6,7 +6,13 @@
     
             <div class="info-page-title" style="grid-area: title;">
                 <h1>{{space.name}}</h1>
-                <p style="display:block"><em>{{space.type}}</em></p>
+                <p style="display:block">
+                    <em>{{space.type}}</em> 
+                    <span v-if="space.building != null"> 
+                        &#8212; 
+                        <a :href="'/info/' + space.building"> {{ space.building_display_name }}</a>
+                    </span>
+                </p>
             </div>
                 
             <div id="description" style="grid-area: desc; justify-self: start;">
@@ -223,10 +229,33 @@ import {createClient} from '@supabase/supabase-js';
                     // Update the space object with the new data
                     this.space = space[0];
 
+                    // Get the display name for the building, if this space has one
+                    if (this.space.building != null){
+                        this.getBuildingDisplayName(this.space.building);
+                    }
+
                     // Get the icon for the space type
 
                 }
                 
+            },
+
+            async getBuildingDisplayName(building){
+                // Fetch the building from the database
+                // Since we are using the canonical name, we should only get one result
+                let { data: building_name, error } = await this.supabase
+                    .from('buildings')
+                    .select('display_name')
+                    .eq('canonical', building)
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // Update the space object with the new data
+                    this.space.building_display_name = building_name[0].display_name;
+                }
             },
 
 
@@ -259,7 +288,7 @@ import {createClient} from '@supabase/supabase-js';
                 }    
 
                 // TODO: Get a more sensible default image
-                return '/images/red-dot.png';
+                return '/images/TCDSenseMapLogo.png';
             },
         },
     }
