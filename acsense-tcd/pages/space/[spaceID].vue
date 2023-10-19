@@ -24,7 +24,7 @@
                 <MainPicture 
                 :mainSrc="space.primary_image_url" 
                 :mainAlt="space.primary_image_alt" 
-                :panorama="true"
+                :panorama="space.primary_image_panorama"
                 />
             </div>
                 

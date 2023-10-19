@@ -19,13 +19,6 @@ class="mainPictureCard">
                 href: 'https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css',
             },
         ],
-        script: [
-            {
-                src: '/javascript/panoramaViewer.js',
-                // body: true,
-                type: 'module',
-            },
-        ]
     });
 
 
@@ -52,19 +45,39 @@ export default {
             imgAlt: this.mainAlt,
         }
     },
+
+    // watch:{
+    //     // If any of the props change, re-initialise the image
+    //     mainSrc(){
+    //         this.initImage();
+    //     },
+    //     mainAlt(){
+    //         this.initImage();
+    //     },
+    // },
     mounted(){
         // If no mainSrc is provided, use a default image
-        if(!this.mainSrc){
-        this.imgSrc = "../images/info_page_default_image.jpg";
-        this.imgAlt = "Photo showing the fellows' square of Trinity College Dublin. No building in particular is focused on";
-        }
-        console.log("Panorama: " + this.panorama)
+        this.initImage();
+    },
 
-        if(this.panorama){
-            this.vue_initPanoramaViewer();
-        }
+    updated(){
+        // If no mainSrc is provided, use a default image
+        this.initImage();
     },
     methods:{
+
+        initImage(){
+            if(!this.mainSrc){
+                this.imgSrc = "../images/info_page_default_image.jpg";
+                this.imgAlt = "Photo showing the fellows' square of Trinity College Dublin. No building in particular is focused on";
+            }
+
+            // console.log("Panorama: " + this.panorama)
+
+            if(this.panorama){
+                this.vue_initPanoramaViewer();
+            }
+        },
 
         vue_initPanoramaViewer(){
             let visibleRangePlugin;
