@@ -19,6 +19,9 @@
     "sass-loader": "^13.2.2"
   },
   "dependencies": {
+    "@photo-sphere-viewer/autorotate-plugin": "^5.4.4",
+    "@photo-sphere-viewer/core": "^5.4.4",
+    "@photo-sphere-viewer/visible-range-plugin": "^5.4.4",
     "@supabase/supabase-js": "^2.38.0",
     "@types/node": "^18.15.11",
     "bootstrap": "^5.3.2",
