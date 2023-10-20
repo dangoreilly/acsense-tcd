@@ -221,7 +221,7 @@
                             <!-- Wayfinding -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="building.wayfinding_disp" id="WayfindDisplay">
+                                    <input class="form-check-input" type="checkbox" v-model="building.wayfinding_display" id="WayfindDisplay">
                                     <label class="form-check-label" for="WayfindDisplay">
                                         Wayfinding
                                     </label>
@@ -232,7 +232,7 @@
                             <!-- Physical -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="building.phys_access_disp" id="PhysicalDisplay">
+                                    <input class="form-check-input" type="checkbox" v-model="building.phys_access_display" id="PhysicalDisplay">
                                     <label class="form-check-label" for="PhysicalDisplay">
                                         Physical Experience
                                     </label>
@@ -280,7 +280,7 @@
                         <!-- Edit -->
                         <div class="col">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" v-model="building.furtherinfo_disp" id="furtherInfoDisplay">
+                                <input class="form-check-input" type="checkbox" v-model="building.furtherinfo_display" id="furtherInfoDisplay">
                                 <label class="form-check-label" for="furtherInfoDisplay">
                                     Further Information
                                 </label>
@@ -291,7 +291,7 @@
                         <!-- Display -->
                         <div class="col">
                             <div
-                            v-if="building.furtherinfo_disp">
+                            v-if="building.furtherinfo_display">
                                 <AdditionalInfo 
                                 :info="building.further_info"/>
                             </div>
@@ -495,12 +495,12 @@ import {createClient} from '@supabase/supabase-js';
                     {
                         title: "Wayfinding",
                         content: this.building.wayfinding || "No information provided",
-                        display: this.building.wayfinding_disp || false
+                        display: this.building.wayfinding_display || false
                     },
                     {
                         title: "Physical Access",
                         content: this.building.phys_access || "No information provided",
-                        display: this.building.phys_access_disp || false
+                        display: this.building.phys_access_display || false
                     },
                 ];
             },
@@ -539,12 +539,12 @@ import {createClient} from '@supabase/supabase-js';
                     sense_exp: this.building.sense_exp,
                     sense_exp_display: this.building.sense_exp_display,
                     wayfinding: this.building.wayfinding,
-                    wayfinding_disp: this.building.wayfinding_disp,
+                    wayfinding_display: this.building.wayfinding_display,
                     phys_access: this.building.phys_access,
-                    phys_access_disp: this.building.phys_access_disp,
+                    phys_access_display: this.building.phys_access_display,
 
                     further_info: this.building.further_info,
-                    furtherinfo_disp: this.building.furtherinfo_disp,
+                    furtherinfo_display: this.building.furtherinfo_display,
                     tips: this.building.tips,
 
                     always_display: this.building.always_display,
