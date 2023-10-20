@@ -76,7 +76,7 @@
         <div
         class="mt-3"
         style="grid-area: additional-info;"
-        v-if="building.furtherinfo_disp">
+        v-if="building.furtherinfo_display">
             <AdditionalInfo 
             :info="building.further_info"/>
         </div>
@@ -328,12 +328,12 @@ body {
                     {
                         title: "Wayfinding",
                         content: this.building.wayfinding || "No information available",
-                        display: this.building.wayfinding_disp
+                        display: this.building.wayfinding_display
                     },
                     {
                         title: "Physical Access",
                         content: this.building.phys_access || "No information available",
-                        display: this.building.phys_access_disp
+                        display: this.building.phys_access_display
                     },
                 ];
             },
