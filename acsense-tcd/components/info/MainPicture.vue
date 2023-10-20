@@ -28,7 +28,10 @@ class="mainPictureCard">
 
 import { Viewer } from '@photo-sphere-viewer/core';
 import { VisibleRangePlugin } from '@photo-sphere-viewer/visible-range-plugin';
-import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin';
+// import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin';
+
+// import pkg from '@photo-sphere-viewer/autorotate-plugin';
+// const { AutorotatePlugin } = pkg;
 
 export default {
     props:{
@@ -102,11 +105,11 @@ export default {
                     [VisibleRangePlugin, {
                         usePanoData: true,
                     }],
-                    [AutorotatePlugin, {
-                        autostartDelay: 1000,
-                        // autorotatePitch: '5deg',
-                        autorotateSpeed: "1rpm",
-                    }],
+                    // [AutorotatePlugin, {
+                    //     autostartDelay: 1000,
+                    //     // autorotatePitch: '5deg',
+                    //     autorotateSpeed: "1rpm",
+                    // }],
                 ],
             });
             
