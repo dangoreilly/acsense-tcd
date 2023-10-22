@@ -222,13 +222,78 @@ body {
 </style>
 
 <script setup>
+
+    function setInfoBoxContent(building){
+        return [
+            {
+                title: "Sensory Experience",
+                content: building.sense_exp || "No information available",
+                display: building.sense_exp_display
+            },
+            {
+                title: "Wayfinding",
+                content: building.wayfinding || "No information available",
+                display: building.wayfinding_display
+            },
+            {
+                title: "Physical Access",
+                content: building.phys_access || "No information available",
+                display: building.phys_access_display
+            },
+        ];
+    }
+
+    async function getBuildingData() {
+        const route = useRoute();
+
+        const response = await useFetch('/api/get/building/' + route.params.buildingId);
+
+        if (response.data.value != "" && response.data.value != null) {
+
+            // Clone it to avoid proxy nonsense
+            return JSON.parse(JSON.stringify(response.data.value));
+            
+            // Set the info box content
+            // this.setInfoBoxContent();
+        }
+        else {
+            console.log("No building data found");
+            // Redirect 
+            useRouter().push('./?search=' + route.params.buildingId);
+        }
+        // console.warn("Building data:")
+        // console.log(this.building);
+    }
+
+    function infoBoxDisplayCheck(infoBoxContent) {
+        // Returns true if any of the infobox tabs are set to display
+        for (let i = 0; i < infoBoxContent.length; i++) {
+            if (infoBoxContent[i].display) {
+                return true;
+            }
+        }
+        // If none of them are set to display, return false
+        return false;
+    }
+
+    
+    const { data: building, error } = await useAsyncData('building', () => getBuildingData())
+
+    // console.log(building);
+
+    const infoBoxContent = ref(setInfoBoxContent(building.value));
+    // console.log(infoBoxContent);
+    const infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
+
+    // console.log(infoBoxContent.value);
+
     useHead({
-        title: 'TCD Sense - Building Info',
+        title: building.value.display_name + '- TCD Sense',
         meta: [
-            // {
-            //     name: 'description',
-            //     content: 'An interactive map of Trinity College Dublin, showing accessibility information for buildings and rooms.',
-            // },
+            {
+                name: 'description',
+                content: building.value.description,
+            },
             {
                 name: 'keywords',
                 content: 'Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
@@ -254,50 +319,50 @@ body {
     export default {
         data() {
             return {
-            building: {},
-            infoBoxContent: [],
+            // building: {},
+            // infoBoxContent: [],
             activeInfoBoxTab: 0,
-            linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
-            linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
+            // linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
+            // linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
             }
         },
-        head() {
-            return {
-                title: this.building.display_name + ' - TCD Sense',
-                meta: [
-                    {
-                        name: 'description',
-                        content: 'Access information for ' + this.building.display_name + ' (Trinity College Dublin), showing accessibility information for buildings and rooms.',
-                    },
-                ],
-            }
-        },
-        created() {
-            // Set dummy variables to stop components from crashing
-            this.building.student_spaces = [];
-            // Grab the building data from the server and transform it 
-            // into the format we need
-            this.getBuildingData()
+        // head() {
+        //     return {
+        //         title: this.building.display_name + ' - TCD Sense',
+        //         meta: [
+        //             {
+        //                 name: 'description',
+        //                 content: 'Access information for ' + this.building.display_name + ' (Trinity College Dublin), showing accessibility information for buildings and rooms.',
+        //             },
+        //         ],
+        //     }
+        // },
+        // created() {
+        //     // Set dummy variables to stop components from crashing
+        //     this.building.student_spaces = [];
+        //     // Grab the building data from the server and transform it 
+        //     // into the format we need
+        //     this.getBuildingData()
             
-        },
+        // },
         computed: {
             // Get the theme from local storage
-            prefersDarkTheme() {
-                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-            },
+            // prefersDarkTheme() {
+            //     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+            // },
 
             // Check if any of the infobox tabs are set to display
             // This will change the class of the whole page to make the infobox tabs visible
-            infoBoxDisplays() {
-                // Returns true if any of the infobox tabs are set to display
-                for (let i = 0; i < this.infoBoxContent.length; i++) {
-                    if (this.infoBoxContent[i].display) {
-                        return true;
-                    }
-                }
-                // If none of them are set to display, return false
-                return false;
-            }
+            // infoBoxDisplays() {
+            //     // Returns true if any of the infobox tabs are set to display
+            //     for (let i = 0; i < this.infoBoxContent.length; i++) {
+            //         if (this.infoBoxContent[i].display) {
+            //             return true;
+            //         }
+            //     }
+            //     // If none of them are set to display, return false
+            //     return false;
+            // }
         },
         watch: {
             // Watch for changes to the theme
@@ -318,53 +383,53 @@ body {
                     document.documentElement.setAttribute('data-bs-theme', 'light')
                 }
             },
-            setInfoBoxContent(){
-                this.infoBoxContent = [
-                    {
-                        title: "Sensory Experience",
-                        content: this.building.sense_exp || "No information available",
-                        display: this.building.sense_exp_display
-                    },
-                    {
-                        title: "Wayfinding",
-                        content: this.building.wayfinding || "No information available",
-                        display: this.building.wayfinding_display
-                    },
-                    {
-                        title: "Physical Access",
-                        content: this.building.phys_access || "No information available",
-                        display: this.building.phys_access_display
-                    },
-                ];
-            },
-            async getBuildingData() {
-                const response = await useFetch('/api/get/building/' + this.$route.params.buildingId);
+            // setInfoBoxContent(){
+            //     this.infoBoxContent = [
+            //         {
+            //             title: "Sensory Experience",
+            //             content: this.building.sense_exp || "No information available",
+            //             display: this.building.sense_exp_display
+            //         },
+            //         {
+            //             title: "Wayfinding",
+            //             content: this.building.wayfinding || "No information available",
+            //             display: this.building.wayfinding_display
+            //         },
+            //         {
+            //             title: "Physical Access",
+            //             content: this.building.phys_access || "No information available",
+            //             display: this.building.phys_access_display
+            //         },
+            //     ];
+            // },
+            // async getBuildingData() {
+            //     const response = await useFetch('/api/get/building/' + this.$route.params.buildingId);
 
-                if (response.data.value != "" && response.data.value != null) {
+            //     if (response.data.value != "" && response.data.value != null) {
 
-                    // Clone it to avoid proxy nonsense
-                    this.building = JSON.parse(JSON.stringify(response.data.value));
+            //         // Clone it to avoid proxy nonsense
+            //         this.building = JSON.parse(JSON.stringify(response.data.value));
                     
-                    // Set the info box content
-                    this.setInfoBoxContent();
+            //         // Set the info box content
+            //         this.setInfoBoxContent();
 
-                    // Set the page title
-                    let newhead = this.building.display_name + ' - TCD Sense';
-                    this.$head.title = newhead;
-                    document.title = newhead;
-                }
-                else {
-                    console.log("No building data found");
-                    // Redirect 
-                    this.$router.push('./?search=' + this.$route.params.buildingId);
-                }
-                // console.warn("Building data:")
-                // console.log(this.building);
-            },
+            //         // Set the page title
+            //         let newhead = this.building.display_name + ' - TCD Sense';
+            //         this.$head.title = newhead;
+            //         document.title = newhead;
+            //     }
+            //     else {
+            //         console.log("No building data found");
+            //         // Redirect 
+            //         this.$router.push('./?search=' + this.$route.params.buildingId);
+            //     }
+            //     // console.warn("Building data:")
+            //     // console.log(this.building);
+            // },
         },
-        mounted() {
-            this.setTheme()
-        }
+        // mounted() {
+        //     this.setTheme()
+        // }
     
     }
 
