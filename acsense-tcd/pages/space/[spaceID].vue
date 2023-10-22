@@ -159,16 +159,127 @@
     </style>
     
 <script setup>
+
+import {createClient} from '@supabase/supabase-js';
+
+
+    // Define data fetching functions
+    async function getStudentSpace(supabase, canonical){
+        // console.log("Fetching space: " + canonical);
+
+        // Fetch the space from the database
+        // Since we are using the canonical name, we should only get one result
+        let { data: space, error } = await supabase
+            .from('spaces')
+            .select('*')
+            .eq('canonical', canonical)
+        if (error) {
+            console.error(error)
+            alert(error.message)
+            throw error
+        }
+        else {
+
+            // If there are no results, navigate to the search page
+            if (space.length == 0){
+                this.$router.push('/info/?search=' + canonical);
+            }
+            
+            // Update the space object with the new data
+            let _space = space[0];
+
+            // Get the display name for the building, if this space has one
+            if (_space.building != null){
+                _space.building_display_name = await getBuildingDisplayName(supabase, _space.building);
+            }
+
+            return _space;
+
+        }
+        
+    }
+
+    async function getBuildingDisplayName(supabase, building){
+        // Fetch the building from the database
+        // Since we are using the canonical name, we should only get one result
+        let { data: building_name, error } = await supabase
+            .from('buildings')
+            .select('display_name')
+            .eq('canonical', building)
+        if (error) {
+            console.error(error)
+            alert(error.message)
+            throw error
+        }
+        else {
+            // Update the space object with the new data
+            // this.space.building_display_name = building_name[0].display_name;
+            return building_name[0].display_name;
+        }
+    }
+
+
+    async function getSpaceTypes(supabase){
+        // Fetch the space types from the database
+        let { data: space_types, error } = await supabase
+            .from('space_styles')
+            .select('*')
+        if (error) {
+            console.error(error)
+            alert(error.message)
+            throw error
+        }
+        else {
+            // Update the space object with the new data
+            // console.log("Space types:")
+            // console.log(space_types);
+            // this.space_types = space_types;
+            return space_types;
+        }
+    }
+
+    function getImageForSpaceType(type, space_types){
+        // Cycle through space types
+        // When the category field matches the input, return the image
+        // If there are no matches, return the placeholder image
+        for (let i = 0; i < space_types.length; i++) {
+            if (space_types[i].category == type){
+                return space_types[i].icon;
+            }
+        }    
+
+        // TODO: Get a more sensible default image
+        return '/images/TCDSenseMapLogo.png';
+    }
+
+
+    // Get the supabase client for fetching the rest of our data
+    const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+    const supabaseKey = useRuntimeConfig().public.supabaseKey;
+    const sb_client = createClient(supabaseUrl, supabaseKey)
+
+    // Load the list of space types from the database
+    const space_types = getSpaceTypes(sb_client);
+
+    // Load and render the space from the database
+    const route = useRoute()
+    const { data: space, error } = await useAsyncData('space', () => getStudentSpace(sb_client, route.params.spaceID))
+    // const space = getStudentSpace(sb_client, route.params.spaceID);
+
+    // console.log(space.value)
+
+    // Set the SEO and page title
+
     useHead({
-        title: 'Student Space',
+        title: space.value.name + ' - TCD Sense',
         meta: [
             {
                 name: 'description',
-                content: 'Information about the sensory spaces of Trinity College Dublin',
+                content: space.value.description,
             },
             {
                 name: 'keywords',
-                content: 'Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
+                content: space.value.name + ', Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
             },
             {
                 name: 'viewport',
@@ -177,36 +288,47 @@
         ],
     });
 
-
 </script>
     
 
-<script>
+<!-- <script>
 import {createClient} from '@supabase/supabase-js';
 
     export default {
-        data() {
+        async asyncData({ params }) {
             return {
-                space: {},
-                supabase: {},
-                space_types: [],
-                space_icon: "",
+                space: this.getStudentSpace(params.spaceID),
+                supabase: () => {
+
+                    // console.log(params)
+                    // Initialise the supabase client
+                    const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+                    const supabaseKey = useRuntimeConfig().public.supabaseKey;
+                    return createClient(supabaseUrl, supabaseKey)
+                },
+                space_types: this.getSpaceTypes(),
+                // space_icon: "",
             }
         },
-        created() {
+        // data() {
+        //     return {
+        //         space: {},
+        //         supabase: {},
+        //         space_types: [],
+        //         space_icon: "",
+        //     }
+        // },
+        // created() {
 
-            // Initialise the supabase client
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
-
-            // Load the list of space types from the database
-            this.getSpaceTypes();
             
-            // Load and render the space from the database
-            this.getStudentSpace(this.$route.params.spaceID);
 
-        },
+        //     // Load the list of space types from the database
+        //     this.getSpaceTypes();
+            
+        //     // Load and render the space from the database
+        //     this.getStudentSpace(this.$route.params.spaceID);
+
+        // },
         methods: {
             // This function fetches the student space from the database based on it's canonical name
             async getStudentSpace(canonical){
@@ -231,11 +353,11 @@ import {createClient} from '@supabase/supabase-js';
                     }
                     
                     // Update the space object with the new data
-                    this.space = space[0];
+                    let _space = space[0];
 
                     // Get the display name for the building, if this space has one
-                    if (this.space.building != null){
-                        this.getBuildingDisplayName(this.space.building);
+                    if (_space.building != null){
+                        _space.building_name = this.getBuildingDisplayName(this.space.building);
                     }
 
                     // Get the icon for the space type
@@ -258,7 +380,8 @@ import {createClient} from '@supabase/supabase-js';
                 }
                 else {
                     // Update the space object with the new data
-                    this.space.building_display_name = building_name[0].display_name;
+                    // this.space.building_display_name = building_name[0].display_name;
+                    return building_name[0].display_name;
                 }
             },
 
@@ -277,7 +400,8 @@ import {createClient} from '@supabase/supabase-js';
                     // Update the space object with the new data
                     // console.log("Space types:")
                     // console.log(space_types);
-                    this.space_types = space_types;
+                    // this.space_types = space_types;
+                    return space_types;
                 }
             },
 
@@ -298,5 +422,5 @@ import {createClient} from '@supabase/supabase-js';
     }
 
 
-</script>
+</script> -->
     
