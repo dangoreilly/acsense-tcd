@@ -19,18 +19,21 @@
                 <h3>Description</h3>
                 <p>{{space.description}}</p>
             </div>
-    
-            <div style="grid-area: main-photo;">
-                <MainPicture 
-                :mainSrc="space.primary_image_url" 
-                :mainAlt="space.primary_image_alt" 
-                :panorama="space.primary_image_panorama"
-                />
-            </div>
                 
             <div style="grid-area: facilties; align-self: end;">
                 <Facilities 
                 :space="space"
+                />
+            </div>
+    
+            <div style="grid-area: main-photo;">
+                <LazyPanoramaViewer v-if="space.primary_image_panorama"
+                :mainSrc="space.primary_image_url" 
+                :mainAlt="space.primary_image_alt" 
+                />
+                <MainPicture v-else
+                :mainSrc="space.primary_image_url"
+                :mainAlt="space.primary_image_alt"
                 />
             </div>
     
