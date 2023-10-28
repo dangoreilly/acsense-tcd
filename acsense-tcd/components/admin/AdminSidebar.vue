@@ -137,21 +137,21 @@ export default {
     }
 };
 
-useHead({
-    title: 'Acsense Admin',
-    meta: [
-        {
-            name: 'description',
-            content: 'Acsense Admin page'
-        }
-    ],
-    // link: [
-    //     {
-    //         rel: 'stylesheet',
-    //         href: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css'
-    //     }
-    // ]
-})
+// useHead({
+//     title: 'Acsense Admin',
+//     meta: [
+//         {
+//             name: 'description',
+//             content: 'Acsense Admin page'
+//         }
+//     ],
+//     // link: [
+//     //     {
+//     //         rel: 'stylesheet',
+//     //         href: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css'
+//     //     }
+//     // ]
+// })
 
 </script>
 

@@ -4,7 +4,7 @@
     <NuxtLayout name="admin-layout" :activePage="'spaces'">
         <main class="d-flex flex-nowrap" style="height:100vh">
 
-            <!-- Sidebar for building selection -->
+            <!-- Sidebar for space selection -->
             <AdminStudentSpaceSelector 
             @activeSpaceChanged="getStudentSpace($event)"/>
             <!-- Main section for editing -->
@@ -50,106 +50,339 @@
 
                 <!-- Main Matter -->
                 <!-- Only render if the space has loaded -->
-                <div class="mainMatter-admin" v-if="space">
+                <div class="mainMatter-admin px-2" v-if="space">
 
                     <!-- Two columns -->
                     <!-- Column 1 contains input boxes -->
                     <!-- Column 2 contains a modal preview -->
                     <!-- The input boxes are paired to the components to allow for live editing -->
 
-                    <div class="row border-b">
-                        <!-- Edit block -->
+                    <!-- <Summary> -->
+                        <div class="row border-b">
+                        <!-- Input -->
                         <div class="col d-flex flex-column">
-                            <div class="row d-flex">
-                                <!-- Typey bits -->
-                                <div class="flex-fill">
-                                    <div class="col flex-column" style="grid-column: auto;">
-                                        <!-- Space Name -->
-                                        <div class="mb-2">
-                                            <label for="nameInput" class="form-label">Name</label>
-                                            <input id="nameInput" type="text" class="form-control" 
-                                            v-model="space.name">
-                                        </div>
+                            <!-- Space Name -->
+                            <div class="mb-3">
+                                <label for="TitleInput" class="form-label">Space Name</label>
+                                <input id="TitleInput" type="text" class="form-control" 
+                                v-model="space.name">
+                            </div>
 
-                                        <!-- Description -->
-                                        <div class="mb-2">
-                                            <label for="descInput" class="form-label">Description</label>
-                                            <textarea class="form-control" id="descInput" rows="4" 
-                                            v-model="space.description"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- Aka -->
+                            <div class="mb-3">
+                                <label for="AkaInput" class="form-label">AKA <small>(optional)</small></label>
+                                <input id="AkaInput" type="text" class="form-control" 
+                                v-model="space.aka">
                             </div>
-                            <div class="row">
-                            <!-- clicky bits -->
-                                <div class="col">
-                                    <!-- Seating -->
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="space.seating" id="seating">
-                                        <label class="form-check-label" for="seating">
-                                            Seating
-                                        </label>
-                                    </div>
-                                    <!-- sockets -->
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="space.outlets" id="sockets">
-                                        <label class="form-check-label" for="sockets">
-                                            Plug Sockets
-                                        </label>
-                                    </div>
-                                    <!-- eating -->
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="space.food_drink_allowed" id="eating">
-                                        <label class="form-check-label" for="eating">
-                                            Food/Drink Allowed
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <!-- microwave -->
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="space.microwave" id="microwave">
-                                        <label class="form-check-label" for="microwave">
-                                            Microwave
-                                        </label>
-                                    </div>
-                                    <!-- kettle -->
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="space.kettle" id="kettle">
-                                        <label class="form-check-label" for="kettle">
-                                            Kettle
-                                        </label>
-                                    </div>
-                                    <!-- wheelchair -->
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="space.wheelchair" id="access">
-                                        <label class="form-check-label" for="access">
-                                            Wheelchair Access
-                                        </label>
-                                    </div>
-                                </div>
+
+                            <!-- Primary Image -->
+                            <div class="mb-3">
+                                <label for="PrimaryImageInput" class="form-label">Primary Image</label>
+                                <input id="PrimaryImageInput" type="file" class="form-control" 
+                                @change="handlePrimaryImageSelect">
                             </div>
-                            <!-- Building selector -->
-                            <div class="row ms-1 pt-2 border-top mt-2">
-                                <label for="buildingSelect" class="form-label">Building</label>
-                                <select 
-                                class="form-select" 
-                                id="buildingSelect" 
-                                v-model="space.building">
-                                    <option value="null">None</option>
-                                    <option 
-                                    v-for="bld in buildings"
-                                    :key="bld.canonical"
-                                    :value="bld.canonical">
-                                    {{ bld.display_name }}
-                                    </option>
-                                </select>
+                            <!-- Primary image alt text -->
+                            <div class="mb-3">
+                                <label for="PrimaryImageAltInput" class="form-label">Primary Image Alt Text</label>
+                                <input id="PrimaryImageAltInput" type="text" class="form-control" 
+                                v-model="space.primary_image_alt">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" v-model="space.primary_image_panorama">
+                                    <label class="form-check-label" for="flexSwitchCheckDefault">Primary image is a panorama</label>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Preview block -->
+                        <!-- Preview -->
                         <div class="col">
-                            <admin-space-modal-preview :space="space"/>
+                            <!-- Name -->
+                            <div class="info-page-title" style="grid-area: title;">
+                                <h1>{{space.name}}</h1>
+                                <p v-if="space.aka" id="aka" style="display:block"><b>Also Known as:</b> {{space.aka}}</p>
+                            </div>
+
+                            <!-- Primary Image -->
+                            <div class="mb-3">
+                                <LazyPanoramaViewer v-if="space.primary_image_panorama"
+                                :mainSrc="space.primary_image_url" 
+                                :mainAlt="space.primary_image_alt" 
+                                />
+                                <MainPicture v-else
+                                :mainSrc="space.primary_image_url"
+                                :mainAlt="space.primary_image_alt"
+                                />
+                            </div>    
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="row border-bottom mb-3 pb-2">
+                        <!-- Input -->
+                        <div class="col">
+                            <label for="descInput" class="form-label">Description</label>
+                            <textarea class="form-control" id="descInput" rows="4" 
+                            v-model="space.description"></textarea>
+                        </div>
+                        <!-- Preview -->
+                        <div class="col" id="description" style="grid-area: desc; justify-self: start;">
+                            <h3>Description</h3>
+                            <p>{{space.description}}</p>
+                        </div>
+                    </div>
+
+                    <!-- Facilities -->
+                    <div class="border-bottom mb-3 pb-2">
+                        <!-- Seating -->
+                        <div class="row mb-3">
+                            <!-- Input -->
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.seating" id="SeatingAvailable">
+                                    <label class="form-check-label" for="SeatingAvailable">
+                                        Seating Available?
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                v-model="space.seating_note"></textarea>
+                            </div>
+                            <!-- Preview -->
+                            <div class="col">
+                                <AdminFacility 
+                                :facility="'seating'"
+                                :available="space.seating"
+                                :note="space.seating_note"/>
+                            </div>
+                        </div>
+
+                        <!-- Sockets -->
+                        <div class="row mb-3">
+                            <!-- Input -->
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.outlets" id="OutletsAvailable">
+                                    <label class="form-check-label" for="OutletsAvailable">
+                                        Plug Sockets Available?
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                v-model="space.outlets_note"></textarea>
+                            </div>
+                            <!-- Preview -->
+                            <div class="col">
+                                <AdminFacility 
+                                :facility="'outlets'"
+                                :available="space.outlets"
+                                :note="space.outlets_note"/>
+                            </div>
+                        </div>
+
+                        <!-- Food and Drink -->
+                        <div class="row mb-3">
+                            <!-- Input -->
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.food_drink_allowed" id="FoodAllowed">
+                                    <label class="form-check-label" for="FoodAllowed">
+                                        Food and Drink Allowed?
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                v-model="space.food_and_drink_allowed_note"></textarea>
+                            </div>
+                            <!-- Preview -->
+                            <div class="col">
+                                <AdminFacility 
+                                :facility="'food_and_drink_allowed'"
+                                :available="space.food_drink_allowed"
+                                :note="space.food_and_drink_allowed_note"/>
+                            </div>
+                        </div>
+
+                        <!-- Kettle -->
+                        <div class="row mb-3">
+                            <!-- Input -->
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.kettle" id="kettle">
+                                    <label class="form-check-label" for="kettle">
+                                        Kettle Available?
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                v-model="space.kettle_note"></textarea>
+                            </div>
+                            <!-- Preview -->
+                            <div class="col">
+                                <AdminFacility 
+                                :facility="'kettle'"
+                                :available="space.kettle"
+                                :note="space.kettle_note"/>
+                            </div>
+                        </div>
+
+                        <!-- Microwave -->
+                        <div class="row mb-3">
+                            <!-- Input -->
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.microwave" id="microwave">
+                                    <label class="form-check-label" for="microwave">
+                                        Microwave Available?
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                v-model="space.microwave_note"></textarea>
+                            </div>
+                            <!-- Preview -->
+                            <div class="col">
+                                <AdminFacility 
+                                :facility="'microwave'"
+                                :available="space.microwave"
+                                :note="space.microwave_note"/>
+                            </div>
+                        </div>
+
+                        <!-- Wheelchair -->
+                        <div class="row mb-3">
+                            <!-- Input -->
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.wheelchair" id="wheelchair">
+                                    <label class="form-check-label" for="wheelchair">
+                                        Wheelchair Accessible?
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                v-model="space.wheelchair_note"></textarea>
+                            </div>
+                            <!-- Preview -->
+                            <div class="col">
+                                <AdminFacility 
+                                :facility="'wheelchair'"
+                                :available="space.wheelchair"
+                                :note="space.wheelchair_note"/>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- Infobox -->
+                    <div class="row mt-3 border-bottom">
+                        <div class="col">
+                            <!-- Sensory -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.sense_exp_display" id="SenseDisplay">
+                                    <label class="form-check-label" for="SenseDisplay">
+                                        Sensory Experience
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="4" 
+                                v-model="space.sense_exp"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control"
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="space.sense_exp_video">
+                                </div>
+                            </div>
+                            <!-- Wayfinding -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.wayfinding_display" id="WayfindDisplay">
+                                    <label class="form-check-label" for="WayfindDisplay">
+                                        Wayfinding
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="4" 
+                                v-model="space.wayfinding"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control"
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="space.wayfinding_video">
+                                </div>
+                            </div>
+                            <!-- Physical -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" v-model="space.phys_access_display" id="PhysicalDisplay">
+                                    <label class="form-check-label" for="PhysicalDisplay">
+                                        Physical Experience
+                                    </label>
+                                </div>
+                                <textarea class="form-control" id="descInput" rows="4" 
+                                v-model="space.phys_access"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control"
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="space.phys_access_video">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <Infobox
+                            :contentArray="infoBoxContent"
+                            />
+                        </div>
+                    </div>
+                    
+                    <!-- Tips -->
+                    <div class="row mt-3 pb-3 border-bottom">
+                        <!-- Edit -->
+                        <div class="col">
+                            <!-- Loop through the tips as text inputs -->
+                            <div class="mb-3">
+                                <div v-for="(tip, index) in space.tips" :key="index" class="input-group mb-2">
+                                    <input type="text" class="form-control" v-model="space.tips[index]" placeholder="New Tip">
+                                    <button class="btn btn-warning" type="button" @click="removeTip(index)">Remove</button>
+                                </div>
+                                <!-- Button to add a new tip -->
+                                <button class="btn btn-success" type="button" @click="addTip()">Add Tip</button>
+                            </div>
+                            
+                        </div>
+                        <!-- Display -->
+                        <div class="col" v-if="space.tips && space.tips.length > 0">
+                            <AccessTips :tips="space.tips" />
+                        </div>
+                        <div class="col" v-else>
+                            <!-- <p><em> &lt;&lt; Tip box will not display >> </em></p> -->
+                        </div>
+                        
+                    </div>
+
+
+                <!-- Additional Information -->
+                    <div class="row mt-3 border-b">
+                        <!-- Edit -->
+                        <div class="col">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" v-model="space.furtherinfo_display" id="furtherInfoDisplay">
+                                <label class="form-check-label" for="furtherInfoDisplay">
+                                    Further Information
+                                </label>
+                            </div>
+                            <textarea class="form-control" id="descInput" rows="4" 
+                            v-model="space.further_info"></textarea>
+                        </div>
+                        <!-- Display -->
+                        <div class="col">
+                            <div
+                            v-if="space.furtherinfo_display">
+                                <AdditionalInfo 
+                                :info="space.further_info"/>
+                            </div>
                         </div>
                     </div>
 
@@ -188,14 +421,14 @@
                                 <select 
                                 class="form-select" 
                                 id="spaceType" 
-                                @update="updateSpaceIcon()"
+                                @change="updateSpaceIcon()"
                                 v-model="space.type">
                                     <option disabled value="">Select Space Type</option>
                                     <option 
-                                    v-for="type in space_types"
-                                    :key="type.category"
-                                    :value="type.category">
-                                    {{ type.category }}
+                                    v-for="_type in space_types"
+                                    :key="_type.category"
+                                    :value="_type.category">
+                                    {{ _type.category }}
                                     </option>
                                 </select>
 
@@ -298,7 +531,33 @@ import {createClient} from '@supabase/supabase-js';
             this.mapInit();
 
         },
+        mounted(){
+            // On mount, update the space icon
+            this.updateSpaceIcon();
+            this.loadSpaceToMap();
+
+        },
         computed: {
+            infoBoxContent() {
+                // return [
+                //     {
+                //         title: "Sensory Experience",
+                //         content: this.space.sense_exp || "No information provided",
+                //         display: this.space.sense_exp_display || false
+                //     },
+                //     {
+                //         title: "Wayfinding",
+                //         content: this.space.wayfinding || "No information provided",
+                //         display: this.space.wayfinding_display || false
+                //     },
+                //     {
+                //         title: "Physical Access",
+                //         content: this.space.phys_access || "No information provided",
+                //         display: this.space.phys_access_display || false
+                //     },
+                // ];
+                return setInfoBoxContent(this.space);
+            },
             spaceHasBeenChanged() {
                 // This function compares the current state of the space against the state it was in when the page was loaded
                 // console.log("Checking if space has been changed")
@@ -329,6 +588,31 @@ import {createClient} from '@supabase/supabase-js';
                 return data;
             },
 
+            // A schema error caused notes to be improperly initialised as "" instead of an empty string
+            // This is purely aesthetic
+            cleanUpNotes(){
+
+                if (this.space.seating_note == '""' || this.space.seating_note == "\"\""){
+                    this.space.seating_note = null;
+                }
+                if (this.space.outlets_note == '""' || this.space.outlets_note == "\"\""){
+                    this.space.outlets_note = null;
+                }
+                if (this.space.food_and_drink_allowed_note == '""' || this.space.food_and_drink_allowed_note == "\"\""){
+                    this.space.food_and_drink_allowed_note = null;
+                }
+                if (this.space.kettle_note == '""' || this.space.kettle_note == "\"\""){
+                    this.space.kettle_note = null;
+                }
+                if (this.space.microwave_note == '""' || this.space.microwave_note == "\"\""){
+                    this.space.microwave_note = null;
+                }
+                if (this.space.wheelchair_note == '""' || this.space.wheelchair_note == "\"\""){
+                    this.space.wheelchair_note = null;
+                }
+
+            },
+
             // This function fetches the student space from the database based on it's canonical name
             async getStudentSpace(canonical){
                 console.log("Fetching space: " + canonical);
@@ -349,8 +633,13 @@ import {createClient} from '@supabase/supabase-js';
                     // Update the space object with the new data
                     this.space = space[0];
 
+                    // Clean up the notes
+                    this.cleanUpNotes();
+
                     // Deep copy the space object so we have comparison data
                     this.space_clean = JSON.parse(JSON.stringify(this.space));
+
+                    console.log(space)
 
                     // Update the map to show the space
                     this.loadSpaceToMap();
@@ -389,8 +678,8 @@ import {createClient} from '@supabase/supabase-js';
                 }
                 else {
                     // Update the space object with the new data
-                    console.log("Space types:")
-                    console.log(space_types);
+                    // console.log("Space types:")
+                    // console.log(space_types);
                     this.space_types = space_types;
                 }
             },
@@ -411,7 +700,7 @@ import {createClient} from '@supabase/supabase-js';
                 // Update the space icon on the map
                 // This function is called when the space type is changed
                 // It will update the icon on the map to match the new space type
-                console.log("Updating map icon")
+                // console.log("Updating map icon")
                 let newIcon = this.getImageForSpaceType(this.space.type);
 
                 

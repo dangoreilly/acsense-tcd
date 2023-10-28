@@ -13,17 +13,21 @@
     "@nuxt/content": "^2.6.0",
     "@vueuse/core": "^10.5.0",
     "@vueuse/nuxt": "^10.1.2",
-    "node-sass": "^8.0.0",
-    "nuxt": "^3.7.4",
-    "sass": "^1.62.0",
+    "node-sass": "^9.0.0",
+    "nuxt": "^3.8.0",
+    "sass": "^1.69.5",
     "sass-loader": "^13.2.2"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.0",
-    "@types/node": "^18.15.11",
+    "@photo-sphere-viewer/autorotate-plugin": "^5.4.4",
+    "@photo-sphere-viewer/core": "^5.4.4",
+    "@photo-sphere-viewer/visible-range-plugin": "^5.4.4",
+    "@supabase/supabase-js": "^2.38.2",
+    "@types/node": "^20.8.9",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.1",
     "fuse.js": "^6.6.2",
-    "leaflet": "^1.9.3"
+    "leaflet": "^1.9.3",
+    "three": "^0.157.0"
   }
 }

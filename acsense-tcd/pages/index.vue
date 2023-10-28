@@ -248,7 +248,7 @@
         }
 
         .sense-icon {
-            opacity: var(--sense-icon-opacity);
+            /* opacity: var(--sense-icon-opacity); */
             transition: opacity 0.5s ease-in-out;
         }
 

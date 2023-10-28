@@ -217,28 +217,52 @@
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
                                 v-model="building.sense_exp"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Sensory Experience Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control" 
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="building.sense_exp_video">
+                                </div>
                             </div>
                             <!-- Wayfinding -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="building.wayfinding_disp" id="WayfindDisplay">
+                                    <input class="form-check-input" type="checkbox" v-model="building.wayfinding_display" id="WayfindDisplay">
                                     <label class="form-check-label" for="WayfindDisplay">
                                         Wayfinding
                                     </label>
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
                                 v-model="building.wayfinding"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Sensory Experience Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control" 
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="building.wayfinding_video">
+                                </div>
                             </div>
                             <!-- Physical -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="building.phys_access_disp" id="PhysicalDisplay">
+                                    <input class="form-check-input" type="checkbox" v-model="building.phys_access_display" id="PhysicalDisplay">
                                     <label class="form-check-label" for="PhysicalDisplay">
                                         Physical Experience
                                     </label>
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
                                 v-model="building.phys_access"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control"
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="building.phys_access_video">
+                                </div>
                             </div>
                         </div>
 
@@ -269,7 +293,7 @@
                             <AccessTips :tips="building.tips" />
                         </div>
                         <div class="col" v-else>
-                            <p><em> &lt;&lt; Tip box will not display >> </em></p>
+                            <!-- <p><em> &lt;&lt; Tip box will not display >> </em></p> -->
                         </div>
                         
                     </div>
@@ -280,7 +304,7 @@
                         <!-- Edit -->
                         <div class="col">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" v-model="building.furtherinfo_disp" id="furtherInfoDisplay">
+                                <input class="form-check-input" type="checkbox" v-model="building.furtherinfo_display" id="furtherInfoDisplay">
                                 <label class="form-check-label" for="furtherInfoDisplay">
                                     Further Information
                                 </label>
@@ -291,7 +315,7 @@
                         <!-- Display -->
                         <div class="col">
                             <div
-                            v-if="building.furtherinfo_disp">
+                            v-if="building.furtherinfo_display">
                                 <AdditionalInfo 
                                 :info="building.further_info"/>
                             </div>
@@ -486,23 +510,24 @@ import {createClient} from '@supabase/supabase-js';
         },
         computed: {
             infoBoxContent() {
-                return [
-                    {
-                        title: "Sensory Experience",
-                        content: this.building.sense_exp || "No information provided",
-                        display: this.building.sense_exp_display || false
-                    },
-                    {
-                        title: "Wayfinding",
-                        content: this.building.wayfinding || "No information provided",
-                        display: this.building.wayfinding_disp || false
-                    },
-                    {
-                        title: "Physical Access",
-                        content: this.building.phys_access || "No information provided",
-                        display: this.building.phys_access_disp || false
-                    },
-                ];
+                // return [
+                //     {
+                //         title: "Sensory Experience",
+                //         content: this.building.sense_exp || "No information provided",
+                //         display: this.building.sense_exp_display || false
+                //     },
+                //     {
+                //         title: "Wayfinding",
+                //         content: this.building.wayfinding || "No information provided",
+                //         display: this.building.wayfinding_display || false
+                //     },
+                //     {
+                //         title: "Physical Access",
+                //         content: this.building.phys_access || "No information provided",
+                //         display: this.building.phys_access_display || false
+                //     },
+                // ];
+                return setInfoBoxContent(this.building);
             },
             buildingHasBeenChanged() {
                 // This function compares the current state of the building against the state it was in when the page was loaded
@@ -539,12 +564,12 @@ import {createClient} from '@supabase/supabase-js';
                     sense_exp: this.building.sense_exp,
                     sense_exp_display: this.building.sense_exp_display,
                     wayfinding: this.building.wayfinding,
-                    wayfinding_disp: this.building.wayfinding_disp,
+                    wayfinding_display: this.building.wayfinding_display,
                     phys_access: this.building.phys_access,
-                    phys_access_disp: this.building.phys_access_disp,
+                    phys_access_display: this.building.phys_access_display,
 
                     further_info: this.building.further_info,
-                    furtherinfo_disp: this.building.furtherinfo_disp,
+                    furtherinfo_display: this.building.furtherinfo_display,
                     tips: this.building.tips,
 
                     always_display: this.building.always_display,

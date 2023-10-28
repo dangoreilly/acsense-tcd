@@ -118,12 +118,11 @@ export default {
             return;
         }
         
-        console.log(facility)
+        // console.log(facility)
 
         if (facility == "seating"){
             // If the note is empty, return the default text
             if (this.space.seating_note == null || this.space.seating_note == "" || this.space.seating_note == "\"\""){
-                console.log("this.space.seating_note");
                 if (this.space.seating) return this.defaults.seating[1];
                 else return this.defaults.seating[0];
             }
@@ -137,7 +136,6 @@ export default {
         if (facility == "outlets"){
             // If the note is empty, return the default text
             if (this.space.outlets_note == null || this.space.outlets_note == "" || this.space.outlets_note == "\"\""){
-                console.log("this.space.outlets_note");
                 if (this.space.outlets) return this.defaults.outlets[1];
                 else return this.defaults.outlets[0];
             }
@@ -151,7 +149,6 @@ export default {
         if (facility == "food_and_drink_allowed"){
             // If the note is empty, return the default text
             if (this.space.food_and_drink_allowed_note == null || this.space.food_and_drink_allowed_note == "" || this.space.food_and_drink_allowed_note == "\"\""){
-                // console.log("this.space.food_and_drink_allowed_note");
                 if (this.space.food_and_drink_allowed) return this.defaults.food_and_drink_allowed[1];
                 else return this.defaults.food_and_drink_allowed[0];
             }
@@ -165,7 +162,6 @@ export default {
         if (facility == "kettle"){
             // If the note is empty, return the default text
             if (this.space.kettle_note == null || this.space.kettle_note == "" || this.space.kettle_note == "\"\""){
-                console.log("this.space.kettle");
                 if (this.space.kettle) return this.defaults.kettle[1];
                 else return this.defaults.kettle[0];
             }
@@ -179,7 +175,6 @@ export default {
         if (facility == "microwave"){
             // If the note is empty, return the default text
             if (this.space.microwave == null || this.space.microwave == "" || this.space.microwave_note == "\"\""){
-                console.log("this.space.microwave");
                 if (this.space.microwave) return this.defaults.microwave[1];
                 else return this.defaults.microwave[0];
             }
@@ -193,7 +188,6 @@ export default {
         if (facility == "wheelchair"){
             // If the note is empty, return the default text
             if (this.space.wheelchair_note == null || this.space.wheelchair_note == "" || this.space.wheelchair_note == "\"\""){
-                console.log("this.space.wheelchair_note");
                 if (this.space.wheelchair) return this.defaults.wheelchair[1];
                 else return this.defaults.wheelchair[0];
             }
@@ -254,7 +248,7 @@ export default {
     top: 110%;
     left: -50%;
     opacity: 0.3;
-    z-index: 100;
+    z-index: -50;
     /* transform: translate(-50%, -50%); */
     /* rotate: 45deg; */
     vertical-align: middle;
