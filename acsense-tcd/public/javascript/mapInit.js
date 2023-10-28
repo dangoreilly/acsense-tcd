@@ -38,6 +38,12 @@ function initialiseMap(map_config, supabase_client) {
         renderer: L.canvas({padding: 1})
     }).fitBounds(getAppropriateInitialView(map_config));
 
+    // Check the zoom level, set it to >LABEL_PRIMARY_RANGE_LOWER if it's too high
+    // This is to prevent the "Primary" label from being hidden
+    if (map.getZoom() < map_config.LABEL_PRIMARY_RANGE_LOWER) {
+        map.setZoom(map_config.LABEL_PRIMARY_RANGE_LOWER + 0.25);
+    }
+
     var info = L.control({position:"bottomleft"});
     var search = L.control({position:"bottomright"});
 
