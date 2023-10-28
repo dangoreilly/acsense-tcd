@@ -17,16 +17,29 @@
                         href="#">
                             {{ tab.title }}
                         </p>
+                        
                     </li>
                 
                 </ul>
             </div>
 
             <div 
-            v-for="tab, index in contentArray" 
+            v-for="tab, index in contentArray"
             class="card-body"
-            :class="{ 'd-block': activeInfoTab === index, 'd-none': activeInfoTab !== index, }"
-            v-html="mdParser(tab.content)">
+            :class="{ 'd-block': activeInfoTab === index, 'd-none': activeInfoTab !== index, }" >
+                <div
+                v-html="mdParser(tab.content)">
+                </div>
+
+                <div v-if="tab.video_embed || false" >
+                    <div class="ratio ratio-16x9" style="max-width: 100%;">
+                        <iframe 
+                        :src="'https://www.youtube-nocookie.com/embed/'+ extractYoutubeID(tab.video)" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen></iframe>
+                    </div>
+                </div>
             </div>
         </div>
     <!-- </div> -->
@@ -49,6 +62,8 @@ export default {
         return {
             activeInfoTab: 0,
             // tabs: [],
+            youtube_embed: true,
+            youtube_embed_link: "https://www.youtube.com/watch?v=Ck3yUXt5tCc",
 
         }
     },
@@ -95,6 +110,17 @@ export default {
         makeTabActive(index) {
             this.activeInfoTab = index;
             // this.$emit('tabChanged', index);
+        },
+
+        extractYoutubeID(youtube_embed_link) {
+            // Extract the youtube ID from the youtube link
+            // https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url
+            let youtubeID = youtube_embed_link.split('v=')[1];
+            let ampersandPosition = youtubeID.indexOf('&');
+            if (ampersandPosition != -1) {
+                youtubeID = youtubeID.substring(0, ampersandPosition);
+            }
+            return youtubeID;
         },
 
         firstValidTab() {

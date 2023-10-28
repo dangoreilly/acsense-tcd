@@ -223,25 +223,25 @@ body {
 
 <script setup>
 
-    function setInfoBoxContent(building){
-        return [
-            {
-                title: "Sensory Experience",
-                content: building.sense_exp || "No information available",
-                display: building.sense_exp_display
-            },
-            {
-                title: "Wayfinding",
-                content: building.wayfinding || "No information available",
-                display: building.wayfinding_display
-            },
-            {
-                title: "Physical Access",
-                content: building.phys_access || "No information available",
-                display: building.phys_access_display
-            },
-        ];
-    }
+    // function setInfoBoxContent(building){
+    //     return [
+    //         {
+    //             title: "Sensory Experience",
+    //             content: building.sense_exp || "No information available",
+    //             display: building.sense_exp_display
+    //         },
+    //         {
+    //             title: "Wayfinding",
+    //             content: building.wayfinding || "No information available",
+    //             display: building.wayfinding_display
+    //         },
+    //         {
+    //             title: "Physical Access",
+    //             content: building.phys_access || "No information available",
+    //             display: building.phys_access_display
+    //         },
+    //     ];
+    // }
 
     async function getBuildingData() {
         const route = useRoute();

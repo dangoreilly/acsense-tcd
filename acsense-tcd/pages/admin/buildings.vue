@@ -217,6 +217,14 @@
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
                                 v-model="building.sense_exp"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Sensory Experience Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control" 
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="building.sense_exp_video">
+                                </div>
                             </div>
                             <!-- Wayfinding -->
                             <div class="mb-3">
@@ -228,6 +236,14 @@
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
                                 v-model="building.wayfinding"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Sensory Experience Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control" 
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="building.wayfinding_video">
+                                </div>
                             </div>
                             <!-- Physical -->
                             <div class="mb-3">
@@ -239,6 +255,14 @@
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
                                 v-model="building.phys_access"></textarea>
+                                <!-- video link -->
+                                <div class="mt-3">
+                                    <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
+                                    <input id="videolink" type="text" class="form-control"
+                                    placeholder="Youtube link" 
+                                    title="Youtube link for embedding"
+                                    v-model="building.phys_access_video">
+                                </div>
                             </div>
                         </div>
 
@@ -269,7 +293,7 @@
                             <AccessTips :tips="building.tips" />
                         </div>
                         <div class="col" v-else>
-                            <p><em> &lt;&lt; Tip box will not display >> </em></p>
+                            <!-- <p><em> &lt;&lt; Tip box will not display >> </em></p> -->
                         </div>
                         
                     </div>
@@ -486,23 +510,24 @@ import {createClient} from '@supabase/supabase-js';
         },
         computed: {
             infoBoxContent() {
-                return [
-                    {
-                        title: "Sensory Experience",
-                        content: this.building.sense_exp || "No information provided",
-                        display: this.building.sense_exp_display || false
-                    },
-                    {
-                        title: "Wayfinding",
-                        content: this.building.wayfinding || "No information provided",
-                        display: this.building.wayfinding_display || false
-                    },
-                    {
-                        title: "Physical Access",
-                        content: this.building.phys_access || "No information provided",
-                        display: this.building.phys_access_display || false
-                    },
-                ];
+                // return [
+                //     {
+                //         title: "Sensory Experience",
+                //         content: this.building.sense_exp || "No information provided",
+                //         display: this.building.sense_exp_display || false
+                //     },
+                //     {
+                //         title: "Wayfinding",
+                //         content: this.building.wayfinding || "No information provided",
+                //         display: this.building.wayfinding_display || false
+                //     },
+                //     {
+                //         title: "Physical Access",
+                //         content: this.building.phys_access || "No information provided",
+                //         display: this.building.phys_access_display || false
+                //     },
+                // ];
+                return setInfoBoxContent(this.building);
             },
             buildingHasBeenChanged() {
                 // This function compares the current state of the building against the state it was in when the page was loaded
