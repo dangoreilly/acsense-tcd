@@ -248,7 +248,7 @@ export default {
     top: 110%;
     left: -50%;
     opacity: 0.3;
-    z-index: 100;
+    z-index: -50;
     /* transform: translate(-50%, -50%); */
     /* rotate: 45deg; */
     vertical-align: middle;
