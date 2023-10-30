@@ -22,7 +22,7 @@
     "@photo-sphere-viewer/autorotate-plugin": "^5.4.4",
     "@photo-sphere-viewer/core": "^5.4.4",
     "@photo-sphere-viewer/visible-range-plugin": "^5.4.4",
-    "@supabase/supabase-js": "^2.38.2",
+    "@supabase/supabase-js": "^2.38.4",
     "@types/node": "^20.8.9",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.1",
