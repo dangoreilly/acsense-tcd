@@ -73,8 +73,8 @@ export default {
 
             const panorama_viewer = new Viewer({
                 container: "panorama",
-                panorama: "https://i.imgur.com/Epj6Nzp.jpg", // TODO: replace with panorama_src
-                caption: 'Kitchen test',
+                panorama: this.imgSrc,
+                caption: this.imgAlt,
                 // touchmoveTwoFingers: true,
                 defaultZoomLvl: 0,
                 maxFov: 70,
