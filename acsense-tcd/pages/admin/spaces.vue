@@ -1,7 +1,7 @@
 <!-- Admin page for displaying logs -->
 <!-- TODO: Turn these inputs into components for maintainability -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'spaces'">
+    <NuxtLayout name="admin-layout" :activePage="'spaces'" :supabase_client="supabase">
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for space selection -->
