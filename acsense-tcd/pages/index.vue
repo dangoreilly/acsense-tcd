@@ -51,7 +51,7 @@
         <div 
         class="modal fade show" 
         tabindex="-1" 
-        @click.self="welcomeModalOpen=false"
+        @click.self="welcomeModalOpen=false; legendModalOpen=true"
         aria-modal="true" 
         role="dialog" 
         :style="welcomeModalOpen ? 'display: block;' : 'display: none;'">
@@ -61,7 +61,7 @@
 
                     <div class="modal-header">
                         <h5 class="modal-title" id="welcomeModalLabel">Welcome</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen = false"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen=false; legendModalOpen=true"></button>
                     </div>
 
                     <div class="modal-body">
@@ -69,13 +69,16 @@
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="welcomeModalOpen = false">Close</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="welcomeModalOpen=false; legendModalOpen=true">Close</button>
                         <!-- <a role="button" href='https://www.tcd.ie/disability/services/tcdsense.php' class="btn btn-secondary" >About TCDSense</a> -->
                     </div>
                 
                 </div>
             </div>
         </div>
+
+        <Legend :displayModal="legendModalOpen" :spaceIcons="spaceIcons" @close-modal="legendModalOpen = false"></Legend>
+
     </div>
     
     </template>
@@ -176,6 +179,8 @@
                     DEBUG: false,
                 },
                 supabase: null,
+                legendModalOpen: false,
+                spaceIcons: [],
             }
         },
         methods: {
@@ -185,6 +190,7 @@
                 mapModal.style.display = "none";
                 areaModal.style.display = "none";
                 // mapModal.classList.remove('show');
+                legendModalOpen = false;
             },
             checkDebug() {
                 // Check if the URL contains a debug parameter
@@ -201,7 +207,27 @@
                 }
                 // Initialise the map
                 initialiseMap(map_config_object, supabase);
+            },
+            async getSpaceIcons() {
+            // Get the space icons from the database
+            // For showing in the info modal
+            // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            // const supabase = createClient(supabaseUrl, supabaseKey)
+
+            let { data: icons, error } = await this.supabase
+                .from('space_styles')
+                .select('category, icon')
+            if (error) {
+                console.log(error)
+                throw error
             }
+            else {
+                console.log("Space icons retrieved")
+                console.log(icons)
+                return JSON.parse(JSON.stringify(icons));
+            }
+        }
         },
         mounted() {
             // Initialise Supabase
@@ -212,6 +238,11 @@
             this.checkDebug();
             // Initialise the map
             this.waitThenInitialiseMap(this.map_config_object, this.supabase);
+
+            // Get the space icons
+            this.getSpaceIcons().then((icons) => {
+                this.spaceIcons = icons;
+            })
 
         },
     }
