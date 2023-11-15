@@ -67,16 +67,71 @@
                         <button class="btn btn-outline-secondary" @click="removeMap()">Delete Map</button>
                     </div>
 
+                    <!-- Floor arranging -->
+                    <div class="container text-center">
+                        <!-- Header -->
+                        <div class="floors-list-row">
+                            <span>Entry floor</span>
+                            <span>SVG file</span>
+                            <span>Label</span>
+                            <span>Arrange</span>
+                            <span>Delete</span>
+                        </div>
+
+                        
+                        <div v-for="(floor, index) in floors" :key="index" class="floors-list-row mb-1">
+                            <div class="form-check">
+                                <input 
+                                class="form-radio-input" 
+                                type="radio" 
+                                @change="setEntryFloor(index)"
+                                :checked="floor.isEntry">
+                                <!-- :disabled="floor.isEntry"> -->
+                                <!-- Disable the checkbox if this is the entry floor, to avoid it being deselected -->
+                                <!-- The only way the checkbox can change therefor is to change the floor -->
+                              </div>
+                            <span><input type="text" style="width:95%" :value="floor.url"> </span>
+                            <span><input type="text" style="width:95%" :value="floor.label"></span>
+                            <div>
+                                <div class="btn-group" role="group">
+                                    <!-- Swap upwards -->
+                                    <button 
+                                    type="button" 
+                                    class="btn btn-sm btn-secondary"
+                                    :disabled="index == 0"
+                                    @click="swapFloors(index, index-1)"
+                                    >&#x2191;</button>
+                                    <!-- Swap downwards -->
+                                    <button 
+                                    type="button" 
+                                    class="btn btn-sm btn-secondary"
+                                    :disabled="index == floors.length - 1"
+                                    @click="swapFloors(index, index+1)"
+                                    >&#x2193;</button>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Don't allow the entry floor to be deleted, because I don't want to deal with that logic -->
+                                <button class="btn btn-sm btn-danger"
+                                :disabled="floor.isEntry"
+                                >Delete</button>
+                            </div> 
+                        <!-- class="floors-list-row">
+                            <input 
+                            id="PrimaryImageInput" 
+                            type="file" 
+                            class="form-control" 
+                            @change="handlePrimaryImageSelect"> -->
+                        </div>
+
+                    </div>
+
 
                     <!-- Map -->
                     <div  id="internal-map" style="height: 600px; padding-top: 30px;"></div>
                     
 
                 </div>
-                <AdminMarkdownModal 
-                :modalOpen="markdownModalOpen" 
-                @modalClose="markdownModalOpen = false"
-                />
             </div>
         </main>
     </NuxtLayout>
@@ -85,7 +140,7 @@
 <script setup>
     
 //Script setup needed for UseHead
-import '~/assets/css/leaflet.css'
+// import '~/assets/css/leaflet.css'
 
 // useHead({
 
@@ -140,7 +195,8 @@ import L from 'leaflet';
                 building_clean: {},
                 gallery: [],
                 gallery_clean: [],
-                markdownModalOpen: false,
+                floors: [],
+                EntryFloor: 1,
                 supabase: {},
                 newGalleryImage: {
                     selectedFile: null,
@@ -157,6 +213,52 @@ import L from 'leaflet';
             this.supabase = createClient(supabaseUrl, supabaseKey)
 
             // this.mapInit();
+            // TEMP: for testing
+            this.floors = [
+                {
+                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+                    "level": 3,
+                    "label": "Fourth Floor",
+                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts04.svg"
+                },
+                {
+                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+                    "level": 0,
+                    "label": "Lower Concourse",
+                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts01.svg"
+                },
+                {
+                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+                    "level": 1,
+                    "label": "Main Concourse",
+                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts02.svg"
+                },
+                {
+                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+                    "level": 2,
+                    "label": "Third Floor",
+                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts03.svg"
+                },
+                {
+                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+                    "level": 5,
+                    "label": "Sixth Floor",
+                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts06.svg"
+                },
+                {
+                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+                    "level": 4,
+                    "label": "Fifth Floor",
+                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts05.svg"
+                },
+            ]
+            
+            // Sort the floors by level
+            this.floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
+
+            // Set the entry floor 
+            // this.setEntryFloor(this.building.entry_floor);
+
             
         },
         computed: {
@@ -167,6 +269,36 @@ import L from 'leaflet';
             },
         },
         methods: {
+
+            swapFloors(A, B){
+                // Takes in the index of two floors, swaps them in the array
+                let temp = this.floors[A];
+                this.floors[A] = this.floors[B];
+                this.floors[B] = temp;
+                this.setFloorLevels();
+            },
+
+            setEntryFloor(newEntryFloor){
+
+                // Set the entry floor to the new value
+                this.EntryFloor = newEntryFloor;
+
+                // Set all floors to entryFloor = false
+                this.floors.forEach((floor, index) => {
+                    floor.isEntry = false;
+                });
+
+                // Set the entry floor to true by checking this.entryfloor
+                this.floors[this.EntryFloor].isEntry = true;
+            },
+
+            setFloorLevels(){
+                // When the list is rearranged, the level of the floor will update to match the index
+                // This function will update the level of each floor to match the index
+                this.floors.forEach((floor, index) => {
+                    floor.level = index;
+                });
+            },
             // Create the map
             mapInit(bounds, floors){
                 // Initialise the map
@@ -442,7 +574,8 @@ import L from 'leaflet';
                 // Since we are using the canonical name, we should only get one result
                 let { data: bld, error } = await this.supabase
                     .from('buildings')
-                    .select('canonical, has_floorplan, entry_floor, display_name, UUID')
+                    // .select('canonical, has_floorplan, entry_floor, display_name, UUID')
+                    .select('canonical, display_name, UUID')
                     .eq('canonical', canonical)
                 if (error) {
                     console.error(error)
@@ -456,7 +589,12 @@ import L from 'leaflet';
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
                     
                     // Get the floorplans for the building
-                    this.getFloorplans(this.building.UUID);
+                    // this.getFloorplans(this.building.UUID);
+
+                    this.building.entry_floor = 1;
+
+                    this.setEntryFloor(this.building.entry_floor);
+
 
                     // Update the map to show the building
                     // this.loadBuildingToMap();
@@ -518,6 +656,14 @@ import L from 'leaflet';
 </script>
 
 <style>
+
+.floors-list-row {
+    display: grid;
+    /* padding-top: 2rem; */
+    grid-template-columns:   6rem auto auto 6rem 4rem;
+    grid-template-rows: auto;
+    row-gap: 1rem;
+}
 
 .map-section{
     /* Define the grid to give enough room for the map */
