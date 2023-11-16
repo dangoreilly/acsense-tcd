@@ -8,9 +8,10 @@
         class="navbar-brand nav-logo-base"
         :class="{'nav-logo-search ': searchIsActive}"
         style="font-family: 'Inter', sans-serif; cursor: pointer;"
-        @click="$router.push('/')"
+        href="/"
         >
-            <strong>acsense</strong>
+        <!-- @click="$router.push('/')" -->
+            <strong>TCD Sense Map</strong>
         </a>
 
         <form 
