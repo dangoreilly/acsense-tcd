@@ -43,8 +43,7 @@
                 
             </div>
     
-            <div style="grid-area: tabs;" 
-            v-if="true">
+            <div style="grid-area: tabs;">
                 <Infobox
                 :contentArray="infoBoxContent"
                 :activeInfoTab="activeInfoBoxTab"
@@ -52,10 +51,10 @@
                 />
             </div>
     
-            <!-- <div style="grid-area: open-times; justify-self: start; align-self: start;">
+            <div style="grid-area: open-times; justify-self: start; align-self: start;" v-if="space.opening_times">
                 <Timebox
                 :times="space.opening_times"/>
-            </div> -->
+            </div>
                     
             <!-- <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
                 <NuxtLink :to="linkToRooms">
@@ -69,12 +68,12 @@
                 </NuxtLink>
             </div> -->
     
-            <!-- <div
+            <div
             style="grid-area: additional-info;"
             v-if="space.furtherinfo_disp">
                 <AdditionalInfo 
                 :info="space.further_info"/>
-            </div> -->
+            </div>
     
             <!-- <div style="grid-area: gallery;">
                 <Gallery
@@ -119,19 +118,14 @@
         display: grid;
         padding-top: 2rem;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: 
-            [row1] auto
-            [row2] auto 
-            [row3] auto
-            [row4] auto
-            [row5] auto;
+        grid-template-rows: auto;
         grid-template-areas: 
             "title main-photo"
             "desc main-photo"
             "facilties facilties"
-            "tabs tabs"
+            "tabs opening-times"
             "tips tips"
-            /* "additional-info additional-info additional-info additional-info" */
+            "additional-info additional-info"
             /* "gallery gallery gallery gallery"; */
     }
     @media screen and (max-width: 992px){
@@ -143,10 +137,11 @@
                 "title"
                 "main-photo"
                 "desc"
+                "opening-times"
                 "tabs"
                 "facilties"
                 "tips"
-                /* "additional-info" */
+                "additional-info"
                 /* "gallery"; */
         }
 

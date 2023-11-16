@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import {createClient} from '@supabase/supabase-js';
+// import {createClient} from '@supabase/supabase-js';
 
 
 export default {
@@ -53,7 +53,11 @@ export default {
         activeTab: {
             type: String,
             required: true,
-        }
+        },
+        supabase_client: {
+            type: Object,
+            required: true,
+        },
     },
     data() {
         return {
@@ -76,6 +80,11 @@ export default {
                     icon: 'bi bi-cup-hot',
                 },
 
+                {
+                    name: 'Floorplans',
+                    key: 'floorplans',
+                    icon: 'bi bi-columns',
+                },
                 // {
                 //     name: 'Map',
                 //     key: 'map',
@@ -86,11 +95,11 @@ export default {
                 //     key: 'branding',
                 //     icon: 'bi bi-brush',
                 // },
-                {
-                    name: 'Contributors',
-                    key: 'contributors',
-                    icon: 'bi bi-people',
-                },
+                // {
+                //     name: 'Contributors',
+                //     key: 'contributors',
+                //     icon: 'bi bi-people',
+                // },
                 // {
                 //     name: 'Audit Logs',
                 //     key: 'logs',
@@ -114,11 +123,11 @@ export default {
 
         async getCurrentUser() {
             
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
+            // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            // this.supabase = createClient(supabaseUrl, supabaseKey)
 
-            const { data, error } = await this.supabase.auth.getSession()
+            const { data, error } = await this.supabase_client.auth.getSession()
             // console.log("Session Data:")
             // console.log(data);
 

@@ -49,14 +49,12 @@
 
 </template>
 
-<script lang="ts">
-
-import { OpeningTimes } from 'assets/types/infoPageTypes'
+<script>
 
     export default {
         props: {
             times: {
-                type: Object as () => OpeningTimes,
+                type: Object,
                 required: true,
             }
         },

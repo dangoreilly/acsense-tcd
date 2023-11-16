@@ -67,14 +67,8 @@
 </template>
     
     
-<script lang="ts">
-    // import { useMediaQuery } from "@vueuse/core"
-    import { Photo } from 'assets/types/infoPageTypes'
+<script>
     
-    interface GalleryPhoto  extends Photo{
-        highlighted: boolean
-    }
-
     // If the screen size is larger than a small tablet, then we will
     // open the modal for the gallery pictures. Otherwise, we will just
     // open the image in a new tab
@@ -84,14 +78,14 @@
     export default {
         props: {
             images: {
-                type: Array as () => Photo[],
+                type: Array,
                 required: true,
             }
         },
         data() {
             return {
-                galleryImages: [] as GalleryPhoto[],
-                modalPicture: {} as Photo,
+                galleryImages: [],
+                modalPicture: {},
                 modalVisible: false,
             }
         },
@@ -110,7 +104,7 @@
             
         },
         methods: {
-            highlightThis(image: GalleryPhoto) {
+            highlightThis(image) {
                 // Set all images to not highlighted
                 this.galleryImages.forEach((i) => {
                     i.highlighted = false

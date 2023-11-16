@@ -6,7 +6,8 @@
 
             <!-- Sidebar for building selection -->
             <AdminBuildingSelector 
-            @activeBuildingChanged="getBuilding($event)"/>
+            @activeBuildingChanged="getBuilding($event)"
+            :supabase_client="supabase"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
