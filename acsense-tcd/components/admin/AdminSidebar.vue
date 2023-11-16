@@ -76,11 +76,16 @@ export default {
                     icon: 'bi bi-cup-hot',
                 },
 
-                // {
-                //     name: 'Map',
-                //     key: 'map',
-                //     icon: 'bi bi-map',
-                // },
+                {
+                    name: 'Floorplans',
+                    key: 'floorplans',
+                    icon: 'bi bi-columns',
+                },
+                {
+                    name: 'General Settings',
+                    key: 'map',
+                    icon: 'bi bi-map',
+                },
                 // {
                 //     name: 'Branding',
                 //     key: 'branding',
