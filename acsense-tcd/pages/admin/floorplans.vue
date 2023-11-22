@@ -61,11 +61,45 @@
                         </div>
                     </div>
 
-                    <!-- Test buttons -->
-                    <div class="mb-3 ps-3">
-                        <button class="btn btn-outline-secondary" @click="mapInit([[-200, -200],[1280, 2120]], [])">Create Map</button>
-                        <button class="btn btn-outline-secondary" @click="removeMap()">Delete Map</button>
+                    <!-- Floorplan size -->
+                    <div class="row g-3 mb-2">
+                        <!-- Button to remake the map -->
+                        <div class="col-md-4 d-flex">
+                            <button class="btn btn-outline-secondary flex-fill" @click="mapInit()">Re-generate Map</button>
+                        </div>
+                        <!-- Map dimensions -->
+                        <div class="col-md-4">
+                          <label for="width" class="form-label">Width</label>
+                          <input type="number" class="form-control" id="width" v-model="building.internalMapSize[0]">
+                        </div>
+                        <div class="col-md-4">
+                          <label for="height" class="form-label">Height</label>
+                          <input type="number" class="form-control" id="height" v-model="building.internalMapSize[1]">
+                        </div>
                     </div>
+                    <!-- <div>
+                        <div class="mb-3 ps-3">
+                            <label for="lat" class="form-label">Latitude</label>
+                            <input 
+                            type="text" 
+                            id="lat"
+                            class="form-control"
+                            placeholder="Latitude"
+                            v-model="space.location[0]" 
+                            disabled>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="long" class="form-label">Longitude</label>
+                            <input 
+                            type="text" 
+                            id="long" 
+                            class="form-control"
+                            placeholder="Longitude"
+                            v-model="space.location[1]"  
+                            disabled>
+                        </div>
+                    </div> -->
 
                     <!-- Floor arranging -->
                     <div class="container text-center">
@@ -125,6 +159,11 @@
                         </div>
 
                     </div>
+
+                    <!-- Regenerate -->
+                    <!-- <div class="mt-3 mb-3 ps-3">
+                        <button class="btn btn-outline-secondary" @click="mapInit()">Re-generate Map</button>
+                    </div> -->
 
 
                     <!-- Map -->
@@ -196,6 +235,7 @@ import L from 'leaflet';
                 gallery: [],
                 gallery_clean: [],
                 floors: [],
+                floor_layers_object: {},
                 EntryFloor: 1,
                 supabase: {},
                 newGalleryImage: {
@@ -300,7 +340,7 @@ import L from 'leaflet';
                 });
             },
             // Create the map
-            mapInit(bounds, floors){
+            mapInit(){
                 // Initialise the map
                 // this.map = L.map('internal-map', {
                 //     crs: L.CRS.Simple,
@@ -312,25 +352,39 @@ import L from 'leaflet';
                 //     renderer: L.canvas({padding: 1})
                 // }).fitBounds(bounds);
 
-                // console.log(map);
+                // Try run this.map.remove, print to the console if it fails
+                try {
+                    this.removeMap();
+                }
+                catch (error) {
+                    console.log(error);
+                }
+
+
+                const BUFFER = 200
+
+                // Create the new map
+                let map_size = [[0,0], this.building.internalMapSize]
+                // Get the bounds by adding padding around the edges
+                // Without this padding, it's not always possible to zoom into the edges
+                let map_bounds = [[-BUFFER, -BUFFER],
+                    [this.building.internalMapSize[0] + BUFFER,
+                    this.building.internalMapSize[1] + BUFFER]
+                ]
+
+                let map_center = [this.building.internalMapSize[0]/2, this.building.internalMapSize[1]/2]
 
                 let map = L.map('internal-map', {
+                    crs: L.CRS.Simple,
                     zoomSnap: 0.25,
                     zoomDelta: 0.25,
+                    maxBounds: map_bounds,
                     maxZoom: 20,
+                    minZoom: -1,
                     renderer: L.canvas({padding: 1})
-                }).setView([0, 0], 0);
-
-                // Check the zoom level, set it to >LABEL_PRIMARY_RANGE_LOWER if it's too high
-                // This is to prevent the "Primary" label from being hidden
+                }).fitBounds(map_size);// map_center, 1);
 
                 // var info = L.control({position:"bottomleft"});
-                // var search = L.control({position:"bottomright"});
-
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //rastertiles/voyager_nolabels
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                    maxZoom:20
-                }).addTo(map);
 
                  // Cheap debug reporting
                 map.on('click', function(e) {
@@ -346,7 +400,42 @@ import L from 'leaflet';
                 });
 
                 this.map = map;
+
+                // Add floors to the map
+                this.addFloorsToMap(map_size);
                 
+            },
+
+            addFloorsToMap(bounds){
+
+                // Init the floor layers object
+                // The floor layers array needs to be stored in the vue instance
+                // Otherwise it will be garbage collected and the layer functions can't be called later
+                this.floor_layers_object = {};
+
+                // Create a the floors
+                for (let i = 0; i < this.floors.length; i++) {
+                    const floor = this.floors[i];
+                    // Create a layer group for each floor
+                    // Add the floor to the layer group
+                    // Add the layer group to the map
+                    let floor_layer = L.layerGroup( [L.imageOverlay(floor.url, bounds)] )
+                    this.floor_layers_object[floor.label] = floor_layer;
+
+                    // If this is the entry floor, add it to the map
+                    if (floor.isEntry) {
+                        floor_layer.addTo(this.map);
+                    }
+                }
+
+                // Add the layer control to the map
+                let layers_control = L.control({position:"topright"});
+    
+                // TODO: Add a check for if mobile, and collapse the layer control
+                layers_control = L.control.layers(this.floor_layers_object, null, {collapsed: false});
+                
+                layers_control.addTo(this.map);
+
             },
 
             removeMap(){
@@ -590,8 +679,10 @@ import L from 'leaflet';
                     
                     // Get the floorplans for the building
                     // this.getFloorplans(this.building.UUID);
+                    // Test data setting
 
                     this.building.entry_floor = 1;
+                    this.building.internalMapSize = [1080, 1920]
 
                     this.setEntryFloor(this.building.entry_floor);
 
