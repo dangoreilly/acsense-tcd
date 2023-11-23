@@ -85,6 +85,11 @@ export default {
                     key: 'floorplans',
                     icon: 'bi bi-columns',
                 },
+                {
+                    name: 'General Info',
+                    key: 'general-info',
+                    icon: 'bi bi-info-circle',
+                },
                 // {
                 //     name: 'Map',
                 //     key: 'map',
