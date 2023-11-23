@@ -82,20 +82,20 @@ export default {
                     icon: 'bi bi-columns',
                 },
                 {
-                    name: 'General Settings',
-                    key: 'map',
-                    icon: 'bi bi-map',
+                    name: 'General Info',
+                    key: 'general-info',
+                    icon: 'bi bi-info-circle',
                 },
                 // {
                 //     name: 'Branding',
                 //     key: 'branding',
                 //     icon: 'bi bi-brush',
                 // },
-                {
-                    name: 'Contributors',
-                    key: 'contributors',
-                    icon: 'bi bi-people',
-                },
+                // {
+                //     name: 'Contributors',
+                //     key: 'contributors',
+                //     icon: 'bi bi-people',
+                // },
                 // {
                 //     name: 'Audit Logs',
                 //     key: 'logs',

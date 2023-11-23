@@ -46,24 +46,6 @@
                             <textarea class="form-control" id="welcomeText" rows="4"  
                             v-model="welcome.mainContent"></textarea>
                         </div>
-                        <!-- <br> -->
-
-                        <!-- Testing -->
-                        <!-- <div>
-
-                            <span class="position-relative">
-                                <span class="position-absolute top-50 start-0 translate-middle p-2 border border-dark rounded-circle" style="background-color: #a5faad;"> </span>
-                                <span class="ps-3">CSC Space</span>
-                            </span>
-                            
-
-                            <span class="position-relative">
-                                <span class="position-absolute top-50 start-0 translate-middle ms-3 p-2 border border-dark rounded-circle" style="background-color: #e97dff;"> </span>
-                                <span class="ps-4">Outdoor Space</span>
-                            </span>
-
-                            
-                        </div> -->
                     </div>
 
                     <!-- Preview -->
@@ -159,9 +141,22 @@ export default {
             welcome: {
                 mainContent: '',
             },
+            welcome_clean: {
+                mainContent: '',
+            },
             supabase: null,
-            contentHasChanged: false,
             space_types: [],
+            space_types_clean: [],
+        }
+    },
+    computed: {
+        contentHasChanged() {
+            // Check if either the welcome text or the space types have changed
+            let welcomeChanged = this.welcome.mainContent !== this.welcome_clean.mainContent
+            let spaceTypesChanged = JSON.stringify(this.space_types) !== JSON.stringify(this.space_types_clean);
+
+            // Return true if either has changed
+            return welcomeChanged || spaceTypesChanged;
         }
     },
     created() {
@@ -187,7 +182,10 @@ export default {
                 return
             }
 
+            // Copy the data into the welcome object
             this.welcome.mainContent = data.data.mainContent
+            // Duplicate the object to keep a clean copy
+            this.welcome_clean.mainContent = data.data.mainContent
         },
         async fetchSpaceTypes() {
             const { data, error } = await this.supabase
@@ -201,6 +199,65 @@ export default {
 
             // Copy the data into the spaces array
             this.space_types = JSON.parse(JSON.stringify(data));
+            // Duplicate the object to keep a clean copy
+            this.space_types_clean = JSON.parse(JSON.stringify(data));
+        },
+
+        cancelChanges(){
+            // Reset the welcome text
+            this.welcome.mainContent = this.welcome_clean.mainContent
+            // Reset the space types
+            this.space_types = JSON.parse(JSON.stringify(this.space_types_clean));
+        },
+        
+        async updateContent() {
+            // Update the welcome text
+            let {data, error:welcome_update_error} = await this.supabase
+                .from('site_settings')
+                .update({ data: this.welcome })
+                .eq('key', "welcome")
+
+                
+            if (welcome_update_error) {
+                console.error(style_update_error)
+                alert(style_update_error.message)
+                throw style_update_error
+            }
+
+            // Update the space types
+            for (let i = 0; i < this.space_types.length; i++) {
+                let {data, error:style_update_error} = await this.supabase
+                    .from('space_styles')
+                    .update(this.space_types[i])
+                    .eq('id', this.space_types[i].id)
+
+                if (style_update_error) {
+                    console.error(style_update_error)
+                    alert(style_update_error.message)
+                    throw style_update_error
+                }
+            }
+
+            // Create temp copies of the data
+            let temp_welcome = JSON.parse(JSON.stringify(this.welcome))
+            let temp_space_types = JSON.parse(JSON.stringify(this.space_types));
+
+            // Pull fresh copies of the data
+            this.fetchWelcome()
+            this.fetchSpaceTypes()
+
+            // Compare the temp copies to the fresh copies, to ensure the update was successful
+            if (JSON.stringify(temp_welcome) !== JSON.stringify(this.welcome)) {
+                alert("Welcome text update failed")
+            }
+            if (JSON.stringify(temp_space_types) !== JSON.stringify(this.space_types)) {
+                alert("Space types update failed")
+            }
+
+            if (JSON.stringify(temp_welcome) === JSON.stringify(this.welcome) && JSON.stringify(temp_space_types) === JSON.stringify(this.space_types)) {
+                alert("Update successful")
+            }
+
         },
     },
 }
