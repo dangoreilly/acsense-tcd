@@ -1,6 +1,6 @@
 <!-- Admin page for displaying analytics from Plausible -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'analytics'">
+    <NuxtLayout name="admin-layout" :activePage="'analytics'" :supabase_client="supabase">
         <div>
             <iframe 
             id="plausible-embed"
@@ -17,6 +17,11 @@
 </template>
 
 <script setup>
+import {createClient} from '@supabase/supabase-js';
+
+const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+const supabaseKey = useRuntimeConfig().public.supabaseKey;
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 onMounted(() => {
     // Required to fix the plausible embed script from turning off scrolling for some reason

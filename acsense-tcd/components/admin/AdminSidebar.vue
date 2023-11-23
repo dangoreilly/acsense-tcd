@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import {createClient} from '@supabase/supabase-js';
+// import {createClient} from '@supabase/supabase-js';
 
 
 export default {
@@ -53,7 +53,11 @@ export default {
         activeTab: {
             type: String,
             required: true,
-        }
+        },
+        supabase_client: {
+            type: Object,
+            required: true,
+        },
     },
     data() {
         return {
@@ -87,6 +91,11 @@ export default {
                     icon: 'bi bi-info-circle',
                 },
                 // {
+                //     name: 'Map',
+                //     key: 'map',
+                //     icon: 'bi bi-map',
+                // },
+                // {
                 //     name: 'Branding',
                 //     key: 'branding',
                 //     icon: 'bi bi-brush',
@@ -119,11 +128,11 @@ export default {
 
         async getCurrentUser() {
             
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
+            // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            // this.supabase = createClient(supabaseUrl, supabaseKey)
 
-            const { data, error } = await this.supabase.auth.getSession()
+            const { data, error } = await this.supabase_client.auth.getSession()
             // console.log("Session Data:")
             // console.log(data);
 

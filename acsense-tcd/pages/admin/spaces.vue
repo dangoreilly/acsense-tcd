@@ -1,7 +1,7 @@
 <!-- Admin page for displaying logs -->
 <!-- TODO: Turn these inputs into components for maintainability -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'spaces'">
+    <NuxtLayout name="admin-layout" :activePage="'spaces'" :supabase_client="supabase">
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for space selection -->
@@ -634,7 +634,7 @@ import {createClient} from '@supabase/supabase-js';
                     this.space = space[0];
 
                     // Clean up the notes
-                    this.cleanUpNotes();
+                    // this.cleanUpNotes();
 
                     // Deep copy the space object so we have comparison data
                     this.space_clean = JSON.parse(JSON.stringify(this.space));
@@ -758,9 +758,32 @@ import {createClient} from '@supabase/supabase-js';
                     seating: this.space.seating,
                     outlets: this.space.outlets,
                     food_drink_allowed: this.space.food_drink_allowed,
+                    sense_exp: this.space.sense_exp,
+                    sense_exp_display: this.space.sense_exp_display,
+                    sense_exp_video: this.space.sense_exp_video,
+                    wayfinding: this.space.wayfinding,
+                    wayfinding_display: this.space.wayfinding_display,
+                    wayfinding_video: this.space.wayfinding_video,
+                    phys_access: this.space.phys_access,
+                    phys_access_display: this.space.phys_access_display,
+                    phys_access_video: this.space.phys_access_video,
+                    further_info: this.space.further_info,
+                    furtherinfo_display: this.space.furtherinfo_display,
+                    tips: this.space.tips,
+                    aka: this.space.aka,
+                    primary_image_url: this.space.primary_image_url,
+                    primary_image_alt: this.space.primary_image_alt,
+                    primary_image_panorama: this.space.primary_image_panorama,
+                    seating_note: this.space.seating_note,
+                    outlets_note: this.space.outlets_note,
+                    food_and_drink_allowed_note: this.space.food_and_drink_allowed_note,
+
                     microwave: this.space.microwave,
+                    microwave_note: this.space.microwave_note,
                     kettle: this.space.kettle,
+                    kettle_note: this.space.kettle_note,
                     wheelchair: this.space.wheelchair,
+                    wheelchair_note: this.space.wheelchair_note,
                     building_uuid: this.space.building_uuid,
                     building: this.space.building,
                     location: this.space.location,
@@ -777,7 +800,7 @@ import {createClient} from '@supabase/supabase-js';
                 // Update the space in the database
                 const { data, error } = await this.supabase
                     .from('spaces')
-                    .update(update_vehicle)
+                    .update(this.space)
                     .eq('UUID', this.space.UUID)
                     .select()
                 

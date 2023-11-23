@@ -1,9 +1,10 @@
 <template>
 <main class="d-flex flex-nowrap" style="height:100vh">
     <AdminSidebar
-    :activeTab="activePage"/>
+    :activeTab="activePage"
+    :supabase_client="supabase_client"/>
     <div class="activityArea">
-        <slot></slot>  
+        <slot ></slot>  
     </div>
 </main>    
 </template>
@@ -14,6 +15,7 @@ export default {
     // The active page is passed in as a prop
     props: {
         activePage: String,
+        supabase_client: Object,
     },
 
     // watch: {
