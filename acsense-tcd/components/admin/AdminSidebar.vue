@@ -18,8 +18,8 @@
         <li v-for="tab in tabs">
             <NuxtLink
             :to="tab.key" 
-            class="nav-link link-body-emphasis"
-            :class="tab.key == activeTab ? 'active' : ''">
+            :class="tab.key == activeTab ? 'active-sidebar-tab active' : ''"
+            class="nav-link link-body-emphasis">
                 <span class="admin-sidebar-span">
                     <i :class="tab.icon"></i>
                     {{ tab.name }}
@@ -188,6 +188,9 @@ i {
     white-space: nowrap;
     transition: opacity 0.4s ease-in-out;
     /* display: none; */
+}
+.active-sidebar-tab {
+    color: white !important;
 }
 
 /* .admin-sidebar:hover {
