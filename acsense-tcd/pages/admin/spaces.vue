@@ -459,26 +459,26 @@
 <script setup>
     
 //Script setup needed for UseHead
-import '~/assets/css/leaflet.css'
+// import '~/assets/css/leaflet.css'
 
-useHead({
+// useHead({
 
-    link: [
-        {
-            rel:"stylesheet",
-            href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-        },
-    ],
-    script: [
-        {
-            src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-            integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-            crossorigin: "",
-        },
-        {
-            src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-            body: true,
-        },
+//     link: [
+//         {
+//             rel:"stylesheet",
+//             href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
+//         },
+//     ],
+//     script: [
+        // {
+        //     src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+        //     integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+        //     crossorigin: "",
+        // },
+        // {
+        //     src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
+        //     body: true,
+        // },
         // {
         //     src: '/javascript/mapInit.js',
         //     body: true,
@@ -486,14 +486,14 @@ useHead({
         // {
         //     src: 'https://unpkg.com/@supabase/supabase-js@2',
         // },
-        {
-            src: '/javascript/adminMapFunctions.js',
-        },
-        {
-            src: '/javascript/mapFunctions.js',
-        },
-    ]
-});
+//         {
+//             src: '/javascript/adminMapFunctions.js',
+//         },
+//         {
+//             src: '/javascript/mapFunctions.js',
+//         },
+//     ]
+// });
 
 
 
@@ -501,17 +501,24 @@ useHead({
 
 <script>
 import {createClient} from '@supabase/supabase-js';
+import L from 'leaflet';
+import '~/assets/css/leaflet.css'
 
     export default {
         data() {
             return {
                 space: {},
                 space_clean: {},
+                space_list: [],
+                overlays: [],
                 markdownModalOpen: false,
                 supabase: {},
                 space_types: [],
                 buildings: [], 
                 user: {},
+
+                map: {},
+                center_marker: {},
             }
         },
         created() {
@@ -527,14 +534,18 @@ import {createClient} from '@supabase/supabase-js';
             this.getSpaceTypes();
             // Grab all the buildings
             this.getBuildingList();
+            // Grab the spaces from the database
+            this.getSpaces();
+            // Grab the overlays from the database
+            this.getOverlays();
 
-            this.mapInit();
+            // this.mapInit();
 
         },
         mounted(){
             // On mount, update the space icon
-            this.updateSpaceIcon();
-            this.loadSpaceToMap();
+            // this.updateSpaceIcon();
+            // this.loadSpaceToMap();
 
         },
         computed: {
@@ -569,7 +580,7 @@ import {createClient} from '@supabase/supabase-js';
         // mounted() {
         // },
         methods: {
-            async mapInit(){
+            async mapInit_old(){
                 // Initialise the map
                 // Wait for this function to have loaded
                 while (typeof spaceSelectMapInit !== "function") {
@@ -642,9 +653,28 @@ import {createClient} from '@supabase/supabase-js';
                     console.log(space)
 
                     // Update the map to show the space
+                    // Wait for the space_types and buildings list to have loaded first
+                    while (!this.mapDataLoaded()) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                    // Now we have the space types and buildings, we can load the space to the map
                     this.loadSpaceToMap();
 
                 }
+                
+            },
+
+            mapDataLoaded(){
+
+                // Checks if the arrays for the map data have been populated
+                // Returns true if all are populated, false otherwise
+                if (this.space_types.length == 0) return false; 
+                if(this.buildings.length == 0) return false;
+                if(this.space_list.length == 0) return false;
+                if(this.overlays.length == 0) return false;
+                if(document.getElementById("space-placement-map") == null) return false;
+
+                return true
                 
             },
 
@@ -652,7 +682,7 @@ import {createClient} from '@supabase/supabase-js';
                 // Fetch the building list from the database
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
-                    .select('canonical, display_name, UUID')
+                    .select('canonical, display_name, UUID, always_display, geometry')
                 if (error) {
                     console.error(error)
                     alert(error.message)
@@ -664,6 +694,22 @@ import {createClient} from '@supabase/supabase-js';
                     // console.log(buildings);
                     this.buildings = sortArrayOfObjectsByKey(buildings, "display_name");
                 }
+            },
+
+            async getSpaces(){
+                // Fetch the spaces list from the database, for dummy display
+                let { data: spaces, error } = await this.supabase
+                    .from('spaces')
+                    .select('canonical, location, type')
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    this.space_list = spaces;
+                }
+
             },
 
             async getSpaceTypes(){
@@ -684,6 +730,21 @@ import {createClient} from '@supabase/supabase-js';
                 }
             },
 
+            async getOverlays(){
+                // Fetch the overlays from the database
+                const { data: overlays_data, error: overlay_error} = await this.supabase
+                .from('overlays')
+                .select('*')
+
+                if (overlay_error) {
+                    console.log('An error occured while fetching overlays:');
+                    console.log(overlay_error);
+                }
+                else {
+                    this.overlays = overlays_data;
+                }
+            },
+
             getImageForSpaceType(type){
                 // Cycle through space types
                 // When the category field matches the input, return the image
@@ -700,102 +761,214 @@ import {createClient} from '@supabase/supabase-js';
                 // Update the space icon on the map
                 // This function is called when the space type is changed
                 // It will update the icon on the map to match the new space type
-                // console.log("Updating map icon")
-                let newIcon = this.getImageForSpaceType(this.space.type);
+                let newIcon = L.icon({
+                        iconUrl: this.getImageForSpaceType(this.space.type),
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                        popupAnchor: [0, -16],
+                    });
 
-                
-                // Wait for this function to have loaded
-                while (typeof spaceSelectMapUpdateIcon !== "function" ) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                // Wait for the leaflet object L to have loaded
-                while (typeof L === "undefined") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-
-                // If Leaflet is loaded and the function is defined, we're ready to rock
-                spaceSelectMapUpdateIcon(newIcon);
+                this.center_marker.setIcon(newIcon);
             },
 
             async loadSpaceToMap(){
                 // When the space selection is changed, this function is called
-                // It will update the marker's location to the space's location
-                // It will also update the icon to match the space type
+                // It will regenerate the map object
+                // It will load all the overlays and buildings (noninteractive)
+                // It will load all the other spaces (noninteractive)
+                // It will load the space under edit and update the space icon
 
-                // Update the marker's location
-                // Wait for this function to have loaded
-                while (typeof spaceSelectMapUpdateMarkerLocation !== "function") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                // Wait for the leaflet object L to have loaded
-                while (typeof L === "undefined") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+                // Set up the basics of the map
+                this.initMap();
 
-                // If Leaflet is loaded and the function is defined, we're ready to rock
+                // Initialise the centre marker
+                this.initCentreMarker();
 
-                spaceSelectMapUpdateMarkerLocation(this.space.location);
+                // Add the overlays to the map
+                this.addOverlays();
 
-                // Update the marker's icon
-                this.updateSpaceIcon();
+                // Add the buildings to the map
+                this.addBuildings();
+
+                // Add the other spaces to the map
+                this.addDummySpaces();
             },
 
-            // Function to be passed to the marker on init
-            updateSpaceLocation(newLocation){
-                this.space.location = newLocation;
+            initMap(){
+
+                // Check if there is already a map object, remove if there is
+                try {
+                    this.map.remove();
+                }
+                catch (error) {
+                    console.log("No map to remove");
+                }
+
+                // Initialise the map
+                let map = L.map('space-placement-map', {
+                    zoomSnap: 0.25,
+                    zoomDelta: 0.25,
+                    maxZoom: 20,
+                    renderer: L.canvas({padding: 1})
+                }).fitBounds([
+                    [53.345568, -6.259428],
+                    [53.341853, -6.249477]
+                ]);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //rastertiles/voyager_nolabels
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    maxZoom:20
+                }).addTo(map);
+
+                // Cheap debug
+                map.on('click', function(e) {
+                    let cheapDebugObject = {
+                        latlng: e.latlng,
+                        bounds: map.getBounds(),
+                        zoom: map.getZoom(),
+                        center: map.getCenter()
+                    }
+            
+                    console.log(cheapDebugObject);
+                    
+                });
+
+                this.map = map;
+
             },
 
+            initCentreMarker(){
+                // Initialise the centre marker
+                // This marker is used to set the space's location
+                // It is not interactive
+
+                // Get the icon for this space's type
+                let iconURL = this.getImageForSpaceType(this.space.type);
+
+                // Initialise the marker at the location of the space
+                this.center_marker = L.marker(this.space.location, {
+                    icon: L.icon({
+                        iconUrl: iconURL,
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 25],
+                    }),
+                    draggable: false,
+                    zIndexOffset: 1000,
+                }).addTo(this.map);
+
+                // Update the view of the map to be centred on the map
+                this.map.setView(this.space.location, 19);
+
+                // Add event handlers to the map to update the space and marker location:
+                // Keep the marker centred on the map
+
+                let setMarker = this.setCenterOfMap;
+
+                //TODO: Change interaction pattern to drag
+                // Keep the zoom to marker on space load
+                // Add a button that recentres the map on the space
+
+                this.map.on('move', function () {
+                    setMarker(false);
+                });
+
+                //When the movement is finished, update the lat and long inputs
+                this.map.on('dragend', function(e) {
+                    setMarker(true);
+                });
+                this.map.on('zoomend', function(e) {
+                    setMarker(true);
+                });
+            },
+
+            setCenterOfMap(record){
+
+                let center = this.map.getCenter();
+                this.center_marker.setLatLng(center);
+                // Update the space's location draw, but only record the change on movement end
+                if (record)
+                this.space.location = [center.lat, center.lng];
+            },
+
+            addOverlays() {
+                // Go through each overlay and add it to the map
+                this.overlays.forEach(overlay => {
+                    L.imageOverlay(overlay.url, overlay.bounds).addTo(this.map);
+                });
+            },
+
+            addBuildings() {
+
+                 // Empty array to hold the layer groups
+                let building_geojsons = [];
+                // Go through each building and add it to the map
+                this.buildings.forEach(building => {
+                    try {
+                        // Check if the building is always displayed
+                        // And that the coordinates are not empty
+                        // If it is, add it to the map
+                        if (building.always_display && building.geometry.coordinates.length > 0){
+                            // Convert building to a valid GeoJSON object
+                            let building_geojson = {
+                                "type": "Feature",
+                                "geometry": {
+                                    "coordinates": building.geometry.coordinates,
+                                    "type": "Polygon"
+                                }
+                            }
+                            
+                            building_geojsons.push(building_geojson);
+                        }
+                    }
+                    catch (error) {
+                        console.error("Error adding " + building.canonical + " to map")
+                        console.error(error)
+                    }
+                });
+
+                var buildings_geojson_array = L.geoJSON(building_geojsons, {
+                    style: {
+                        fillColor: '#0087A2',
+                        weight: 1,
+                        opacity: 0,
+                        color: '#FCE891',
+                        dashArray: '0',
+                        fillOpacity: 1,
+                        noClip:true
+                    }
+                }).addTo(this.map);
+            },
+
+            addDummySpaces(){
+                // Go through each space and add it to the map at an opacity of DUMMY_SPACE_OPACITY
+                // Except for the currently active space
+
+                const DUMMY_SPACE_OPACITY = 0.5;
+
+                this.space_list.forEach(space => {
+
+                    // Skip the current space
+                    if (space.canonical == this.space.canonical) return;
+
+                    // Create the icon object
+                    // The className is used to make the icon fade in and out when the zoom changes
+                    let myIcon = L.icon({
+                        iconUrl: this.getImageForSpaceType(space.type), 
+                        iconSize: [50, 50], 
+                        iconAnchor: [25, 25],
+                    });
+
+                    // Create the marker object
+                    L.marker(space.location, {
+                        icon: myIcon, 
+                        opacity: DUMMY_SPACE_OPACITY,})
+                        .addTo(this.map);
+
+                });
+            },
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             async updateSpace() {
-
-                // Create an empty object to store the update query
-                // Only contains the things we want to update
-                let update_vehicle = {
-                    name: this.space.name,
-                    description: this.space.description,
-                    type: this.space.type,
-                    seating: this.space.seating,
-                    outlets: this.space.outlets,
-                    food_drink_allowed: this.space.food_drink_allowed,
-                    sense_exp: this.space.sense_exp,
-                    sense_exp_display: this.space.sense_exp_display,
-                    sense_exp_video: this.space.sense_exp_video,
-                    wayfinding: this.space.wayfinding,
-                    wayfinding_display: this.space.wayfinding_display,
-                    wayfinding_video: this.space.wayfinding_video,
-                    phys_access: this.space.phys_access,
-                    phys_access_display: this.space.phys_access_display,
-                    phys_access_video: this.space.phys_access_video,
-                    further_info: this.space.further_info,
-                    furtherinfo_display: this.space.furtherinfo_display,
-                    tips: this.space.tips,
-                    aka: this.space.aka,
-                    primary_image_url: this.space.primary_image_url,
-                    primary_image_alt: this.space.primary_image_alt,
-                    primary_image_panorama: this.space.primary_image_panorama,
-                    seating_note: this.space.seating_note,
-                    outlets_note: this.space.outlets_note,
-                    food_and_drink_allowed_note: this.space.food_and_drink_allowed_note,
-
-                    microwave: this.space.microwave,
-                    microwave_note: this.space.microwave_note,
-                    kettle: this.space.kettle,
-                    kettle_note: this.space.kettle_note,
-                    wheelchair: this.space.wheelchair,
-                    wheelchair_note: this.space.wheelchair_note,
-                    building_uuid: this.space.building_uuid,
-                    building: this.space.building,
-                    location: this.space.location,
-                }
-
-                // Match the building's UUID to the building's canonical name, since that wasn't done earlier
-                // This is needed for the update query
-                for (let i = 0; i < this.buildings.length; i++) {
-                    if (this.buildings[i].canonical == this.space.building){
-                        update_vehicle.building_uuid = this.buildings[i].UUID;
-                    }
-                }
 
                 // Update the space in the database
                 const { data, error } = await this.supabase
@@ -811,6 +984,8 @@ import {createClient} from '@supabase/supabase-js';
                     throw error
                 }
                 else {
+                    //TODO: Add a log entry
+                    // TODO: Check the response from the database to see if the update was successful
                     // If the update was successful, update the clean space object
                     this.space_clean = JSON.parse(JSON.stringify(this.space));
                     alert(this.space.name + " updated successfully")
