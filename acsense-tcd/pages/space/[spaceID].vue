@@ -37,13 +37,35 @@
                 />
             </div>
     
-            <div style="grid-area: tips;"
+            <!-- Tips -->
+            <!-- Changes location if there's an infobox or not -->
+            <!-- If there's no infobox, but there are openingtimes, take up the infobox space -->
+            <!-- Otherwise, take it's own space -->
+            <div 
+            :style="!infoBoxDisplays && space.opening_times ? 'grid-area: tips;' : 'grid-area: tabs;'"
+            class="my-3"
             v-if="space.tips.length >0">
                 <AccessTips :tips="space.tips" />
-                
             </div>
+            <div style="grid-area: tips;"
+            class="my-3"
+            v-else>
+                <div class="card access-tips-card">
+                    <div class="card-header">
+                        <h6 class="m-0">
+                            <strong>Access Tips | </strong>
+                            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jb6V1Qaz9EWAZJ5bgvvlK8Q61F2uS1FIukiAqksty_1UNTBEMFQ2MU5JUEpSUThIRjMyUExZSU1QMSQlQCN0PWcu" target="_blank" class="small"> Submit a tip</a>
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <span> This space has no tips! Why don't you submit one?</span>
+                    </div>
+                </div>
+            </div>
+            
     
-            <div style="grid-area: tabs;">
+            <!-- Infobox -->
+            <div style="grid-area: tabs;" v-if="infoBoxDisplays">
                 <Infobox
                 :contentArray="infoBoxContent"
                 :activeInfoTab="activeInfoBoxTab"
@@ -51,9 +73,19 @@
                 />
             </div>
     
-            <div style="grid-area: open-times; justify-self: start; align-self: start;" v-if="space.opening_times">
+            <!-- Timebox -->
+            <!-- Displays if there's data to display -->
+            <!-- Shows a placeholder message iff there's no data and there's an infobox -->
+            <div style="grid-area: opening-times; justify-self: start; align-self: start;" v-if="space.opening_times">
                 <Timebox
                 :times="space.opening_times"/>
+            </div>
+            <div v-if="infoBoxDisplays && !space.opening_times" style="grid-area: opening-times; align-self: center; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
+                <div 
+                class="time-card card  pt-2 mx-2 px-3" 
+                style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
+                    <p><em>Opening times not available for this space</em></p>
+                </div>
             </div>
                     
             <!-- <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
