@@ -80,11 +80,11 @@ export default {
                     icon: 'bi bi-cup-hot',
                 },
 
-                {
-                    name: 'Floorplans',
-                    key: 'floorplans',
-                    icon: 'bi bi-columns',
-                },
+                // {
+                //     name: 'Floorplans',
+                //     key: 'floorplans',
+                //     icon: 'bi bi-columns',
+                // },
                 {
                     name: 'General Info',
                     key: 'general-info',

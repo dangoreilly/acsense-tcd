@@ -552,7 +552,7 @@
                             </div>
                         </div>
                         <!-- Map -->
-                        <div  id="space-placement-map" style="height: 600px; padding-top: 30px; grid-area: 'input';"></div>
+                        <div  id="space-placement-map" style="height: 700px; padding-top: 30px; grid-area: 'input';"></div>
                     </div>
 
                 </div>
