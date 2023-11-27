@@ -90,7 +90,7 @@
 
                             <div class="mb-3">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" v-model="space.primary_image_panorama">
+                                    <input disabled class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" v-model="space.primary_image_panorama">
                                     <label class="form-check-label" for="flexSwitchCheckDefault">Primary image is a panorama</label>
                                 </div>
                             </div>
@@ -393,8 +393,8 @@
                         <div style="grid-area: 'input';" class="me-2">    
                             <!-- Lat and long inputs -->
                             <div>
-                                <div class="mb-3">
-                                    <label for="lat" class="form-label">Latitude</label>
+                                <div >
+                                    <label for="lat" class="form-label">Lat // Lng</label>
                                     <input 
                                     type="text" 
                                     id="lat"
@@ -405,7 +405,7 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="long" class="form-label">Longitude</label>
+                                    <!-- <label for="long" class="form-label">Longitude</label> -->
                                     <input 
                                     type="text" 
                                     id="long" 
@@ -419,14 +419,14 @@
                                     <span class="d-block">Center map</span>
                                     <button 
                                     type="button" 
-                                    class="btn btn-outline-primary mx-1" 
+                                    class="btn btn-sm btn-outline-primary mx-1" 
                                     @click="centerViewOnCampus()">
                                         Campus
                                     </button>
         
                                     <button 
                                     type="button" 
-                                    class="btn btn-outline-primary mx-1" 
+                                    class="btn btn-sm btn-outline-primary mx-1" 
                                     @click="centerViewOnSpace()">
                                         Space
                                     </button>
@@ -450,11 +450,27 @@
                                 </select>
 
                                 <!-- Icon Display -->
-                                <div class="mt-3">
+                                <div class="mt-3 position-relative">
                                     <img 
-                                    :src="getImageForSpaceType(space.type)" 
+                                    :src="getImageForSpaceType(space)" 
                                     style="width: 100%;">
+                                    <!-- Button to reset the icon to defaults, if an override is in place -->
+                                    <button
+                                    v-if="space.icon_override && space.icon_override.length > 0"
+                                    type="button"
+                                    class="badge rounded-pill text-bg-danger position-absolute bottom-0 start-0"
+                                    @click="resetIconToTypeDefault">
+                                        Reset
+                                    </button>
                                 </div>
+
+                                <!-- Custom Icon -->
+                                <div class="mt-3">
+                                    <label for="IconOverrideInput" class="form-label"><small>Custom Icon</small></label>
+                                    <input id="IconOverrideInput" type="file" class="form-control" 
+                                    @change="handleCustomIconSelect">
+                                </div>
+
                             </div>
                         </div>
                         <!-- Map -->
@@ -602,23 +618,96 @@ const campusBounds = [
         // mounted() {
         // },
         methods: {
-            async mapInit_old(){
-                // Initialise the map
-                // Wait for this function to have loaded
-                while (typeof spaceSelectMapInit !== "function") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                // Once the function is loaded, we can call it
-                // This function will initialise the map and add the marker
-                // We provide a callback function to update the space's location when the marker is moved
-                spaceSelectMapInit(this.updateSpaceLocation, this.supabase);
-            },
-
             async getUserData(){
                 
                 const { data, error } = await this.supabase.auth.getSession()
 
                 return data;
+            },
+
+            handlePrimaryImageSelect(evt) { 
+                // Get the file from the input
+                // Set the primary image to the file to preview
+                const file = evt.target.files[0];
+                this.space.primary_image_url = URL.createObjectURL(file);
+
+                // If the image is a panorama, the variable needs to be toggled to force a redraw
+                if (this.space.primary_image_panorama){
+                    this.space.primary_image_panorama = false;
+                    // Timeout
+                    setTimeout(() => {
+                        this.space.primary_image_panorama = true;
+                    }, 100);
+                    this.space.primary_image_panorama = true;
+                }
+            },
+
+            handleCustomIconSelect(evt){
+                // Get the file from the input
+                // Set the iconOverride to the file to preview
+                const file = evt.target.files[0];
+                this.space.icon_override = URL.createObjectURL(file);
+
+                this.updateSpaceIcon();
+
+            },
+
+            async uploadNewPrimaryImage(){
+                // Get the file object from the primary image upload input
+                // Upsert to the storage bucket as the canonical name
+                // TODO: Check if the file already exists under a different extension, and if so, delete it
+
+                // Get the file
+                let file = document.getElementById("PrimaryImageInput").files[0];
+                // Get the file extension
+                let extension = file.name.split('.').pop();
+                
+                // Build the new url for the file
+                let newUrl = this.supabase.storageUrl + "/object/public/primary-images/spaces/" + this.space.canonical + "." + extension;
+
+                // Upload the file to the storage bucket
+                const { data, error:upload_error } = await this.supabase.storage
+                .from('primary-images')
+                .upload(`spaces/${this.space.canonical}.${extension}`, file)
+                if (upload_error) {
+                    console.error(upload_error)
+                    return error
+                }
+                
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
+
+                return newUrl;
+
+            },
+
+            async uploadNewCustomIcon(){
+                // Get the file object from the primary image upload input
+                // Upsert to the storage bucket as the canonical name
+                // TODO: Check if the file already exists under a different extension, and if so, delete it
+
+                // Get the file
+                let file = document.getElementById("IconOverrideInput").files[0];
+                // Get the file extension
+                let extension = file.name.split('.').pop();
+                
+                // Build the new url for the file
+                let newUrl = this.supabase.storageUrl + "/object/public/icons/custom/" + this.space.canonical + "." + extension;
+
+                // Upload the file to the storage bucket
+                const { data, error:upload_error } = await this.supabase.storage
+                .from('icons')
+                .upload(`custom/${this.space.canonical}.${extension}`, file)
+                if (upload_error) {
+                    console.error(upload_error)
+                    return error
+                }
+                
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
+
+                return newUrl;
+
             },
 
             // A schema error caused notes to be improperly initialised as "" instead of an empty string
@@ -722,7 +811,7 @@ const campusBounds = [
                 // Fetch the spaces list from the database, for dummy display
                 let { data: spaces, error } = await this.supabase
                     .from('spaces')
-                    .select('canonical, location, type')
+                    .select('canonical, location, type, icon_override, name')
                 if (error) {
                     console.error(error)
                     alert(error.message)
@@ -767,12 +856,18 @@ const campusBounds = [
                 }
             },
 
-            getImageForSpaceType(type){
-                // Cycle through space types
+            getImageForSpaceType(space){
+                // Get the image for the space type
+
+                // First check if the space has a custom icon
+                if (this.space.icon_override && this.space.icon_override.length > 0){
+                    return this.space.icon_override;
+                }
+                // Else, Cycle through space types
                 // When the category field matches the input, return the image
                 // If there are no matches, return the placeholder image
                 for (let i = 0; i < this.space_types.length; i++) {
-                    if (this.space_types[i].category == type){
+                    if (this.space_types[i].category == space.type){
                         return this.space_types[i].icon;
                     }
                 }    
@@ -784,10 +879,10 @@ const campusBounds = [
                 // This function is called when the space type is changed
                 // It will update the icon on the map to match the new space type
                 let newIcon = L.icon({
-                        iconUrl: this.getImageForSpaceType(this.space.type),
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 16],
-                        popupAnchor: [0, -16],
+                        iconUrl: this.getImageForSpaceType(this.space),
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 25],
+                        // popupAnchor: [0, -16],
                     });
 
                 this.center_marker.setIcon(newIcon);
@@ -866,7 +961,7 @@ const campusBounds = [
                 // It is not interactive
 
                 // Get the icon for this space's type
-                let iconURL = this.getImageForSpaceType(this.space.type);
+                let iconURL = this.getImageForSpaceType(this.space);
 
                 // Initialise the marker at the location of the space
                 this.center_marker = L.marker(this.space.location, {
@@ -972,7 +1067,7 @@ const campusBounds = [
                     // Create the icon object
                     // The className is used to make the icon fade in and out when the zoom changes
                     let myIcon = L.icon({
-                        iconUrl: this.getImageForSpaceType(space.type), 
+                        iconUrl: this.getImageForSpaceType(space), 
                         iconSize: [50, 50], 
                         iconAnchor: [25, 25],
                     });
@@ -988,6 +1083,16 @@ const campusBounds = [
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             async updateSpace() {
+
+                // If the primary image has changed, upload it to the storage bucket
+                if (document.getElementById("PrimaryImageInput").files.length > 0){
+                    this.space.primary_image_url = await this.uploadNewPrimaryImage();
+                }
+
+                // If the custom icon has changed, upload it to the storage bucket
+                if (document.getElementById("IconOverrideInput").files.length > 0){
+                    this.space.icon_override = await this.uploadNewCustomIcon();
+                }
 
                 // Update the space in the database
                 const { data, error } = await this.supabase
@@ -1012,15 +1117,24 @@ const campusBounds = [
                 }
             },
 
+            resetIconToTypeDefault(){
+                // Reset the icon to the default for the space type
+                // Clear the custom icon input
+                document.getElementById("IconOverrideInput").value = "";
+                // Remove the icon override from the space object
+                this.space.icon_override = "";
+                // Update the icon on the map
+                this.updateSpaceIcon();
+            },
+
             // This function is called when the user clicks the "Cancel" button
             // It will revert the building to the state it was in when the page was loaded
             cancelChanges() {
 
-                // console.log("Current copy:")
-                // console.log(JSON.parse(JSON.stringify(this.space)))
-
-                // console.log("Clean copy:")
-                // console.log(JSON.parse(JSON.stringify(this.space_clean)))
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
+                // Clear the custom icon input
+                document.getElementById("IconOverrideInput").value = "";
 
                 // Deep copy the space_clean object back into the space object
                 this.space = JSON.parse(JSON.stringify(this.space_clean));
