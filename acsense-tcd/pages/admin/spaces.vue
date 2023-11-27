@@ -50,7 +50,7 @@
 
                 <!-- Main Matter -->
                 <!-- Only render if the space has loaded -->
-                <div class="mainMatter-admin px-2" v-if="space">
+                <div class="mainMatter-admin px-2" v-if="space.name">
 
                     <!-- Two columns -->
                     <!-- Column 1 contains input boxes -->
@@ -90,7 +90,7 @@
 
                             <div class="mb-3">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" v-model="space.primary_image_panorama">
+                                    <input disabled class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" v-model="space.primary_image_panorama">
                                     <label class="form-check-label" for="flexSwitchCheckDefault">Primary image is a panorama</label>
                                 </div>
                             </div>
@@ -130,6 +130,84 @@
                         <div class="col" id="description" style="grid-area: desc; justify-self: start;">
                             <h3>Description</h3>
                             <p>{{space.description}}</p>
+                        </div>
+                    </div>
+
+                    <!-- Opening Times -->
+                    <div class="row mt-3 pb-3 border-bottom"><label class="form-label d-block">Opening Times</label>
+                        <div class="col d-flex flex-column">
+                            <!-- Weekdays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="weekDay-checkbox" >Weekdays</label>
+                                    <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
+                                    v-model="space.opening_times.weekday.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="weekDay-open">Opening Time</label>
+                                    <input type="time" id="weekDay-open" class="form-control"
+                                    v-model="space.opening_times.weekday.times[0]" 
+                                    :disabled="!space.opening_times.weekday.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="weekDay-open">Closing Time</label>
+                                    <input type="time" id="weekDay-open" class="form-control"
+                                    v-model="space.opening_times.weekday.times[1]" 
+                                    :disabled="!space.opening_times.weekday.open"/>
+                                </div>
+                            </div>
+                            <!-- Saturdays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="sat-checkbox">Saturday</label>
+                                    <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
+                                    v-model="space.opening_times.sat.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="sat-open">Opening Time</label>
+                                    <input type="time" id="sat-open" class="form-control"
+                                    v-model="space.opening_times.sat.times[0]" 
+                                    :disabled="!space.opening_times.sat.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="sat-close">Closing Time</label>
+                                    <input type="time" id="sat-close" class="form-control"
+                                    v-model="space.opening_times.sat.times[1]" 
+                                    :disabled="!space.opening_times.sat.open"/>
+                                </div>
+                            </div>
+                            <!-- Sundays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="sunday-checkbox">Sunday & Public Holidays</label>
+                                    <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
+                                    v-model="space.opening_times.holidays.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="sunday-open">Opening Time</label>
+                                    <input type="time" id="sunday-open" class="form-control"
+                                    v-model="space.opening_times.holidays.times[0]" 
+                                    :disabled="!space.opening_times.holidays.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="sunday-close">Closing Time</label>
+                                    <input type="time" id="sunday-close" class="form-control"
+                                    v-model="space.opening_times.holidays.times[1]" 
+                                    :disabled="!space.opening_times.holidays.open"/>
+                                </div>
+                            </div>
+
+                            <!-- Note -->
+                            <div class="mt-3">
+                                <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
+                                <input id="timeNoteInput" type="text" class="form-control" 
+                                v-model="space.opening_times.note">
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <Timebox
+                                :times="space.opening_times"/>
                         </div>
                     </div>
 
@@ -393,8 +471,8 @@
                         <div style="grid-area: 'input';" class="me-2">    
                             <!-- Lat and long inputs -->
                             <div>
-                                <div class="mb-3">
-                                    <label for="lat" class="form-label">Latitude</label>
+                                <div >
+                                    <label for="lat" class="form-label">Lat // Lng</label>
                                     <input 
                                     type="text" 
                                     id="lat"
@@ -405,7 +483,7 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="long" class="form-label">Longitude</label>
+                                    <!-- <label for="long" class="form-label">Longitude</label> -->
                                     <input 
                                     type="text" 
                                     id="long" 
@@ -414,9 +492,26 @@
                                     v-model="space.location[1]"  
                                     disabled>
                                 </div>
+
+                                <div>
+                                    <span class="d-block">Center map</span>
+                                    <button 
+                                    type="button" 
+                                    class="btn btn-sm btn-outline-primary mx-1" 
+                                    @click="centerViewOnCampus()">
+                                        Campus
+                                    </button>
+        
+                                    <button 
+                                    type="button" 
+                                    class="btn btn-sm btn-outline-primary mx-1" 
+                                    @click="centerViewOnSpace()">
+                                        Space
+                                    </button>
+                                </div>
                             </div>
                             <!-- Space Type -->
-                            <div class="mb-3">
+                            <div class="my-3">
                                 <label for="spaceType" class="form-label">Space Type</label>
                                 <select 
                                 class="form-select" 
@@ -433,15 +528,31 @@
                                 </select>
 
                                 <!-- Icon Display -->
-                                <div class="mt-3">
+                                <div class="mt-3 position-relative">
                                     <img 
-                                    :src="getImageForSpaceType(space.type)" 
+                                    :src="getImageForSpaceType(space)" 
                                     style="width: 100%;">
+                                    <!-- Button to reset the icon to defaults, if an override is in place -->
+                                    <button
+                                    v-if="space.icon_override && space.icon_override.length > 0"
+                                    type="button"
+                                    class="badge rounded-pill text-bg-danger position-absolute bottom-0 start-0"
+                                    @click="resetIconToTypeDefault">
+                                        Reset
+                                    </button>
                                 </div>
+
+                                <!-- Custom Icon -->
+                                <div class="mt-3">
+                                    <label for="IconOverrideInput" class="form-label"><small>Custom Icon</small></label>
+                                    <input id="IconOverrideInput" type="file" class="form-control" 
+                                    @change="handleCustomIconSelect">
+                                </div>
+
                             </div>
                         </div>
                         <!-- Map -->
-                        <div  id="space-placement-map" style="height: 600px; padding-top: 30px; grid-area: 'input';"></div>
+                        <div  id="space-placement-map" style="height: 700px; padding-top: 30px; grid-area: 'input';"></div>
                     </div>
 
                 </div>
@@ -459,26 +570,26 @@
 <script setup>
     
 //Script setup needed for UseHead
-import '~/assets/css/leaflet.css'
+// import '~/assets/css/leaflet.css'
 
-useHead({
+// useHead({
 
-    link: [
-        {
-            rel:"stylesheet",
-            href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-        },
-    ],
-    script: [
-        {
-            src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-            integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-            crossorigin: "",
-        },
-        {
-            src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-            body: true,
-        },
+//     link: [
+//         {
+//             rel:"stylesheet",
+//             href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
+//         },
+//     ],
+//     script: [
+        // {
+        //     src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+        //     integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+        //     crossorigin: "",
+        // },
+        // {
+        //     src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
+        //     body: true,
+        // },
         // {
         //     src: '/javascript/mapInit.js',
         //     body: true,
@@ -486,14 +597,14 @@ useHead({
         // {
         //     src: 'https://unpkg.com/@supabase/supabase-js@2',
         // },
-        {
-            src: '/javascript/adminMapFunctions.js',
-        },
-        {
-            src: '/javascript/mapFunctions.js',
-        },
-    ]
-});
+//         {
+//             src: '/javascript/adminMapFunctions.js',
+//         },
+//         {
+//             src: '/javascript/mapFunctions.js',
+//         },
+//     ]
+// });
 
 
 
@@ -501,17 +612,29 @@ useHead({
 
 <script>
 import {createClient} from '@supabase/supabase-js';
+import L from 'leaflet';
+import '~/assets/css/leaflet.css'
+
+const campusBounds = [
+                    [53.345568, -6.259428],
+                    [53.341853, -6.249477]
+                ];
 
     export default {
         data() {
             return {
                 space: {},
                 space_clean: {},
+                space_list: [],
+                overlays: [],
                 markdownModalOpen: false,
                 supabase: {},
                 space_types: [],
                 buildings: [], 
                 user: {},
+
+                map: {},
+                center_marker: {},
             }
         },
         created() {
@@ -527,35 +650,22 @@ import {createClient} from '@supabase/supabase-js';
             this.getSpaceTypes();
             // Grab all the buildings
             this.getBuildingList();
+            // Grab the spaces from the database
+            this.getSpaces();
+            // Grab the overlays from the database
+            this.getOverlays();
 
-            this.mapInit();
+            // this.mapInit();
 
         },
         mounted(){
             // On mount, update the space icon
-            this.updateSpaceIcon();
-            this.loadSpaceToMap();
+            // this.updateSpaceIcon();
+            // this.loadSpaceToMap();
 
         },
         computed: {
             infoBoxContent() {
-                // return [
-                //     {
-                //         title: "Sensory Experience",
-                //         content: this.space.sense_exp || "No information provided",
-                //         display: this.space.sense_exp_display || false
-                //     },
-                //     {
-                //         title: "Wayfinding",
-                //         content: this.space.wayfinding || "No information provided",
-                //         display: this.space.wayfinding_display || false
-                //     },
-                //     {
-                //         title: "Physical Access",
-                //         content: this.space.phys_access || "No information provided",
-                //         display: this.space.phys_access_display || false
-                //     },
-                // ];
                 return setInfoBoxContent(this.space);
             },
             spaceHasBeenChanged() {
@@ -569,23 +679,120 @@ import {createClient} from '@supabase/supabase-js';
         // mounted() {
         // },
         methods: {
-            async mapInit(){
-                // Initialise the map
-                // Wait for this function to have loaded
-                while (typeof spaceSelectMapInit !== "function") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                // Once the function is loaded, we can call it
-                // This function will initialise the map and add the marker
-                // We provide a callback function to update the space's location when the marker is moved
-                spaceSelectMapInit(this.updateSpaceLocation, this.supabase);
-            },
-
             async getUserData(){
                 
                 const { data, error } = await this.supabase.auth.getSession()
 
                 return data;
+            },
+
+            handlePrimaryImageSelect(evt) { 
+                // Get the file from the input
+                // Set the primary image to the file to preview
+                const file = evt.target.files[0];
+                this.space.primary_image_url = URL.createObjectURL(file);
+
+                // If the image is a panorama, the variable needs to be toggled to force a redraw
+                if (this.space.primary_image_panorama){
+                    this.space.primary_image_panorama = false;
+                    // Timeout
+                    setTimeout(() => {
+                        this.space.primary_image_panorama = true;
+                    }, 100);
+                    this.space.primary_image_panorama = true;
+                }
+            },
+
+            setDefaultOpenTimesIfNull(data){
+
+                // let opening_times = {};
+                if (!data.opening_times) {
+                    return {
+                        weekday: {
+                            open: false,
+                            times: ["08:00", "17:00"],
+                        },
+                        sat: {
+                            open: false,
+                            times: ["08:00", "17:00"],
+                        },
+                        holidays: {
+                            open: false,
+                            times: ["08:00", "17:00"],
+                        },
+                        note: "",
+                    }
+                }
+
+                return data.opening_times;
+            },
+
+            handleCustomIconSelect(evt){
+                // Get the file from the input
+                // Set the iconOverride to the file to preview
+                const file = evt.target.files[0];
+                this.space.icon_override = URL.createObjectURL(file);
+
+                this.updateSpaceIcon();
+
+            },
+
+            async uploadNewPrimaryImage(){
+                // Get the file object from the primary image upload input
+                // Upsert to the storage bucket as the canonical name
+                // TODO: Check if the file already exists under a different extension, and if so, delete it
+
+                // Get the file
+                let file = document.getElementById("PrimaryImageInput").files[0];
+                // Get the file extension
+                let extension = file.name.split('.').pop();
+                
+                // Build the new url for the file
+                let newUrl = this.supabase.storageUrl + "/object/public/primary-images/spaces/" + this.space.canonical + "." + extension;
+
+                // Upload the file to the storage bucket
+                const { data, error:upload_error } = await this.supabase.storage
+                .from('primary-images')
+                .upload(`spaces/${this.space.canonical}.${extension}`, file)
+                if (upload_error) {
+                    console.error(upload_error)
+                    return error
+                }
+                
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
+
+                return newUrl;
+
+            },
+
+            async uploadNewCustomIcon(){
+                // Get the file object from the primary image upload input
+                // Upsert to the storage bucket as the canonical name
+                // TODO: Check if the file already exists under a different extension, and if so, delete it
+
+                // Get the file
+                let file = document.getElementById("IconOverrideInput").files[0];
+                // Get the file extension
+                let extension = file.name.split('.').pop();
+                
+                // Build the new url for the file
+                let newUrl = this.supabase.storageUrl + "/object/public/icons/custom/" + this.space.canonical + "." + extension;
+
+                // Upload the file to the storage bucket
+                const { data, error:upload_error } = await this.supabase.storage
+                .from('icons')
+                .upload(`custom/${this.space.canonical}.${extension}`, file)
+                if (upload_error) {
+                    console.error(upload_error)
+                    return error
+                }
+                
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
+
+                return newUrl;
+
             },
 
             // A schema error caused notes to be improperly initialised as "" instead of an empty string
@@ -629,7 +836,9 @@ import {createClient} from '@supabase/supabase-js';
                     throw error
                 }
                 else {
-                    
+                    // Set default opening times if null
+                    space[0].opening_times = this.setDefaultOpenTimesIfNull(space[0])
+
                     // Update the space object with the new data
                     this.space = space[0];
 
@@ -642,9 +851,28 @@ import {createClient} from '@supabase/supabase-js';
                     console.log(space)
 
                     // Update the map to show the space
+                    // Wait for the space_types and buildings list to have loaded first
+                    while (!this.mapDataLoaded()) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                    // Now we have the space types and buildings, we can load the space to the map
                     this.loadSpaceToMap();
 
                 }
+                
+            },
+
+            mapDataLoaded(){
+
+                // Checks if the arrays for the map data have been populated
+                // Returns true if all are populated, false otherwise
+                if (this.space_types.length == 0) return false; 
+                if(this.buildings.length == 0) return false;
+                if(this.space_list.length == 0) return false;
+                if(this.overlays.length == 0) return false;
+                if(document.getElementById("space-placement-map") == null) return false;
+
+                return true
                 
             },
 
@@ -652,7 +880,7 @@ import {createClient} from '@supabase/supabase-js';
                 // Fetch the building list from the database
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
-                    .select('canonical, display_name, UUID')
+                    .select('canonical, display_name, UUID, always_display, geometry')
                 if (error) {
                     console.error(error)
                     alert(error.message)
@@ -664,6 +892,22 @@ import {createClient} from '@supabase/supabase-js';
                     // console.log(buildings);
                     this.buildings = sortArrayOfObjectsByKey(buildings, "display_name");
                 }
+            },
+
+            async getSpaces(){
+                // Fetch the spaces list from the database, for dummy display
+                let { data: spaces, error } = await this.supabase
+                    .from('spaces')
+                    .select('canonical, location, type, icon_override, name')
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    this.space_list = spaces;
+                }
+
             },
 
             async getSpaceTypes(){
@@ -684,12 +928,33 @@ import {createClient} from '@supabase/supabase-js';
                 }
             },
 
-            getImageForSpaceType(type){
-                // Cycle through space types
+            async getOverlays(){
+                // Fetch the overlays from the database
+                const { data: overlays_data, error: overlay_error} = await this.supabase
+                .from('overlays')
+                .select('*')
+
+                if (overlay_error) {
+                    console.log('An error occured while fetching overlays:');
+                    console.log(overlay_error);
+                }
+                else {
+                    this.overlays = overlays_data;
+                }
+            },
+
+            getImageForSpaceType(space){
+                // Get the image for the space type
+
+                // First check if the space has a custom icon
+                if (this.space.icon_override && this.space.icon_override.length > 0){
+                    return this.space.icon_override;
+                }
+                // Else, Cycle through space types
                 // When the category field matches the input, return the image
                 // If there are no matches, return the placeholder image
                 for (let i = 0; i < this.space_types.length; i++) {
-                    if (this.space_types[i].category == type){
+                    if (this.space_types[i].category == space.type){
                         return this.space_types[i].icon;
                     }
                 }    
@@ -700,101 +965,220 @@ import {createClient} from '@supabase/supabase-js';
                 // Update the space icon on the map
                 // This function is called when the space type is changed
                 // It will update the icon on the map to match the new space type
-                // console.log("Updating map icon")
-                let newIcon = this.getImageForSpaceType(this.space.type);
+                let newIcon = L.icon({
+                        iconUrl: this.getImageForSpaceType(this.space),
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 25],
+                        // popupAnchor: [0, -16],
+                    });
 
-                
-                // Wait for this function to have loaded
-                while (typeof spaceSelectMapUpdateIcon !== "function" ) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                // Wait for the leaflet object L to have loaded
-                while (typeof L === "undefined") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-
-                // If Leaflet is loaded and the function is defined, we're ready to rock
-                spaceSelectMapUpdateIcon(newIcon);
+                this.center_marker.setIcon(newIcon);
             },
 
             async loadSpaceToMap(){
-                // When the space selection is changed, this function is called
-                // It will update the marker's location to the space's location
-                // It will also update the icon to match the space type
+                // Regenerate and Set up the basics of the map
+                this.initMap();
 
-                // Update the marker's location
-                // Wait for this function to have loaded
-                while (typeof spaceSelectMapUpdateMarkerLocation !== "function") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                // Wait for the leaflet object L to have loaded
-                while (typeof L === "undefined") {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+                // Initialise the centre marker
+                this.initCentreMarker();
 
-                // If Leaflet is loaded and the function is defined, we're ready to rock
+                // Add the overlays to the map
+                this.addOverlays();
 
-                spaceSelectMapUpdateMarkerLocation(this.space.location);
+                // Add the buildings to the map
+                this.addBuildings();
 
-                // Update the marker's icon
-                this.updateSpaceIcon();
+                // Add the other spaces to the map
+                this.addDummySpaces();
             },
 
-            // Function to be passed to the marker on init
-            updateSpaceLocation(newLocation){
-                this.space.location = newLocation;
+            initMap(){
+
+                // Check if there is already a map object, remove if there is
+                try {
+                    this.map.remove();
+                }
+                catch (error) {
+                    console.log("No map to remove");
+                }
+
+                // Initialise the map
+                let map = L.map('space-placement-map', {
+                    zoomSnap: 0.25,
+                    zoomDelta: 0.25,
+                    maxZoom: 20,
+                    renderer: L.canvas({padding: 1})
+                }).fitBounds(campusBounds);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //rastertiles/voyager_nolabels
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    maxZoom:20
+                }).addTo(map);
+
+                // Cheap debug
+                map.on('click', function(e) {
+                    let cheapDebugObject = {
+                        latlng: e.latlng,
+                        bounds: map.getBounds(),
+                        zoom: map.getZoom(),
+                        center: map.getCenter()
+                    }
+            
+                    console.log(cheapDebugObject);
+                    
+                });
+
+                this.map = map;
+
             },
 
+            centerViewOnCampus(){
+                // When called, update the map to be centred on the campus
+                this.map.fitBounds(campusBounds);
+            },
+
+            centerViewOnSpace(){
+                // When called, update the map to be centred on the space
+                this.map.setView(this.space.location, 18);
+            },
+
+            initCentreMarker(){
+                // Initialise the centre marker
+                // This marker is used to set the space's location
+                // It is not interactive
+
+                // Get the icon for this space's type
+                let iconURL = this.getImageForSpaceType(this.space);
+
+                // Initialise the marker at the location of the space
+                this.center_marker = L.marker(this.space.location, {
+                    icon: L.icon({
+                        iconUrl: iconURL,
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 25],
+                    }),
+                    draggable: true,
+                    zIndexOffset: 1000,
+                }).addTo(this.map);
+
+                // Update the view of the map to be centred on the space
+                this.centerViewOnSpace();
+
+                // Add event handlers to the map to update the space and marker location:
+                // Keep the marker centred on the map
+
+                // Avoid issues with 'this' binding
+                let setMarker = this.updateSpaceLocation;
+
+                // When the marker is dragged, update the space's location
+                this.center_marker.on('dragend', function(e) {
+                    setMarker();
+                });
+
+            },
+
+            updateSpaceLocation(){
+                // Update the space's location to match the marker
+                this.space.location = [this.center_marker.getLatLng().lat, this.center_marker.getLatLng().lng];
+            },
+
+            setCenterOfMap(record){
+
+                let center = this.map.getCenter();
+                this.center_marker.setLatLng(center);
+                // Update the space's location draw, but only record the change on movement end
+                if (record)
+                this.space.location = [center.lat, center.lng];
+            },
+
+            addOverlays() {
+                // Go through each overlay and add it to the map
+                this.overlays.forEach(overlay => {
+                    L.imageOverlay(overlay.url, overlay.bounds).addTo(this.map);
+                });
+            },
+
+            addBuildings() {
+
+                 // Empty array to hold the layer groups
+                let building_geojsons = [];
+                // Go through each building and add it to the map
+                this.buildings.forEach(building => {
+                    try {
+                        // Check if the building is always displayed
+                        // And that the coordinates are not empty
+                        // If it is, add it to the map
+                        if (building.always_display && building.geometry.coordinates.length > 0){
+                            // Convert building to a valid GeoJSON object
+                            let building_geojson = {
+                                "type": "Feature",
+                                "geometry": {
+                                    "coordinates": building.geometry.coordinates,
+                                    "type": "Polygon"
+                                }
+                            }
+                            
+                            building_geojsons.push(building_geojson);
+                        }
+                    }
+                    catch (error) {
+                        console.error("Error adding " + building.canonical + " to map")
+                        console.error(error)
+                    }
+                });
+
+                var buildings_geojson_array = L.geoJSON(building_geojsons, {
+                    style: {
+                        fillColor: '#0087A2',
+                        weight: 1,
+                        opacity: 0,
+                        color: '#FCE891',
+                        dashArray: '0',
+                        fillOpacity: 1,
+                        noClip:true
+                    }
+                }).addTo(this.map);
+            },
+
+            addDummySpaces(){
+                // Go through each space and add it to the map at an opacity of DUMMY_SPACE_OPACITY
+                // Except for the currently active space
+
+                const DUMMY_SPACE_OPACITY = 0.5;
+
+                this.space_list.forEach(space => {
+
+                    // Skip the current space
+                    if (space.canonical == this.space.canonical) return;
+
+                    // Create the icon object
+                    // The className is used to make the icon fade in and out when the zoom changes
+                    let myIcon = L.icon({
+                        iconUrl: this.getImageForSpaceType(space), 
+                        iconSize: [50, 50], 
+                        iconAnchor: [25, 25],
+                    });
+
+                    // Create the marker object
+                    L.marker(space.location, {
+                        icon: myIcon, 
+                        opacity: DUMMY_SPACE_OPACITY,})
+                        .addTo(this.map);
+
+                });
+            },
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             async updateSpace() {
 
-                // Create an empty object to store the update query
-                // Only contains the things we want to update
-                let update_vehicle = {
-                    name: this.space.name,
-                    description: this.space.description,
-                    type: this.space.type,
-                    seating: this.space.seating,
-                    outlets: this.space.outlets,
-                    food_drink_allowed: this.space.food_drink_allowed,
-                    sense_exp: this.space.sense_exp,
-                    sense_exp_display: this.space.sense_exp_display,
-                    sense_exp_video: this.space.sense_exp_video,
-                    wayfinding: this.space.wayfinding,
-                    wayfinding_display: this.space.wayfinding_display,
-                    wayfinding_video: this.space.wayfinding_video,
-                    phys_access: this.space.phys_access,
-                    phys_access_display: this.space.phys_access_display,
-                    phys_access_video: this.space.phys_access_video,
-                    further_info: this.space.further_info,
-                    furtherinfo_display: this.space.furtherinfo_display,
-                    tips: this.space.tips,
-                    aka: this.space.aka,
-                    primary_image_url: this.space.primary_image_url,
-                    primary_image_alt: this.space.primary_image_alt,
-                    primary_image_panorama: this.space.primary_image_panorama,
-                    seating_note: this.space.seating_note,
-                    outlets_note: this.space.outlets_note,
-                    food_and_drink_allowed_note: this.space.food_and_drink_allowed_note,
-
-                    microwave: this.space.microwave,
-                    microwave_note: this.space.microwave_note,
-                    kettle: this.space.kettle,
-                    kettle_note: this.space.kettle_note,
-                    wheelchair: this.space.wheelchair,
-                    wheelchair_note: this.space.wheelchair_note,
-                    building_uuid: this.space.building_uuid,
-                    building: this.space.building,
-                    location: this.space.location,
+                // If the primary image has changed, upload it to the storage bucket
+                if (document.getElementById("PrimaryImageInput").files.length > 0){
+                    this.space.primary_image_url = await this.uploadNewPrimaryImage();
                 }
 
-                // Match the building's UUID to the building's canonical name, since that wasn't done earlier
-                // This is needed for the update query
-                for (let i = 0; i < this.buildings.length; i++) {
-                    if (this.buildings[i].canonical == this.space.building){
-                        update_vehicle.building_uuid = this.buildings[i].UUID;
-                    }
+                // If the custom icon has changed, upload it to the storage bucket
+                if (document.getElementById("IconOverrideInput").files.length > 0){
+                    this.space.icon_override = await this.uploadNewCustomIcon();
                 }
 
                 // Update the space in the database
@@ -811,6 +1195,8 @@ import {createClient} from '@supabase/supabase-js';
                     throw error
                 }
                 else {
+                    //TODO: Add a log entry
+                    // TODO: Check the response from the database to see if the update was successful
                     // If the update was successful, update the clean space object
                     this.space_clean = JSON.parse(JSON.stringify(this.space));
                     alert(this.space.name + " updated successfully")
@@ -818,15 +1204,24 @@ import {createClient} from '@supabase/supabase-js';
                 }
             },
 
+            resetIconToTypeDefault(){
+                // Reset the icon to the default for the space type
+                // Clear the custom icon input
+                document.getElementById("IconOverrideInput").value = "";
+                // Remove the icon override from the space object
+                this.space.icon_override = "";
+                // Update the icon on the map
+                this.updateSpaceIcon();
+            },
+
             // This function is called when the user clicks the "Cancel" button
             // It will revert the building to the state it was in when the page was loaded
             cancelChanges() {
 
-                // console.log("Current copy:")
-                // console.log(JSON.parse(JSON.stringify(this.space)))
-
-                // console.log("Clean copy:")
-                // console.log(JSON.parse(JSON.stringify(this.space_clean)))
+                // Clear the primary image input
+                document.getElementById("PrimaryImageInput").value = "";
+                // Clear the custom icon input
+                document.getElementById("IconOverrideInput").value = "";
 
                 // Deep copy the space_clean object back into the space object
                 this.space = JSON.parse(JSON.stringify(this.space_clean));

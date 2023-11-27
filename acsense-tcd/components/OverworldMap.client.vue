@@ -108,6 +108,31 @@ export default {
             this.addZoomHandling();
             this.addStudentSpaces();
             this.addControlButtons();
+
+            // Check if there's a building in the URL, and if so, fly to it
+            this.checkForBuildingInURL();
+        },
+
+        checkForBuildingInURL(){
+
+            // Check if there's a building in the URL, and if so, fly to it
+            let url = window.location.href;
+            
+            // Loop through the buildings and check if the url contains the canonical name
+            this.buildings.forEach(building => {
+                if (window.location.href.includes(building.canonical)){
+                    
+                    // Dismiss the modals if they're open
+                    this.$emit('dismissModals');
+
+                    // Get the center of the building to aim for
+                    let center = this.getGeometricCenter(building.geometry.coordinates);
+
+                    // Fly to the building at the correct zoom level
+                    this.map.flyTo(center, this.LABEL_PRIMARY_RANGE_UPPER + 0.5);
+                    
+                }
+            });
         },
 
         // Add the overlays to the map eg main campus
@@ -387,6 +412,7 @@ export default {
 
             // Check the url for the building canonical, in which case we want to highlight it
             if (window.location.href.includes(feature.properties.canonical)){
+
                 return {
                     fillColor: "#E53397",
                     weight: 1,
