@@ -414,9 +414,26 @@
                                     v-model="space.location[1]"  
                                     disabled>
                                 </div>
+
+                                <div>
+                                    <span class="d-block">Center map</span>
+                                    <button 
+                                    type="button" 
+                                    class="btn btn-outline-primary mx-1" 
+                                    @click="centerViewOnCampus()">
+                                        Campus
+                                    </button>
+        
+                                    <button 
+                                    type="button" 
+                                    class="btn btn-outline-primary mx-1" 
+                                    @click="centerViewOnSpace()">
+                                        Space
+                                    </button>
+                                </div>
                             </div>
                             <!-- Space Type -->
-                            <div class="mb-3">
+                            <div class="my-3">
                                 <label for="spaceType" class="form-label">Space Type</label>
                                 <select 
                                 class="form-select" 
@@ -503,6 +520,11 @@
 import {createClient} from '@supabase/supabase-js';
 import L from 'leaflet';
 import '~/assets/css/leaflet.css'
+
+const campusBounds = [
+                    [53.345568, -6.259428],
+                    [53.341853, -6.249477]
+                ];
 
     export default {
         data() {
@@ -772,13 +794,7 @@ import '~/assets/css/leaflet.css'
             },
 
             async loadSpaceToMap(){
-                // When the space selection is changed, this function is called
-                // It will regenerate the map object
-                // It will load all the overlays and buildings (noninteractive)
-                // It will load all the other spaces (noninteractive)
-                // It will load the space under edit and update the space icon
-
-                // Set up the basics of the map
+                // Regenerate and Set up the basics of the map
                 this.initMap();
 
                 // Initialise the centre marker
@@ -810,10 +826,7 @@ import '~/assets/css/leaflet.css'
                     zoomDelta: 0.25,
                     maxZoom: 20,
                     renderer: L.canvas({padding: 1})
-                }).fitBounds([
-                    [53.345568, -6.259428],
-                    [53.341853, -6.249477]
-                ]);
+                }).fitBounds(campusBounds);
 
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //rastertiles/voyager_nolabels
                     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -837,6 +850,16 @@ import '~/assets/css/leaflet.css'
 
             },
 
+            centerViewOnCampus(){
+                // When called, update the map to be centred on the campus
+                this.map.fitBounds(campusBounds);
+            },
+
+            centerViewOnSpace(){
+                // When called, update the map to be centred on the space
+                this.map.setView(this.space.location, 18);
+            },
+
             initCentreMarker(){
                 // Initialise the centre marker
                 // This marker is used to set the space's location
@@ -852,33 +875,29 @@ import '~/assets/css/leaflet.css'
                         iconSize: [50, 50],
                         iconAnchor: [25, 25],
                     }),
-                    draggable: false,
+                    draggable: true,
                     zIndexOffset: 1000,
                 }).addTo(this.map);
 
-                // Update the view of the map to be centred on the map
-                this.map.setView(this.space.location, 19);
+                // Update the view of the map to be centred on the space
+                this.centerViewOnSpace();
 
                 // Add event handlers to the map to update the space and marker location:
                 // Keep the marker centred on the map
 
-                let setMarker = this.setCenterOfMap;
+                // Avoid issues with 'this' binding
+                let setMarker = this.updateSpaceLocation;
 
-                //TODO: Change interaction pattern to drag
-                // Keep the zoom to marker on space load
-                // Add a button that recentres the map on the space
-
-                this.map.on('move', function () {
-                    setMarker(false);
+                // When the marker is dragged, update the space's location
+                this.center_marker.on('dragend', function(e) {
+                    setMarker();
                 });
 
-                //When the movement is finished, update the lat and long inputs
-                this.map.on('dragend', function(e) {
-                    setMarker(true);
-                });
-                this.map.on('zoomend', function(e) {
-                    setMarker(true);
-                });
+            },
+
+            updateSpaceLocation(){
+                // Update the space's location to match the marker
+                this.space.location = [this.center_marker.getLatLng().lat, this.center_marker.getLatLng().lng];
             },
 
             setCenterOfMap(record){
