@@ -19,14 +19,14 @@ function openInfoModal(building){
 
     let buttons = [modal_info_button];
 
-    let mapModal = document.getElementById('buildingModal')
+    // let mapModal = document.getElementById('buildingModal')
 
-    let modalTitle = mapModal.querySelector('.modal-title');
-    let modalBody = mapModal.querySelector('.modal-body');
-    let modalFoot = mapModal.querySelector('.modal-footer');
+    // let modalTitle = mapModal.querySelector('.modal-title');
+    // let modalBody = mapModal.querySelector('.modal-body');
+    // let modalFoot = mapModal.querySelector('.modal-footer');
 
-    modalTitle.textContent = building.name;
-    modalBody.innerHTML = modal_content;
+    // modalTitle.textContent = building.name;
+    // modalBody.innerHTML = modal_content;
 
     let _tempHtml = "";
 
@@ -41,20 +41,26 @@ function openInfoModal(building){
 
     });
 
-    modalFoot.innerHTML = _tempHtml;
+    // modalFoot.innerHTML = _tempHtml;
 
-    mapModal.style.display = "block";
+    return {
+        title: building.name, 
+        mainContent: modal_content, 
+        footer: _tempHtml
+    }
+
+    // mapModal.style.display = "block";
 
 }
 
 // Modal for displaying information about the sensory areas
 function openAreaModal(area){
 
-    let areaModal = document.getElementById('areaModal')
+    // let areaModal = document.getElementById('areaModal')
 
-    let modalTitle = areaModal.querySelector('.modal-title');
-    let modalBody = areaModal.querySelector('.modal-body');
-    let modalFoot = areaModal.querySelector('.modal-footer');
+    // let modalTitle = areaModal.querySelector('.modal-title');
+    // let modalBody = areaModal.querySelector('.modal-body');
+    // let modalFoot = areaModal.querySelector('.modal-footer');
 
     let badges = 
     // <!-- Seating -->
@@ -113,11 +119,16 @@ function openAreaModal(area){
     `<a class="btn btn-primary mt-2" style="grid-area: btn;" href="/space/${area.canonical}" role="button">More Info</a>`;
 
   
-    modalTitle.textContent = area.name;
-    modalBody.textContent = area.description;
-    modalFoot.innerHTML = badges;
+    // modalTitle.textContent = area.name;
+    // modalBody.textContent = area.description;
+    // modalFoot.innerHTML = badges;
 
-    areaModal.style.display = "block";
+    
+    return {
+        title: area.name, 
+        mainContent: area.description, 
+        footer: badges
+    }
 
 }
 

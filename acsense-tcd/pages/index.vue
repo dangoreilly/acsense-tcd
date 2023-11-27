@@ -8,9 +8,10 @@
     :spaceStyles="spaceStyles"
     @openBuildingModal="openBuildingModal"
     @openSpaceModal="openSpaceModal"
-    @openLegendModal="legendModalOpen = true"/>
+    @openLegendModal="legendModalOpen = true"
+    @dismissModals="closeModal"/>
 
-    <!-- Building Modal -->
+    <!-- Info Modal -->
     <div 
         class="modal fade show" 
         id="buildingModal"
@@ -18,25 +19,25 @@
         @click.self="closeModal()"
         aria-modal="true" 
         role="dialog" 
-        :style="buildingModalOpen ? 'display: block;' : 'display: none;'">
+        :style="infoModalOpen ? 'display: block;' : 'display: none;'">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
                 <div class="modal-content" >
 
                     <div class="modal-header" style="width: 100%;">
-                        <h5 class="modal-title d-flex" id="mapModalLabel" >text</h5>
+                        <h5 class="modal-title d-flex" id="mapModalLabel">{{infoModal.title}}</h5>
                         <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
                     </div>
 
-                    <div class="modal-body" style="align-self: baseline;"></div>
+                    <div class="modal-body" style="align-self: baseline;" v-html="infoModal.mainContent"></div>
 
-                    <div class="modal-footer" style="justify-content: center"></div>
+                    <div class="modal-footer space-modal-badge-container" style="justify-content: center" v-html="infoModal.footer"></div>
                 
                 </div>
             </div>
         </div>
 
     <!-- Space Modal -->
-    <div 
+    <!-- <div 
         class="modal fade show" 
         id="areaModal"
         tabindex="-1" 
@@ -58,7 +59,7 @@
                 
                 </div>
             </div>
-        </div>
+        </div> -->
 
     <!-- Welcome Modal -->
     <div 
@@ -262,9 +263,13 @@ export default {
         return {
             welcomeModalOpen: false,
             legendModalOpen: false,
-            spaceModalOpen: false,
-            buildingModalOpen: false,
+            infoModalOpen: false,
             skipWelcome: false,
+            infoModal: {
+                title: '',
+                mainContent: '',
+                footer: '',
+            },
         }
     },
     mounted() {
@@ -276,22 +281,22 @@ export default {
     methods: {
 
         openBuildingModal(building){
-            openInfoModal(building);
+            this.infoModal = openInfoModal(building);
 
-            this.buildingModalOpen = true;
+            this.infoModalOpen = true;
         },
 
         openSpaceModal(space){
-            openAreaModal(space);
+            this.infoModal = openAreaModal(space);
 
-            this.spaceModalOpen = true;
+            this.infoModalOpen = true;
         },
         
         
         closeModal(){
             // Close the modals
-            this.spaceModalOpen = false;
-            this.buildingModalOpen = false;
+            this.welcomeModalOpen = false;
+            this.infoModalOpen = false;
             this.legendModalOpen = false;
         },
 
