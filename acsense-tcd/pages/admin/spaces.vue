@@ -50,7 +50,7 @@
 
                 <!-- Main Matter -->
                 <!-- Only render if the space has loaded -->
-                <div class="mainMatter-admin px-2" v-if="space">
+                <div class="mainMatter-admin px-2" v-if="space.name">
 
                     <!-- Two columns -->
                     <!-- Column 1 contains input boxes -->
@@ -130,6 +130,84 @@
                         <div class="col" id="description" style="grid-area: desc; justify-self: start;">
                             <h3>Description</h3>
                             <p>{{space.description}}</p>
+                        </div>
+                    </div>
+
+                    <!-- Opening Times -->
+                    <div class="row mt-3 pb-3 border-bottom"><label class="form-label d-block">Opening Times</label>
+                        <div class="col d-flex flex-column">
+                            <!-- Weekdays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="weekDay-checkbox" >Weekdays</label>
+                                    <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
+                                    v-model="space.opening_times.weekday.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="weekDay-open">Opening Time</label>
+                                    <input type="time" id="weekDay-open" class="form-control"
+                                    v-model="space.opening_times.weekday.times[0]" 
+                                    :disabled="!space.opening_times.weekday.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="weekDay-open">Closing Time</label>
+                                    <input type="time" id="weekDay-open" class="form-control"
+                                    v-model="space.opening_times.weekday.times[1]" 
+                                    :disabled="!space.opening_times.weekday.open"/>
+                                </div>
+                            </div>
+                            <!-- Saturdays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="sat-checkbox">Saturday</label>
+                                    <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
+                                    v-model="space.opening_times.sat.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="sat-open">Opening Time</label>
+                                    <input type="time" id="sat-open" class="form-control"
+                                    v-model="space.opening_times.sat.times[0]" 
+                                    :disabled="!space.opening_times.sat.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="sat-close">Closing Time</label>
+                                    <input type="time" id="sat-close" class="form-control"
+                                    v-model="space.opening_times.sat.times[1]" 
+                                    :disabled="!space.opening_times.sat.open"/>
+                                </div>
+                            </div>
+                            <!-- Sundays -->
+                            <div class="row">
+                                <div class="col">
+                                    <label for="sunday-checkbox">Sunday & Public Holidays</label>
+                                    <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
+                                    v-model="space.opening_times.holidays.open" />
+                                </div>
+                                <div class="col">
+                                    <label for="sunday-open">Opening Time</label>
+                                    <input type="time" id="sunday-open" class="form-control"
+                                    v-model="space.opening_times.holidays.times[0]" 
+                                    :disabled="!space.opening_times.holidays.open"/>
+                                </div>
+                                <div class="col">
+                                    <label for="sunday-close">Closing Time</label>
+                                    <input type="time" id="sunday-close" class="form-control"
+                                    v-model="space.opening_times.holidays.times[1]" 
+                                    :disabled="!space.opening_times.holidays.open"/>
+                                </div>
+                            </div>
+
+                            <!-- Note -->
+                            <div class="mt-3">
+                                <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
+                                <input id="timeNoteInput" type="text" class="form-control" 
+                                v-model="space.opening_times.note">
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <Timebox
+                                :times="space.opening_times"/>
                         </div>
                     </div>
 
@@ -588,23 +666,6 @@ const campusBounds = [
         },
         computed: {
             infoBoxContent() {
-                // return [
-                //     {
-                //         title: "Sensory Experience",
-                //         content: this.space.sense_exp || "No information provided",
-                //         display: this.space.sense_exp_display || false
-                //     },
-                //     {
-                //         title: "Wayfinding",
-                //         content: this.space.wayfinding || "No information provided",
-                //         display: this.space.wayfinding_display || false
-                //     },
-                //     {
-                //         title: "Physical Access",
-                //         content: this.space.phys_access || "No information provided",
-                //         display: this.space.phys_access_display || false
-                //     },
-                // ];
                 return setInfoBoxContent(this.space);
             },
             spaceHasBeenChanged() {
@@ -640,6 +701,30 @@ const campusBounds = [
                     }, 100);
                     this.space.primary_image_panorama = true;
                 }
+            },
+
+            setDefaultOpenTimesIfNull(data){
+
+                // let opening_times = {};
+                if (!data.opening_times) {
+                    return {
+                        weekday: {
+                            open: false,
+                            times: ["08:00", "17:00"],
+                        },
+                        sat: {
+                            open: false,
+                            times: ["08:00", "17:00"],
+                        },
+                        holidays: {
+                            open: false,
+                            times: ["08:00", "17:00"],
+                        },
+                        note: "",
+                    }
+                }
+
+                return data.opening_times;
             },
 
             handleCustomIconSelect(evt){
@@ -751,7 +836,9 @@ const campusBounds = [
                     throw error
                 }
                 else {
-                    
+                    // Set default opening times if null
+                    space[0].opening_times = this.setDefaultOpenTimesIfNull(space[0])
+
                     // Update the space object with the new data
                     this.space = space[0];
 
