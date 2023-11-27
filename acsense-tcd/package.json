@@ -25,7 +25,7 @@
     "@photo-sphere-viewer/core": "^5.4.4",
     "@photo-sphere-viewer/visible-range-plugin": "^5.4.4",
     "@supabase/supabase-js": "^2.38.2",
-    "@types/node": "^20.8.9",
+    "@types/node": "^20.10.0",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.1",
     "chart.js": "^4.4.0",
