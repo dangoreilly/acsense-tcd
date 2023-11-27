@@ -238,11 +238,8 @@ import L from 'leaflet';
                 floor_layers_object: {},
                 EntryFloor: 1,
                 supabase: {},
-                newGalleryImage: {
-                    selectedFile: null,
-                    alt: "",
-                    caption: "",
-                },
+                spaces: [],
+                spaces_clean: [],
                 map: {},
             }
         },
@@ -296,6 +293,9 @@ import L from 'leaflet';
             // Sort the floors by level
             this.floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
 
+            // Get the spaces in this building
+            this.getSpaces();
+
             // Set the entry floor 
             // this.setEntryFloor(this.building.entry_floor);
 
@@ -309,6 +309,26 @@ import L from 'leaflet';
             },
         },
         methods: {
+
+            async getSpaces(){
+                // Get the spaces in this building
+
+                const { data: spaces, error } = await this.supabase
+                    .from('spaces')
+                    .select('display_name, UUID, floor, location_internal, type, icon_override')
+                    .eq('building_uuid', this.building.UUID)
+
+                    if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    console.log(spaces);
+                    this.spaces = JSON.parse(JSON.stringify(spaces));
+                    this.spaces_clean = JSON.parse(JSON.stringify(spaces));
+                }
+            },
 
             swapFloors(A, B){
                 // Takes in the index of two floors, swaps them in the array
