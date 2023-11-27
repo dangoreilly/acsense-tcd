@@ -1,6 +1,8 @@
 <template>
     <div class="d-flex flex-column flex-shrink-0 py-3 px-3 border-end border-secondary-subtle bg-body-tertiary position-sticky space-selection-sidebar">
         <!-- TODO: Filter -->
+        <!-- TODO: Squash into one component with buildings that takes the list as an input -->
+        <!-- Pulling the data at the component level is really dumb -->
         <ul class="nav nav-pills flex-column mb-auto">
             <!-- Highlight the active page by matching it to the activeSpace -->
             <li v-for="space in spaces" style="max-width: 100%;">

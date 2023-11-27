@@ -16,32 +16,46 @@ export default {
         mainSrc: String,
         mainAlt: String,
     },
-    data(){
-        return{
-            imgSrc: this.mainSrc,
-            imgAlt: this.mainAlt,
-        }
-    },
-
-    created(){
+    computed:{
         // If no mainSrc is provided, use a default image
-        this.initImage();
-    },
-
-    updated(){
-        // If no mainSrc is provided, use a default image
-        this.initImage();
-    },
-    methods:{
-
-        initImage(){
+        imgSrc(){
             if(!this.mainSrc){
-                this.imgSrc = "../images/info_page_default_image.jpg";
-                this.imgAlt = "Photo showing the fellows' square of Trinity College Dublin. No building in particular is focused on";
+                return "../images/info_page_default_image.jpg";
+            }
+            else{
+                return this.mainSrc;
             }
         },
+        // If no mainAlt is provided, use a default image
+        imgAlt(){
+            if(!this.mainAlt){
+                return "Photo showing the fellows' square of Trinity College Dublin. No building in particular is focused on";
+            }
+            else{
+                return this.mainAlt;
+            }
+        },
+    },
 
-    }
+    // created(){
+    //     // If no mainSrc is provided, use a default image
+    //     this.initImage();
+    // },
+
+    // updated(){
+    //     // If no mainSrc is provided, use a default image
+    //     this.initImage();
+    // },
+    // methods:{
+
+    //     initImage(){
+    //         if(!this.mainSrc){
+    //             this.imgSrc = "../images/info_page_default_image.jpg";
+    //             this.imgAlt = "Photo showing the fellows' square of Trinity College Dublin. No building in particular is focused on";
+    //         }
+    //     },
+
+    // }
 
 }
 </script>

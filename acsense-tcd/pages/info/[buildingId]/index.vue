@@ -20,6 +20,7 @@
         <div style="grid-area: sense-areas; align-self: end;">
             <SenseSpaces 
             :sensoryAreas="building.student_spaces"
+            :spaceIcons="space_icons"
             />
         </div>
 
@@ -223,6 +224,8 @@ body {
 
 <script setup>
 
+import {createClient} from '@supabase/supabase-js'
+
     // function setInfoBoxContent(building){
     //     return [
     //         {
@@ -242,6 +245,31 @@ body {
     //         },
     //     ];
     // }
+
+    let space_icons = ref([]);
+
+    async function getSpaceIcons() {
+        // Get the space icons from the database
+        // For showing in the info modal
+        const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+        const supabaseKey = useRuntimeConfig().public.supabaseKey;
+        const supabase = createClient(supabaseUrl, supabaseKey)
+
+        let { data: icons, error } = await supabase
+            .from('space_styles')
+            .select('category, icon')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+            console.log("Space icons retrieved")
+            console.log(icons)
+            return JSON.parse(JSON.stringify(icons));
+        }
+    }
+
+    // space_icons = ref(await getSpaceIcons());
 
     async function getBuildingData() {
         const route = useRoute();
@@ -277,7 +305,10 @@ body {
     }
 
     
-    const { data: building, error } = await useAsyncData('building', () => getBuildingData())
+    const { data: building, error: building_err } = await useAsyncData('building', () => getBuildingData());
+
+    // space_icons = await useAsyncData('space_icons', () => getSpaceIcons())
+    space_icons = await getSpaceIcons();
 
     // console.log(building);
 
