@@ -434,7 +434,10 @@ export default {
             }
 
             // Check the url for the building canonical, in which case we want to highlight it
-            if (window.location.href.includes(feature.properties.canonical)){
+            const urlParams = new URL(window.location.href).searchParams;
+            const highlight = urlParams.get('highlight');
+            
+            if (highlight == feature.properties.canonical){
 
                 return {
                     fillColor: "#E53397",
@@ -500,7 +503,10 @@ export default {
                 });
 
                 // If the url contains the canonical name of the area, overwrite the icon with the highlighted version
-                if (window.location.href.includes(area.canonical)){
+                const urlParams = new URL(window.location.href).searchParams;
+                const highlight = urlParams.get('highlight');
+                
+                if (highlight == area.canonical){
                     myIcon = L.icon({
                         iconUrl: icon_url, 
                         iconSize: [50, 50], 

@@ -12,7 +12,7 @@
             <p v-if="building.aka" id="aka" class="d-block pb-0 mb-0"><b>Also Known as:</b> {{building.aka}}</p>
             <!-- Pill link to highlight the building on the map -->
             <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
-            :href="'/?'+building.canonical">
+            :href="'/?highlight='+building.canonical">
             Highlight on map</a>
         </div>
             

@@ -16,7 +16,7 @@
                 </p>
                 <!-- Pill link to highlight the building on the map -->
                 <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
-                :href="'/?'+space.canonical">
+                :href="'/?highlight='+space.canonical">
                 Highlight on map</a>
             </div>
                 
