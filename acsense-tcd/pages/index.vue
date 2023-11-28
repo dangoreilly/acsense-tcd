@@ -83,11 +83,10 @@
                 </div>
                 
                 <div class="modal-footer d-flex justify-content-between">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" :value="skipWelcome" id="skipWelcomeCheck" @change="setWelcomeSkipCookie"
-                        title="This checkbox stores a non-tracking cookie on your device, to store your preference">
+                    <div class="form-check" title="This checkbox stores a non-tracking cookie on your device, to store your preference">
+                        <input class="form-check-input" type="checkbox" v-model="skipWelcome" id="skipWelcomeCheck">
                         <label class="form-check-label" for="skipWelcomeCheck">
-                            Don't show again
+                            Don't show again (stores a cookie)
                         </label>
                     </div>
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="welcomeModalOpen=false; legendModalOpen=true">Close</button>
@@ -277,6 +276,11 @@ export default {
         // Check if the user has indicated they want to skip the welcome modal
         this.checkSkipWelcome();
     },
+    watch: {
+        skipWelcome: function(){
+            this.setWelcomeSkipCookie();
+        }
+    },
 
     methods: {
 
@@ -304,23 +308,42 @@ export default {
         // Check the cookies to see if the user has requested to skip the welcome modal
         checkSkipWelcome(){
             // Access the cookie
-            const skipWelcomeCookie = useCookie('tcdsense-skipWelcome')
-            console.log("Cookie value:", skipWelcomeCookie.value);
+            let skipWelcomeCookie = useCookie('tcdsense-skipWelcome');
 
-            // Check the state, assign it to false if it doesn't exist
-            skipWelcomeCookie.value = skipWelcomeCookie.value || false;
+            // Initialise the cookie if it doesn't exist
+            skipWelcomeCookie.value = skipWelcomeCookie.value || 'false';
 
-            // Open or close the welcome modal based on the cookie value
-            this.welcomeModalOpen = !skipWelcomeCookie.value;
+            // If the cookie exists, and is set to true, skip the welcome modal
+            if (skipWelcomeCookie.value == 'false'){
+                this.welcomeModalOpen = true;
+            }
+
+            // If the cookie was initialised for this check, it'll be non-persistent
             
         },
 
         setWelcomeSkipCookie(){
-            // Access the cookie
-            const skipWelcomeCookie = useCookie('tcdsense-skipWelcome')
+            // create the cookie, if the user has requested to skip the welcome modal
+            if (this.skipWelcome){
+                console.log("creating cookie")
+                // Create the cookie to expire in 6 months
+                let skipWelcomeCookie =  useCookie('tcdsense-skipWelcome', {maxAge: 60*60*24*180});
 
-            // Assign it to true
-            skipWelcomeCookie.value = true;
+                skipWelcomeCookie.value = 'true';
+
+                console.log(skipWelcomeCookie);
+            }
+            else {
+                console.log("deleting cookie")
+                // Delete the cookie by setting it to expire in 10 seconds
+                let skipWelcomeCookie =  useCookie('tcdsense-skipWelcome', {maxAge: 10});
+
+                skipWelcomeCookie.value = 'false';
+
+                console.log(skipWelcomeCookie);
+            }
+            
+
         }
 
     }
