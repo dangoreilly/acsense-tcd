@@ -110,29 +110,63 @@ export default {
             this.addControlButtons();
 
             // Check if there's a building in the URL, and if so, fly to it
-            this.checkForBuildingInURL();
+            this.checkForBuildingOrSpaceInURL();
         },
 
-        checkForBuildingInURL(){
+        checkForBuildingOrSpaceInURL(){
 
             // Check if there's a building in the URL, and if so, fly to it
             let url = window.location.href;
+            const urlParams = new URL(url).searchParams;
+
+            // Initialise check variable
+            let buildingMatches = false;
+
+            // First, check if there's a highlight parameter in the URL
+            // if there isn't, we don't need to check any further
+            if (!url.includes("highlight")) return;
+
+            // Else, find the highlight parameter
+            const highlight = urlParams.get('highlight');
             
+            // if (highlight == feature.properties.canonical){
+
             // Loop through the buildings and check if the url contains the canonical name
+            // Run buildings first, because if a building and a space share a canonical name, the building will be prioritised
+            // Zooming to the building will also zoom to the space, so it's not a problem
             this.buildings.forEach(building => {
-                if (window.location.href.includes(building.canonical)){
+                if (highlight == building.canonical){
                     
                     // Dismiss the modals if they're open
-                    this.$emit('dismissModals');
+                    // this.$emit('dismissModals');
 
                     // Get the center of the building to aim for
                     let center = this.getGeometricCenter(building.geometry.coordinates);
 
                     // Fly to the building at the correct zoom level
                     this.map.flyTo(center, this.LABEL_PRIMARY_RANGE_UPPER + 0.5);
+
+                    buildingMatches = true;
                     
                 }
             });
+            
+            // If a building was found, don't check for a space
+            if (buildingMatches) return;
+            
+            // Loop through the student spaces and check if the url contains the canonical name
+            this.studentSpaces.forEach(space => {
+                if (highlight == space.canonical){
+                    
+                    // Dismiss the modals if they're open
+                    // this.$emit('dismissModals');
+
+                    // Fly to the building at the correct zoom level
+                    this.map.flyTo(space.location, this.LABEL_PRIMARY_RANGE_UPPER + 0.5);
+                    
+                }
+            });
+
         },
 
         // Add the overlays to the map eg main campus
@@ -411,7 +445,10 @@ export default {
             }
 
             // Check the url for the building canonical, in which case we want to highlight it
-            if (window.location.href.includes(feature.properties.canonical)){
+            const urlParams = new URL(window.location.href).searchParams;
+            const highlight = urlParams.get('highlight');
+            
+            if (highlight == feature.properties.canonical){
 
                 return {
                     fillColor: "#E53397",
@@ -464,6 +501,7 @@ export default {
             this.studentSpaces.forEach(area => {
 
                 // Figure out what the icon will be by matching the area type to the area type in the area_types array
+                // TODO: Replace with composable for finding the icon that includes icon_override
                 let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
                 let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
 
@@ -472,8 +510,23 @@ export default {
                 let myIcon = L.icon({
                     iconUrl: icon_url, 
                     iconSize: [50, 50], 
-                    className: "sense-icon"
+                    className: "sense-icon",
                 });
+
+                // If the url contains the canonical name of the area, overwrite the icon with the highlighted version
+                const urlParams = new URL(window.location.href).searchParams;
+                const highlight = urlParams.get('highlight');
+                
+                if (highlight == area.canonical){
+                    myIcon = L.icon({
+                        iconUrl: icon_url, 
+                        iconSize: [50, 50], 
+                        className: "sense-icon",
+                        shadowUrl: '/images/red-dot.png',
+                        shadowSize: [60, 60],
+                        // shadowAnchor: [22, 94]
+                    });
+                }
 
                 // Create the marker object
                 let marker = L.marker(area.location, {icon: myIcon, alt: area.name});
