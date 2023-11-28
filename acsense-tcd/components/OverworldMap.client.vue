@@ -127,7 +127,7 @@ export default {
                 if (window.location.href.includes(building.canonical)){
                     
                     // Dismiss the modals if they're open
-                    this.$emit('dismissModals');
+                    // this.$emit('dismissModals');
 
                     // Get the center of the building to aim for
                     let center = this.getGeometricCenter(building.geometry.coordinates);
