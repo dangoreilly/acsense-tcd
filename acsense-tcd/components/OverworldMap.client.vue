@@ -117,14 +117,25 @@ export default {
 
             // Check if there's a building in the URL, and if so, fly to it
             let url = window.location.href;
+            const urlParams = new URL(url).searchParams;
 
+            // Initialise check variable
             let buildingMatches = false;
+
+            // First, check if there's a highlight parameter in the URL
+            // if there isn't, we don't need to check any further
+            if (!url.includes("highlight")) return;
+
+            // Else, find the highlight parameter
+            const highlight = urlParams.get('highlight');
+            
+            // if (highlight == feature.properties.canonical){
 
             // Loop through the buildings and check if the url contains the canonical name
             // Run buildings first, because if a building and a space share a canonical name, the building will be prioritised
             // Zooming to the building will also zoom to the space, so it's not a problem
             this.buildings.forEach(building => {
-                if (window.location.href.includes(building.canonical)){
+                if (highlight == building.canonical){
                     
                     // Dismiss the modals if they're open
                     // this.$emit('dismissModals');
@@ -145,10 +156,10 @@ export default {
             
             // Loop through the student spaces and check if the url contains the canonical name
             this.studentSpaces.forEach(space => {
-                if (url.includes(space.canonical)){
+                if (highlight == space.canonical){
                     
                     // Dismiss the modals if they're open
-                    this.$emit('dismissModals');
+                    // this.$emit('dismissModals');
 
                     // Fly to the building at the correct zoom level
                     this.map.flyTo(space.location, this.LABEL_PRIMARY_RANGE_UPPER + 0.5);
