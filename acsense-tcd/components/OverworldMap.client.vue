@@ -35,6 +35,8 @@ export default {
             map: null,
             flyOvers_objects: [],
             studentSpaces_objects: [],
+            studentSpaces_list: [],
+            studentSpace_popups: [],
             buildings_objects: [],
             overlays_objects: [],
 
@@ -110,15 +112,19 @@ export default {
             this.addControlButtons();
 
             // Check if there's a building in the URL, and if so, fly to it
-            this.checkForBuildingInURL();
+            this.checkForBuildingOrSpaceInURL();
         },
 
-        checkForBuildingInURL(){
+        checkForBuildingOrSpaceInURL(){
 
             // Check if there's a building in the URL, and if so, fly to it
             let url = window.location.href;
-            
+
+            let buildingMatches = false;
+
             // Loop through the buildings and check if the url contains the canonical name
+            // Run buildings first, because if a building and a space share a canonical name, the building will be prioritised
+            // Zooming to the building will also zoom to the space, so it's not a problem
             this.buildings.forEach(building => {
                 if (window.location.href.includes(building.canonical)){
                     
@@ -130,9 +136,28 @@ export default {
 
                     // Fly to the building at the correct zoom level
                     this.map.flyTo(center, this.LABEL_PRIMARY_RANGE_UPPER + 0.5);
+
+                    buildingMatches = true;
                     
                 }
             });
+            
+            // If a building was found, don't check for a space
+            if (buildingMatches) return;
+            
+            // Loop through the student spaces and check if the url contains the canonical name
+            this.studentSpaces.forEach(space => {
+                if (url.includes(space.canonical)){
+                    
+                    // Dismiss the modals if they're open
+                    this.$emit('dismissModals');
+
+                    // Fly to the building at the correct zoom level
+                    this.map.flyTo(space.location, this.LABEL_PRIMARY_RANGE_UPPER + 0.5);
+                    
+                }
+            });
+
         },
 
         // Add the overlays to the map eg main campus
@@ -464,6 +489,7 @@ export default {
             this.studentSpaces.forEach(area => {
 
                 // Figure out what the icon will be by matching the area type to the area type in the area_types array
+                // TODO: Replace with composable for finding the icon that includes icon_override
                 let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
                 let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
 
@@ -472,8 +498,20 @@ export default {
                 let myIcon = L.icon({
                     iconUrl: icon_url, 
                     iconSize: [50, 50], 
-                    className: "sense-icon"
+                    className: "sense-icon",
                 });
+
+                // If the url contains the canonical name of the area, overwrite the icon with the highlighted version
+                if (window.location.href.includes(area.canonical)){
+                    myIcon = L.icon({
+                        iconUrl: icon_url, 
+                        iconSize: [50, 50], 
+                        className: "sense-icon",
+                        shadowUrl: '/images/red-dot.png',
+                        shadowSize: [60, 60],
+                        // shadowAnchor: [22, 94]
+                    });
+                }
 
                 // Create the marker object
                 let marker = L.marker(area.location, {icon: myIcon, alt: area.name});
@@ -487,6 +525,9 @@ export default {
                     emitOpenModal("space", area);
                     // openAreaModal(area);
                 });
+
+                // Add a popup to the marker
+                marker = this.addPopupToStudentSpaces(marker, area);
 
 
                 if (styled_label in areas_sorted){
@@ -519,10 +560,65 @@ export default {
         },
 
         // TODO: Add popups to student spaces
-        addPopupsToStudentSpaces(areas){
-            // Loop through the student spaces and add a popup to each one
-            for (let i = 0; i < this.spaceStyles.length; i++){
+        addPopupToStudentSpaces(marker, space){
+             
+            // create a popup object on the space
+            let popup = L.popup({
+                closeButton: false, 
+                offset: L.point(0, -20)
+            }).setContent(space.name);
+
+            marker.bindPopup(popup);
+            
+            // Create a local function to avoid the 'this' keyword
+            // let openPopup = () => {
+            //     this.map.openPopup(popup);
+            // }
+            // let popup = {}
+
+            // Issues are being caused with the closePopup function,
+            // so instead we'll open a dummy popup in the middle of the atlantic
+            // to trigger the real popup to close
+
+            let openDummyPopup = () => {
+                // console.log('openDummyPopup');
+                let map = this.map;
+                popup = L.popup({
+                    closeButton: false, 
+                    offset: L.point(0, -20),
+                    autoPan: false
+                }).setContent(" ").setLatLng([0,0]).openOn(map);
             }
+
+            marker.on('mouseover', function(e) { 
+                // Open the popup on the Map
+                console.log('mouseover', space.name);
+                // this.bindPopup(space.name, {
+                //     closeButton: false, 
+                //     offset: L.point(0, -20)
+                // }).openPopup();
+                    this.openPopup();
+            });
+
+            marker.on('mouseout', function(e) { 
+                // Close the popup, by opening a dummy one
+                // TODO: Figure out why closePopup isn't working
+                openDummyPopup();
+                
+            });
+
+            // let popup = L.popup({ closeButton: false, offset: L.point(0, -20) }) .setContent(space.name);
+
+            // marker.bindPopup(popup);
+
+            // marker.on(‘mouseover’, function(e) { // Open the popup on the Map this.openPopup(); });
+
+            // marker.on(‘mouseout’, function(e) { // Close the popup this.closePopup(); });
+
+            // Add the popup to the list of popups, to preserve the reference
+            this.studentSpace_popups.push(popup);
+
+            return marker;
         },
 
         // Emit the various openModal events
