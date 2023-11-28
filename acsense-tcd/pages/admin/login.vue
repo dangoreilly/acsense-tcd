@@ -6,7 +6,7 @@
                 <div class="card-body">
                     <h2 class="card-title text-center">Acsense Login</h2>
 
-                    <form @submit.prevent="login">
+                    <form @submit.prevent="login" class="mb-2">
 
                         <div class="form-group">
                             <input v-model="username" type="text" class="form-control my-1" placeholder="Email" required>
@@ -16,6 +16,21 @@
                         <button type="submit" class="btn btn-primary btn-block w-100 mt-1">Login</button>
                     
                     </form>
+
+                    <!-- Social logins -->
+                    <hr class="bg-dark border-1 border-top border-dark" />
+                    
+                    <button 
+                    class="btn btn-primary btn-block w-100 mt-1 mb-2" 
+                    @click="loginWithMicrosoft">
+                        Login with Microsoft
+                    </button>
+                    <button 
+                    class="btn btn-primary btn-block w-100 mt-1 mb-2" 
+                    @click="loginWithGoogle">
+                        Login with Google
+                    </button>
+
                 </div>
             </div>
         </div>
@@ -52,56 +67,75 @@ export default {
 
   },
   methods: {
-    async checkIfLoggedIn() {
-        
-        // Create the client
-        // It will also be used for logging in eventually.
-        this.supabase = await createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
-        
-        // Check if there's an active session.
-        const { data, error } = await this.supabase.auth.getSession()
-  
-        console.log(data)
-
-        if (data.session) {
-            // Redirect to admin page
-            console.log("user is logged in")
-            return navigateTo('/admin/analytics'); 
-        }
-        console.log("user is not logged in")
-    },
-
-    checkSocialOverride() {
-        this.social_override = this.$route.query.bypass
-    },
-
-    async login() {
-        const { data, error } = await this.supabase.auth.signInWithPassword({
-        email: this.username,
-        password: this.password,
-        })
-
-        if (error) {
-
-            alert(error.message)
-            console.log(error)
-
-        } else {
-
-            console.log("user logged in as " + data.user.email)
-            navigateTo('/admin/analytics')
+        async checkIfLoggedIn() {
             
-        }
-    },
-    loginWithGoogle() {
-      // Implement your Google login logic here.
-      console.log('Login with Google');
-    },
-    loginWithMicrosoft() {
-      // Implement your Microsoft login logic here.
-      console.log('Login with Microsoft');
-    },
-  }
+            // Create the client
+            // It will also be used for logging in eventually.
+            this.supabase = createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
+            
+            // Check if there's an active session.
+            const { data, error } = await this.supabase.auth.getSession()
+    
+            console.log(data)
+
+            if (data.session) {
+                // Redirect to admin page
+                console.log("user is logged in")
+                return navigateTo('/admin/analytics'); 
+            }
+            console.log("user is not logged in")
+        },
+
+        checkSocialOverride() {
+            this.social_override = this.$route.query.bypass
+        },
+
+        async login() {
+            const { data, error } = await this.supabase.auth.signInWithPassword({
+            email: this.username,
+            password: this.password,
+            })
+
+            if (error) {
+
+                alert(error.message)
+                console.log(error)
+
+            } else {
+
+                console.log("user logged in as " + data.user.email)
+                navigateTo('/admin/analytics')
+                
+            }
+        },
+        async loginWithGoogle() {
+            const { user, session, error } = await this.supabase.auth.signInWithOAuth({
+                provider: 'google',
+            })
+
+            if (error) {
+                alert(error.message)
+                console.log(error)
+            } else {
+                console.log("User logged in with Microsoft")
+                navigateTo('/admin/analytics')
+            }
+        },
+
+        async loginWithMicrosoft() {
+            const { user, session, error } = await this.supabase.auth.signInWithOAuth({
+                provider: 'azure',
+            })
+
+            if (error) {
+                alert(error.message)
+                console.log(error)
+            } else {
+                console.log("User logged in with Microsoft")
+                navigateTo('/admin/analytics')
+            }
+        },
+    }
 }
 
 </script>
