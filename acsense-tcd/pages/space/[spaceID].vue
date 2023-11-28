@@ -6,13 +6,18 @@
     
             <div class="info-page-title" style="grid-area: title;">
                 <h1>{{space.name}}</h1>
-                <p style="display:block">
+                <p v-if="space.aka" id="aka" class="d-block pb-0 mb-0"><b>Also Known as:</b> {{space.aka}}</p>
+                <p class="d-block pb-0 mb-0">
                     <em>{{space.type}}</em> 
                     <span v-if="space.building != null"> 
                         &#8212; 
                         <a :href="'/info/' + space.building"> {{ space.building_display_name }}</a>
                     </span>
                 </p>
+                <!-- Pill link to highlight the building on the map -->
+                <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
+                :href="'/?'+space.canonical">
+                Highlight on map</a>
             </div>
                 
             <div id="description" style="grid-area: desc; justify-self: start;">
@@ -42,12 +47,12 @@
             <!-- If there's no infobox, but there are openingtimes, take up the infobox space -->
             <!-- Otherwise, take it's own space -->
             <div 
-            :style="!infoBoxDisplays && space.opening_times ? 'grid-area: tips;' : 'grid-area: tabs;'"
+            :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
             class="my-3"
             v-if="space.tips.length >0">
                 <AccessTips :tips="space.tips" />
             </div>
-            <div style="grid-area: tips;"
+            <div :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
             class="my-3"
             v-else>
                 <div class="card access-tips-card">
@@ -76,11 +81,11 @@
             <!-- Timebox -->
             <!-- Displays if there's data to display -->
             <!-- Shows a placeholder message iff there's no data and there's an infobox -->
-            <div style="grid-area: opening-times; justify-self: start; align-self: start;" v-if="space.opening_times">
+            <div style="grid-area: opening-times; justify-self: start; align-self: start;" v-if="timeBoxDisplays">
                 <Timebox
                 :times="space.opening_times"/>
             </div>
-            <div v-if="infoBoxDisplays && !space.opening_times" style="grid-area: opening-times; align-self: center; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
+            <div v-if="infoBoxDisplays && !timeBoxDisplays" style="grid-area: opening-times; align-self: center; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
                 <div 
                 class="time-card card  pt-2 mx-2 px-3" 
                 style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
@@ -334,6 +339,11 @@ import {createClient} from '@supabase/supabase-js';
     const infoBoxContent = ref(setInfoBoxContent(space.value));
     // console.log(infoBoxContent);
     const infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
+    const timeBoxDisplays = ref(
+        space.value.opening_times != null && 
+        (space.value.opening_times.sat.open || space.value.opening_times.holidays.open || space.value.opening_times.weekday.open)
+        // false
+        );
 
     // Set the SEO and page title
 

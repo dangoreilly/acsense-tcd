@@ -9,7 +9,11 @@
 
             <h1>{{building.display_name}}</h1>
 
-            <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
+            <p v-if="building.aka" id="aka" class="d-block pb-0 mb-0"><b>Also Known as:</b> {{building.aka}}</p>
+            <!-- Pill link to highlight the building on the map -->
+            <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
+            :href="'/?'+building.canonical">
+            Highlight on map</a>
         </div>
             
         <div id="description" style="grid-area: desc; justify-self: start;">
