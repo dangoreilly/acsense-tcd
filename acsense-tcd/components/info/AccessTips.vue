@@ -4,7 +4,7 @@
     <div class="card-header">
         <h6 class="m-0">
             <strong>Access Tips | </strong>
-            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jb6V1Qaz9EWAZJ5bgvvlK8Q61F2uS1FIukiAqksty_1UNTBEMFQ2MU5JUEpSUThIRjMyUExZSU1QMSQlQCN0PWcu" target="_blank" class="small"> Submit a tip</a>
+            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jb6V1Qaz9EWAZJ5bgvvlK19m7VaqSzBAqvP3e08WnHFUMkVaUjkyWEc5WTNWMDY3OThNOU9ERVZRNS4u" target="_blank" class="small"> Submit a tip</a>
         </h6>
     </div>
     <div class="card-body">
