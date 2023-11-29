@@ -29,6 +29,11 @@ export default {
             type: Object,
             default: () => {}
         },
+
+        dummy_studentSpaces: {
+            type: Array,
+            default: () => []
+        },
     },
     data() {
         return {
@@ -547,6 +552,33 @@ export default {
                 }
             });
 
+            // Repeat for the dummy spaces, but without any interaction
+            this.dummy_studentSpaces.forEach(area => {
+
+                // Figure out what the icon will be by matching the area type to the area type in the area_types array
+                let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
+                let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
+
+                // Create the icon object
+                // The className is used to make the icon fade in and out when the zoom changes
+                let myIcon = L.icon({
+                    iconUrl: icon_url, 
+                    iconSize: [50, 50], 
+                    className: "sense-icon",
+                });
+
+                // Create the marker object, pushing the click through to the building behind
+                let marker = L.marker(area.location, {
+                    icon: myIcon, 
+                    alt: area.name,
+                    interactive: false,
+                });
+
+                if (styled_label in areas_sorted){
+                    areas_sorted[styled_label].push(marker);
+                }
+            });
+
             let areas_grouped = [];
 
             // Now transform the arrays into layer group objects
@@ -570,6 +602,10 @@ export default {
             // Add the popups to the student spaces
             // this.addPopupsToStudentSpaces(areas_sorted);
         },
+
+        // Allows for icons to be placed on the map without a corresponding student space
+        // For decorative purposes
+        addDummyStudentSpaces(){},
 
         // TODO: Add popups to student spaces
         addPopupsToStudentSpaces(areas){
@@ -648,7 +684,7 @@ export default {
 
         info.addTo(this.map);
         search.addTo(this.map);
-},
+        },
 
         // Add the overworld fast travel jump arrows to the map
         addJumpArrows(){
