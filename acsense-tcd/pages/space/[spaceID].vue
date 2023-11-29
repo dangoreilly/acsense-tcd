@@ -48,11 +48,10 @@
             <!-- Otherwise, take it's own space -->
             <div 
             :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
-            class="my-3"
-            v-if="space.tips.length >0">
-                <AccessTips :tips="space.tips" />
+            class="my-3">
+                <AccessTips :tips="space.tips" :entity="'space'"/>
             </div>
-            <div :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
+            <!-- <div :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
             class="my-3"
             v-else>
                 <div class="card access-tips-card">
@@ -66,7 +65,7 @@
                         <span> This space has no tips! Why don't you submit one?</span>
                     </div>
                 </div>
-            </div>
+            </div> -->
             
     
             <!-- Infobox -->

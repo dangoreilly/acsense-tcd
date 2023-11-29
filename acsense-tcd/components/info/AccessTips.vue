@@ -8,13 +8,16 @@
         </h6>
     </div>
     <div class="card-body">
-        <ul class="list-group list-group-flush">
+        <!-- If there are tips, display them -->
+        <ul v-if="tips.length > 0" class="list-group list-group-flush">
             <li 
             v-for="tip in tips" 
             class="list-group-item">
                 {{ tip }}
             </li>
         </ul>
+        <!-- Otherwise, Invite some -->
+        <span v-else><em>This {{entity}} has no tips! Why don't you submit one?</em></span>
     </div>
 </div>
 
@@ -26,6 +29,10 @@ export default {
     props: {
         tips : {
             type: Array as () => string[],
+            required: true,
+        },
+        entity : {
+            type: String,
             required: true,
         }
     }
