@@ -35,9 +35,8 @@
             />
         </div>
 
-        <div style="grid-area: tips;"
-        v-if="building.tips.length >0">
-            <AccessTips :tips="building.tips" />
+        <div style="grid-area: tips;">
+            <AccessTips :tips="building.tips" :entity="'building'"/>
             
         </div>
 
@@ -268,7 +267,7 @@ import {createClient} from '@supabase/supabase-js'
         }
         else {
             console.log("Space icons retrieved")
-            console.log(icons)
+            // console.log(icons)
             return JSON.parse(JSON.stringify(icons));
         }
     }

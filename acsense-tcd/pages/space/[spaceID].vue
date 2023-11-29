@@ -48,26 +48,9 @@
             <!-- Otherwise, take it's own space -->
             <div 
             :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
-            class="my-3"
-            v-if="space.tips.length >0">
-                <AccessTips :tips="space.tips" />
+            class="my-3">
+                <AccessTips :tips="space.tips" :entity="'space'"/>
             </div>
-            <div :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
-            class="my-3"
-            v-else>
-                <div class="card access-tips-card">
-                    <div class="card-header">
-                        <h6 class="m-0">
-                            <strong>Access Tips | </strong>
-                            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jb6V1Qaz9EWAZJ5bgvvlK8Q61F2uS1FIukiAqksty_1UNTBEMFQ2MU5JUEpSUThIRjMyUExZSU1QMSQlQCN0PWcu" target="_blank" class="small"> Submit a tip</a>
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <span> This space has no tips! Why don't you submit one?</span>
-                    </div>
-                </div>
-            </div>
-            
     
             <!-- Infobox -->
             <div style="grid-area: tabs;" v-if="infoBoxDisplays">
