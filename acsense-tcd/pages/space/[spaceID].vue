@@ -6,13 +6,18 @@
     
             <div class="info-page-title" style="grid-area: title;">
                 <h1>{{space.name}}</h1>
-                <p style="display:block">
+                <p v-if="space.aka" id="aka" class="d-block pb-0 mb-0"><b>Also Known as:</b> {{space.aka}}</p>
+                <p class="d-block pb-0 mb-0">
                     <em>{{space.type}}</em> 
                     <span v-if="space.building != null"> 
                         &#8212; 
                         <a :href="'/info/' + space.building"> {{ space.building_display_name }}</a>
                     </span>
                 </p>
+                <!-- Pill link to highlight the building on the map -->
+                <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
+                :href="'/?highlight='+space.canonical">
+                Highlight on map</a>
             </div>
                 
             <div id="description" style="grid-area: desc; justify-self: start;">
@@ -37,14 +42,18 @@
                 />
             </div>
     
-            <div style="grid-area: tips;"
-            v-if="space.tips.length >0">
-                <AccessTips :tips="space.tips" />
-                
+            <!-- Tips -->
+            <!-- Changes location if there's an infobox or not -->
+            <!-- If there's no infobox, but there are openingtimes, take up the infobox space -->
+            <!-- Otherwise, take it's own space -->
+            <div 
+            :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
+            class="my-3">
+                <AccessTips :tips="space.tips" :entity="'space'"/>
             </div>
     
-            <div style="grid-area: tabs;" 
-            v-if="true">
+            <!-- Infobox -->
+            <div style="grid-area: tabs;" v-if="infoBoxDisplays">
                 <Infobox
                 :contentArray="infoBoxContent"
                 :activeInfoTab="activeInfoBoxTab"
@@ -52,10 +61,20 @@
                 />
             </div>
     
-            <!-- <div style="grid-area: open-times; justify-self: start; align-self: start;">
+            <!-- Timebox -->
+            <!-- Displays if there's data to display -->
+            <!-- Shows a placeholder message iff there's no data and there's an infobox -->
+            <div style="grid-area: opening-times; justify-self: start; align-self: start;" v-if="timeBoxDisplays">
                 <Timebox
                 :times="space.opening_times"/>
-            </div> -->
+            </div>
+            <div v-if="infoBoxDisplays && !timeBoxDisplays" style="grid-area: opening-times; align-self: center; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
+                <div 
+                class="time-card card  pt-2 mx-2 px-3" 
+                style="grid-area: open-times; justify-self: start; align-self: start; margin-left: min(3rem, 3vw); margin-right: min(3rem, 3vw);">
+                    <p><em>Opening times not available for this space</em></p>
+                </div>
+            </div>
                     
             <!-- <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
                 <NuxtLink :to="linkToRooms">
@@ -69,12 +88,12 @@
                 </NuxtLink>
             </div> -->
     
-            <!-- <div
+            <div
             style="grid-area: additional-info;"
             v-if="space.furtherinfo_disp">
                 <AdditionalInfo 
                 :info="space.further_info"/>
-            </div> -->
+            </div>
     
             <!-- <div style="grid-area: gallery;">
                 <Gallery
@@ -119,19 +138,14 @@
         display: grid;
         padding-top: 2rem;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: 
-            [row1] auto
-            [row2] auto 
-            [row3] auto
-            [row4] auto
-            [row5] auto;
+        grid-template-rows: auto;
         grid-template-areas: 
             "title main-photo"
             "desc main-photo"
             "facilties facilties"
-            "tabs tabs"
+            "tabs opening-times"
             "tips tips"
-            /* "additional-info additional-info additional-info additional-info" */
+            "additional-info additional-info"
             /* "gallery gallery gallery gallery"; */
     }
     @media screen and (max-width: 992px){
@@ -143,10 +157,11 @@
                 "title"
                 "main-photo"
                 "desc"
+                "opening-times"
                 "tabs"
                 "facilties"
                 "tips"
-                /* "additional-info" */
+                "additional-info"
                 /* "gallery"; */
         }
 
@@ -307,6 +322,11 @@ import {createClient} from '@supabase/supabase-js';
     const infoBoxContent = ref(setInfoBoxContent(space.value));
     // console.log(infoBoxContent);
     const infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
+    const timeBoxDisplays = ref(
+        space.value.opening_times != null && 
+        (space.value.opening_times.sat.open || space.value.opening_times.holidays.open || space.value.opening_times.weekday.open)
+        // false
+        );
 
     // Set the SEO and page title
 

@@ -389,7 +389,7 @@ async function addSensoryAreas(supabase_client, map, clickable = true){
     let areas_sorted = {};
     // Loop through the area types and add them to the object
     area_types.forEach(area_type => {
-        areas_sorted[area_type.category] = [];
+        areas_sorted[area_type.styled_label] = [];
     });
 
     // First we need to sort the areas into their respective groups
@@ -397,6 +397,7 @@ async function addSensoryAreas(supabase_client, map, clickable = true){
 
         // Figure out what the icon will be by matching the area type to the area type in the area_types array
         let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
+        let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
 
         // Create the icon object
         // The className is used to make the icon fade in and out when the zoom changes
@@ -417,12 +418,14 @@ async function addSensoryAreas(supabase_client, map, clickable = true){
             });
         }
 
-        if (area.type in areas_sorted){
-            areas_sorted[area.type].push(marker);
+
+        if (styled_label in areas_sorted){
+            areas_sorted[styled_label].push(marker);
         }
     });
 
     let areas_grouped = [];
+
     // Now transform the arrays into layer group objects
     // and add them to the map
     for (const [key, value] of Object.entries(areas_sorted)) {
@@ -433,10 +436,11 @@ async function addSensoryAreas(supabase_client, map, clickable = true){
     let areas_grouped_object = {};
     // Loop through the layer groups and add them to the object
     areas_grouped.forEach((layer_group, index) => {
-        areas_grouped_object[area_types[index].category] = layer_group;
+        areas_grouped_object[area_types[index].styled_label] = layer_group;
     });
 
     // Add the layer groups to the map controls
+    console.log(areas_grouped_object)
     addLayerControl(areas_grouped_object, map);
 
     // Return an array of layer groups
@@ -457,7 +461,11 @@ async function getAreaStyles(supabase_client){
         throw error
     }
     else {
-        // console.log(styles)
+        // For each space style, add a styled layer group label
+        data.forEach(space_style => {
+            space_style.styled_label = createStyledLayerGroupLabel(space_style.category, data);
+        });
+
         return data;
     }
 
@@ -537,6 +545,20 @@ function addLayerControl(area_types, map){
     layers.addTo(map);
 }
 
+function createStyledLayerGroupLabel(area_type, area_styles){
+    // Take in space type and the space styles array
+    // Return the styled layer group label
+
+    let area_colour = area_styles.find(area_style => area_style.category == area_type).colour;
+
+    // Create the label
+    return `<span class="position-relative">` +
+                    `<span class="position-absolute top-50 start-0 translate-middle ms-3 p-2 border border-dark rounded-circle" style="background-color: ${area_colour};"> </span>` +
+                    `<span class="ms-1 ps-4">${area_type}</span>` +
+                `</span>`
+        
+
+}
 
 // ---------------------------------------------------------------------------------//
 // ---------------------------------------------------------------------------------//

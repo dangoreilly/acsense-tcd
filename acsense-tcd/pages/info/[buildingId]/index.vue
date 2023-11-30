@@ -9,7 +9,11 @@
 
             <h1>{{building.display_name}}</h1>
 
-            <p v-if="building.aka" id="aka" style="display:block"><b>Also Known as:</b> {{building.aka}}</p>
+            <p v-if="building.aka" id="aka" class="d-block pb-0 mb-0"><b>Also Known as:</b> {{building.aka}}</p>
+            <!-- Pill link to highlight the building on the map -->
+            <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
+            :href="'/?highlight='+building.canonical">
+            Highlight on map</a>
         </div>
             
         <div id="description" style="grid-area: desc; justify-self: start;">
@@ -20,6 +24,7 @@
         <div style="grid-area: sense-areas; align-self: end;">
             <SenseSpaces 
             :sensoryAreas="building.student_spaces"
+            :spaceIcons="space_icons"
             />
         </div>
 
@@ -30,9 +35,8 @@
             />
         </div>
 
-        <div style="grid-area: tips;"
-        v-if="building.tips.length >0">
-            <AccessTips :tips="building.tips" />
+        <div style="grid-area: tips;">
+            <AccessTips :tips="building.tips" :entity="'building'"/>
             
         </div>
 
@@ -223,6 +227,8 @@ body {
 
 <script setup>
 
+import {createClient} from '@supabase/supabase-js'
+
     // function setInfoBoxContent(building){
     //     return [
     //         {
@@ -242,6 +248,31 @@ body {
     //         },
     //     ];
     // }
+
+    let space_icons = ref([]);
+
+    async function getSpaceIcons() {
+        // Get the space icons from the database
+        // For showing in the info modal
+        const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+        const supabaseKey = useRuntimeConfig().public.supabaseKey;
+        const supabase = createClient(supabaseUrl, supabaseKey)
+
+        let { data: icons, error } = await supabase
+            .from('space_styles')
+            .select('category, icon')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+            console.log("Space icons retrieved")
+            // console.log(icons)
+            return JSON.parse(JSON.stringify(icons));
+        }
+    }
+
+    // space_icons = ref(await getSpaceIcons());
 
     async function getBuildingData() {
         const route = useRoute();
@@ -277,7 +308,10 @@ body {
     }
 
     
-    const { data: building, error } = await useAsyncData('building', () => getBuildingData())
+    const { data: building, error: building_err } = await useAsyncData('building', () => getBuildingData());
+
+    // space_icons = await useAsyncData('space_icons', () => getSpaceIcons())
+    space_icons = await getSpaceIcons();
 
     // console.log(building);
 

@@ -4,17 +4,20 @@
     <div class="card-header">
         <h6 class="m-0">
             <strong>Access Tips | </strong>
-            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jb6V1Qaz9EWAZJ5bgvvlK8Q61F2uS1FIukiAqksty_1UNTBEMFQ2MU5JUEpSUThIRjMyUExZSU1QMSQlQCN0PWcu" target="_blank" class="small"> Submit a tip</a>
+            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jb6V1Qaz9EWAZJ5bgvvlK19m7VaqSzBAqvP3e08WnHFUMkVaUjkyWEc5WTNWMDY3OThNOU9ERVZRNS4u" target="_blank" class="small"> Submit a tip</a>
         </h6>
     </div>
     <div class="card-body">
-        <ul class="list-group list-group-flush">
+        <!-- If there are tips, display them -->
+        <ul v-if="tips.length > 0" class="list-group list-group-flush">
             <li 
             v-for="tip in tips" 
             class="list-group-item">
                 {{ tip }}
             </li>
         </ul>
+        <!-- Otherwise, Invite some -->
+        <span v-else><em>This {{entity}} has no tips! Why don't you submit one?</em></span>
     </div>
 </div>
 
@@ -26,6 +29,10 @@ export default {
     props: {
         tips : {
             type: Array as () => string[],
+            required: true,
+        },
+        entity : {
+            type: String,
             required: true,
         }
     }

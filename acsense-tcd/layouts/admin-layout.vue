@@ -18,19 +18,19 @@ export default {
         supabase_client: Object,
     },
 
-    watch: {
-        activePage: function (val) {
-            useHead({
-                title: 'Acsense Admin - ' + val,
-                meta: [
-                    {
-                        name: 'description',
-                        content: 'Acsense Admin page'
-                    }
-                ],
-            })
-        }
-    },
+    // watch: {
+    //     activePage: function (val) {
+    //         useHead({
+    //             title: 'Acsense Admin - ' + val,
+    //             meta: [
+    //                 {
+    //                     name: 'description',
+    //                     content: 'Acsense Admin page'
+    //                 }
+    //             ],
+    //         })
+    //     }
+    // },
 }
 </script>
 
