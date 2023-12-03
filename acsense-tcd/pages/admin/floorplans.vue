@@ -6,8 +6,9 @@
 
             <!-- Sidebar for building selection -->
             <AdminBuildingSelector 
-            @activeBuildingChanged="getBuilding($event)" 
-            :supabase_client="supabase"/>
+            
+            :supabase_client="supabase"/> <!-- @activeBuildingChanged="getBuilding($event)"  -->
+            <!-- TODO: Replace building selector functionality -->
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
@@ -27,6 +28,14 @@
 
                     <!-- Construction Badge -->
                     <div class="d-flex align-items-center m-3 fs-5">
+                        <!-- Test data puller -->
+                        <button 
+                            type="button" 
+                            class="btn btn-primary me-2" 
+                            @click="loadTestData()">
+                                Pull test data
+                        </button>
+
                         <div class="btn-group" role="group">
                             <button 
                             type="button" 
@@ -64,17 +73,29 @@
                     <!-- Floorplan size -->
                     <div class="row g-3 mb-2">
                         <!-- Button to remake the map -->
-                        <div class="col-md-4 d-flex">
+                        <div class="col-md-2 d-flex">
                             <button class="btn btn-outline-secondary flex-fill" @click="mapInit()">Re-generate Map</button>
                         </div>
-                        <!-- Map dimensions -->
-                        <div class="col-md-4">
-                          <label for="width" class="form-label">Width</label>
-                          <input type="number" class="form-control" id="width" v-model="building.internalMapSize[0]">
+                        <div class="col-md-3">
+                            <label for="floorSelect" class="form-label">Set Active Floor</label>
+                            <select class="form-select" id="floorSelect" 
+                            v-model="activeFloor"
+                            @change="moveToFloor(activeFloor)">
+                                <option 
+                                v-for="(floor, index) in floors"
+                                :value="index">
+                                    {{ floor.label }}
+                                </option>
+                            </select>
                         </div>
-                        <div class="col-md-4">
-                          <label for="height" class="form-label">Height</label>
-                          <input type="number" class="form-control" id="height" v-model="building.internalMapSize[1]">
+                        <!-- Map dimensions -->
+                        <div class="col-md-3">
+                            <label for="width" class="form-label">Width</label>
+                            <input type="number" class="form-control" id="width" v-model="building.internalMapSize[0]">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="height" class="form-label">Height</label>
+                            <input type="number" class="form-control" id="height" v-model="building.internalMapSize[1]">
                         </div>
                     </div>
                     <!-- <div>
@@ -160,10 +181,25 @@
 
                     </div>
 
-                    <!-- Regenerate -->
-                    <!-- <div class="mt-3 mb-3 ps-3">
-                        <button class="btn btn-outline-secondary" @click="mapInit()">Re-generate Map</button>
-                    </div> -->
+                    
+                    <!-- Floor changing test -->
+                    <!-- <div class="row g-3 mb-2"> -->
+                        <!-- Button to remake the map -->
+                        <!-- <div class="col-md-4 d-flex">
+                            <select class="form-select-lg" v-model="activeFloor">
+                                <option 
+                                v-for="(floor, index) in floors"
+                                :value="index">
+                                    {{ floor.label }}
+                                </option>
+                            </select>
+                        </div> -->
+                        
+                        <!-- <div class="col-md-4">
+                          <label for="height" class="form-label">Height</label>
+                          <input type="number" class="form-control" id="height" v-model="building.internalMapSize[1]">
+                        </div> -->
+                    <!-- </div> -->
 
 
                     <!-- Map -->
@@ -177,50 +213,9 @@
 </template>
 
 <script setup>
-    
-//Script setup needed for UseHead
-// import '~/assets/css/leaflet.css'
-
-// useHead({
-
-//     link: [
-//         {
-//             rel:"stylesheet",
-//             href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-//         },
-//     ],
-//     script: [
-//         {
-//             src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-//             integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-//             crossorigin: "",
-//         },
-//         {
-//             src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-//             body: true,
-//         },
-//         // {
-//         //     src: '/javascript/mapInit.js',
-//         //     body: true,
-//         // },
-//         // {
-//         //     src: 'https://unpkg.com/@supabase/supabase-js@2',
-//         // },
-//         {
-//             src: '/javascript/adminMapFunctions.js',
-//         },
-//         {
-//             src: '/javascript/mapFunctions.js',
-//         },
-//     ]
-// });
-
     definePageMeta({
         middleware: 'auth'
     })
-
-
-
 </script>
 
 <script>
@@ -230,17 +225,26 @@ import L from 'leaflet';
     export default {
         data() {
             return {
-                building: {},
+                building: {
+                    UUID: "b5694bc5-90c0-440f-b95c-7c0672992211",
+                    entry_floor: 1,
+                    internalMapSize: [1080, 1920],
+                    canonical: "arts-building",
+                    display_name: "Arts Building",
+                },
                 building_clean: {},
                 gallery: [],
                 gallery_clean: [],
                 floors: [],
+                floors_clean: [],
                 floor_layers_object: {},
                 EntryFloor: 1,
                 supabase: {},
                 spaces: [],
                 spaces_clean: [],
                 map: {},
+                activeFloor: 0,
+                activeFloor_object: {},
             }
         },
         created() {
@@ -251,50 +255,51 @@ import L from 'leaflet';
 
             // this.mapInit();
             // TEMP: for testing
-            this.floors = [
-                {
-                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-                    "level": 3,
-                    "label": "Fourth Floor",
-                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts04.svg"
-                },
-                {
-                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-                    "level": 0,
-                    "label": "Lower Concourse",
-                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts01.svg"
-                },
-                {
-                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-                    "level": 1,
-                    "label": "Main Concourse",
-                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts02.svg"
-                },
-                {
-                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-                    "level": 2,
-                    "label": "Third Floor",
-                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts03.svg"
-                },
-                {
-                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-                    "level": 5,
-                    "label": "Sixth Floor",
-                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts06.svg"
-                },
-                {
-                    "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-                    "level": 4,
-                    "label": "Fifth Floor",
-                    "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts05.svg"
-                },
-            ]
+            // this.floors = [
+            //     {
+            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+            //         "level": 3,
+            //         "label": "Fourth Floor",
+            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts04.svg"
+            //     },
+            //     {
+            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+            //         "level": 0,
+            //         "label": "Lower Concourse",
+            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts01.svg"
+            //     },
+            //     {
+            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+            //         "level": 1,
+            //         "label": "Main Concourse",
+            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts02.svg"
+            //     },
+            //     {
+            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+            //         "level": 2,
+            //         "label": "Third Floor",
+            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts03.svg"
+            //     },
+            //     {
+            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+            //         "level": 5,
+            //         "label": "Sixth Floor",
+            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts06.svg"
+            //     },
+            //     {
+            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
+            //         "level": 4,
+            //         "label": "Fifth Floor",
+            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts05.svg"
+            //     },
+            // ]
+
             
             // Sort the floors by level
-            this.floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
+            // this.floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
 
             // Get the spaces in this building
-            this.getSpaces();
+            // this.getSpaces();
 
             // Set the entry floor 
             // this.setEntryFloor(this.building.entry_floor);
@@ -310,12 +315,23 @@ import L from 'leaflet';
         },
         methods: {
 
+            async loadTestData(){
+                // Simulate the arts building being selected
+                // Call the getFloors and getSpaces functions
+                // this.getBuilding("arts-building");
+                this.getSpaces(this.building.UUID);
+                this.getFloorplans(this.building.UUID);
+            },
+
             async getSpaces(){
                 // Get the spaces in this building
 
+                // Null the spaces array
+                this.spaces = [];
+
                 const { data: spaces, error } = await this.supabase
                     .from('spaces')
-                    .select('display_name, UUID, floor, location_internal, type, icon_override')
+                    .select('name, UUID, floor, location_internal, type, icon_override')
                     .eq('building_uuid', this.building.UUID)
 
                     if (error) {
@@ -324,10 +340,25 @@ import L from 'leaflet';
                     throw error
                 }
                 else {
-                    console.log(spaces);
+                    console.log("spaces", spaces);
                     this.spaces = JSON.parse(JSON.stringify(spaces));
                     this.spaces_clean = JSON.parse(JSON.stringify(spaces));
                 }
+            },
+
+            moveToFloor(floorIndex){
+                // Move the map to the floor with the given index
+                // First, find the label of the floor as that is how
+                // they are stored in the layer control
+                let floorLabel = this.floors[floorIndex].label;
+                // Then, get the layer group from the floor_layers_object
+                let floorLayer = this.floor_layers_object[floorLabel];
+                // Then remove all layers from the map
+                this.map.eachLayer(function (layer) {
+                    layer.remove();
+                });
+                // Then add the layer group to the map
+                floorLayer.addTo(this.map);
             },
 
             swapFloors(A, B){
@@ -446,7 +477,18 @@ import L from 'leaflet';
                     if (floor.isEntry) {
                         floor_layer.addTo(this.map);
                     }
+
+                    // Add an event listener to the layer group
+                    // When the layer is added to the map, set the active floor to this floor
+                    floor_layer.on('add', () => {
+                        this.activeFloor = i;
+                        this.activeFloor_object = floor_layer;
+                        console.log("Active floor set to: " + this.activeFloor)
+                    });
                 }
+
+                // Set the active floor to the entry floor
+                this.activeFloor = this.EntryFloor;
 
                 // Add the layer control to the map
                 let layers_control = L.control({position:"topright"});
@@ -698,13 +740,9 @@ import L from 'leaflet';
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
                     
                     // Get the floorplans for the building
-                    // this.getFloorplans(this.building.UUID);
-                    // Test data setting
+                    this.getFloorplans(this.building.UUID);
 
-                    this.building.entry_floor = 1;
-                    this.building.internalMapSize = [1080, 1920]
-
-                    this.setEntryFloor(this.building.entry_floor);
+                    // this.setEntryFloor(this.building.entry_floor);
 
 
                     // Update the map to show the building
@@ -715,6 +753,10 @@ import L from 'leaflet';
             },
 
             async getFloorplans(building_uuid){
+
+                // Null the floors array
+                this.floors = [];
+
                 // Fetch the floorplans for the building from the database
                 let { data: flr, error } = await this.supabase
                     .from('floorplans')
@@ -726,38 +768,20 @@ import L from 'leaflet';
                     throw error
                 }
                 else {
-                    // console.log(flr);
-                    this.floorplans = JSON.parse(JSON.stringify(flr));
-                    this.floorplans_clean = JSON.parse(JSON.stringify(flr));
-                }
-            },
 
-            // this function fetches all the images for a given building
-            async getGallery(canonical){
-                let { data: imgs, error } = await this.supabase
-                    .from('building_gallery_images')
-                    .select('*')
-                    .eq('building', canonical)
-                if (error) {
-                    console.error(error)
-                    alert(error.message)
-                    throw error
-                }
-                else {
-                    // console.log(imgs);
-                    this.gallery = JSON.parse(JSON.stringify(imgs));
-                    this.gallery_clean = JSON.parse(JSON.stringify(imgs));
-                }
-            },
-            galleryImageHasBeenChanged(index){
-                // Check the gallery images array against the clean copy
-                return JSON.stringify(this.gallery[index]) !== JSON.stringify(this.gallery_clean[index]);
-            },
+                    console.log("Floorplans", flr);
+                    // load the floors into the vue instance
+                    this.floors = JSON.parse(JSON.stringify(flr));
+                    this.floors_clean = JSON.parse(JSON.stringify(flr));
 
-            revertGalleryImage(index){
-                // Deep copy the clean copy back into the gallery
-                this.gallery[index] = JSON.parse(JSON.stringify(this.gallery_clean[index]));
-
+                    // If there are no floors, don't try to set the entry floor
+                    if (this.floors.length > 0) {
+                        // Sort the floors by level
+                        this.floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
+                        // Set the entry floor
+                        this.setEntryFloor(this.building.entry_floor);
+                    }
+                }
             },
 
         },
