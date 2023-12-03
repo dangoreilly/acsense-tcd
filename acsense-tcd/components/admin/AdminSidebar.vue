@@ -119,7 +119,7 @@ export default {
     methods: {
         async logout() {
             console.log("User logging out")
-            const {error} =  await this.supabase.auth.signOut()
+            const {error} =  await this.supabase_client.auth.signOut()
             if (error) {
                 console.log(error)
             }

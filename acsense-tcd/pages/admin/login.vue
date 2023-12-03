@@ -38,7 +38,7 @@ export default {
       supabase: {},
     }
   },
-  created() {
+  mounted() {
         // For debugging purposes, you can bypass the social login by adding ?bypass=true to the URL.
         // This will allow for a quick login without having to use Google or Microsoft.
         // this.checkSocialOverride(); // Uncomment this line to hide the social login bypass
