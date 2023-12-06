@@ -209,7 +209,7 @@
                             <input 
                             type="number" 
                             style="width:95%" 
-                            :value="space.floor" 
+                            v-model="space.floor" 
                             min="0" max="5">
                             <!-- Space internal location -->
                             <input 
@@ -222,7 +222,20 @@
 
 
                     <!-- Map -->
-                    <div  id="internal-map" style="height: 600px; padding-top: 30px;"></div>
+                    <div class="mb-3 position-relative">
+                        <!-- Leaflet instance -->
+                        <div id="internal-map" style="height: 600px; padding-top: 30px;">
+                        </div>
+                        <!-- Toast in the bottom left corner to display what the current space is -->
+                        <div class="toast-container p-3 start-50 translate-middle-x space-name-toast bottom-0"
+                        :style="space_name_toast_showing ? 'opacity: 1;' : 'opacity: 0;'">
+                            <div class="toast show">
+                                <div class="toast-body">
+                                    {{ space_being_hovered_on  }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
 
                 </div>
@@ -257,13 +270,14 @@ import L from 'leaflet';
                 floors: [],
                 floors_clean: [],
                 floor_layers_object: {},
-                EntryFloor: 1,
                 supabase: {},
                 spaces: [],
                 spaces_clean: [],
                 map: {},
                 activeFloor: 0,
                 activeFloor_object: {},
+                space_being_hovered_on: "",
+                space_name_toast_showing: false,
             }
         },
         created() {
@@ -368,17 +382,6 @@ import L from 'leaflet';
             },
             // Create the map
             mapInit(){
-                // Initialise the map
-                // this.map = L.map('internal-map', {
-                //     crs: L.CRS.Simple,
-                //     zoomSnap: 0.25,
-                //     zoomDelta: 0.25,
-                //     maxBounds: bounds,
-                //     maxZoom: 20,
-                //     minZoom: -1,
-                //     renderer: L.canvas({padding: 1})
-                // }).fitBounds(bounds);
-
                 // Try run this.map.remove, print to the console if it fails
                 try {
                     this.removeMap();
@@ -430,6 +433,8 @@ import L from 'leaflet';
 
                 // Add floors to the map
                 this.addFloorsToMap(map_size);
+                // Add spaces to the map
+                this.addSpacesToMap();
                 
             },
 
@@ -473,6 +478,83 @@ import L from 'leaflet';
                 layers_control = L.control.layers(this.floor_layers_object, null, {collapsed: false});
                 
                 layers_control.addTo(this.map);
+
+            },
+
+            addSpacesToMap(){
+
+                // Cycle through all the spaces
+                // Add a marker to the map for each space
+                // On the layer specified by the floor
+
+                for (let i = 0; i < this.spaces.length; i++) {
+                    
+                    const space = this.spaces[i];
+
+                    // Create an icon for the space
+                    let icon = L.icon({
+                        iconUrl: space.icon,
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 25],
+                        popupAnchor: [0, -25],
+                    });
+
+                    // Set the starting position for the marker
+                    // If the space has a location, use that, otherwise use the center of the floor
+                    let marker_position = [];
+
+                    if (space.location_internal == [0,0])
+                        marker_position = [this.building.internalMapSize[0]/2, this.building.internalMapSize[1]/2];
+                    else
+                        marker_position = space.location_internal;
+                    
+                    // Create a draggable marker for the space with the icon
+                    let marker = L.marker(marker_position, {
+                        icon: icon, 
+                        draggable: true,
+                        bubblingMouseEvents: false,
+                    });
+
+                    // Add an event listener to the marker, to update the space location when it is dragged
+                    marker.on('dragend', (e) => {
+                        // Get the new coordinates
+                        let new_coordinates = e.target.getLatLng();
+                        // Update the space location
+                        this.spaces[i].location_internal = [new_coordinates.lat, new_coordinates.lng];
+                    });
+
+                    // create a local function for updating the toast value
+                    let updateToast = (e) => {
+                        // Get the name of the space
+                        let space_name = this.spaces[i].name;
+                        // Set the toast value
+                        this.space_being_hovered_on = space_name;
+                        // Set the toast to show
+                        this.space_name_toast_showing = true;
+                    }
+                    // And a local function for setting the toast to not display
+                    let clearToast = () => {
+                        this.space_name_toast_showing = false;
+                    }
+
+                    // Add an event listener to update the toast when the mouse hovers over the marker
+                    marker.on('mouseover', (e) => {
+                        updateToast(e);
+                    });
+                    // And close it on mouseout
+                    marker.on('mouseout', (e) => {
+                        clearToast();
+                    });
+                    
+                    // Add the marker to the map
+                    // marker.addTo(this.map);
+
+                    // Get the name of the floor for this space (this is how they're stored in the layer control)
+                    let floor_label = this.floors[space.floor].label;
+
+                    // Add the marker to the layer for the floor
+                    marker.addTo(this.floor_layers_object[floor_label]);
+                }
 
             },
 
@@ -808,12 +890,8 @@ import L from 'leaflet';
     grid-template-rows: auto;
 }
 
-.primary-image-preview{
-    border-bottom-right-radius: 0.5rem;
-    border-top-left-radius: 0.5rem;
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.3), -5px -5px 15px rgba(0,0,0,0.1);
-    width: min(25rem, calc(100vw - 6rem));
-    margin: 0 min(3rem, 3vw) 0 min(3rem, 3vw);
+.space-name-toast {
+    transition: all 0.2s ease-in-out;
 }
 
 </style>
