@@ -309,8 +309,12 @@ export default {
             // Precalculate the styles, to avoid the issue with 'this'
             let highlightStyle = this.highlightFeature();
             let buildingStyle = this.buildingStyle(feature);
-            // let popup;
+            
+            // Localise the emitSpaceHover and emitSpaceUnhover functions, to avoid hassle with the 'this' keyword
+            let emitSpaceHover = this.emitSpaceHover;
+            let emitSpaceUnhover = this.emitSpaceUnhover;
 
+            // Add the mouseover and mouseout events to the building
             layer.on('mouseover', function(e) { 
                 // Highlight the feature that the mouse is over
                 if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -320,13 +324,13 @@ export default {
                 e.target.setStyle(highlightStyle);
 
                 // Add a popup of the building name
-                // layer.bindPopup(building.name, {closeButton: false, offset: L.point(0, -20)}).openPopup();
+                emitSpaceHover(building.name);
             });
 
             layer.on('mouseout', function(e) { 
                 // Reset the style, otherwise it will stay highlighted
                 layer.setStyle(buildingStyle);
-                // popup.close();
+                emitSpaceUnhover();
             });
         },
 
@@ -546,6 +550,20 @@ export default {
                     // openAreaModal(area);
                 });
 
+                // Localise the emitSpaceHover and emitSpaceUnhover functions, to avoid hassle with the 'this' keyword
+                let emitSpaceHover = this.emitSpaceHover;
+                let emitSpaceUnhover = this.emitSpaceUnhover;
+
+                // Add a mouseover event to the marker, that emits the spaceHover event
+                marker.on('mouseover', function (e){
+                    emitSpaceHover(area.type + ": " + area.name);
+                });
+                // Add a mouseout event to the marker, that emits the spaceUnhover event
+                marker.on('mouseout', function (e){
+                    emitSpaceUnhover();
+                });
+
+
 
                 if (styled_label in areas_sorted){
                     areas_sorted[styled_label].push(marker);
@@ -607,13 +625,6 @@ export default {
         // For decorative purposes
         addDummyStudentSpaces(){},
 
-        // TODO: Add popups to student spaces
-        addPopupsToStudentSpaces(areas){
-            // Loop through the student spaces and add a popup to each one
-            for (let i = 0; i < this.spaceStyles.length; i++){
-            }
-        },
-
         // Emit the various openModal events
         emitOpenModal(type, building_or_space){
             // Method for emtting the openmodal event for the legend, building, or space modal
@@ -627,6 +638,16 @@ export default {
                 console.log('openLegendModal')
                 this.$emit('openLegendModal', null);
             }
+        },
+
+        // Emit that a space is being hovered over
+        emitSpaceHover(space){
+            this.$emit('spaceHover', space);
+            console.log('spaceHover', space)
+        },
+        // Emit that a space is no longer being hovered over
+        emitSpaceUnhover(){
+            this.$emit('spaceUnhover');
         },
 
         // Add the layer selector to the UI
