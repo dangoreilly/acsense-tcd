@@ -231,6 +231,66 @@
                         </div>
                     </div>
 
+                    <!-- Navigation nodes -->
+                    <div class="border-bottom border-1 border-secondary mt-3">
+                        <h3 class="fs-4">Navigation</h3>
+                    </div>
+                    <ContentDoc path="admincopy/floorplans/navigation"></ContentDoc>
+
+                    <div class="container text-center">
+                        <!-- Header -->
+                        <div class="nav-list-row">
+                            <span>Node</span>
+                            <span>Type</span>
+                            <span>Floors</span>
+                            <span>UP Location</span>
+                            <span>DOWN Location</span>
+                        </div>
+                        <!-- Nodes -->
+                        <div class="nav-list-row border-top border-primary-subtle my-1 py-1" v-for="node in navigationNodes">
+                            <!-- Node label -->
+                            <span><input type="text" style="width:95%" :value="node.label"></span>
+                            <!-- Lift or stair -->
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="inlineRadio1" value="1" v-model="node.lift">
+                                    <!-- @change="node.lift = Boolean(this.$event.value)"> -->
+                                    <label class="form-check-label" for="inlineRadio1">Lift</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="inlineRadio2" value="0" v-model="node.lift">
+                                    <!-- @change="node.lift = Boolean(this.$event.value)"> -->
+                                    <label class="form-check-label" for="inlineRadio2">Stairs</label>
+                                </div>
+                            </div>
+                            <!-- Active floors -->
+                            <div>
+                                <div class="form-check form-check-inline" v-for="(floor, index) in floors">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox"
+                                    v-model="node.presence[index]">
+                                </div>
+                            </div>
+                            <!-- UP Location -->
+                            <input 
+                            class="form-control"
+                            type="text" 
+                            :value="coordinatesToString(node.location_up)" 
+                            disabled readonly>
+                            <!-- UP Location -->
+                            <div>
+                                <!-- Only display the DOWN location if the node is a stair -->
+                                <input 
+                                v-if="node.lift == 0"
+                                class="form-control"
+                                type="text" 
+                                :value="coordinatesToString(node.location_down)" 
+                                disabled readonly>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- Map -->
                     <div class="mb-3 position-relative">
@@ -289,6 +349,8 @@ import L from 'leaflet';
                 activeFloor_object: {},
                 space_being_hovered_on: "",
                 space_name_toast_showing: false,
+
+                navigationNodes: []
             }
         },
         created() {
@@ -312,6 +374,7 @@ import L from 'leaflet';
                 // Call the getFloors and getSpaces functions
                 this.getSpaces(this.building.UUID);
                 this.getFloorplans(this.building.UUID);
+                this.getNavigationNodes(this.building.UUID);
             },
 
             async getSpaces(){
@@ -345,6 +408,86 @@ import L from 'leaflet';
                     this.spaces = JSON.parse(JSON.stringify(spaces));
                     this.spaces_clean = JSON.parse(JSON.stringify(spaces));
                 }
+            },
+
+            async getNavigationNodes(building){
+                // Database entry doesn't exist yet. so mock up the data.
+
+                this.navigationNodes = [];
+
+                // Constructor for navigation nodes
+                let newNavigationNode = (name, location_up, location_down, type, presence) => {
+                    return {
+                        label: name, // private label
+                        location_up: location_up, // Location of the button for going UP || Lift location
+                        location_down: location_down, // Location of the button for going DOWN
+                        lift: type ? 1 : 0, // 1 if lift, 0 if stairs, have to cast to int because radio buttons return strings  
+                        presence: presence, // array of what floors the node is present on
+                    }
+                }
+
+                // 4 Stairwells
+
+                this.navigationNodes.push(newNavigationNode(
+                    "Stairwell A", 
+                    [0,0], 
+                    [0,0], 
+                    false, 
+                    [0,1,1,1,1,1].map(value => Boolean(value))
+                ));
+
+                this.navigationNodes.push(newNavigationNode(
+                    "Stairwell B", 
+                    [0,0], 
+                    [0,0], 
+                    false, 
+                    [0,1,1,1,1,1].map(value => Boolean(value))
+                ));
+
+                this.navigationNodes.push(newNavigationNode(
+                    "Stairwell C", 
+                    [0,0], 
+                    [0,0], 
+                    false, 
+                    [1,1,1,1,1,1].map(value => Boolean(value))
+                ));
+
+                this.navigationNodes.push(newNavigationNode(
+                    "Stairwell D", 
+                    [0,0], 
+                    [0,0], 
+                    false, 
+                    [0,0,1,1,1,1].map(value => Boolean(value))
+                ));
+
+                // 2 Elevators
+
+                // 1 Stair
+
+            },
+
+            validateNavigationNode(node){
+                // Takes in a lift or stair, checks it has the correct number of floors
+                // Trims the presence array to the correct number of floors if too many
+                // filles the presence array with 0s if too few
+
+                // Check the presence array is the correct length
+                if (node.presence.length != this.floors.length) {
+                    // If it's too long, trim it
+                    if (node.presence.length > this.floors.length) {
+                        node.presence = node.presence.slice(0, this.floors.length);
+                    }
+                    // If it's too short, fill it with 0s
+                    else {
+                        let difference = this.floors.length - node.presence.length;
+                        for (let i = 0; i < difference; i++) {
+                            node.presence.push(0);
+                        }
+                    }
+                }
+
+                return node;
+
             },
 
             moveToFloor(floorIndex){
@@ -893,6 +1036,15 @@ import L from 'leaflet';
     column-gap: 1rem;
     text-align: start;
     align-content: center;
+}
+
+.nav-list-row {
+    display: grid;
+    /* padding-top: 2rem; */
+    grid-template-columns:  auto 10rem auto 8rem 8rem;
+    grid-template-rows: auto;
+    row-gap: 1rem;
+    column-gap: 1rem;
 }
 
 
