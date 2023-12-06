@@ -217,11 +217,27 @@
                                 </div>
                             </span>
                             <!-- Floor number input -->
-                            <input 
+                            <!-- <input 
                             type="number" 
                             style="width:95%" 
                             v-model="space.floor" 
-                            min="0" max="5">
+                            min="0" max="5"> -->
+                            <!-- <div>
+                                <div class="form-check form-check-inline" v-for="(floor, index) in floors">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="radio"
+                                    :value="index"
+                                    :title="floor.label"
+                                    v-model="space.floor">
+                                </div>
+                            </div> -->
+                            <select class="form-select" v-model="space.floor">
+                                <option v-for="(floor, index) in floors"
+                                :value="index">
+                                    {{ floor.label }}
+                                </option>
+                            </select>
                             <!-- Space internal location -->
                             <input 
                             class="form-control"
@@ -360,6 +376,9 @@ import L from 'leaflet';
             this.supabase = createClient(supabaseUrl, supabaseKey)
 
         },
+        mounted() {
+            this.loadTestData();
+        },
         computed: {
             buildingHasBeenChanged(){
                 // Check the building object against the clean copy
@@ -373,7 +392,8 @@ import L from 'leaflet';
                 // Simulate the arts building being selected
                 // Call the getFloors and getSpaces functions
                 this.getSpaces(this.building.UUID);
-                this.getFloorplans(this.building.UUID);
+                // Floors need to be awaited because we use the floor count to validate the navigation nodes
+                await this.getFloorplans(this.building.UUID);
                 this.getNavigationNodes(this.building.UUID);
             },
 
@@ -462,7 +482,36 @@ import L from 'leaflet';
 
                 // 2 Elevators
 
+                this.navigationNodes.push(newNavigationNode(
+                    "Main Lift", 
+                    [0,0], 
+                    [0,0], 
+                    true, 
+                    [1,1,1,1,1,1].map(value => Boolean(value))
+                ));
+
+                this.navigationNodes.push(newNavigationNode(
+                    "Perch Lift", 
+                    [0,0], 
+                    [0,0], 
+                    true, 
+                    [1,1].map(value => Boolean(value))
+                ));
+
                 // 1 Stair
+
+                this.navigationNodes.push(newNavigationNode(
+                    "Perch Steps", 
+                    [0,0], 
+                    [0,0], 
+                    false, 
+                    [1,1].map(value => Boolean(value))
+                ));
+
+                // Validate all the nodes
+                for (let i = 0; i < this.navigationNodes.length; i++) {
+                    this.navigationNodes[i] = this.validateNavigationNode(this.navigationNodes[i]);
+                }
 
             },
 
@@ -589,6 +638,8 @@ import L from 'leaflet';
                 this.addFloorsToMap(map_size);
                 // Add spaces to the map
                 this.addSpacesToMap();
+                // Add navigation nodes to the map
+                this.addNavNodesToMap();
                 
             },
 
@@ -712,6 +763,188 @@ import L from 'leaflet';
                     // Add the marker to the layer for the floor
                     marker.addTo(this.floor_layers_object[floor_label]);
                 }
+
+            },
+
+            addNavNodesToMap(){
+                // Cycle through all the navigation nodes
+                // Add a marker to the map for each node
+                // On the layer specified by the floor
+
+                // First, set up the icon for the nodes
+
+                // Stair up icon
+                let stair_up_icon = L.icon({
+                    iconUrl: "/images/icons/stair-up.svg",
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15],
+                });
+
+                // Stair down icon
+                let stair_down_icon = L.icon({
+                    iconUrl: "/images/icons/stair-down.svg",
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15],
+                });
+
+                // Lift icon
+                let lift_icon = L.icon({
+                    iconUrl: "/images/icons/lift.svg",
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25],
+                });
+                
+                // Create a marker for each node
+                for (let i = 0; i < this.navigationNodes.length; i++){
+
+                    // create a local function for updating the toast value
+                    let updateToast = (e) => {
+                        // Get the name of the space
+                        let node_name = this.navigationNodes[i].label;
+                        // Set the toast value
+                        this.space_being_hovered_on = node_name;
+                        // Set the toast to show
+                        this.space_name_toast_showing = true;
+                    }
+                    // And a local function for setting the toast to not display
+                    let clearToast = () => {
+                        this.space_name_toast_showing = false;
+                    }
+
+                    // Check what sort of node it is
+                    if (this.navigationNodes[i].lift) {
+                        // If it's a lift, use the lift icon
+                        let marker = L.marker(this.navigationNodes[i].location_up, {
+                            icon: lift_icon, 
+                            draggable: true,
+                            bubblingMouseEvents: false,
+                        });
+
+                        // Add an event listener to the marker, to update the space location when it is dragged
+                        marker.on('dragend', (e) => {
+                            // Get the new coordinates
+                            let new_coordinates = e.target.getLatLng();
+                            // Update the space location
+                            this.navigationNodes[i].location_up = [new_coordinates.lat, new_coordinates.lng];
+                        });
+
+                        // Add an event listener to update the toast when the mouse hovers over the marker
+                        marker.on('mouseover', (e) => {
+                            updateToast(e);
+                        });
+                        // And close it on mouseout
+                        marker.on('mouseout', (e) => {
+                            clearToast();
+                        });
+
+                        // Add the lift marker to ever floor it's on
+                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
+                            if (this.navigationNodes[i].presence[j]) {
+                                // Get the name of the floor for this space (this is how they're stored in the layer control)
+                                let floor_label = this.floors[j].label;
+                                // Add the marker to the layer for the floor
+                                marker.addTo(this.floor_layers_object[floor_label]);
+                            }
+                        }
+
+
+                    }
+                    else {
+                        // If it's a stairs, create two markers, one for up and one for down
+                        // Stairs UP
+                        let marker_up = L.marker(this.navigationNodes[i].location_up, {
+                            icon: stair_up_icon, 
+                            draggable: true,
+                            bubblingMouseEvents: false,
+                        });
+                        
+                        // Add an event listener to the marker, to update the space location when it is dragged
+                        marker_up.on('dragend', (e) => {
+                            // Get the new coordinates
+                            let new_coordinates = e.target.getLatLng();
+                            // Update the space location
+                            this.navigationNodes[i].location_up = [new_coordinates.lat, new_coordinates.lng];
+                        });
+
+                        // Add an event listener to update the toast when the mouse hovers over the marker
+                        marker_up.on('mouseover', (e) => {
+                            updateToast(e);
+                        });
+                        // And close it on mouseout
+                        marker_up.on('mouseout', (e) => {
+                            clearToast();
+                        });
+
+                        // ====================================================================================================
+                        // Stairs DOWN
+                        let marker_down = L.marker(this.navigationNodes[i].location_down, {
+                            icon: stair_down_icon, 
+                            draggable: true,
+                            bubblingMouseEvents: false,
+                        });
+                        
+                        // Add an event listener to the marker, to update the space location when it is dragged
+                        marker_down.on('dragend', (e) => {
+                            // Get the new coordinates
+                            let new_coordinates = e.target.getLatLng();
+                            // Update the space location
+                            this.navigationNodes[i].location_down = [new_coordinates.lat, new_coordinates.lng];
+                        });
+
+                        // Add an event listener to update the toast when the mouse hovers over the marker
+                        marker_down.on('mouseover', (e) => {
+                            updateToast(e);
+                        });
+                        // And close it on mouseout
+                        marker_down.on('mouseout', (e) => {
+                            clearToast();
+                        });
+
+                        // ====================================================================================================
+                        // Adding stairs to map
+                        // UP stairs need to be added to every floor they're on, except the topmost floor they're on
+                        // DOWN stairs need to be added to every floor they're on, except the bottommost floor they're on
+
+                        // Calculate the topmost floor the stairs are on
+                        let topmost_floor = 0;
+                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
+                            if (this.navigationNodes[i].presence[j]) {
+                                topmost_floor = j;
+                            }
+                        }
+                        // Calculate the bottommost floor the stairs are on
+                        let bottommost_floor = this.navigationNodes[i].presence.length;
+                        for (let j = this.navigationNodes[i].presence.length; j >= 0; j--) {
+                            if (this.navigationNodes[i].presence[j]) {
+                                bottommost_floor = j;
+                            }
+                        }
+
+                        // UP stairs
+                        // Add the lift marker to ever floor it's on, except the topmost floor
+                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
+                            if (this.navigationNodes[i].presence[j] && j != topmost_floor) {
+                                // Get the name of the floor for this space (this is how they're stored in the layer control)
+                                let floor_label = this.floors[j].label;
+                                // Add the marker to the layer for the floor
+                                marker_up.addTo(this.floor_layers_object[floor_label]);
+                            }
+                        }
+
+                        // DOWN stairs
+                        // Add the lift marker to ever floor it's on, except the bottommost floor
+                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
+                            if (this.navigationNodes[i].presence[j] && j != bottommost_floor) {
+                                // Get the name of the floor for this space (this is how they're stored in the layer control)
+                                let floor_label = this.floors[j].label;
+                                // Add the marker to the layer for the floor
+                                marker_down.addTo(this.floor_layers_object[floor_label]);
+                            }
+                        }
+
+                    }
+                }
+
 
             },
 
@@ -1023,7 +1256,7 @@ import L from 'leaflet';
 .spaces-list-row {
     display: grid;
     /* padding-top: 2rem; */
-    grid-template-columns:  auto 6rem 18rem;
+    grid-template-columns:  auto 18rem 18rem;
     grid-template-rows: auto;
     row-gap: 1rem;
     column-gap: 2rem;
