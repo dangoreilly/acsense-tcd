@@ -62,6 +62,12 @@
                 <!-- Main Matter -->
                 <!-- Don't render anything until some data has been pulled -->
                 <div class="mainMatter-admin" v-if="building.display_name">
+
+                    <div class="border-bottom border-1 border-secondary mb-3">
+                        <!-- <h3 class="fs-4">Floorplans</h3> -->
+                        <ContentDoc path="admincopy/floorplans"></ContentDoc>
+                        
+                    </div>
                     
                     <div class="mb-3 ps-3">
                         <div class="form-check form-switch">
@@ -77,10 +83,11 @@
                             <button class="btn btn-outline-secondary flex-fill" @click="mapInit()">Re-generate Map</button>
                         </div>
                         <div class="col-md-3">
-                            <label for="floorSelect" class="form-label">Set Active Floor</label>
+                            <label for="floorSelect" class="form-label">Entry Floor</label>
                             <select class="form-select" id="floorSelect" 
-                            v-model="activeFloor"
-                            @change="moveToFloor(activeFloor)">
+                            @change="setEntryFloor($event.target.value)"
+                            v-model="building.entry_floor">
+                            <!-- @change="moveToFloor(activeFloor)"> -->
                                 <option 
                                 v-for="(floor, index) in floors"
                                 :value="index">
@@ -121,7 +128,7 @@
                             disabled>
                         </div>
                     </div> -->
-
+                    
                     <!-- Floor arranging -->
                     <div class="container text-center">
                         <!-- Header -->
@@ -186,6 +193,10 @@
                     </div>
 
                     <!-- Internal spaces management -->
+                    <div class="border-bottom border-1 border-secondary mt-3">
+                        <h3 class="fs-4">Spaces</h3>
+                    </div>
+                    <ContentDoc path="admincopy/floorplans/spaces"></ContentDoc>
                     <div class="container text-center">
                         <!-- Header -->
                         <div class="spaces-list-row">
@@ -362,15 +373,15 @@ import L from 'leaflet';
             setEntryFloor(newEntryFloor){
 
                 // Set the entry floor to the new value
-                this.EntryFloor = newEntryFloor;
+                this.building.entry_floor = newEntryFloor;
 
                 // Set all floors to entryFloor = false
                 this.floors.forEach((floor, index) => {
                     floor.isEntry = false;
                 });
 
-                // Set the entry floor to true by checking this.entryfloor
-                this.floors[this.EntryFloor].isEntry = true;
+                // Set the entry floor to true by checking newEntryfloor
+                this.floors[newEntryFloor].isEntry = true;
             },
 
             setFloorLevels(){
@@ -489,11 +500,11 @@ import L from 'leaflet';
 
                 for (let i = 0; i < this.spaces.length; i++) {
                     
-                    const space = this.spaces[i];
+                    // const space = this.spaces[i];
 
                     // Create an icon for the space
                     let icon = L.icon({
-                        iconUrl: space.icon,
+                        iconUrl: this.spaces[i].icon,
                         iconSize: [50, 50],
                         iconAnchor: [25, 25],
                         popupAnchor: [0, -25],
@@ -503,10 +514,13 @@ import L from 'leaflet';
                     // If the space has a location, use that, otherwise use the center of the floor
                     let marker_position = [];
 
-                    if (space.location_internal == [0,0])
+                    // Check equivalence to [0,0] because the array is not being compared correctly
+                    let equivalence = (this.spaces[i].location_internal[0] == 0) && (this.spaces[i].location_internal[1] == 0);
+
+                    if (equivalence)
                         marker_position = [this.building.internalMapSize[0]/2, this.building.internalMapSize[1]/2];
                     else
-                        marker_position = space.location_internal;
+                        marker_position = this.spaces[i].location_internal;
                     
                     // Create a draggable marker for the space with the icon
                     let marker = L.marker(marker_position, {
@@ -550,7 +564,7 @@ import L from 'leaflet';
                     // marker.addTo(this.map);
 
                     // Get the name of the floor for this space (this is how they're stored in the layer control)
-                    let floor_label = this.floors[space.floor].label;
+                    let floor_label = this.floors[this.spaces[i].floor].label;
 
                     // Add the marker to the layer for the floor
                     marker.addTo(this.floor_layers_object[floor_label]);
