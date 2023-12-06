@@ -170,36 +170,55 @@
                                 <button class="btn btn-sm btn-danger"
                                 :disabled="floor.isEntry"
                                 >Delete</button>
-                            </div> 
-                        <!-- class="floors-list-row">
-                            <input 
-                            id="PrimaryImageInput" 
-                            type="file" 
-                            class="form-control" 
-                            @change="handlePrimaryImageSelect"> -->
+                            </div>
+                        </div>
+                        <!-- Input a new floor -->
+                        <div class="row g-3 mb-2">
+                            <div class="col d-flex">
+                                <button 
+                                class="btn btn-outline-success flex-fill"
+                                @click="console.log('Add new floor')">
+                                    Add new floor
+                                </button>
+                            </div>
                         </div>
 
                     </div>
 
-                    
-                    <!-- Floor changing test -->
-                    <!-- <div class="row g-3 mb-2"> -->
-                        <!-- Button to remake the map -->
-                        <!-- <div class="col-md-4 d-flex">
-                            <select class="form-select-lg" v-model="activeFloor">
-                                <option 
-                                v-for="(floor, index) in floors"
-                                :value="index">
-                                    {{ floor.label }}
-                                </option>
-                            </select>
-                        </div> -->
-                        
-                        <!-- <div class="col-md-4">
-                          <label for="height" class="form-label">Height</label>
-                          <input type="number" class="form-control" id="height" v-model="building.internalMapSize[1]">
-                        </div> -->
-                    <!-- </div> -->
+                    <!-- Internal spaces management -->
+                    <div class="container text-center">
+                        <!-- Header -->
+                        <div class="spaces-list-row">
+                            <span>Space</span>
+                            <span>Floor</span>
+                            <span>Location</span>
+                        </div>
+                        <!-- Spaces -->
+                        <div class="spaces-list-row border-top border-primary-subtle my-1 py-1" v-for="space in spaces">
+                            <!-- Space name + icon -->
+                            <span class="spaces-list-space">
+                                <div class="space-list-space-icon">
+                                    <img :src="space.icon" style="width: 2rem; margin-right: .25rem;"/>
+                                </div>
+
+                                <div class="spaces-list-space-name">
+                                    {{ space.name }}
+                                </div>
+                            </span>
+                            <!-- Floor number input -->
+                            <input 
+                            type="number" 
+                            style="width:95%" 
+                            :value="space.floor" 
+                            min="0" max="5">
+                            <!-- Space internal location -->
+                            <input 
+                            class="form-control"
+                            type="text" 
+                            :value="coordinatesToString(space.location_internal)" 
+                            disabled readonly>
+                        </div>
+                    </div>
 
 
                     <!-- Map -->
@@ -253,58 +272,6 @@ import L from 'leaflet';
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
             this.supabase = createClient(supabaseUrl, supabaseKey)
 
-            // this.mapInit();
-            // TEMP: for testing
-            // this.floors = [
-            //     {
-            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-            //         "level": 3,
-            //         "label": "Fourth Floor",
-            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts04.svg"
-            //     },
-            //     {
-            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-            //         "level": 0,
-            //         "label": "Lower Concourse",
-            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts01.svg"
-            //     },
-            //     {
-            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-            //         "level": 1,
-            //         "label": "Main Concourse",
-            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts02.svg"
-            //     },
-            //     {
-            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-            //         "level": 2,
-            //         "label": "Third Floor",
-            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts03.svg"
-            //     },
-            //     {
-            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-            //         "level": 5,
-            //         "label": "Sixth Floor",
-            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts06.svg"
-            //     },
-            //     {
-            //         "building": "b5694bc5-90c0-440f-b95c-7c0672992211",
-            //         "level": 4,
-            //         "label": "Fifth Floor",
-            //         "url": "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/floorplans/Arts05.svg"
-            //     },
-            // ]
-
-            
-            // Sort the floors by level
-            // this.floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
-
-            // Get the spaces in this building
-            // this.getSpaces();
-
-            // Set the entry floor 
-            // this.setEntryFloor(this.building.entry_floor);
-
-            
         },
         computed: {
             buildingHasBeenChanged(){
@@ -318,7 +285,6 @@ import L from 'leaflet';
             async loadTestData(){
                 // Simulate the arts building being selected
                 // Call the getFloors and getSpaces functions
-                // this.getBuilding("arts-building");
                 this.getSpaces(this.building.UUID);
                 this.getFloorplans(this.building.UUID);
             },
@@ -340,7 +306,17 @@ import L from 'leaflet';
                     throw error
                 }
                 else {
-                    console.log("spaces", spaces);
+
+                    // Calculate the icon for each space
+                    
+                    let spaceStyles = await getSpaceStyles(this.supabase);
+                    // console.log("spaceStyles", spaceStyles);
+                    spaces.forEach(space => {
+                        space.icon = getIconForSpace(space, spaceStyles);
+                    });
+
+                    // console.log("spaces", spaces);
+
                     this.spaces = JSON.parse(JSON.stringify(spaces));
                     this.spaces_clean = JSON.parse(JSON.stringify(spaces));
                 }
@@ -502,6 +478,11 @@ import L from 'leaflet';
 
             removeMap(){
                 this.map.remove();
+            },
+
+            coordinatesToString(coordinates){
+                // Takes in an array of coordinates, returns a string
+                return "[" + coordinates[0] + ", " + coordinates[1] + "]";
             },
 
 
@@ -769,7 +750,7 @@ import L from 'leaflet';
                 }
                 else {
 
-                    console.log("Floorplans", flr);
+                    // console.log("Floorplans", flr);
                     // load the floors into the vue instance
                     this.floors = JSON.parse(JSON.stringify(flr));
                     this.floors_clean = JSON.parse(JSON.stringify(flr));
@@ -799,6 +780,25 @@ import L from 'leaflet';
     grid-template-rows: auto;
     row-gap: 1rem;
 }
+
+.spaces-list-row {
+    display: grid;
+    /* padding-top: 2rem; */
+    grid-template-columns:  auto 6rem 18rem;
+    grid-template-rows: auto;
+    row-gap: 1rem;
+    column-gap: 2rem;
+}
+
+.spaces-list-space {
+    display: grid;
+    grid-template-columns:  2rem auto;
+    grid-template-rows: auto;
+    column-gap: 1rem;
+    text-align: start;
+    align-content: center;
+}
+
 
 .map-section{
     /* Define the grid to give enough room for the map */
