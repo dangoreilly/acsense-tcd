@@ -766,6 +766,230 @@ import L from 'leaflet';
 
             },
 
+            // addNavNodesToMap_rectangles(){
+            //     // DEPRECATED
+            //     // Cycle through all the navigation nodes
+            //     // Add a coloured rectangle to the map for each node
+            //     // Add an SVG overlay to the map for each node, over the rectangle
+            //     // On the layers specified by the floors
+
+            //     // Editing nav nodes requires geoman tools, so init the toolbar
+            //     // with only the tools we want: drag mode and edit mode
+            //     // this.map.pm.addControls({  
+            //     //     position: 'topleft',  
+            //     //     drawControls: false,
+            //     //     editControls: true,
+            //     //     cutPolygon: false,
+            //     //     removalMode: false,
+            //     //     rotateMode: false,
+            //     // });
+
+
+            //     // First, set the rectangle and SVG options
+
+            //     let up_arrow_url = "/images/icons/up_arrow.svg";
+            //     let down_arrow_url = "/images/icons/down_arrow.svg";
+            //     let lift_arrows_url = "/images/icons/lift_arrows.svg";
+
+            //     let svg_overlay_options = {
+            //         opacity: 0.4,
+            //         interactive: false,
+            //         pane: "markerPane",
+            //         zIndex: 201,
+            //     }
+
+            //     let up_rectangle = {
+            //         color: "#000000",
+            //         fillColor: "#3fa9f5",
+            //         weight: 2,
+            //         fillOpacity: 0.5,
+            //         pane: "markerPane",
+            //     }
+
+            //     let down_rectangle = {
+            //         color: "#000000",
+            //         fillColor: "#ff1d25",
+            //         weight: 2,
+            //         fillOpacity: 0.5,
+            //         pane: "markerPane",
+            //         interactive: false,
+            //     }
+
+            //     let lift_rectangle = {
+            //         color: "#000000",
+            //         fillColor: "#7ac943",
+            //         weight: 2,
+            //         fillOpacity: 0.5,
+            //         pane: "markerPane",
+            //         draggable: true,
+            //     }
+
+            //     // Scaling handles
+            //     let circle_icon = L.icon({
+            //         iconUrl: "/images/red-dot.png",
+            //         iconSize: [10, 10],
+            //         iconAnchor: [5, 5],
+            //     });
+
+            //     let circle_options = {
+            //         icon: circle_icon,
+            //         pane: "markerPane",
+            //         draggable: true,
+            //     }
+
+            //     // Create a rectangle for each node
+            //     for (let i = 0; i < this.navigationNodes.length; i++){
+
+            //         // Create a local function for updating the toast value
+            //         let updateToast = (e) => {
+            //             // Get the name of the space
+            //             let node_name = this.navigationNodes[i].label;
+            //             // Set the toast value
+            //             this.space_being_hovered_on = node_name;
+            //             // Set the toast to show
+            //             this.space_name_toast_showing = true;
+            //         }
+            //         // And a local function for setting the toast to not display
+            //         let clearToast = () => {
+            //             this.space_name_toast_showing = false;
+            //         }
+
+            //         // ========================
+
+            //         let findCenter = (coordinates) => {
+            //             // Takes in a nested array of coordinates
+            //             // Returns the center of the array
+            //             let center = [
+            //                 (coordinates[0][0] + coordinates[1][0])/2, 
+            //                 (coordinates[0][1] + coordinates[1][1])/2
+            //             ]
+
+            //             return center;
+            //         }
+
+            //         // Check what sort of node it is
+            //         if (this.navigationNodes[i].lift) {
+            //             // If it's a lift, Draw a rectangle for the lift
+            //             let rectangle = L.rectangle(this.navigationNodes[i].location_up, lift_rectangle);
+            //             // Add an SVG overlay for the lift
+            //             // let svg_overlay = L.svgOverlay(lift_arrows_url, this.navigationNodes[i].location_up, svg_overlay_options);
+
+            //             // Add three red circle markers to the rectangle to handle dragging and scaling
+            //             // Top left
+            //             let circle_topright = L.marker(this.navigationNodes[i].location_up[0], circle_options);
+            //             // Bottom right
+            //             let circle_bottomleft = L.marker(this.navigationNodes[i].location_up[1], circle_options);
+            //             // Center
+            //             let circle_center = L.marker(findCenter(this.navigationNodes[i].location_up), circle_options);
+
+            //             // Add an event listener to the center circle to update the space location when it is dragged
+            //             circle_center.on('drag', (e) => {
+            //                 console.log("Circle center dragged");
+            //                 // Get the new center coordinates
+            //                 let new_center = e.target.getLatLng();
+            //                 console.log("new_center", new_center);
+
+            //                 // Calculate the new bounds
+            //                 let old_center = findCenter(this.navigationNodes[i].location_up);
+            //                 let difference = [new_center.lat - old_center[0], new_center.lng - old_center[1]];
+
+            //                 // Add the difference to each coordinate
+            //                 let new_coordinates = this.navigationNodes[i].location_up.map((coordinate) => {
+            //                     return [coordinate[0] + difference[0], coordinate[1] + difference[1]];
+            //                 });
+
+            //                 console.log("new_coordinates", new_coordinates)
+
+            //                 // Update the location of the rectangle
+            //                 rectangle.setBounds(new_coordinates);
+            //                 // Update the location of the scaling handles
+            //                 circle_topright.setLatLng(new_coordinates[0]);
+            //                 circle_bottomleft.setLatLng(new_coordinates[1]);
+            //                 // Update the SVG overlay
+            //                 // svg_overlay.setBounds(new_coordinates);
+
+            //                 // Update the node location
+            //                 this.navigationNodes[i].location_up = new_coordinates;
+            //             });
+
+            //             // Add an event listener to the scaling handles to update the space location when they are dragged
+            //             // Top left
+            //             circle_topright.on('drag', (e) => {
+            //                 console.log("Circle top right dragged");
+            //                 // Get the new coordinates
+            //                 let new_coordinates = e.target.getLatLng();
+            //                 let nc_array = [new_coordinates.lat, new_coordinates.lng];
+            //                 console.log("new_coordinates", new_coordinates);
+            //                 // Update the location of the rectangle
+            //                 rectangle.setBounds([nc_array, this.navigationNodes[i].location_up[1]]);
+            //                 // Update the SVG overlay
+            //                 // svg_overlay.setBounds([new_coordinates, this.navigationNodes[i].location_up[1]]);
+            //                 // Update the center circle
+            //                 circle_center.setLatLng(
+            //                     findCenter([nc_array, this.navigationNodes[i].location_up[1]])
+            //                 );
+
+            //                 // Update the node location
+            //                 this.navigationNodes[i].location_up[0] = [new_coordinates.lat, new_coordinates.lng];
+            //             });
+
+            //             // Bottom right
+            //             circle_bottomleft.on('drag', (e) => {
+            //                 console.log("Circle bottom left dragged");
+            //                 // Get the new coordinates
+            //                 let new_coordinates = e.target.getLatLng();
+            //                 let nc_array = [new_coordinates.lat, new_coordinates.lng];
+            //                 console.log("new_coordinates", new_coordinates);
+            //                 // Update the location of the rectangle
+            //                 rectangle.setBounds([this.navigationNodes[i].location_up[0], nc_array]);
+            //                 // Update the SVG overlay
+            //                 // svg_overlay.setBounds([this.navigationNodes[i].location_up[0], new_coordinates]);
+            //                 // Update the center circle
+            //                 circle_center.setLatLng(
+            //                     findCenter([this.navigationNodes[i].location_up[0], nc_array])
+            //                 );
+
+            //                 // Update the node location
+            //                 this.navigationNodes[i].location_up[1] = [new_coordinates.lat, new_coordinates.lng];
+            //             });
+                        
+            //             // Add an event listener to update the toast when the mouse hovers over the rectangle
+            //             rectangle.on('mouseover', (e) => {
+            //                 updateToast(e);
+            //             });
+            //             // And close it on mouseout
+            //             rectangle.on('mouseout', (e) => {
+            //                 clearToast();
+            //             });
+
+            //             // Group the rectangle and SVG overlay
+            //             // let marker = L.layerGroup([rectangle, svg_overlay, circle_topright, circle_bottomleft, circle_center]);
+            //             // let marker = [rectangle, svg_overlay, circle_topright, circle_bottomleft, circle_center];
+
+            //             // Add the lift marker to ever floor it's on
+            //             for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
+            //                 if (this.navigationNodes[i].presence[j]) {
+            //                     // Get the name of the floor for this space (this is how they're stored in the layer control)
+            //                     let floor_label = this.floors[j].label;
+            //                     // Add the markers to the layer for the floor
+            //                     rectangle.addTo(this.floor_layers_object[floor_label]);
+            //                     // svg_overlay.addTo(this.floor_layers_object[floor_label]);
+            //                     circle_topright.addTo(this.floor_layers_object[floor_label]);
+            //                     circle_bottomleft.addTo(this.floor_layers_object[floor_label]);
+            //                     circle_center.addTo(this.floor_layers_object[floor_label]);
+            //                 }
+            //             }
+
+            //             // Add the markers to the vue instance
+            //             this.navigationNodes[i].rectangle = rectangle;
+            //             // this.navigationNodes[i].svg_overlay = svg_overlay;
+            //             this.navigationNodes[i].circle_topright = circle_topright;
+            //             this.navigationNodes[i].circle_bottomleft = circle_bottomleft;
+            //             this.navigationNodes[i].circle_center = circle_center;
+            //         }
+            //     }
+            // },
+
             addNavNodesToMap(){
                 // Cycle through all the navigation nodes
                 // Add a marker to the map for each node
@@ -954,6 +1178,13 @@ import L from 'leaflet';
 
             coordinatesToString(coordinates){
                 // Takes in an array of coordinates, returns a string
+        
+                // Check if the coordinates are nested
+                if (Array.isArray(coordinates[0])) {
+                    // If they are, return a string of the first set of coordinates
+                    return "[[" + coordinates[0][0] + ", " + coordinates[0][1] + "], [" + coordinates[1][0] + ", " + coordinates[1][1] + "]]";
+                }
+                // If they're not, return a string of the coordinates
                 return "[" + coordinates[0] + ", " + coordinates[1] + "]";
             },
 
@@ -1274,7 +1505,7 @@ import L from 'leaflet';
 .nav-list-row {
     display: grid;
     /* padding-top: 2rem; */
-    grid-template-columns:  auto 10rem auto 8rem 8rem;
+    grid-template-columns:  auto 10rem auto 12rem 12rem;
     grid-template-rows: auto;
     row-gap: 1rem;
     column-gap: 1rem;
