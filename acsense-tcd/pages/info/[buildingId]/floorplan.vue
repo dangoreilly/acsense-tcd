@@ -5,11 +5,12 @@
         :floorplans="floorplans"
         :studentSpaces="studentSpaces"
         :spaceStyles="spaceStyles"
-        :navNodes="navNodes"
+        :navigationNodes="navNodes"
         @openSpaceModal="openSpaceModal"
         @openLegendModal="legendModalOpen = true"
         @spaceHover="space_name_toast_showing = true; space_being_hovered_on = $event"
         @spaceUnhover="space_name_toast_showing = false"
+        @openLiftModal="openLiftModal"
         @dismissModals="closeModal"/>
     
         <!-- Info Modal -->
@@ -37,30 +38,40 @@
                 </div>
             </div>
     
-        <!-- Space Modal -->
-        <!-- <div 
+        <!-- Lift Modal -->
+        <div 
             class="modal fade show" 
             id="areaModal"
             tabindex="-1" 
             @click.self="closeModal()"
             aria-modal="true" 
             role="dialog" 
-            :style="spaceModalOpen ? 'display: block;' : 'display: none;'">
+            :style="liftModalOpen ? 'display: block;' : 'display: none;'">
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
                     <div class="modal-content" >
     
                         <div class="modal-header" style="width: 100%;">
-                            <h5 class="modal-title d-flex" id="mapModalLabel" >text</h5>
+                            <h5 class="modal-title d-flex" id="mapModalLabel">{{ lift.node.label }}</h5>
                             <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
                         </div>
     
-                        <div class="modal-body" style="align-self: baseline; max-height: 70vh; overflow-y: auto;"></div>
+                        <div class="modal-body w-100" style="align-self: baseline; max-height: 70vh; overflow-y: auto;">
+                            <div class="d-grid gap-2">
+                                <!-- Loop through the valid floors, each button calls the gotoFloor function for the relevant index -->
+                                <button v-for = "floor in lift.validFloors" 
+                                class="btn btn-primary" 
+                                type="button" 
+                                @click="floor.gotoFloor()"
+                                :disabled="floor.isCurrentFloor">
+                                    {{ floor.label }}
+                                </button>
+                            </div>
+                        </div>
     
-                        <div class="modal-footer space-modal-badge-container" style="justify-content: center"></div>
                     
                     </div>
                 </div>
-            </div> -->
+            </div>
     
         <!-- Welcome Modal -->
         <div 
@@ -304,6 +315,8 @@
 
 import {openAreaModal} from '~/assets/modalFunctions.js';
 
+console.log()
+
 export default {
     data() {
         return {
@@ -318,6 +331,11 @@ export default {
                 mainContent: '',
                 footer: '',
             },
+            lift: {
+                node: {label: ''},
+                validFloors: []
+            },
+            liftModalOpen: false,
         }
     },
     mounted() {
@@ -338,6 +356,12 @@ export default {
 
             this.infoModalOpen = true;
         },
+
+        openLiftModal(lift){
+            this.lift = lift;
+
+            this.liftModalOpen = true;
+        },
         
         
         closeModal(){
@@ -345,6 +369,7 @@ export default {
             this.welcomeModalOpen = false;
             this.infoModalOpen = false;
             this.legendModalOpen = false;
+            this.liftModalOpen = false;
         },
 
 

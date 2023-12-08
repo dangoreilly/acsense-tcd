@@ -9,7 +9,7 @@ import '~/assets/css/leaflet.css'
 
 export default {
     props: {
-        navNodes: {
+        navigationNodes: {
             type: Array,
             default: () => []
         },
@@ -81,7 +81,7 @@ export default {
                 renderer: L.canvas({padding: 1})
             }).fitBounds(map_size);// map_center, 1);
 
-            console.log("Map initialised", map);
+            // console.log("Map initialised", map);
 
             // var info = L.control({position:"bottomleft"});
 
@@ -105,7 +105,7 @@ export default {
             // Add spaces to the map
             this.addSpacesToMap();
             // Add navigation nodes to the map
-            // this.addNavNodesToMap();
+            this.addNavNodesToMap();
             
         },
 
@@ -114,6 +114,36 @@ export default {
             // Method for emtting the openmodal event for the space modal
             this.$emit('openSpaceModal', space);
            
+        },
+
+        // Open lift modal
+        emitOpenLiftModal(node){
+
+            // localise for transport nonsense
+            // Basically, we're going to set the go to floor function for each valid floor
+            // Then we're going to pass the node and the array of valid floors and their functions
+            // back to the main instance, because the main instance can't pass eventst to this child
+            let gotoFloor = this.moveToFloor;
+            let closeModal = () => {this.$emit('dismissModals')};
+            // Process the lift node to extract the array of valid floors
+            let validFloors = [];
+            for (let i = 0; i < node.presence.length; i++) {
+                if (node.presence[i]){
+                    // Get the name and the index of the floorplan
+                    validFloors.push({
+                        label: this.floorplans[i].label,
+                        gotoFloor: () => {gotoFloor(i); closeModal();},
+                        isCurrentFloor: i == this.activeFloor
+                    });
+                }
+            }
+
+            // Method for emtting the openmodal event for the lift modal
+            // Transmits the node and the floor move as a callback
+            this.$emit('openLiftModal', {
+                node: node,
+                validFloors: validFloors,
+            });
         },
 
         // Emit that a space is being hovered over
@@ -152,12 +182,12 @@ export default {
                 floor_layer.on('add', () => {
                     this.activeFloor = i;
                     this.activeFloor_object = floor_layer;
-                    console.log("Active floor set to: " + this.activeFloor)
+                    // console.log("Active floor set to: " + this.activeFloor)
                 });
             }
 
             // Set the active floor to the entry floor
-            this.activeFloor = this.EntryFloor;
+            this.activeFloor = this.building.entry_floor;
 
             // Add the layer control to the map
             let layers_control = L.control({position:"topright"});
@@ -238,6 +268,66 @@ export default {
 
         },
 
+        nextValidFloor(direction, node){
+            // This function takes a direction (up or down) and a node
+            // It then returns the next valid floor in that direction
+            // If there is no valid floor in that direction, it returns null
+
+            // List of valid floors for this node
+            let valid_floors = [];
+            for (let i = 0; i < node.presence.length; i++) {
+                if (node.presence[i]) {
+                    valid_floors.push(i);
+                }
+            }
+            console.log("Valid floors: " + valid_floors)
+            console.log("Current floor: " + this.activeFloor)
+            // Get the index of the current floor
+            let current_floor_index = valid_floors.indexOf(this.activeFloor);
+
+            if (direction == "up") {
+                // If the current floor is the top floor, return null
+                if (current_floor_index == valid_floors.length - 1) {
+                    return null;
+                }
+                // Otherwise, return the next floor up
+                else {
+                    return valid_floors[current_floor_index + 1];
+                }
+            }
+            else if (direction == "down") {
+                // If the current floor is the bottom floor, return null
+                if (current_floor_index == 0) {
+                    return null;
+                }
+                // Otherwise, return the next floor down
+                else {
+                    return valid_floors[current_floor_index - 1];
+                }
+            }
+            else {
+                console.log("Invalid direction: " + direction);
+                return null;
+            }
+        },
+
+        moveToFloor(floorIndex){
+
+            console.log("Moving to floor: " + floorIndex);
+            // Move the map to the floor with the given index
+            // First, find the label of the floor as that is how
+            // they are stored in the layer control
+            let floorLabel = this.floorplans[floorIndex].label;
+            // Then, get the layer group from the floor_layers_object
+            let floorLayer = this.floor_layers_object[floorLabel];
+            // Then remove all layers from the map
+            this.map.eachLayer(function (layer) {
+                layer.remove();
+            });
+            // Then add the layer group to the map
+            floorLayer.addTo(this.map);
+        },
+
         addNavNodesToMap(){
             // Cycle through all the navigation nodes
             // Add a marker to the map for each node
@@ -269,19 +359,6 @@ export default {
             // Create a marker for each node
             for (let i = 0; i < this.navigationNodes.length; i++){
 
-                // create a local function for updating the toast value
-                let updateToast = (e) => {
-                    // Get the name of the space
-                    let node_name = this.navigationNodes[i].label;
-                    // Set the toast value
-                    this.space_being_hovered_on = node_name;
-                    // Set the toast to show
-                    this.space_name_toast_showing = true;
-                }
-                // And a local function for setting the toast to not display
-                let clearToast = () => {
-                    this.space_name_toast_showing = false;
-                }
 
                 // Check what sort of node it is
                 if (this.navigationNodes[i].lift) {
@@ -292,32 +369,20 @@ export default {
                         bubblingMouseEvents: false,
                     });
 
-                    // Add an event listener to the marker, to update the space location when it is dragged
-                    marker.on('dragend', (e) => {
-                        // Get the new coordinates
-                        let new_coordinates = e.target.getLatLng();
-                        // Update the space location
-                        this.navigationNodes[i].location_up = [new_coordinates.lat, new_coordinates.lng];
-                    });
-
-                    // Add an event listener to update the toast when the mouse hovers over the marker
-                    marker.on('mouseover', (e) => {
-                        updateToast(e);
-                    });
-                    // And close it on mouseout
-                    marker.on('mouseout', (e) => {
-                        clearToast();
-                    });
-
-                    // Add the lift marker to ever floor it's on
+                    // Add the lift marker to every floor it's on
                     for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
                         if (this.navigationNodes[i].presence[j]) {
                             // Get the name of the floor for this space (this is how they're stored in the layer control)
-                            let floor_label = this.floors[j].label;
+                            let floor_label = this.floorplans[j].label;
                             // Add the marker to the layer for the floor
                             marker.addTo(this.floor_layers_object[floor_label]);
                         }
                     }
+
+                    // Add an event listener to the marker, to open the lift modal when it is clicked
+                    marker.on('click', (e) => {
+                        this.emitOpenLiftModal(this.navigationNodes[i]);
+                    });
 
 
                 }
@@ -329,23 +394,17 @@ export default {
                         draggable: true,
                         bubblingMouseEvents: false,
                     });
-                    
-                    // Add an event listener to the marker, to update the space location when it is dragged
-                    marker_up.on('dragend', (e) => {
-                        // Get the new coordinates
-                        let new_coordinates = e.target.getLatLng();
-                        // Update the space location
-                        this.navigationNodes[i].location_up = [new_coordinates.lat, new_coordinates.lng];
-                    });
 
-                    // Add an event listener to update the toast when the mouse hovers over the marker
-                    marker_up.on('mouseover', (e) => {
-                        updateToast(e);
+                    // Add an event listener to the marker, to move to the next floor up when it is clicked
+                    marker_up.on('click', (e) => {
+                        // Get the next valid floor up
+                        let next_floor = this.nextValidFloor("up", this.navigationNodes[i]);
+                        // If there is a valid floor, move to it
+                        if (next_floor != null) {
+                            this.moveToFloor(next_floor);
+                        }
                     });
-                    // And close it on mouseout
-                    marker_up.on('mouseout', (e) => {
-                        clearToast();
-                    });
+                    
 
                     // ====================================================================================================
                     // Stairs DOWN
@@ -354,22 +413,15 @@ export default {
                         draggable: true,
                         bubblingMouseEvents: false,
                     });
-                    
-                    // Add an event listener to the marker, to update the space location when it is dragged
-                    marker_down.on('dragend', (e) => {
-                        // Get the new coordinates
-                        let new_coordinates = e.target.getLatLng();
-                        // Update the space location
-                        this.navigationNodes[i].location_down = [new_coordinates.lat, new_coordinates.lng];
-                    });
 
-                    // Add an event listener to update the toast when the mouse hovers over the marker
-                    marker_down.on('mouseover', (e) => {
-                        updateToast(e);
-                    });
-                    // And close it on mouseout
-                    marker_down.on('mouseout', (e) => {
-                        clearToast();
+                    // Add an event listener to the marker, to move to the next floor down when it is clicked
+                    marker_down.on('click', (e) => {
+                        // Get the next valid floor down
+                        let next_floor = this.nextValidFloor("down", this.navigationNodes[i]);
+                        // If there is a valid floor, move to it
+                        if (next_floor != null) {
+                            this.moveToFloor(next_floor);
+                        }
                     });
 
                     // ====================================================================================================
@@ -397,7 +449,7 @@ export default {
                     for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
                         if (this.navigationNodes[i].presence[j] && j != topmost_floor) {
                             // Get the name of the floor for this space (this is how they're stored in the layer control)
-                            let floor_label = this.floors[j].label;
+                            let floor_label = this.floorplans[j].label;
                             // Add the marker to the layer for the floor
                             marker_up.addTo(this.floor_layers_object[floor_label]);
                         }
@@ -408,7 +460,7 @@ export default {
                     for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
                         if (this.navigationNodes[i].presence[j] && j != bottommost_floor) {
                             // Get the name of the floor for this space (this is how they're stored in the layer control)
-                            let floor_label = this.floors[j].label;
+                            let floor_label = this.floorplans[j].label;
                             // Add the marker to the layer for the floor
                             marker_down.addTo(this.floor_layers_object[floor_label]);
                         }
