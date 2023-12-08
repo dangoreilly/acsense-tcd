@@ -71,6 +71,7 @@
                     
                     <div class="mb-3 ps-3">
                         <div class="form-check form-switch">
+                            <!-- TODO: Handle by setting map size to [0,0] or [1080,1920] -->
                             <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
                             <label class="form-check-label" for="flexSwitchCheckDefault">Display floorplan for {{ building.display_name }}</label>
                         </div>
@@ -98,11 +99,11 @@
                         <!-- Map dimensions -->
                         <div class="col-md-3">
                             <label for="width" class="form-label">Width</label>
-                            <input type="number" class="form-control" id="width" v-model="building.internalMapSize[0]">
+                            <input type="number" class="form-control" id="width" v-model="building.internal_map_size[0]">
                         </div>
                         <div class="col-md-3">
                             <label for="height" class="form-label">Height</label>
-                            <input type="number" class="form-control" id="height" v-model="building.internalMapSize[1]">
+                            <input type="number" class="form-control" id="height" v-model="building.internal_map_size[1]">
                         </div>
                     </div>
                     <!-- <div>
@@ -347,7 +348,7 @@ import L from 'leaflet';
                 building: {
                     UUID: "b5694bc5-90c0-440f-b95c-7c0672992211",
                     entry_floor: 1,
-                    internalMapSize: [1080, 1920],
+                    internal_map_size: [1080, 1920],
                     canonical: "arts-building",
                     display_name: "Arts Building",
                 },
@@ -543,15 +544,15 @@ import L from 'leaflet';
                 const BUFFER = 200
 
                 // Create the new map
-                let map_size = [[0,0], this.building.internalMapSize]
+                let map_size = [[0,0], this.building.internal_map_size]
                 // Get the bounds by adding padding around the edges
                 // Without this padding, it's not always possible to zoom into the edges
                 let map_bounds = [[-BUFFER, -BUFFER],
-                    [this.building.internalMapSize[0] + BUFFER,
-                    this.building.internalMapSize[1] + BUFFER]
+                    [this.building.internal_map_size[0] + BUFFER,
+                    this.building.internal_map_size[1] + BUFFER]
                 ]
 
-                let map_center = [this.building.internalMapSize[0]/2, this.building.internalMapSize[1]/2]
+                let map_center = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2]
 
                 let map = L.map('internal-map', {
                     crs: L.CRS.Simple,
@@ -658,7 +659,7 @@ import L from 'leaflet';
                     let equivalence = (this.spaces[i].location_internal[0] == 0) && (this.spaces[i].location_internal[1] == 0);
 
                     if (equivalence)
-                        marker_position = [this.building.internalMapSize[0]/2, this.building.internalMapSize[1]/2];
+                        marker_position = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
                     else
                         marker_position = this.spaces[i].location_internal;
                     

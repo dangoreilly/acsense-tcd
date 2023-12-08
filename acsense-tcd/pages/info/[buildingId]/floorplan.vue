@@ -1,163 +1,478 @@
 <template>
-<!-- Container div -->
-<div> 
-    <!-- Map object, populated by Leaflet -->
-    <div id="map"></div>
-
-    <!-- Modal for building info -->
-    <div 
-    class="modal fade show" 
-    id="mapModal"
-    tabindex="-1" 
-    @click.self="closeModal()"
-    aria-modal="true" 
-    role="dialog" >
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
-            <div class="modal-content" >
-
-                <div class="modal-header" style="width: 100%;">
-                    <h5 class="modal-title d-flex" id="mapModalLabel" >text</h5>
-                    <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
+    <div>
+        <InternalMap
+        :building="building"
+        :floorplans="floorplans"
+        :studentSpaces="studentSpaces"
+        :spaceStyles="spaceStyles"
+        :navNodes="navNodes"
+        @openSpaceModal="openSpaceModal"
+        @openLegendModal="legendModalOpen = true"
+        @spaceHover="space_name_toast_showing = true; space_being_hovered_on = $event"
+        @spaceUnhover="space_name_toast_showing = false"
+        @dismissModals="closeModal"/>
+    
+        <!-- Info Modal -->
+        <div 
+            class="modal fade show" 
+            id="buildingModal"
+            tabindex="-1" 
+            @click.self="closeModal()"
+            aria-modal="true" 
+            role="dialog" 
+            :style="infoModalOpen ? 'display: block;' : 'display: none;'">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
+                    <div class="modal-content" >
+    
+                        <div class="modal-header" style="width: 100%;">
+                            <h5 class="modal-title d-flex" id="mapModalLabel">{{infoModal.title}}</h5>
+                            <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
+                        </div>
+    
+                        <div class="modal-body" style="align-self: baseline;" v-html="infoModal.mainContent"></div>
+    
+                        <div class="modal-footer space-modal-badge-container" style="justify-content: center" v-html="infoModal.footer"></div>
+                    
+                    </div>
                 </div>
-
-                <div class="modal-body" style="align-self: baseline;"></div>
-
-                <div class="modal-footer" style="justify-content: center"></div>
-            
             </div>
-        </div>
-    </div>
-
-    <!-- Modal for map markers -->
-    <div 
-    class="modal fade show" 
-    id="areaModal"
-    tabindex="-1" 
-    @click.self="closeModal()"
-    aria-modal="true" 
-    role="dialog" >
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
-            <div class="modal-content" >
-
-                <div class="modal-header" style="width: 100%;">
-                    <h5 class="modal-title d-flex" id="mapModalLabel" >text</h5>
-                    <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
+    
+        <!-- Space Modal -->
+        <!-- <div 
+            class="modal fade show" 
+            id="areaModal"
+            tabindex="-1" 
+            @click.self="closeModal()"
+            aria-modal="true" 
+            role="dialog" 
+            :style="spaceModalOpen ? 'display: block;' : 'display: none;'">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
+                    <div class="modal-content" >
+    
+                        <div class="modal-header" style="width: 100%;">
+                            <h5 class="modal-title d-flex" id="mapModalLabel" >text</h5>
+                            <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
+                        </div>
+    
+                        <div class="modal-body" style="align-self: baseline; max-height: 70vh; overflow-y: auto;"></div>
+    
+                        <div class="modal-footer space-modal-badge-container" style="justify-content: center"></div>
+                    
+                    </div>
                 </div>
-
-                <div class="modal-body" style="align-self: baseline;"></div>
-
-                <div class="modal-footer" style="justify-content: center"></div>
-            
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for welcome message -->
-    <div 
-    class="modal fade show" 
-    tabindex="-1" 
-    @click.self="welcomeModalOpen=false"
-    aria-modal="true" 
-    role="dialog" 
-    :style="welcomeModalOpen ? 'display: block;' : 'display: none;'">
-
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title" id="welcomeModalLabel">Welcome</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen = false"></button>
-                </div>
-
-                <div class="modal-body">
-                    <p>{{welcome.MainContent}}</p>
-                </div>
+            </div> -->
+    
+        <!-- Welcome Modal -->
+        <div 
+        class="modal fade show" 
+        tabindex="-1" 
+        @click.self="welcomeModalOpen=false; legendModalOpen=true"
+        aria-modal="true" 
+        role="dialog" 
+        :style="welcomeModalOpen ? 'display: block;' : 'display: none;'">
+    
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+    
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="welcomeModalLabel">Internal map of {{ building.display_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen=false; legendModalOpen=true"></button>
+                    </div>
+    
+                    <div class="modal-body">
+                        <p>{{welcome.mainContent}}</p>
+                    </div>
+                    
+                    <div class="modal-footer d-flex justify-content-between">
+                        <div class="form-check" title="This checkbox stores a non-tracking cookie on your device, to store your preference">
+                            <input class="form-check-input" type="checkbox" v-model="skipWelcome" id="skipWelcomeCheck">
+                            <label class="form-check-label" for="skipWelcomeCheck">
+                                Don't show again (stores a cookie)
+                            </label>
+                        </div>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="welcomeModalOpen=false; legendModalOpen=true">Close</button>
+                        <!-- <a role="button" href='https://www.tcd.ie/disability/services/tcdsense.php' class="btn btn-secondary" >About TCDSense</a> -->
+                    </div>
                 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="welcomeModalOpen = false">Close</button>
-                    <a role="button" href='https://www.tcd.ie/disability/services/tcdsense.php' class="btn btn-secondary" >About TCDSense</a>
                 </div>
-            
             </div>
         </div>
+    
+        <div class="toast-container p-3 start-50 translate-middle-x space-name-toast bottom-0"
+        :style="space_name_toast_showing ? 'opacity: 1;' : 'opacity: 0;'">
+            <div class="toast show">
+                <div class="toast-body">
+                    {{ space_being_hovered_on  }}
+                </div>
+            </div>
+        </div>
+    
+        <!-- <Legend :displayModal="legendModalOpen" :spaceIcons="spaceStyles" @close-modal="legendModalOpen = false"></Legend> -->
+    
     </div>
-</div>
-
 </template>
 
-
 <script setup>
+    
+    import { createClient } from '@supabase/supabase-js';
 
-//Script setup needed for UseHead
-// The index page is very different to the rest of the script
-// so there's no qualms with using the composition API here, instead of the Options API
-import '~/assets/css/leaflet.css'
+    function validateNavigationNode(node, numFloors){
+        // Takes in a lift or stair, checks it has the correct number of floors
+        // Trims the presence array to the correct number of floors if too many
+        // filles the presence array with 0s if too few
 
-useHead({
-    link: [
-        {
-            rel:"stylesheet",
-            href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-        },
-        {
-            rel:"stylesheet",
-            href:"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        },
-    ],
-    script: [
-        {
-            src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-            integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-            crossorigin: "",
-        },
-        {
-            src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-            body: true,
-        },
-        {
-            src: '/javascript/internalMapInit.js',
-            body: true,
-        },
-        {
-            src: '/javascript/mapFunctions.js',
-        },
-        {
-            src: '/javascript/debugFunctions.js',
-        },
-        {
-            src: '/javascript/modalFunctions.js',
+        // Check the presence array is the correct length
+        if (node.presence.length != numFloors) {
+            // If it's too long, trim it
+            if (node.presence.length > numFloors) {
+                node.presence = node.presence.slice(0, numFloors);
+            }
+            // If it's too short, fill it with 0s
+            else {
+                let difference = numFloors - node.presence.length;
+                for (let i = 0; i < difference; i++) {
+                    node.presence.push(0);
+                }
+            }
         }
-    ]
-});
+
+        return node;
+
+    }
 
 
+    // Create the supabase client that will gather all our data
+    const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+    const supabaseKey = useRuntimeConfig().public.supabaseKey;
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Gather all our data
+
+    let building = ref([]);
+    let floorplans = ref([]);
+    let studentSpaces = ref([]);
+    let navNodes = ref([]);
+    let spaceStyles = ref([]);
+    let welcome = ref({});
+
+    // Figure out what building we're in
+    const route = useRoute();
+    const buildingId = route.params.buildingId;
+
+    // Get our building data
+    const { data: buildings_data, error: building_error} = await supabase
+        .from('buildings')
+        .select('canonical, UUID, display_name, entry_floor, internal_map_size')
+        .eq('canonical', buildingId)
+
+    if (building_error) {
+        console.log('An error occured while fetching the building data:');
+        console.log(building_error);
+    }
+    else {
+        building = ref(buildings_data[0]);
+    }
+
+    // Space Styles
+    const { data: spaceStyles_data, error: spaceStyle_error} = await supabase
+        .from('space_styles')
+        .select('*')
+
+    if (spaceStyle_error) {
+        console.log('An error occured while fetching space styles:');
+        console.log(spaceStyle_error);
+    }
+    else {
+        spaceStyles = ref(spaceStyles_data);
+    }
+
+    // Student Spaces
+    const { data: studentSpaces_data, error: studentSpace_error} = await supabase
+        .from('spaces')
+        .select('*')
+        .eq('building_uuid', building.value.UUID)
+
+    if (studentSpace_error) {
+        console.log('An error occured while fetching student spaces:');
+        console.log(studentSpace_error);
+    }
+    else {
+
+        studentSpaces_data.forEach(space => {
+            space.icon = getIconForSpace(space, spaceStyles.value);
+        });
+
+        studentSpaces = ref(studentSpaces_data);
+    }
+
+    function setEntryFloor(floors, newEntryFloor){
+        // Set all floors to entryFloor = false
+        floors.forEach((floor, index) => {
+            floor.isEntry = false;
+        });
+
+        // Set the entry floor to true by checking newEntryfloor
+        floors[newEntryFloor].isEntry = true;
+
+        return floors;
+    }
+
+    // Floors
+    const { data: floors_data, error: floors_error} = await supabase
+        .from('floorplans')
+        .select('*')
+        .eq('building', building.value.UUID)
+
+    if (floors_error) {
+        console.log('An error occured while fetching floorplans:');
+        console.log(floors_error);
+    }
+    else {
+
+        let floors = floors_data;
+        // Sort the floors and set the entry floor
+        floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
+        floors = setEntryFloor(floors, building.value.entry_floor);
+        // Store the floors
+        floorplans = ref(floors);
+    }
+
+    // Nav Nodes
+    const { data: NavNodes_data, error: NavNodes_error} = await supabase
+        .from('nav_nodes')
+        .select('*')
+        .eq('building', building.value.UUID)
+
+    if (NavNodes_error) {
+        console.log('An error occured while fetching lifts and stairs:');
+        console.log(NavNodes_error);
+    }
+    else {
+        // Validate all the nodes
+        for (let i = 0; i < NavNodes_data.length; i++) {
+            NavNodes_data[i] = validateNavigationNode(NavNodes_data[i], );
+        }
+        navNodes = ref(NavNodes_data);
+    }
+
+    // Welcome Modal Content
+    const { data: welcome_data, error: welcome_error} = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('key', 'internal_welcome')
+
+    if (welcome_error) {
+        console.log('An error occured while fetching welcome modal content:');
+        console.log(welcome_error);
+    }
+    else {
+        welcome = ref(welcome_data[0].data);
+        // console.log(welcome_data[0].data);
+    }
+
+    
+    // Set some meta data for the page
+    useHead({
+        title: 'Map of ' + building.value.display_name + ' | TCDSense',
+        meta: [
+            {
+                name: 'viewport',
+                content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+            },
+        ],
+        // Add the plausible analytics script
+        script: [
+            {
+                src: 'https://plausible.io/js/script.js',
+                defer: true,
+                'data-domain': "tcdsensemap.ie"
+            },
+        ]
+    });
+
+    // console.log("building", building.value);
+    // console.log("floorplans", floorplans.value);
+    // console.log("studentSpaces", studentSpaces.value);
+    // console.log("navNodes", navNodes.value);
+    // console.log("spaceStyles", spaceStyles.value);
+        
 
 </script>
 
 <script>
+// import { createClient } from '@supabase/supabase-js';
 
-    export default {
-        data() {
-            return {
-                welcome: {
-                    MainContent: "Internal map test. Use the floor controls in the top left to move through the floors",
-                },
-                welcomeModalOpen: true,
-            }
+import {openAreaModal} from '~/assets/modalFunctions.js';
+
+export default {
+    data() {
+        return {
+            welcomeModalOpen: false,
+            legendModalOpen: false,
+            infoModalOpen: false,
+            skipWelcome: false,
+            space_name_toast_showing: false,
+            space_being_hovered_on: '',
+            infoModal: {
+                title: '',
+                mainContent: '',
+                footer: '',
+            },
+        }
+    },
+    mounted() {
+        // console.log(this.$refs.welcome);
+        // Check if the user has indicated they want to skip the welcome modal
+        this.checkSkipWelcome();
+    },
+    watch: {
+        skipWelcome: function(){
+            this.setWelcomeSkipCookie();
+        }
+    },
+
+    methods: {
+
+        openSpaceModal(space){
+            this.infoModal = openAreaModal(space);
+
+            this.infoModalOpen = true;
         },
-        methods: {
-            closeModal() {
-                let mapModal = document.getElementById('mapModal')
-                let areaModal = document.getElementById('areaModal')
-                mapModal.style.display = "none";
-                areaModal.style.display = "none";
-                // mapModal.classList.remove('show');
-            }
+        
+        
+        closeModal(){
+            // Close the modals
+            this.welcomeModalOpen = false;
+            this.infoModalOpen = false;
+            this.legendModalOpen = false;
         },
+
+
+        // Check the cookies to see if the user has requested to skip the welcome modal
+        checkSkipWelcome(){
+            // Access the cookie
+            let skipWelcomeCookie = useCookie('tcdsense-skipWelcome-internal');
+
+            // Initialise the cookie if it doesn't exist
+            skipWelcomeCookie.value = skipWelcomeCookie.value || 'false';
+
+            // If the cookie exists, and is set to true, skip the welcome modal
+            if (skipWelcomeCookie.value == 'false'){
+                this.welcomeModalOpen = true;
+            }
+
+            // If the cookie was initialised for this check, it'll be non-persistent
+            
+        },
+
+        setWelcomeSkipCookie(){
+            // create the cookie, if the user has requested to skip the welcome modal
+            if (this.skipWelcome){
+                console.log("creating cookie")
+                // Create the cookie to expire in 6 months
+                let skipWelcomeCookie =  useCookie('tcdsense-skipWelcome_internal', {maxAge: 60*60*24*180});
+
+                skipWelcomeCookie.value = 'true';
+
+                console.log(skipWelcomeCookie);
+            }
+            else {
+                console.log("deleting cookie")
+                // Delete the cookie by setting it to expire in 10 seconds
+                let skipWelcomeCookie =  useCookie('tcdsense-skipWelcome-internal', {maxAge: 10});
+
+                skipWelcomeCookie.value = 'false';
+
+                console.log(skipWelcomeCookie);
+            }
+            
+
+        }
+
     }
-
+};
 </script>
 
 <style>
-#map { height: 100vh; }
+    /* @import url("~/assets/css/leaflet.css"); */
+
+    :root{
+        /* --primary-label-opacity: 1;
+        --secondary-label-opacity: 0;
+        --tertiary-label-opacity: 0; */
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    #map { height: 100dvh; }
+
+    .primary-label {
+        opacity: var(--primary-label-opacity);
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+    .secondary-label {
+        opacity: var(--secondary-label-opacity);
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+    .tertiary-label {
+        opacity: var(--tertiary-label-opacity);
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+    .flyover-label {
+        opacity: calc(var(--secondary-label-opacity) + var(--primary-label-opacity));
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+
+    .sense-icon {
+        /* opacity: var(--sense-icon-opacity); */
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .svg-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        vertical-align: middle;
+        fill: currentColor;
+        width: 1.5rem;
+    }
+    .svg-icon-sash {
+        position: absolute;
+        top: 31%;
+        left: -30%;
+        opacity: 0.8;
+        /* transform: translate(-50%, -50%); */
+        rotate: 45deg;
+        vertical-align: middle;
+        fill: currentColor;
+        width: 2.4rem;
+    }
+
+    .facility-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        position: relative;
+        /* padding: 0.25rem; */
+    }
+
+    .space-modal-badge-container {
+        display: grid;
+        /* width: 100%; */
+        /* padding-top: 2rem; */
+        grid-template-columns:  auto auto auto auto auto auto;
+        grid-template-rows: auto auto;
+        grid-template-areas: 
+            "seating sockets food kettle microwave wheelchair"
+            "btn btn btn btn btn btn";
+    }
+
+    
+    .space-name-toast {
+        transition: all 0.2s ease-in-out;
+    }
+
 </style>
