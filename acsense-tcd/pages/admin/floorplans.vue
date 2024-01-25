@@ -153,7 +153,35 @@
                                 <!-- Disable the checkbox if this is the entry floor, to avoid it being deselected -->
                                 <!-- The only way the checkbox can change therefor is to change the floor -->
                               </div>
-                            <span><input type="text" style="width:95%" :value="floor.url"> </span>
+                            <span>
+                                <!-- <input type="text" style="width:95%" :value="floor.url"> -->
+                                <!-- Floor svg file display -->
+                                <!-- File input that will show the current URL on load -->
+                                <!-- On change, it will update the URL for the selected floor -->
+                                
+                                <!-- <input 
+                                :id="'floorSVGInput_' + index"
+                                type="file" 
+                                style="width:90%"
+                                class="form-control" 
+                                @change="handleFloorImageSelect(index)">  -->
+                                <div class="input-group input-group-sm"
+                                    style="width:90%">
+                                    <!-- File input -->
+                                    <input 
+                                    :id="'floorSVGInput_' + index"
+                                    type="file" 
+                                    class="form-control" 
+                                    @change="handleFloorImageSelect(index)">
+                                    <!-- Preview Button -->
+                                    <a class="btn btn-outline-secondary" type="button" :href="floor.url"
+                                    target="_blank">
+                                        <i class="bi bi-image"></i>
+                                        View
+                                    </a>
+                                </div>
+                            </span>
+                            
                             <span><input type="text" style="width:95%" :value="floor.label"></span>
                             <div>
                                 <div class="btn-group" role="group">
@@ -979,12 +1007,19 @@ import L from 'leaflet';
 
 
             },
+            
+            handleFloorImageSelect(floor) { 
+                // Get the file from the input specified by the floor number
+                // Set the image of the floor to the file to preview
 
-            handlePrimaryImageSelect(evt) { 
-                // Get the file from the input
-                // Set the primary image to the file to preview
-                const file = evt.target.files[0];
-                this.building.primary_image_url = URL.createObjectURL(file);
+                // Get the file
+                let input_id = "floorSVGInput_" + floor;
+                let file_input = document.getElementById(input_id);
+                const file = file_input.files[0];
+                // Set the floor image to the file
+                this.floors[floor].url = URL.createObjectURL(file);
+                // Refresh the map
+                this.mapInit();
             },
 
             async uploadNewPrimaryImage(){
