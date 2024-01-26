@@ -290,11 +290,8 @@
                             
                         </div>
                         <!-- Display -->
-                        <div class="col" v-if="building.tips.length > 0">
-                            <AccessTips :tips="building.tips" />
-                        </div>
-                        <div class="col" v-else>
-                            <!-- <p><em> &lt;&lt; Tip box will not display >> </em></p> -->
+                        <div class="col">
+                            <AccessTips :tips="building.tips" entity="building"/>
                         </div>
                         
                     </div>
