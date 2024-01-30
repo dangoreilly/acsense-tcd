@@ -6,8 +6,8 @@
 
             <!-- Sidebar for building selection -->
             <AdminBuildingSelector 
-            
-            :supabase_client="supabase"/> <!-- @activeBuildingChanged="getBuilding($event)"  -->
+            @activeBuildingChanged="getBuilding($event)"
+            :supabase_client="supabase"/> <!--   -->
             <!-- TODO: Replace building selector functionality -->
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
@@ -29,12 +29,12 @@
                     <!-- Construction Badge -->
                     <div class="d-flex align-items-center m-3 fs-5">
                         <!-- Test data puller -->
-                        <button 
+                        <!-- <button 
                             type="button" 
                             class="btn btn-primary me-2" 
                             @click="loadTestData()">
                                 Pull test data
-                        </button>
+                        </button> -->
 
                         <div class="btn-group" role="group">
                             <button 
@@ -68,14 +68,14 @@
                         <ContentDoc path="admincopy/floorplans"></ContentDoc>
                         
                     </div>
-                    
-                    <div class="mb-3 ps-3">
+
+                    <!-- TODO: Handle by setting map size to [0,0] or [1080,1920] -->
+                    <!-- <div class="mb-3 ps-3">
                         <div class="form-check form-switch">
-                            <!-- TODO: Handle by setting map size to [0,0] or [1080,1920] -->
                             <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
                             <label class="form-check-label" for="flexSwitchCheckDefault">Display floorplan for {{ building.display_name }}</label>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Floorplan size -->
                     <div class="row g-3 mb-2">
@@ -182,7 +182,7 @@
                                 </div>
                             </span>
                             
-                            <span><input type="text" style="width:95%" :value="floor.label"></span>
+                            <span><input type="text" style="width:95%" v-model="floor.label"></span>
                             <div>
                                 <div class="btn-group" role="group">
                                     <!-- Swap upwards -->
@@ -205,17 +205,51 @@
                                 <!-- Don't allow the entry floor to be deleted, because I don't want to deal with that logic -->
                                 <button class="btn btn-sm btn-danger"
                                 :disabled="floor.isEntry"
+                                @click="deleteFloor(index)"
                                 >Delete</button>
                             </div>
                         </div>
+
                         <!-- Input a new floor -->
-                        <div class="row g-3 mb-2">
-                            <div class="col d-flex">
-                                <button 
-                                class="btn btn-outline-success flex-fill"
-                                @click="console.log('Add new floor')">
-                                    Add new floor
-                                </button>
+                        <!-- File select and label input same as edit -->
+                        <!-- No entry floor or rearrange buttons -->
+                        <!-- Replace Delete button with Add button that calls addNewFloor() -->
+                        <div class="floors-list-row mb-1">
+                            <div>  
+                                <!-- Empty Div for layout -->
+                            </div>
+                            <span>
+                                <!-- Floor svg file display -->
+                                <div class="input-group input-group-sm"
+                                    style="width:90%">
+                                    <!-- File input -->
+                                    <input 
+                                    id="newFloorSVGInput"
+                                    type="file" 
+                                    class="form-control" 
+                                    @change="handleNewFloorImageSelect()">
+                                    <!-- Preview Button -->
+                                    <!-- Disabled if there is no url -->
+                                    <a class="btn btn-outline-secondary" 
+                                    type="button" 
+                                    :href="newFloor.url"
+                                    :disabled="newFloor.url.length == 0"
+                                    target="_blank">
+                                        <i class="bi bi-image"></i>
+                                        View
+                                    </a>
+                                </div>
+                            </span>
+                            
+                            <span><input type="text" style="width:95%" v-model="newFloor.label"></span>
+                            <div>
+                                <!-- Empty Div for layout -->
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-success"
+                                :disabled="!newFloorIsValid"
+                                @click="addNewFloor()"
+                                >Add</button>
                             </div>
                         </div>
 
@@ -290,20 +324,23 @@
                             <span>Floors</span>
                             <span>UP Location</span>
                             <span>DOWN Location</span>
+                            <span></span>
                         </div>
                         <!-- Nodes -->
-                        <div class="nav-list-row border-top border-primary-subtle my-1 py-1" v-for="node in navigationNodes">
+                        <div class="nav-list-row border-top border-primary-subtle my-1 py-1" 
+                        :class="checkNodeValid(node) ? '' : 'bg-warning'"
+                        v-for="node in navigationNodes">
                             <!-- Node label -->
-                            <span><input type="text" style="width:95%" :value="node.label"></span>
+                            <span><input type="text" style="width:95%" v-model="node.label"></span>
                             <!-- Lift or stair -->
                             <div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="inlineRadio1" value="1" v-model="node.lift">
+                                    <input class="form-check-input" type="radio" id="inlineRadio1" value="lift" v-model="node.node_type">
                                     <!-- @change="node.lift = Boolean(this.$event.value)"> -->
                                     <label class="form-check-label" for="inlineRadio1">Lift</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="inlineRadio2" value="0" v-model="node.lift">
+                                    <input class="form-check-input" type="radio" id="inlineRadio2" value="stairs" v-model="node.node_type">
                                     <!-- @change="node.lift = Boolean(this.$event.value)"> -->
                                     <label class="form-check-label" for="inlineRadio2">Stairs</label>
                                 </div>
@@ -314,6 +351,7 @@
                                     <input 
                                     class="form-check-input" 
                                     type="checkbox"
+                                    :title="floor.label"
                                     v-model="node.presence[index]">
                                 </div>
                             </div>
@@ -327,11 +365,70 @@
                             <div>
                                 <!-- Only display the DOWN location if the node is a stair -->
                                 <input 
-                                v-if="node.lift == 0"
+                                v-if="node.node_type == 'stairs'"
                                 class="form-control"
                                 type="text" 
                                 :value="coordinatesToString(node.location_down)" 
                                 disabled readonly>
+                            </div>
+                            <!-- Delete Button -->
+                            <div>
+                                <button class="btn btn-sm btn-danger"
+                                @click="deleteNavNode(node)"
+                                >X</button>
+                            </div>
+                        </div>
+                        <!-- Insert a new node -->
+                        <div class="nav-list-row border-top border-primary-subtle my-1 py-1">
+                            <!-- Node label -->
+                            <span><input type="text" style="width:95%" v-model="newNode.label" placeholder="New Node"></span>
+                            <!-- Lift or stair -->
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="inlineRadio1" value="lift" v-model="newNode.node_type">
+                                    <!-- @change="node.lift = Boolean(this.$event.value)"> -->
+                                    <label class="form-check-label" for="inlineRadio1">Lift</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="inlineRadio2" value="stairs" v-model="newNode.node_type">
+                                    <!-- @change="node.lift = Boolean(this.$event.value)"> -->
+                                    <label class="form-check-label" for="inlineRadio2">Stairs</label>
+                                </div>
+                            </div>
+                            <!-- Active floors -->
+                            <div>
+                                <div class="form-check form-check-inline" v-for="(floor, index) in floors">
+                                    <input 
+                                    class="form-check-input" 
+                                    type="checkbox"
+                                    :title="floor.label"
+                                    v-model="newNode.presence[index]">
+                                </div>
+                            </div>
+                                <!-- UP Location -->
+                                <input 
+                                class="form-control"
+                                type="text" 
+                                value="-----" 
+                                disabled readonly>
+                                <!-- UP Location -->
+                            <div>
+                                <!-- Only display the DOWN location if the node is a stair -->
+                                <input 
+                                v-if="newNode.node_type == 'stairs'"
+                                class="form-control"
+                                type="text" 
+                                value="-----" 
+                                disabled readonly>
+                            </div>
+                            <!-- Add Button -->
+                            <div>
+                                <!-- Only enable if the new node is valid -->
+                                <button class="btn btn-sm btn-success"
+                                @click="addNewNavNode()"
+                                :disabled="!checkNodeValid(newNode)"
+                                >+</button>
+                                <!--  -->
                             </div>
                         </div>
                     </div>
@@ -340,7 +437,7 @@
                     <!-- Map -->
                     <div class="mb-3 position-relative">
                         <!-- Leaflet instance -->
-                        <div id="internal-map" style="height: 600px; padding-top: 30px;">
+                        <div id="internal-map" style="height: 0px; padding-top: 30px;">
                         </div>
                         <!-- Toast in the bottom left corner to display what the current space is -->
                         <div class="toast-container p-3 start-50 translate-middle-x space-name-toast bottom-0"
@@ -373,20 +470,24 @@ import L from 'leaflet';
     export default {
         data() {
             return {
-                building: {
-                    UUID: "b5694bc5-90c0-440f-b95c-7c0672992211",
-                    entry_floor: 1,
-                    internal_map_size: [1080, 1920],
-                    canonical: "arts-building",
-                    display_name: "Arts Building",
-                },
+                building: {},
                 building_clean: {},
-                gallery: [],
-                gallery_clean: [],
                 floors: [],
+                deleted_floors: [],
                 floors_clean: [],
                 floor_layers_object: {},
                 supabase: {},
+                newFloor: {
+                    label: "",
+                    url: "",
+                },
+                newNode: {
+                    label: "",
+                    node_type: "",
+                    presence: [],
+                    location_up: [0,0],
+                    location_down: [0,0],
+                },
                 spaces: [],
                 spaces_clean: [],
                 map: {},
@@ -407,16 +508,74 @@ import L from 'leaflet';
 
         },
         mounted() {
-            this.loadTestData();
+            // this.loadTestData();
         },
         computed: {
             buildingHasBeenChanged(){
-                // Check the building object against the clean copy
-                // return JSON.stringify(this.building) !== JSON.stringify(this.building_clean);
-                return false;
+
+                // I'm fully aware that this code is inefficient
+                // I don't care
+                let floorplans_changed = false;
+
+                // Check if the building details (map size, entry floor) have changed
+                if (this.checkBuildingChanges()) {
+                    floorplans_changed = true;
+                }
+                
+                // Check if the floors have changed
+                if (this.checkFloorChanges()) {
+                    floorplans_changed = true;
+                }
+
+                // Check if the spaces have changed
+                if (this.checkSpaceChanges()) {
+                    floorplans_changed = true;
+                }
+
+                // Check if the navigation nodes have changed
+                if (this.checkNavNodeChanges()) {
+                    floorplans_changed = true;
+                }
+
+                return floorplans_changed;
+
             },
+            newFloorIsValid(){
+                // Check the input fields of the new floor
+                // Check that the label is not empty
+                // And that a file has been selected
+                return (this.newFloor.label != "") && (this.newFloor.url != "");
+            },
+
+            
         },
         methods: {
+
+            printNewNavNodeValidity(){
+                // Test function
+                // Print the 3 components of the validity check
+                console.log("Label: " + (this.newNode.label != ""));
+                console.log(this.newNode.label)
+                console.log("Type: " + (this.newNode.node_type != ""));
+                console.log(this.newNode.node_type)
+                console.log("Presence: " + (this.newNode.presence.includes(true)));
+                console.log(this.newNode.presence)
+            },
+
+            checkNodeValid(node){
+                // Check the fields of the node
+                // Check that the label is not empty
+                // And that a node type has been selected
+                // And that at least two floors have been selected
+                let floors_selected = 0;
+                node.presence.forEach(floor => {
+                    if (floor) {
+                        floors_selected++;
+                    }
+                });
+
+                return (node.label != "") && (node.node_type != "") && (floors_selected >= 2);
+            },
 
             async loadTestData(){
                 // Simulate the arts building being selected
@@ -487,6 +646,28 @@ import L from 'leaflet';
                     this.navigationNodes_clean = JSON.parse(JSON.stringify(nodes));
                 }
 
+                // Set up the empty "new node" object
+                this.setUpNewNode();
+
+
+            },
+
+            setUpNewNode(){
+                // Set up the empty "new node" object
+                this.newNode = {
+                    label: "",
+                    node_type: "",
+                    presence: [],
+                    location_up: [0,0],
+                    location_down: [0,0],
+                }
+
+                // Update the locations to be the center of the map
+                this.newNode.location_up = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
+                this.newNode.location_down = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
+
+                // Set the presence array to the correct length
+                this.newNode = this.validateNavigationNode(this.newNode);
 
             },
 
@@ -505,7 +686,7 @@ import L from 'leaflet';
                     else {
                         let difference = this.floors.length - node.presence.length;
                         for (let i = 0; i < difference; i++) {
-                            node.presence.push(0);
+                            node.presence.push(false);
                         }
                     }
                 }
@@ -537,7 +718,7 @@ import L from 'leaflet';
                 this.setFloorLevels();
             },
 
-            setEntryFloor(newEntryFloor){
+            setEntryFloor(newEntryFloor, init=false){
 
                 // Set the entry floor to the new value
                 this.building.entry_floor = newEntryFloor;
@@ -549,6 +730,15 @@ import L from 'leaflet';
 
                 // Set the entry floor to true by checking newEntryfloor
                 this.floors[newEntryFloor].isEntry = true;
+
+                // If this is the initial call, repeat for the clean copy of the floors
+                // So we can compare them properly
+                if (init) {
+                    this.floors_clean.forEach((floor, index) => {
+                        floor.isEntry = false;
+                    });
+                    this.floors_clean[newEntryFloor].isEntry = true;
+                }
             },
 
             setFloorLevels(){
@@ -557,6 +747,7 @@ import L from 'leaflet';
                 this.floors.forEach((floor, index) => {
                     floor.level = index;
                 });
+                
             },
             // Create the map
             mapInit(){
@@ -566,6 +757,17 @@ import L from 'leaflet';
                 }
                 catch (error) {
                     console.log(error);
+                }
+
+                // Make space for the map
+                let map_container = document.getElementById("internal-map");
+                    map_container.style.height = "600px";
+
+                // Make sure there are floors to add
+                // If there aren't, don't init the map
+                if (this.floors.length == 0) {
+                    alert("No map to display");
+                    return;
                 }
 
 
@@ -658,6 +860,73 @@ import L from 'leaflet';
                 layers_control = L.control.layers(this.floor_layers_object, null, {collapsed: false});
                 
                 layers_control.addTo(this.map);
+
+            },
+
+            async uploadFloorImage(file, floorLabel){
+                // Get the file object from the primary image upload input
+                // Upsert to the storage bucket as the canonical name
+                // TODO: Check if the file already exists under a different extension, and if so, delete it
+
+                // Get the file name
+                let fileName = file.name;
+                // Get the file extension
+                let fileExtension = fileName.split('.').pop();
+                // Create a new file name
+                let newFileName = this.building.UUID + "_" + this.newFloor.label + "." + fileExtension;
+                
+                // Build the new url for the file
+                let newUrl = this.supabase.storageUrl + "/object/public/floorplans/" + newFileName;
+
+                // Upload the file to the storage bucket
+                const { data, error:upload_error } = await this.supabase.storage
+                .from('floorplans')
+                .upload(newFileName, file)
+                if (upload_error) {
+                    console.error(upload_error)
+                    return error
+                }
+    
+
+                return newUrl;
+
+            },
+
+            async addNewFloor(){
+
+    
+                // Get the file from the input
+                let file = document.getElementById("newFloorSVGInput").files[0];
+                // Upload the file to the storage bucket
+                try {
+                    // Set the url of the new floor
+                    this.newFloor.url = await this.uploadFloorImage(file, this.newFloor.label)
+                    // Add the new floor to the floors array
+                    this.floors.push(this.newFloor);
+                    // Reset the new floor object
+                    this.newFloor = {
+                        label: "",
+                        url: "",
+                    }
+                    // Reset the new floor input
+                    document.getElementById("newFloorSVGInput").value = "";
+                }
+                catch (error) {
+                    console.log(error);
+                    alert("Error uploading file");
+
+                }
+
+            },
+
+            deleteFloor(floorIndex){
+
+                // Add it to the deleted_floors array
+                // This will let us track later if it needs to be deleted from the database
+                this.deleted_floors.push(this.floors[floorIndex]);
+                // Delete the floor at the given index
+                // Remove it from the floors array
+                this.floors.splice(floorIndex, 1);
 
             },
 
@@ -787,7 +1056,7 @@ import L from 'leaflet';
                     }
 
                     // Check what sort of node it is
-                    if (this.navigationNodes[i].lift) {
+                    if (this.navigationNodes[i].node_type == "lift") {
                         // If it's a lift, use the lift icon
                         let marker = L.marker(this.navigationNodes[i].location_up, {
                             icon: lift_icon, 
@@ -824,7 +1093,7 @@ import L from 'leaflet';
 
 
                     }
-                    else {
+                    else if (this.navigationNodes[i].node_type == "stairs"){
                         // If it's a stairs, create two markers, one for up and one for down
                         // Stairs UP
                         let marker_up = L.marker(this.navigationNodes[i].location_up, {
@@ -918,13 +1187,48 @@ import L from 'leaflet';
                         }
 
                     }
+                    else {
+                        // If it's neither, throw an error
+                        throw "Invalid node type: " + this.navigationNodes[i].node_type;
+                    }
                 }
 
 
             },
 
+            addNewNavNode(){
+                // Add the new node to the navigationNodes array
+                this.navigationNodes.push(this.newNode);
+                // Set up the new node object
+                this.setUpNewNode();
+            },
+
+            deleteNavNode(node){
+                this.navigationNodes.splice(this.navigationNodes.indexOf(node), 1)
+            },
+
+
             removeMap(){
-                this.map.remove();
+                // Delete with the leaflet method, if it exists
+                try {
+                    this.map.remove();
+                }
+                catch (error) {
+                    console.log(error);
+                }
+                // Fallback delete
+                this.map = {};
+
+                // Find the map container, and empty it's innerHTML and classlist
+                try {
+                    let map_container = document.getElementById("internal-map");
+                    map_container.innerHTML = "";
+                    map_container.classList = [];
+                    map_container.style.height = "0px";
+                }
+                catch (error) {
+                    console.log(error);
+                }
             },
 
             coordinatesToString(coordinates){
@@ -941,70 +1245,122 @@ import L from 'leaflet';
 
 
             // This function is called when the user clicks the "Save" button
-            // It will save the current state of the building to the database
+            // It will save the current state of the building, floorplans, navnodes and spaces to the database
             async updateBuilding() {
 
-                // Create an empty object to store the update query
-                // Only contains the things we want to update
-                let update_vehicle = {
-                    display_name: this.building.display_name,
-                    description: this.building.description,
-                    aka: this.building.aka,
-                    opening_times: this.building.opening_times,
-
-                    sense_exp: this.building.sense_exp,
-                    sense_exp_display: this.building.sense_exp_display,
-                    wayfinding: this.building.wayfinding,
-                    wayfinding_display: this.building.wayfinding_display,
-                    phys_access: this.building.phys_access,
-                    phys_access_display: this.building.phys_access_display,
-
-                    further_info: this.building.further_info,
-                    furtherinfo_display: this.building.furtherinfo_display,
-                    tips: this.building.tips,
-
-                    always_display: this.building.always_display,
-                    coordinates: this.building.coordinates,
-                }
-
-                // If the primary image has been changed, upload the new image and update the url
-                try {
-                    if (document.getElementById("PrimaryImageInput").files[0]) {
-                        // If the primary image has been changed, upload the new image and update the url, and the alt
-                        // If uploading the primary image fails, we don't want to update the alt
-                        update_vehicle.primary_image_url = await this.uploadNewPrimaryImage();
-                        update_vehicle.primary_image_alt = this.building.primary_image_alt;
+                // Check if the building details have changed
+                if (this.checkBuildingChanges()) {
+                    
+                    // Update the building in the database
+                    const { data:building_update_response, error:building_update_error } = await this.supabase
+                        .from('buildings')
+                        .update(this.building)
+                        .eq('UUID', this.building.UUID)
+                        .select()
+                    
+                    // If there is an error, log it
+                    if (building_update_error) {
+                        console.error(building_update_error)
+                        alert(building_update_error.message)
+                        throw building_update_error
                     }
-                    else{
-                        // If the primary image has not been changed, update the alt
-                    }
-                }
-                catch (error) {
-                    console.error(error)
-                    alert(error.message)
-                    throw error
-                }
 
-                // Update the building in the database
-                const { data, error } = await this.supabase
-                    .from('buildings')
-                    .update(update_vehicle)
-                    .eq('UUID', this.building.UUID)
-                    .select()
-                
-                // If there is an error, log it
-                if (error) {
-                    console.error(error)
-                    alert(error.message)
-                    throw error
-                }
-                else {
-                    // If the update was successful, update the clean building object
+                    // Set the clean building to the current building
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
-                    alert(this.building.display_name + " updated successfully")
-                    console.log(data)
+
                 }
 
+                // Check if the floors have changed
+                if (this.checkFloorChanges()){
+                    // Update the floors in the database
+                    // First, delete all the floors for this building
+                    const { data:delete_response, error:delete_error } = await this.supabase
+                        .from('building_floors')
+                        .delete()
+                        .eq('building', this.building.UUID)
+                    // If there is an error, log it
+                    if (delete_error) {
+                        console.error(delete_error)
+                        alert(delete_error.message)
+                        throw delete_error
+                    }
+                    // Then, insert the new floors
+                    const { data:insert_response, error:insert_error } = await this.supabase
+                        .from('building_floors')
+                        .insert(this.floors)
+                    // If there is an error, log it
+                    if (insert_error) {
+                        console.error(insert_error)
+                        alert(insert_error.message)
+                        throw insert_error
+                    }
+
+                    // Set the clean floors to the current floors
+                    this.floors_clean = JSON.parse(JSON.stringify(this.floors));
+                }
+                
+                // Check if the spaces have changed
+                if (this.checkSpaceChanges()) {
+                    // Update the spaces in the database
+                    // First, delete all the spaces for this building
+                    const { data:delete_response, error:delete_error } = await this.supabase
+                        .from('spaces')
+                        .delete()
+                        .eq('building_uuid', this.building.UUID)
+                    // If there is an error, log it
+                    if (delete_error) {
+                        console.error(delete_error)
+                        alert(delete_error.message)
+                        throw delete_error
+                    }
+                    // Then, insert the new spaces
+                    const { data:insert_response, error:insert_error } = await this.supabase
+                        .from('spaces')
+                        .insert(this.spaces)
+                    // If there is an error, log it
+                    if (insert_error) {
+                        console.error(insert_error)
+                        alert(insert_error.message)
+                        throw insert_error
+                    }
+
+                    // Set the clean spaces to the current spaces
+                    this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
+                }
+
+                // Check if the navigation nodes have changed
+                if (this.checkNavNodeChanges()) {
+                    // Update the navigation nodes in the database
+                    // First, delete all the nodes for this building
+                    const { data:delete_response, error:delete_error } = await this.supabase
+                        .from('nav_nodes')
+                        .delete()
+                        .eq('building', this.building.UUID)
+                    // If there is an error, log it
+                    if (navNode_delete_error) {
+                        console.error(delete_error)
+                        alert(delete_error.message)
+                        throw delete_error
+                    }
+                    // Then, insert the new nodes
+                    const { data:insert_response, error:insert_error } = await this.supabase
+                        .from('nav_nodes')
+                        .insert(this.navigationNodes)
+                    // If there is an error, log it
+                    if (insert_error) {
+                        console.error(insert_error)
+                        alert(insert_error.message)
+                        throw insert_error
+                    }
+
+                    // Set the clean nodes to the current nodes
+                    this.navigationNodes_clean = JSON.parse(JSON.stringify(this.navigationNodes));
+                }
+
+                // Call the getBuilding function to refresh the building object and all the dependent objects
+                this.getBuilding(this.building.canonical);
+                // Remove the map, if it exists
+                this.removeMap();
 
             },
             
@@ -1022,33 +1378,15 @@ import L from 'leaflet';
                 this.mapInit();
             },
 
-            async uploadNewPrimaryImage(){
-                // Get the file object from the primary image upload input
-                // Upsert to the storage bucket as the canonical name
-                // TODO: Check if the file already exists under a different extension, and if so, delete it
+            handleNewFloorImageSelect() { 
+                // Get the file from the input
+                // Set the image of the floor to the file to preview
 
                 // Get the file
-                let file = document.getElementById("PrimaryImageInput").files[0];
-                // Get the file extension
-                let extension = file.name.split('.').pop();
-                
-                // Build the new url for the file
-                let newUrl = this.supabase.storageUrl + "/object/public/primary-images/" + this.building.canonical + "." + extension;
-
-                // Upload the file to the storage bucket
-                const { data, error:upload_error } = await this.supabase.storage
-                .from('primary-images')
-                .upload(`${this.building.canonical}.${extension}`, file)
-                if (upload_error) {
-                    console.error(upload_error)
-                    return error
-                }
-                
-                // Clear the primary image input
-                document.getElementById("PrimaryImageInput").value = "";
-
-                return newUrl;
-
+                let file_input = document.getElementById("newFloorSVGInput");
+                const file = file_input.files[0];
+                // Set the floor image to the file
+                this.newFloor.url = URL.createObjectURL(file);
             },
 
             // Function to add a new gallery image to the building
@@ -1097,9 +1435,7 @@ import L from 'leaflet';
                 
 
             },
-            handleFileUpload(event) {
-                this.newGalleryImage.selectedFile = event.target.files[0];
-            },
+
 
             // Function to remove a gallery image from the building
             async removeGalleryImage(index, url) {
@@ -1144,11 +1480,8 @@ import L from 'leaflet';
             // It will revert the building to the state it was in when the page was loaded
             cancelChanges() {
 
-                // Deep copy the building_clean object back into the building object
-                this.building = JSON.parse(JSON.stringify(this.building_clean));
-
-                // Clear the primary image input
-                document.getElementById("PrimaryImageInput").value = "";
+                // Call the getBuilding function to refresh the building object and all the dependent objects
+                this.getBuilding(this.building.canonical);
 
             },
 
@@ -1161,14 +1494,28 @@ import L from 'leaflet';
 
             // This function fetches the building from the database based on it's canonical name
             async getBuilding(canonical){
+
+                // Remove the map, if it exists
+                this.removeMap();
+                
+                // For testing: Set canonical to "arts-building"
+                // canonical = "arts-building";
                 console.log("Fetching floorplans for: " + canonical);
 
-                // Fetch the building from the database
+                // Try run this.map.remove, print to the console if it fails
+                try {
+                    this.removeMap();
+                }
+                catch (error) {
+                    console.log("Attempted to clear map before loading new building, but there was no map to clear");
+                }
+
+                // Get the relevant building fields from the database
                 // Since we are using the canonical name, we should only get one result
                 let { data: bld, error } = await this.supabase
                     .from('buildings')
-                    // .select('canonical, has_floorplan, entry_floor, display_name, UUID')
-                    .select('canonical, display_name, UUID')
+                    .select('canonical, entry_floor, display_name, UUID, internal_map_size')
+                    // .select('canonical, display_name, UUID')
                     .eq('canonical', canonical)
                 if (error) {
                     console.error(error)
@@ -1176,19 +1523,17 @@ import L from 'leaflet';
                     throw error
                 }
                 else {
-                    
+                    // Deep copy the building object to the vue instance
                     this.building = JSON.parse(JSON.stringify(bld[0]));
+                    console.log("Building", this.building);
                     // Deep copy the building object so we have comparison data
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
                     
-                    // Get the floorplans for the building
-                    this.getFloorplans(this.building.UUID);
-
-                    // this.setEntryFloor(this.building.entry_floor);
-
-
-                    // Update the map to show the building
-                    // this.loadBuildingToMap();
+                    // Call the getFloors and getSpaces functions
+                    this.getSpaces(this.building.UUID);
+                    // Floors need to be awaited because we use the floor count to validate the navigation nodes
+                    await this.getFloorplans(this.building.UUID);
+                    this.getNavigationNodes(this.building.UUID);
 
                 }
                 
@@ -1196,8 +1541,11 @@ import L from 'leaflet';
 
             async getFloorplans(building_uuid){
 
-                // Null the floors array
+                // Null the floors arrays
                 this.floors = [];
+                this.floors_clean = [];
+                this.floor_layers_object = {};
+                this.deleted_floors = [];
 
                 // Fetch the floorplans for the building from the database
                 let { data: flr, error } = await this.supabase
@@ -1216,15 +1564,58 @@ import L from 'leaflet';
                     this.floors = JSON.parse(JSON.stringify(flr));
                     this.floors_clean = JSON.parse(JSON.stringify(flr));
 
-                    // If there are no floors, don't try to set the entry floor
-                    if (this.floors.length > 0) {
+                    // If there is only one floor, don't try to sort the floors
+                    if (this.floors.length > 1) {
                         // Sort the floors by level
                         this.floors.sort((a, b) => (a.level > b.level) ? 1 : -1)
+                        this.floors_clean.sort((a, b) => (a.level > b.level) ? 1 : -1)
+                    }
+
+                    // If there are no floors, don't try to set the entry floor
+                    if (this.floors.length > 0) {
                         // Set the entry floor
-                        this.setEntryFloor(this.building.entry_floor);
+                        this.setEntryFloor(this.building.entry_floor, true);
                     }
                 }
             },
+
+            // Check if the building details (map size, entry floor) have changed
+            checkBuildingChanges(){
+                // Dump the building and building_clean to JSON and compare
+                if (JSON.stringify(this.building) != JSON.stringify(this.building_clean)) {
+                    return true;
+                }
+
+                return false;
+            },
+                
+            // Check if the floors have changed
+            checkFloorChanges(){
+                // Dump the floors and floors_clean to JSON and compare
+                if (JSON.stringify(this.floors) != JSON.stringify(this.floors_clean)) {
+                    return true;
+                }
+
+                return false;
+            },
+
+            // Check if the spaces have changed
+            checkSpaceChanges(){
+                // Dump the spaces and spaces_clean to JSON and compare
+                if (JSON.stringify(this.spaces) != JSON.stringify(this.spaces_clean)) {
+                    return true
+                }
+                return false;
+            },
+
+            // Check if the navigation nodes have changed
+            checkNavNodeChanges(){
+                // Dump the navigationNodes and navigationNodes_clean to JSON and compare
+                if (JSON.stringify(this.navigationNodes) != JSON.stringify(this.navigationNodes_clean)) {
+                    return true
+                }
+                return false;
+            }
 
         },
     }
@@ -1263,10 +1654,16 @@ import L from 'leaflet';
 .nav-list-row {
     display: grid;
     /* padding-top: 2rem; */
-    grid-template-columns:  auto 10rem auto 8rem 8rem;
+    grid-template-columns:  8rem 10rem auto 8rem 8rem 2rem;
     grid-template-rows: auto;
     row-gap: 1rem;
     column-gap: 1rem;
+}
+
+.show-this{
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
 }
 
 
