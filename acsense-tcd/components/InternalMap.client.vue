@@ -361,7 +361,7 @@ export default {
 
 
                 // Check what sort of node it is
-                if (this.navigationNodes[i].lift) {
+                if (this.navigationNodes[i].node_type == "lift") {
                     // If it's a lift, use the lift icon
                     let marker = L.marker(this.navigationNodes[i].location_up, {
                         icon: lift_icon, 
