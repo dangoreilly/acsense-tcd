@@ -182,7 +182,14 @@
                                 </div>
                             </span>
                             
-                            <span><input type="text" style="width:95%" v-model="floor.label"></span>
+                            <span>
+                                <!-- Allow hovering to show the actual database ID, for debugging -->
+                                <input 
+                                type="text" 
+                                style="width:95%" 
+                                :title="'id: '+floor.id"
+                                v-model="floor.label">
+                            </span>
                             <div>
                                 <div class="btn-group" role="group">
                                     <!-- Swap upwards -->
@@ -635,7 +642,7 @@ import L from 'leaflet';
                     throw error
                 }
                 else {
-                    console.log("nodes", nodes);   
+                    // console.log("nodes", nodes);   
                     // Validate all the nodes
                     for (let i = 0; i < nodes.length; i++) {
                         nodes[i] = this.validateNavigationNode(nodes[i]);
@@ -657,6 +664,7 @@ import L from 'leaflet';
                 this.newNode = {
                     label: "",
                     node_type: "",
+                    building: this.building.UUID,
                     presence: [],
                     location_up: [0,0],
                     location_down: [0,0],
@@ -873,7 +881,7 @@ import L from 'leaflet';
                 // Get the file extension
                 let fileExtension = fileName.split('.').pop();
                 // Create a new file name
-                let newFileName = this.building.UUID + "_" + this.newFloor.label + "." + fileExtension;
+                let newFileName = this.building.UUID + "_" + floorLabel + "." + fileExtension;
                 
                 // Build the new url for the file
                 let newUrl = this.supabase.storageUrl + "/object/public/floorplans/" + newFileName;
@@ -881,10 +889,13 @@ import L from 'leaflet';
                 // Upload the file to the storage bucket
                 const { data, error:upload_error } = await this.supabase.storage
                 .from('floorplans')
-                .upload(newFileName, file)
+                .upload(newFileName, file, {
+                    upsert: true
+                })
                 if (upload_error) {
                     console.error(upload_error)
-                    return error
+                    throw upload_error;
+                    return upload_error
                 }
     
 
@@ -1214,7 +1225,7 @@ import L from 'leaflet';
                     this.map.remove();
                 }
                 catch (error) {
-                    console.log(error);
+                    // console.log(error);
                 }
                 // Fallback delete
                 this.map = {};
@@ -1227,7 +1238,7 @@ import L from 'leaflet';
                     map_container.style.height = "0px";
                 }
                 catch (error) {
-                    console.log(error);
+                    // console.log(error);
                 }
             },
 
@@ -1260,6 +1271,7 @@ import L from 'leaflet';
                     
                     // If there is an error, log it
                     if (building_update_error) {
+                        console.error("Error updating building details: " + this.building.canonical)
                         console.error(building_update_error)
                         alert(building_update_error.message)
                         throw building_update_error
@@ -1270,58 +1282,146 @@ import L from 'leaflet';
 
                 }
 
-                // Check if the floors have changed
-                if (this.checkFloorChanges()){
-                    // Update the floors in the database
-                    // First, delete all the floors for this building
-                    const { data:delete_response, error:delete_error } = await this.supabase
-                        .from('building_floors')
-                        .delete()
-                        .eq('building', this.building.UUID)
-                    // If there is an error, log it
-                    if (delete_error) {
-                        console.error(delete_error)
-                        alert(delete_error.message)
-                        throw delete_error
+                // Check if the relevant floor details have changed
+                let floorEquivalence = (f, cf) => {
+
+                    if (f.label != cf.label) {
+                        console.log("Label mismatch")
+                        console.log(`${f.label} != ${cf.label}`)
+                        return false
                     }
-                    // Then, insert the new floors
-                    const { data:insert_response, error:insert_error } = await this.supabase
-                        .from('building_floors')
-                        .insert(this.floors)
-                    // If there is an error, log it
-                    if (insert_error) {
-                        console.error(insert_error)
-                        alert(insert_error.message)
-                        throw insert_error
+                    if (f.url != cf.url) {
+                        console.log("URL mismatch")
+                        console.log(`${f.url} != ${cf.url}`)
+                        return false
+                    }
+                    if (f.level != cf.level) {
+                        console.log("Level mismatch")
+                        console.log(`${f.level} != ${cf.level}`)
+                        return false
                     }
 
-                    // Set the clean floors to the current floors
-                    this.floors_clean = JSON.parse(JSON.stringify(this.floors));
+                    return true;
                 }
-                
-                // Check if the spaces have changed
-                if (this.checkSpaceChanges()) {
-                    // Update the spaces in the database
-                    // First, delete all the spaces for this building
-                    const { data:delete_response, error:delete_error } = await this.supabase
-                        .from('spaces')
-                        .delete()
-                        .eq('building_uuid', this.building.UUID)
-                    // If there is an error, log it
-                    if (delete_error) {
-                        console.error(delete_error)
-                        alert(delete_error.message)
-                        throw delete_error
+
+                // Cycle through the floors
+                for (let i = 0; i < this.floors.length; i++) {
+                    // Check if the floor has changed
+                    // Since the order of the floors is mutable,
+                    // We need to compare them by their id property
+                    let floor = this.floors[i];
+                    
+                    let deleted_floor = this.deleted_floors.find(f => f.id == floor.id);
+                    let clean_floor = this.floors_clean.find(f => f.id == floor.id);
+
+                    // Copy the floor to a new variable with only the properties we want to update
+                    let floor_update_vehicle = {
+                        label: floor.label,
+                        url: floor.url,
+                        level: floor.level,
                     }
-                    // Then, insert the new spaces
-                    const { data:insert_response, error:insert_error } = await this.supabase
-                        .from('spaces')
-                        .insert(this.spaces)
-                    // If there is an error, log it
-                    if (insert_error) {
-                        console.error(insert_error)
-                        alert(insert_error.message)
-                        throw insert_error
+
+                    // Check if the floor has a new image
+                    if (floor.file != undefined) {
+                        // console.log("Uploading new floor")
+                        // Upload the new floor image
+                        // Set the url of the new floor
+                        floor_update_vehicle.url = await this.uploadFloorImage(floor.file, floor.label)
+                        // console.log("New floor url: " + floor_update_vehicle.url)
+                    }
+
+                    // Check if the clean_floor is undefined - then the floor is new
+                    if (clean_floor == undefined) {
+                        console.log("Uploading new floor")
+                        console.log(floor_update_vehicle)
+                        // Insert the new floor into the database
+                        const { data:floor_insert_response, error:floor_insert_error } = await this.supabase
+                            .from('floorplans')
+                            .insert(floor_update_vehicle)
+                        // If there is an error, log it
+                        if (floor_insert_error) {
+                            console.error("Error inserting new floor: " + floor.id)
+                            console.error(floor_insert_error)
+                            alert(floor_insert_error.message)
+                            throw floor_insert_error
+                        }
+                    }
+                    // Check if the floor has changed
+                    else if (!floorEquivalence(floor, clean_floor)) {
+
+                        console.log("Updating existing floor")
+                        // console.log(floor_update_vehicle)
+                        console.log("floor", JSON.parse(JSON.stringify(floor)))
+                        // console.log("clean_floor", JSON.parse(JSON.stringify(clean_floor)))
+
+                        // Update the floor in the database
+                        const { data:floor_update_response, error:floor_update_error } = await this.supabase
+                            .from('floorplans')
+                            .update(floor_update_vehicle)
+                            .eq('id', floor.id)
+                            .select()
+                        // If there is an error, log it
+                        if (floor_update_error) {
+                            console.error("Error updating floor: " + floor.id)
+                            console.error(floor_update_error)
+                            alert(floor_update_error.message)
+                            throw floor_update_error
+                        }
+                        else {
+                            // console.log("floor_update_response", floor_update_response)
+                            alert(floor.label + " updated successfully")
+                        }
+                    }
+                    // Check if the floor is deleted
+                    // A floor that was created and deleted in the same session will also be
+                    // In the deleted_floors array, so we'll check for that
+                    else if (deleted_floor != undefined && floor.id == deleted_floor.id) {
+                        
+                        console.log("Deleting existing floor")
+                        console.log(floor_update_vehicle)
+
+                        // Delete the floor from the database
+                        const { data:floor_delete_response, error:floor_delete_error } = await this.supabase
+                            .from('floorplans')
+                            .delete()
+                            .eq('id', floor.id)
+                        // If there is an error, log it
+                        if (floor_delete_error) {
+                            console.error("Error deleting floor: " + floor.id)
+                            console.error(floor_delete_error)
+                            alert(floor_delete_error.message)
+                            throw floor_delete_error
+                        }
+
+                    }
+
+                    
+                }
+                // Set the clean floors to the current floors
+                this.floors_clean = JSON.parse(JSON.stringify(this.floors));
+                
+                // Cycle through the spaces
+                for (let i = 0; i < this.spaces.length; i++) {
+                    // Check if the space has changed
+                    if (this.checkSpaceChanges(i)) {
+                        console.log(f`Updating ${this.spaces[i].name}`)
+                        // Update the space in the database
+                        const { data:space_update_response, error:space_update_error } = await this.supabase
+                            .from('spaces')
+                            .update(this.spaces[i])
+                            .eq('UUID', this.spaces[i].UUID)
+                            .select()
+                        // If there is an error, log it
+                        if (space_update_error) {
+                            console.log("Error updating space: " + this.spaces[i].name)
+                            console.error(space_update_error)
+                            alert(space_update_error.message)
+                            throw space_update_error
+                        }
+                        else {
+                            // console.log("space_update_response", space_update_response)
+                            alert(this.spaces[i].name + " updated successfully")
+                        }
                     }
 
                     // Set the clean spaces to the current spaces
@@ -1332,25 +1432,45 @@ import L from 'leaflet';
                 if (this.checkNavNodeChanges()) {
                     // Update the navigation nodes in the database
                     // First, delete all the nodes for this building
-                    const { data:delete_response, error:delete_error } = await this.supabase
+                    const { data:delete_response, error:navNode_delete_error } = await this.supabase
                         .from('nav_nodes')
                         .delete()
                         .eq('building', this.building.UUID)
                     // If there is an error, log it
                     if (navNode_delete_error) {
-                        console.error(delete_error)
-                        alert(delete_error.message)
-                        throw delete_error
+                        console.error(navNode_delete_error)
+                        alert(navNode_delete_error.message)
+                        throw navNode_delete_error
                     }
+
+                    // Create a new array of nodes without UUIDs to insert
+                    let nodes_update_vehicle = []
+                    
+                    this.navigationNodes.map(node => {
+                        nodes_update_vehicle.push(JSON.parse(JSON.stringify({
+                            label: node.label,
+                            node_type: node.node_type,
+                            presence: node.presence,
+                            location_up: node.location_up,
+                            location_down: node.location_down,
+                            building: node.building,
+                        })));
+                    });
+
+                    console.log("nodes_update_vehicle", nodes_update_vehicle)
+
                     // Then, insert the new nodes
-                    const { data:insert_response, error:insert_error } = await this.supabase
+                    const { data:insert_response, error:navNode_insert_error } = await this.supabase
                         .from('nav_nodes')
-                        .insert(this.navigationNodes)
+                        .insert(nodes_update_vehicle)
                     // If there is an error, log it
-                    if (insert_error) {
-                        console.error(insert_error)
-                        alert(insert_error.message)
-                        throw insert_error
+                    if (navNode_insert_error) {
+                        console.error(navNode_insert_error)
+                        alert(navNode_insert_error.message)
+                        throw navNode_insert_error
+                    }
+                    else {
+                        alert("Navigation nodes updated successfully")
                     }
 
                     // Set the clean nodes to the current nodes
@@ -1374,6 +1494,8 @@ import L from 'leaflet';
                 const file = file_input.files[0];
                 // Set the floor image to the file
                 this.floors[floor].url = URL.createObjectURL(file);
+                // Attach the file to the floor object
+                this.floors[floor].file = file;
                 // Refresh the map
                 this.mapInit();
             },
@@ -1387,93 +1509,6 @@ import L from 'leaflet';
                 const file = file_input.files[0];
                 // Set the floor image to the file
                 this.newFloor.url = URL.createObjectURL(file);
-            },
-
-            // Function to add a new gallery image to the building
-            async addGalleryImage() {
-                // Get the file from the input
-                const file = document.getElementById("myFile").files[0];
-                // Upload the file to the storage bucket
-                // Get the URL of the uploaded file
-                const { data, error:upload_error } = await this.supabase.storage
-                .from('gallery-images')
-                .upload(`${this.building.canonical}/${file.name}`, file)
-                if (upload_error) {
-                    console.error(upload_error)
-                    alert(upload_error.message)
-                    throw upload_error
-                }
-                console.log(data)
-                // Create a new image object
-                let newImage = {
-                    url: "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/gallery-images/" + data.path,
-                    alt: this.newGalleryImage.alt,
-                    caption: this.newGalleryImage.caption,
-                }
-
-                // Add the image to the database
-                let { data: img, error:db_insert_error } = await this.supabase
-                    .from('building_gallery_images')
-                    .insert([
-                        { 
-                            building: this.building.canonical,
-                            url: newImage.url,
-                            alt: newImage.alt,
-                            caption: newImage.caption,
-                        }
-                    ])
-
-                if (db_insert_error) {
-                    console.error(db_insert_error)
-                    alert(db_insert_error.message)
-                    throw db_insert_error
-                }
-                // Add a copy of the image to the gallery array
-                this.gallery.push(JSON.parse(JSON.stringify(newImage)))
-                // And to the clean gallery
-                this.gallery_clean.push(JSON.parse(JSON.stringify(newImage)))
-                
-
-            },
-
-
-            // Function to remove a gallery image from the building
-            async removeGalleryImage(index, url) {
-                // Remove the image from the gallery array
-                this.gallery.splice(index, 1);
-                // And from the clean copy
-                this.gallery_clean.splice(index, 1);
-                
-                // Remove the database entry
-                const { data:db_response, error:db_error } = await this.supabase
-                .from('building_gallery_images')
-                .delete()
-                .eq('url', url)
-
-                if (db_error) {
-                    console.error(db_error)
-                    alert(db_error.message)
-                    throw db_error
-                }
-                console.log(db_response)
-
-                // Get the path by subtracting the supabase url from the image url
-                let path = url.replace(this.supabase.storageUrl + "/object/public/gallery-images/", "");
-                console.log(path)
-                // Delete the image from the storage bucket
-                const { data:storage_response, error:storage_error } = await this.supabase.storage
-                .from('gallery-images')
-                .remove([path])
-
-                if (storage_error) {
-                    console.error(storage_error)
-                    alert(storage_error.message)
-                    throw storage_error
-                }
-                console.log("storage_response")
-                console.log(storage_response)
-
-                alert("Image deleted successfully")
             },
 
             // This function is called when the user clicks the "Cancel" button
@@ -1500,7 +1535,7 @@ import L from 'leaflet';
                 
                 // For testing: Set canonical to "arts-building"
                 // canonical = "arts-building";
-                console.log("Fetching floorplans for: " + canonical);
+                // console.log("Fetching floorplans for: " + canonical);
 
                 // Try run this.map.remove, print to the console if it fails
                 try {
@@ -1525,7 +1560,7 @@ import L from 'leaflet';
                 else {
                     // Deep copy the building object to the vue instance
                     this.building = JSON.parse(JSON.stringify(bld[0]));
-                    console.log("Building", this.building);
+                    // console.log("Building", this.building);
                     // Deep copy the building object so we have comparison data
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
                     
@@ -1550,7 +1585,7 @@ import L from 'leaflet';
                 // Fetch the floorplans for the building from the database
                 let { data: flr, error } = await this.supabase
                     .from('floorplans')
-                    .select('level, url, label')
+                    .select('*')
                     .eq('building', building_uuid)
                 if (error) {
                     console.error(error)
@@ -1600,12 +1635,26 @@ import L from 'leaflet';
             },
 
             // Check if the spaces have changed
-            checkSpaceChanges(){
-                // Dump the spaces and spaces_clean to JSON and compare
-                if (JSON.stringify(this.spaces) != JSON.stringify(this.spaces_clean)) {
-                    return true
+            checkSpaceChanges(i = null){
+
+                // If i is null, check all the spaces
+                if (i == null) {
+                    // Dump the spaces and spaces_clean to JSON and compare
+                    if (JSON.stringify(this.spaces) != JSON.stringify(this.spaces_clean)) {
+                        return true
+                    }
+                    return false;
                 }
-                return false;
+                // If i is not null, check only the space at index i
+                else {
+                    // Dump the space and space_clean to JSON and compare
+                    console.log("Space:", this.spaces[i])
+                    console.log("Space_clean:", this.spaces_clean[i])
+                    if (JSON.stringify(this.spaces[i]) != JSON.stringify(this.spaces_clean[i])) {
+                        return true
+                    }
+                    return false;
+                }
             },
 
             // Check if the navigation nodes have changed
