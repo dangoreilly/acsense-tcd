@@ -34,7 +34,7 @@ export default {
             kettle: ["No Kettle Available", "Kettle Available"], 
             seating: ["No Seating Available", "Seating Available"], 
             outlets: ["No Plug Sockets", "Plug Sockets"], 
-            food_and_drink_allowed: ["No Food or Drink Allowed", "Food and Drink Allowed"], 
+            food_drink_allowed: ["No Food or Drink Allowed", "Food and Drink Allowed"], 
             wheelchair: ["No Wheelchair Access", "Wheelchair Access"]
         },
 
@@ -43,7 +43,7 @@ export default {
             kettle: "/images/icons/kettle.svg",
             seating: "/images/icons/chair-solid.svg",
             outlets: "/images/icons/plug-solid.svg",
-            food_and_drink_allowed: "/images/icons/utensils-solid.svg",
+            food_drink_allowed: "/images/icons/utensils-solid.svg",
             wheelchair: "/images/icons/wheelchair-solid.svg"
         }
     }
@@ -72,8 +72,8 @@ export default {
         if (facility == "outlets"){
             return this.defaults.outlets;
         }
-        if (facility == "food_and_drink_allowed"){
-            return this.defaults.food_and_drink_allowed;
+        if (facility == "food_drink_allowed"){
+            return this.defaults.food_drink_allowed;
         }
         if (facility == "kettle"){
             return this.defaults.kettle;
@@ -95,8 +95,8 @@ export default {
         if (facility == "outlets"){
             return this.icons.outlets;
         }
-        if (facility == "food_and_drink_allowed"){
-            return this.icons.food_and_drink_allowed;
+        if (facility == "food_drink_allowed"){
+            return this.icons.food_drink_allowed;
         }
         if (facility == "kettle"){
             return this.icons.kettle;

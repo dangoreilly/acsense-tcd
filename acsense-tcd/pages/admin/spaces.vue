@@ -268,14 +268,14 @@
                                     </label>
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
-                                v-model="space.food_and_drink_allowed_note"></textarea>
+                                v-model="space.food_drink_allowed_note"></textarea>
                             </div>
                             <!-- Preview -->
                             <div class="col">
                                 <AdminFacility 
                                 :facility="'food_and_drink_allowed'"
                                 :available="space.food_drink_allowed"
-                                :note="space.food_and_drink_allowed_note"/>
+                                :note="space.food_drink_allowed_note"/>
                             </div>
                         </div>
 
