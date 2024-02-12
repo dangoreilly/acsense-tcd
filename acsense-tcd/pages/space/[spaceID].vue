@@ -47,13 +47,13 @@
             <!-- If there's no infobox, but there are openingtimes, take up the infobox space -->
             <!-- Otherwise, take it's own space -->
             <div 
-            :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
+            style="grid-area: tips;"
             class="my-3">
                 <AccessTips :tips="space.tips" :entity="'space'"/>
             </div>
     
             <!-- Infobox -->
-            <div style="grid-area: tabs;" v-if="infoBoxDisplays">
+            <div style="grid-area: tabs;">
                 <Infobox
                 :contentArray="infoBoxContent"
                 :activeInfoTab="activeInfoBoxTab"
@@ -119,7 +119,7 @@
         margin: 0 min(3rem, 3vw) 0 min(3rem, 3vw);
     }
     .time-card {
-        margin-top: 1rem;
+        margin-top: 2rem;
     }
     
         .infotabs {
