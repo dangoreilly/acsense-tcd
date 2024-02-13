@@ -871,7 +871,7 @@ import L from 'leaflet';
 
             },
 
-            async uploadFloorImage(file, floorLabel){
+            async uploadFloorImage(file, floor_label){
                 // Get the file object from the primary image upload input
                 // Upsert to the storage bucket as the canonical name
                 // TODO: Check if the file already exists under a different extension, and if so, delete it
@@ -881,7 +881,11 @@ import L from 'leaflet';
                 // Get the file extension
                 let fileExtension = fileName.split('.').pop();
                 // Create a new file name
-                let newFileName = this.building.UUID + "_" + floorLabel + "." + fileExtension;
+                // Replace any spaces in the floor label with underscores
+                // Replace any special characters with nothing
+                floor_label = floorLabel.replace(/[^a-zA-Z0-9]/g, '');
+                floor_label = floor_label.replace(" ", "_");
+                let newFileName = this.building.UUID + "_" + floor_label + "." + fileExtension;
                 
                 // Build the new url for the file
                 let newUrl = this.supabase.storageUrl + "/object/public/floorplans/" + newFileName;
@@ -895,7 +899,6 @@ import L from 'leaflet';
                 if (upload_error) {
                     console.error(upload_error)
                     throw upload_error;
-                    return upload_error
                 }
     
 
