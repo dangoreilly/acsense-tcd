@@ -1289,18 +1289,18 @@ import L from 'leaflet';
                 let floorEquivalence = (f, cf) => {
 
                     if (f.label != cf.label) {
-                        console.log("Label mismatch")
-                        console.log(`${f.label} != ${cf.label}`)
+                        // console.log("Label mismatch")
+                        // console.log(`${f.label} != ${cf.label}`)
                         return false
                     }
                     if (f.url != cf.url) {
-                        console.log("URL mismatch")
-                        console.log(`${f.url} != ${cf.url}`)
+                        // console.log("URL mismatch")
+                        // console.log(`${f.url} != ${cf.url}`)
                         return false
                     }
                     if (f.level != cf.level) {
-                        console.log("Level mismatch")
-                        console.log(`${f.level} != ${cf.level}`)
+                        // console.log("Level mismatch")
+                        // console.log(`${f.level} != ${cf.level}`)
                         return false
                     }
 
@@ -1416,7 +1416,7 @@ import L from 'leaflet';
                             .select()
                         // If there is an error, log it
                         if (space_update_error) {
-                            console.log("Error updating space: " + this.spaces[i].name)
+                            console.warn("Error updating space: " + this.spaces[i].name)
                             console.error(space_update_error)
                             alert(space_update_error.message)
                             throw space_update_error
@@ -1460,7 +1460,7 @@ import L from 'leaflet';
                         })));
                     });
 
-                    console.log("nodes_update_vehicle", nodes_update_vehicle)
+                    // console.log("nodes_update_vehicle", nodes_update_vehicle)
 
                     // Then, insert the new nodes
                     const { data:insert_response, error:navNode_insert_error } = await this.supabase
@@ -1651,8 +1651,8 @@ import L from 'leaflet';
                 // If i is not null, check only the space at index i
                 else {
                     // Dump the space and space_clean to JSON and compare
-                    console.log("Space:", this.spaces[i])
-                    console.log("Space_clean:", this.spaces_clean[i])
+                    // console.log("Space:", this.spaces[i])
+                    // console.log("Space_clean:", this.spaces_clean[i])
                     if (JSON.stringify(this.spaces[i]) != JSON.stringify(this.spaces_clean[i])) {
                         return true
                     }
