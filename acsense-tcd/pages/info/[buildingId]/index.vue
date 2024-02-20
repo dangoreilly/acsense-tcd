@@ -85,6 +85,23 @@
             :info="building.further_info"/>
         </div>
 
+        <div
+        class="mb-3 mx-3"
+        style="grid-area: buttons;"
+        v-if="false">
+        <!-- Floorplans button -->
+            <NuxtLink :to="'/info/' + building.canonical + '/floorplan'">
+                <button type="button" class="btn btn-primary btn-lg w-100">Internal Map
+                    <!-- Chevron -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 18" fill="currentColor">
+                        <g>
+                            <polygon points="0 0 10 0 16 8 10 16 0 16 6 8 0 0"/>
+                        </g>
+                    </svg>
+                </button>
+            </NuxtLink>
+        </div>
+
         <div style="grid-area: gallery;"
         v-if="building.gallery_images.length > 0">
             <Gallery
@@ -147,6 +164,7 @@
         "tips tips tips tips"
         ". . . ." /* ". rooms floorplan ." */
         "additional-info additional-info additional-info additional-info"
+        "buttons buttons buttons buttons"
         "gallery gallery gallery gallery";
 }
 
@@ -159,6 +177,7 @@
         "tips tips tips tips"
         ". . . ." /* ". rooms floorplan ." */
         "additional-info additional-info additional-info additional-info"
+        "buttons buttons buttons buttons"
         "gallery gallery gallery gallery";
 }
 
@@ -171,6 +190,7 @@
         "tips tips tips tips"
         ". . . ." /* ". rooms floorplan ." */
         "additional-info additional-info additional-info additional-info"
+        "buttons buttons buttons buttons"
         "gallery gallery gallery gallery";
 }
 
@@ -190,6 +210,7 @@
             /* "rooms" */
             /* "floorplan" */
             "additional-info"
+            "buttons"
             "gallery";
     }
     

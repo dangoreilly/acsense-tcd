@@ -30,6 +30,10 @@ export default defineEventHandler(async (event) => {
     let gallery_response_data = await getGalleryImagesForBuilding(buildingId);
     building.gallery_images = gallery_response_data;
 
+    // Check if there are any floorplans for the building
+    let has_floorplans = await checkForFloorplans(building.UUID);
+    building.has_floorplans = has_floorplans;
+
     return building;
 
   })
@@ -88,6 +92,20 @@ async function getGalleryImagesForBuilding(buildingId) {
     
 
     return images;
+}
+
+async function checkForFloorplans(buildingId) {
+    // Check if there are any floorplans for the building
+    let { data: floorplans, error } = await supabase
+        .from('floorplans')
+        .select('*')
+        .eq('building', buildingId)
+    if (error) {
+        console.log(error)
+        throw error
+    }
+    // Returns true if there are floorplans, false if not
+    return floorplans.length > 0;
 }
 
 // function getSpaceStyledTitle(styles, area){
