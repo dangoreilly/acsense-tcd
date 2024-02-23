@@ -883,7 +883,7 @@ import L from 'leaflet';
                 // Create a new file name
                 // Replace any spaces in the floor label with underscores
                 // Replace any special characters with nothing
-                floor_label = floorLabel.replace(/[^a-zA-Z0-9]/g, '');
+                floor_label = floor_label.replace(/[^a-zA-Z0-9]/g, '');
                 floor_label = floor_label.replace(" ", "_");
                 let newFileName = this.building.UUID + "_" + floor_label + "." + fileExtension;
                 
@@ -1325,7 +1325,9 @@ import L from 'leaflet';
                     }
 
                     // Check if the floor has a new image
-                    if (floor.file != undefined) {
+                    // We can check for the floor option being null
+                    // Or for the floor url to have the prefix "blob:"
+                    if (floor.file != undefined || floor.url.startsWith("blob:")) {
                         // console.log("Uploading new floor")
                         // Upload the new floor image
                         // Set the url of the new floor
@@ -1354,7 +1356,7 @@ import L from 'leaflet';
 
                         console.log("Updating existing floor")
                         // console.log(floor_update_vehicle)
-                        console.log("floor", JSON.parse(JSON.stringify(floor)))
+                        console.log("floor", JSON.parse(JSON.stringify(floor_update_vehicle)))
                         // console.log("clean_floor", JSON.parse(JSON.stringify(clean_floor)))
 
                         // Update the floor in the database
@@ -1407,11 +1409,17 @@ import L from 'leaflet';
                 for (let i = 0; i < this.spaces.length; i++) {
                     // Check if the space has changed
                     if (this.checkSpaceChanges(i)) {
-                        console.log(f`Updating ${this.spaces[i].name}`)
+                        
+                        console.log("Updating " + this.spaces[i].name)
+
+                        let space_update_vehicle = {
+                            floor: this.spaces[i].floor,
+                            location_internal: this.spaces[i].location_internal,
+                        }
                         // Update the space in the database
                         const { data:space_update_response, error:space_update_error } = await this.supabase
                             .from('spaces')
-                            .update(this.spaces[i])
+                            .update(space_update_vehicle)
                             .eq('UUID', this.spaces[i].UUID)
                             .select()
                         // If there is an error, log it
@@ -1426,10 +1434,10 @@ import L from 'leaflet';
                             alert(this.spaces[i].name + " updated successfully")
                         }
                     }
-
-                    // Set the clean spaces to the current spaces
-                    this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
                 }
+
+                // Set the clean spaces to the current spaces
+                this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
 
                 // Check if the navigation nodes have changed
                 if (this.checkNavNodeChanges()) {
