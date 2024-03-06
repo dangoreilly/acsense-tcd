@@ -1,7 +1,7 @@
 <template>
 
     <!-- Card container -->
-        <div class="infotabs card" v-if="anyTabs">
+        <div class="infotabs card" id="infoCard" v-if="anyTabs">
             <!-- Nav bar for tabs -->
             <div class="card-header">
                 <!-- Tabs -->
@@ -67,8 +67,7 @@ export default {
         return {
             activeInfoTab: 0,
             // tabs: [],
-            youtube_embed: true,
-            youtube_embed_link: "https://www.youtube.com/watch?v=Ck3yUXt5tCc",
+            elementHasBeenViewed: false,
 
         }
     },
@@ -82,6 +81,17 @@ export default {
                 }
             },
             deep: true,
+        },
+        // Watch the element being viewed
+        // If the element is viewed for the first, print to the console and set the elementHasBeenViewed to true
+        elementBeingViewed: {
+            handler() {
+                    console.log('Element is in view');
+                if (this.elementBeingViewed && !this.elementHasBeenViewed) {
+                    console.log('...for the first time!');
+                    this.elementHasBeenViewed = true;
+                }
+            }
         }
     },
     computed: {
@@ -94,6 +104,26 @@ export default {
             }
             // if none have display marked as true, return false
             return false;
+        },
+        elementBeingViewed() {
+            // Check if the element is in view
+            // Get the element
+            let el = document.getElementById('infoCard');
+            // Check the element exists, otherwise return false
+            if (!el) {
+                console.log('Element does not exist');
+                return false;
+            }
+            let boundingBox = el.getBoundingClientRect();
+            console.log(boundingBox);
+            let boxIsInViewport = (
+                boundingBox.top >= 0 &&
+                boundingBox.left >= 0 &&
+                boundingBox.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+
+            return boxIsInViewport;
         }
     },
     created() {
