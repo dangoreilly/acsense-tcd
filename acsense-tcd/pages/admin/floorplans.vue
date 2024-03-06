@@ -171,6 +171,7 @@
                                     <input 
                                     :id="'floorSVGInput_' + index"
                                     type="file" 
+                                    accept=".svg"
                                     class="form-control" 
                                     @change="handleFloorImageSelect(index)">
                                     <!-- Preview Button -->
@@ -233,6 +234,7 @@
                                     <input 
                                     id="newFloorSVGInput"
                                     type="file" 
+                                    accept=".svg"
                                     class="form-control" 
                                     @change="handleNewFloorImageSelect()">
                                     <!-- Preview Button -->
@@ -915,8 +917,17 @@ import L from 'leaflet';
                 try {
                     // Set the url of the new floor
                     this.newFloor.url = await this.uploadFloorImage(file, this.newFloor.label)
+                    // Set the building UUID
+                    this.newFloor.building = this.building.UUID;
+                    
                     // Add the new floor to the floors array
                     this.floors.push(this.newFloor);
+                    // Check if this is the first floor added
+                    // If it is, set this as the entry floor
+                    if (this.floors.length == 1) {
+                        this.setEntryFloor(0);
+                    }
+
                     // Reset the new floor object
                     this.newFloor = {
                         label: "",

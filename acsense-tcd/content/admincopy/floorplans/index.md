@@ -17,6 +17,8 @@ The absolute size of "Width" and "Height" boxes above don't really matter, as lo
 aspect ratio matches that of the SVG files. Set it to match whatver units you used to
 create the SVG files, and the floorplan viewer will scale things accordingly. 
 
+Setting both the width and height to 0 will mean the floorplan link will not display on the info page. 
+
 ***Warning:*** *If you adjust the map size you will need to update the positions of all the spaces
 and navigation nodes*
 

@@ -34,6 +34,12 @@ export default defineEventHandler(async (event) => {
     let has_floorplans = await checkForFloorplans(building.UUID);
     building.has_floorplans = has_floorplans;
 
+    // Check the internal_map_size to see if the floorplans are to be displayed 
+    // A size of [0,0] means that the floorplans are not to be displayed
+    if (building.internal_map_size[0] == 0 && building.internal_map_size[1] == 0) {
+        building.has_floorplans = false;
+    }
+
     return building;
 
   })
@@ -48,7 +54,8 @@ async function getBuildingData(buildingId) {
         throw error
     }
     // console.log("Building found: " + building[0].display_name + " (" + building[0].canonical + ")");
-    
+
+
     return building;
 }
 
@@ -104,7 +111,6 @@ async function checkForFloorplans(buildingId) {
         console.log(error)
         throw error
     }
-    // Returns true if there are floorplans, false if not
     return floorplans.length > 0;
 }
 

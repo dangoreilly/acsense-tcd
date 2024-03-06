@@ -88,7 +88,8 @@
         <div
         class="mb-3 mx-3"
         style="grid-area: buttons;"
-        v-if="false">
+        v-if="building.has_floorplans && false">
+        <!-- Button permanently disabled until enough content is ready -->
         <!-- Floorplans button -->
             <NuxtLink :to="'/info/' + building.canonical + '/floorplan'">
                 <button type="button" class="btn btn-primary btn-lg w-100">Internal Map
