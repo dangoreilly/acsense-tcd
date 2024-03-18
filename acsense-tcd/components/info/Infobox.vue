@@ -1,7 +1,7 @@
 <template>
 
     <!-- Card container -->
-        <div class="infotabs card" v-if="anyTabs">
+        <div class="infotabs card" id="infoCard" v-if="anyTabs">
             <!-- Nav bar for tabs -->
             <div class="card-header">
                 <!-- Tabs -->
@@ -41,6 +41,12 @@
                     </div>
                 </div>
             </div>
+            <!-- <span v-if="elementBeingViewed">Test</span> -->
+        </div>
+        <div class="infotabs card" v-else style="justify-self: start; align-self: start;">
+            <div class="card-body">
+                <p>No Wayfinding, sensory, or physical access information available</p>
+            </div>
         </div>
         <div class="infotabs card" v-else style="justify-self: start; align-self: start;">
             <div class="card-body">
@@ -52,7 +58,6 @@
 </template>
 
 <script>
-
 // import { InfoBoxContentTab } from '~/assets/types/infoPageTypes'
 
 
@@ -62,13 +67,19 @@ export default {
             type: Array,
             required: true,
         },
+        // An optional scroll amount to track the visibility of the element
+        scrollAmount: {
+            type: Number,
+            default: 0,
+            required: false,
+        },
     },
     data() {
         return {
             activeInfoTab: 0,
             // tabs: [],
-            youtube_embed: true,
-            youtube_embed_link: "https://www.youtube.com/watch?v=Ck3yUXt5tCc",
+            elementHasBeenViewed: false,
+            elementIsVisible: false,
 
         }
     },
@@ -82,6 +93,35 @@ export default {
                 }
             },
             deep: true,
+        },
+        // Watch the scroll amount, every time it updates, check the visibility of the element
+        scrollAmount() {
+
+            // Check if this is a real scroll event or just an artifact of the page loading
+            // Make sure the scroll amount is greater than 0
+            if (this.scrollAmount == 0) {
+                // Check if the element is in view
+                return;
+            }
+            // Check if the element is in view
+            // Get the element
+            let el = document.getElementById('infoCard');
+            // Check the element exists, otherwise return false
+            if (!el) {
+                console.log('Element does not exist');
+                return false;
+            }
+            let boundingBox = el.getBoundingClientRect();
+            // console.log(boundingBox);
+            let boxIsInViewport = (
+                boundingBox.top >= 0 &&
+                boundingBox.left >= 0 &&
+                boundingBox.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+
+            if (boxIsInViewport)
+                this.onElementVisibility(true);
         }
     },
     computed: {
@@ -94,7 +134,27 @@ export default {
             }
             // if none have display marked as true, return false
             return false;
-        }
+        },
+        // elementBeingViewed() {
+        //     // Check if the element is in view
+        //     // Get the element
+        //     let el = document.getElementById('infoCard');
+        //     // Check the element exists, otherwise return false
+        //     if (!el) {
+        //         console.log('Element does not exist');
+        //         return false;
+        //     }
+        //     let boundingBox = el.getBoundingClientRect();
+        //     console.log(boundingBox);
+        //     let boxIsInViewport = (
+        //         boundingBox.top >= 0 &&
+        //         boundingBox.left >= 0 &&
+        //         boundingBox.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        //         boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth)
+        //     );
+
+        //     return boxIsInViewport;
+        // }
     },
     created() {
         // Parse markdown and move the content array data into the tabs array
@@ -136,6 +196,20 @@ export default {
                     this.activeInfoTab = i;
                     break;
                 }
+            }
+        },
+
+        onElementVisibility(state) {
+            // Check if the element is in view
+            this.elementIsVisible = state;
+            // console.log('Element is visible: ' + state);
+            // Pause for 100ms to allow the element to be fully in view
+            // await new Promise(r => setTimeout(r, 100));
+            // Check if the element has been viewed before
+            if (!this.elementHasBeenViewed) {
+                this.elementHasBeenViewed = state;
+                // console.log('Infobox has been viewed!');
+                plausibleEvent("InfoBoxViewed");
             }
         }
     }

@@ -36,7 +36,7 @@
         </div>
 
         <div style="grid-area: tips;">
-            <AccessTips :tips="building.tips" :entity="'building'"/>
+            <AccessTips :tips="building.tips" :entity="'building'" :scrollAmount="y"/>
             
         </div>
 
@@ -46,6 +46,7 @@
             :contentArray="infoBoxContent"
             :activeInfoTab="activeInfoBoxTab"
             @tabChanged="activeInfoBoxTab = $event"
+            :scrollAmount="y"
             />
         </div>
 
@@ -228,6 +229,11 @@ body {
 <script setup>
 
 import {createClient} from '@supabase/supabase-js'
+import { useWindowScroll } from '@vueuse/core'
+
+// Track the scroll amount, this can be passed to components to trigger
+// view rectangle tracking
+const { x, y } = useWindowScroll()
 
     // function setInfoBoxContent(building){
     //     return [
@@ -417,49 +423,6 @@ import {createClient} from '@supabase/supabase-js'
                     document.documentElement.setAttribute('data-bs-theme', 'light')
                 }
             },
-            // setInfoBoxContent(){
-            //     this.infoBoxContent = [
-            //         {
-            //             title: "Sensory Experience",
-            //             content: this.building.sense_exp || "No information available",
-            //             display: this.building.sense_exp_display
-            //         },
-            //         {
-            //             title: "Wayfinding",
-            //             content: this.building.wayfinding || "No information available",
-            //             display: this.building.wayfinding_display
-            //         },
-            //         {
-            //             title: "Physical Access",
-            //             content: this.building.phys_access || "No information available",
-            //             display: this.building.phys_access_display
-            //         },
-            //     ];
-            // },
-            // async getBuildingData() {
-            //     const response = await useFetch('/api/get/building/' + this.$route.params.buildingId);
-
-            //     if (response.data.value != "" && response.data.value != null) {
-
-            //         // Clone it to avoid proxy nonsense
-            //         this.building = JSON.parse(JSON.stringify(response.data.value));
-                    
-            //         // Set the info box content
-            //         this.setInfoBoxContent();
-
-            //         // Set the page title
-            //         let newhead = this.building.display_name + ' - TCD Sense';
-            //         this.$head.title = newhead;
-            //         document.title = newhead;
-            //     }
-            //     else {
-            //         console.log("No building data found");
-            //         // Redirect 
-            //         this.$router.push('./?search=' + this.$route.params.buildingId);
-            //     }
-            //     // console.warn("Building data:")
-            //     // console.log(this.building);
-            // },
         },
         // mounted() {
         //     this.setTheme()
