@@ -56,7 +56,7 @@
             <div>
                 <!-- Count of results -->
                 <div class="container">
-                        <span>Showing {{filterActive ? filtered_list.length + "/" + sorted_list.length : sorted_list.length}} results</span>
+                        <span>Showing {{filterActive ? filtered_list.length : sorted_list.length}} results</span>
                 </div>
             </div>
         </div>
