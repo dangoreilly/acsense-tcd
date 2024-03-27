@@ -113,6 +113,13 @@ the search page with a URL param signalling that the link was broken
 Make sure the search with the url param converst dashes to spaces -->
 
 <script setup>
+import {createClient} from '@supabase/supabase-js'
+
+    // Create the supabase client
+    const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+    const supabaseKey = useRuntimeConfig().public.supabaseKey;
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    
     useHead({
         title: 'TCD Sense Map - Search',
         meta: [
@@ -137,6 +144,111 @@ Make sure the search with the url param converst dashes to spaces -->
         ],
     });
 
+    /**
+     * Takes in a list of buildings or spaces, and adds a show and type property to each one
+     * @param {Array} list
+     * @param {Boolean} isBuilding
+     */
+    function initList (list, isBuilding) {
+        // Normalise the result objects for sorting and styling
+        if (isBuilding) {
+            for (let i = 0; i < list.length; i++) {
+                list[i].type = "building";
+            }
+        }
+        else {
+            for (let i = 0; i < list.length; i++) {
+                list[i].display_name = list[i].name;
+            }
+        }
+
+        return list;
+    }
+                
+    async function getListOfBuildings() {
+        // Select All buildings from supabase
+        // Assign them the buildings array
+
+        let { data: buildings, error } = await supabase
+            .from('buildings')
+            .select('display_name, canonical, description, aka')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+            // Add them to the buildings list
+            // Add a show property to each building, so that it can later be controlled with the search function
+            let build_list = JSON.parse(JSON.stringify(buildings));
+            return initList(build_list, true);
+        }
+        
+    }
+
+    async function getListOfSpaces() {
+
+        // Select All spaces from supabase
+        // Assign them the spaces array
+
+        let { data: spaces, error } = await supabase
+            .from('spaces')
+            // .select('*')
+            .select('name, building, aka, microwave, kettle, seating, outlets, food_drink_allowed, wheelchair, type, description, canonical, aka')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+
+            // Add a show property to each space, so that it can later be controlled with the search function
+            let spaces_list_temp = JSON.parse(JSON.stringify(spaces));
+            return initList(spaces_list_temp, false);
+
+        }
+        
+    }
+
+    async function getSpaceIcons(spaces_list) {
+
+        let { data: icons, error } = await supabase
+            .from('space_styles')
+            .select('*')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+
+            for (let i = 0; i < spaces_list.length; i++) {
+                // Get the icon for the space type
+                let icon = icons.find(s => s.category == spaces_list[i].type);
+                // console.log(icon);
+                // Assign the icon to the space
+                spaces_list[i].icon = icon.icon;
+                spaces_list[i].colour = icon.colour;
+            }
+
+            // This will double as a flag for the load being finished
+            return spaces_list;
+        }
+    }
+
+    let buildings_list_temp = await getListOfBuildings();
+    // console.log("Buildings fetched")
+    let spaces_list_temp = await getListOfSpaces();
+    spaces_list_temp = await getSpaceIcons(spaces_list_temp);
+    // console.log("Spaces fetched")
+
+    const spaces = useState("spaces_list");
+    spaces.value = spaces_list_temp;
+    // console.log("Spaces stored")
+    // console.log(space.value)
+
+    const buildings = useState("buildings_list");
+    buildings.value = buildings_list_temp;
+    // console.log("Buildings stored")
+    // console.log(buildings_list.value)
+
 </script>
 
 <script>
@@ -160,12 +272,12 @@ Make sure the search with the url param converst dashes to spaces -->
                 filterActive: false,
             }
         },
+        // setup(){
+
+        // },
         created() {
 
-            // Create the supabase client
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
+            
 
             // Gather the list of buildings and spaces
             this.formSearchList()
@@ -186,19 +298,25 @@ Make sure the search with the url param converst dashes to spaces -->
                 {key: "food_drink_allowed", label: "Food/Drink Allowed", active: false},
                 {key: "wheelchair", label: "Wheelchair Accessible", active: false}
             ]
+
+            // console.log(useState("test").value)
         },
         methods: {
 
             async formSearchList(){
-                // Get the buildings, spaces and space icons
-                this.getListOfBuildings()
-                this.getListOfSpaces()
-                this.getSpaceIcons()
+                // Get the buildings and spaces
+                this.buildings_list = JSON.parse(JSON.stringify(useState("buildings_list").value));
+                // console.log("Buildings List")
+                // console.log(this.buildings_list)
+                this.spaces_list = useState("spaces_list").value;
+                // console.log("Spaces List")
+                // console.log(this.spaces_list)
+
 
                 // Wait for them all to be loaded
-                while (this.buildings_list.length == 0 || this.spaces_list.length == 0 || this.spaceIcons.length == 0){
-                    await new Promise(r => setTimeout(r, 100));
-                }
+                // while (this.buildings_list.length == 0 || this.spaces_list.length == 0 || this.spaceIcons.length == 0){
+                //     await new Promise(r => setTimeout(r, 100));
+                // }
 
                 this.assignBuildingNamesToSpaces(this.spaces_list);
 
@@ -232,24 +350,6 @@ Make sure the search with the url param converst dashes to spaces -->
                 }
             },
 
-            /**
-             * Takes in a list of buildings or spaces, and adds a show and type property to each one
-             * @param {Array} list
-             * @param {Boolean} isBuilding
-             */
-            initList (list, isBuilding) {
-                // Normalise the result objects for sorting and styling
-                if (isBuilding) {
-                    for (let i = 0; i < list.length; i++) {
-                        list[i].type = "building";
-                    }
-                }
-                else {
-                    for (let i = 0; i < list.length; i++) {
-                        list[i].display_name = list[i].name;
-                    }
-                }
-            },
 
             assignBuildingNamesToSpaces(list){
                 for (let i = 0; i < list.length; i++) {
@@ -339,40 +439,7 @@ Make sure the search with the url param converst dashes to spaces -->
                 }
             },
 
-            async getSpaceIcons() {
-                // Get the space icons from the database
-                // For showing in the result card
-                const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-                const supabaseKey = useRuntimeConfig().public.supabaseKey;
-                this.supabase = createClient(supabaseUrl, supabaseKey)
-
-                let { data: icons, error } = await this.supabase
-                    .from('space_styles')
-                    .select('*')
-                if (error) {
-                    console.log(error)
-                    throw error
-                }
-                else {
-
-                    // Wait for the spaces to be loaded, then assign them icons
-                    while (this.spaces_list.length == 0){
-                        await new Promise(r => setTimeout(r, 500));
-                    }
-
-                    for (let i = 0; i < this.spaces_list.length; i++) {
-                        // Get the icon for the space type
-                        let icon = icons.find(s => s.category == this.spaces_list[i].type);
-                        // console.log(icon);
-                        // Assign the icon to the space
-                        this.spaces_list[i].icon = icon.icon;
-                        this.spaces_list[i].colour = icon.colour;
-                    }
-
-                    // This will double as a flag for the load being finished
-                    this.spaceIcons = icons;
-                }
-            },
+            
 
             getBuildingDisplayName(canonical){
                 // Get the display name of a building from it's canonical name
