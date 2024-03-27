@@ -59,7 +59,7 @@
                     <span>Showing {{filterActive ? filtered_list.length : sorted_list.length}} results</span>
                     <!-- Pill link to highlight the filtered results on the map -->
                     <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
-                    v-if="filterActive"
+                    v-if="filterActive && filtered_list.length > 0"
                     @click="highlightResultsOnMap()">
                     Highlight on map</a>
                 </div>
