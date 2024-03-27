@@ -13,14 +13,77 @@
             v-model="searchTerm"
             style="font-size: 1.5rem;">
         </div>
+        <!-- Filters -->
+        <div class="mt-1 pt-1"> 
+            <!-- <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex">
+                            <div>
+                                <span>Filter by:</span>
+                                <span v-for="(filter, index) in facilty_filter" 
+                                :key="index" 
+                                class="badge ms-1 cursor-pointer" 
+                                @click="updateFilter(index)" 
+                                :class="filter.active ? 'bg-success' : 'bg-secondary opacity-50'">
+                                    {{filter.label}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                <!-- Count of results -->
+                <!-- <div class="row">
+                    <div class="col-12">
+                        <span>Showing {{filterActive ? filtered_list.length : sorted_list.length}} results</span>
+                    </div>
+                </div>
+            </div>  -->
+            <div class="container">
+                <span>Filter by:</span>
+                <!-- Grid of options -->
+                <div class="d-flex flex-wrap">
+                    <span v-for="(filter, index) in facilty_filter" 
+                    :key="index" 
+                    class="badge ms-1 cursor-pointer flex-fill mt-1" 
+                    @click="updateFilter(index)" 
+                    :class="filter.active ? 'bg-success' : 'bg-secondary opacity-50'">
+                        {{filter.label}}
+                    </span>
+                </div>
+                
+            </div>
+            <div>
+                <!-- Count of results -->
+                <div class="container">
+                        <span>Showing {{filterActive ? filtered_list.length + "/" + sorted_list.length : sorted_list.length}} results</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Placeholder results -->
-        <div class="border-top mt-2 pt-1" v-if="sorted_list.length < 1"> 
-            <searchResultPlaceholder v-for="(n, index) in 8" :key="index" :index="index"/>
+        <div class="border-top mt-2 pt-1" v-if="sorted_list.length < 1 || filterActive && filtered_list.length == 0"> 
+            <!-- <searchResultPlaceholder v-for="(n, index) in 8" :key="index" :index="index"/> -->
+            <div class="container fs-3">
+                Sorry, no results found.
+            </div>
         </div>
         <!-- Results section -->
         <div class="border-top mt-2 pt-1" v-else> 
-            <searchResult v-for="result in sorted_list" :result="result" :searchterm="searchTerm" />
+            <!-- If there is a filter active, loop through the filtered list -->
+            <div v-if="filterActive">
+                <searchResult 
+                v-for="result in filtered_list" 
+                :result="result"
+                :searchterm="searchTerm" />
+            </div>
+            <!-- If there is no filter active, loop through the sorted list -->
+            <div v-else>
+                <searchResult 
+                v-for="result in sorted_list" 
+                :result="result"
+                :searchterm="searchTerm" />
+            </div>
         </div>
     </NuxtLayout>
 </template>
@@ -70,7 +133,10 @@ Make sure the search with the url param converst dashes to spaces -->
                 sort_list: [],
                 // fuse: null,
                 sorted_list: [],
+                filtered_list: [],
                 spaceIcons: [],
+                facilty_filter: [],
+                filterActive: false,
             }
         },
         created() {
@@ -90,6 +156,15 @@ Make sure the search with the url param converst dashes to spaces -->
         mounted() {
             // Once there's a list to check, check it
             // this.buildingSearch()
+            // Set up the facility filters
+            this.facilty_filter = [
+                {key: "microwave", label: "Has Microwave", active: false},
+                {key: "kettle", label: "Has Kettle", active: false},
+                {key: "seating", label: "Has Seating", active: false},
+                {key: "outlets", label: "Has Plug Sockets", active: false},
+                {key: "food_drink_allowed", label: "Food/Drink Allowed", active: false},
+                {key: "wheelchair", label: "Wheelchair Accessible", active: false}
+            ]
         },
         methods: {
 
@@ -121,14 +196,14 @@ Make sure the search with the url param converst dashes to spaces -->
 
             async checkForSearchParam() {
                 // Check if there is a search param
-                // console.log("Checking for search param")
-                // console.log(this.$route.query.search)
+                console.log("Checking for search param")
+                console.log(this.$route.query.search)
                 if (this.$route.query.search) {
                     // If there is, set the search bar to that value
                     this.searchTerm = this.normaliseSearchTerm(this.$route.query.search);
 
                     // And search for it, is the sort list is available
-                    while (this.sorted_list.length == 0){
+                    while (this.sort_list.length == 0){
                         await new Promise(r => setTimeout(r, 100));
                     }
 
@@ -161,6 +236,85 @@ Make sure the search with the url param converst dashes to spaces -->
                     if (list[i].building){
                         list[i].building_display_name = this.getBuildingDisplayName(list[i].building);
                     }
+                }
+            },
+
+            updateFilter(filter_index) {
+                // Get the filter object from the index
+                let filter = this.facilty_filter[filter_index];
+                // Toggle the active state of the filter
+                filter.active = !filter.active;
+
+                // If a filter is active, filter the list
+                if (this.checkFilterActive()) {
+                    this.filterList();
+                }
+
+                // console.log(filter.key + " " + filter.active)
+                // // If there are any active filters, filter the list
+                // if (this.checkFilterActive()) {
+                //     this.filterList();
+                // }
+                // else {
+                //     // If there are no active filters, reset the list
+                //     this.search();
+                // }
+                
+            },
+
+            checkFilterActive() {
+                // Cycle through the facility_filter array and check if any are true
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    if (this.facilty_filter[i].active == true) {
+                        this.filterActive = true;
+                        return true;
+                    }
+                }
+                // If none are true, return false
+                this.filterActive = false;
+                return false;
+            },
+
+            filterList() {
+                // Filter the list based on the active filters
+
+                // Clean copy the sorted_list into the filtered_list
+                this.filtered_list = JSON.parse(JSON.stringify(this.sorted_list));
+                // For each active filter, filter the list
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    if (this.facilty_filter[i].active) {
+
+                        this.filtered_list = this.filtered_list.filter(item => item[this.facilty_filter[i].key] == true);
+                    
+                    }
+                }
+            },
+
+            checkFilter(item){
+                // Check if there is a filter active
+                if (!this.filterActive) {
+                    return true;
+                }
+
+                // Check if the item is a building. If it is, it has no facilities to filter
+                if (item.type == "building") {
+                    return false;
+                }
+
+                // Check if the item has the filter by cycling through the filter and matching the keys
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    if (this.facilty_filter[i].active) {
+                        if (item[this.facilty_filter[i].key] == false) {
+                            return false;
+                        }
+                    }
+                }
+            },
+
+            clearFilter(){
+                // Cycle through the filters and set them all to false
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    this.facilty_filter[i].active = false;
                 }
             },
 
@@ -240,7 +394,8 @@ Make sure the search with the url param converst dashes to spaces -->
 
                 let { data: buildings, error } = await this.supabase
                     .from('spaces')
-                    .select('*')
+                    // .select('*')
+                    .select('name, building, aka, microwave, kettle, seating, outlets, food_drink_allowed, wheelchair, type, description, canonical, aka')
                 if (error) {
                     console.log(error)
                     throw error
@@ -290,7 +445,7 @@ Make sure the search with the url param converst dashes to spaces -->
 
                 //Use the static generated Fuse instance to get a list of matches
                 let result = fuse.search(this.searchTerm)
-                // console.log(result)
+                console.log(result)
 
                 // Check there is a result
                 // If there's no result and no text in the textbox, show everything except the apology
@@ -368,4 +523,8 @@ Make sure the search with the url param converst dashes to spaces -->
 
 
 <style>
+.cursor-pointer {
+    cursor: pointer;
+    transition: all 0.2s;
+}
 </style>
