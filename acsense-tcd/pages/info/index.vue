@@ -45,7 +45,7 @@
                 <div class="d-flex flex-wrap">
                     <span v-for="(filter, index) in facilty_filter" 
                     :key="index" 
-                    class="badge ms-1 cursor-pointer flex-fill mt-1" 
+                    class="badge ms-1 cursor-pointer flex-fill my-1" 
                     @click="updateFilter(index)" 
                     :class="filter.active ? 'bg-success' : 'bg-secondary opacity-50'">
                         {{filter.label}}
@@ -55,9 +55,15 @@
             </div>
             <div>
                 <!-- Count of results -->
-                <div class="container">
-                        <span>Showing {{filterActive ? filtered_list.length : sorted_list.length}} results</span>
+                <div class="container d-flex justify-content-between">
+                    <span>Showing {{filterActive ? filtered_list.length : sorted_list.length}} results</span>
+                    <!-- Pill link to highlight the filtered results on the map -->
+                    <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
+                    v-if="filterActive"
+                    @click="highlightResultsOnMap()">
+                    Highlight on map</a>
                 </div>
+                
             </div>
         </div>
 
@@ -85,6 +91,21 @@
                 :searchterm="searchTerm" />
             </div>
         </div>
+
+        <!-- Back to top toast -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Back to top</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body
+                cursor-pointer" @click="scrollToTop()">
+                    Back to 
+                </div>
+            </div>
+        </div>
+
     </NuxtLayout>
 </template>
 <!-- Going to a building page that doesn't exist should redirect to
@@ -515,6 +536,21 @@ Make sure the search with the url param converst dashes to spaces -->
                 }
                 // Copy the sorted list
                 this.sorted_list = JSON.parse(JSON.stringify(b));
+            },
+
+            highlightResultsOnMap(){
+                // Collect up the canonical names of the filtered results and form
+                // a link back to the main map page with a URL param
+
+                // Add the first result to the search param
+                let searchParam = "?filterSearchResults=" + this.filtered_list[0].canonical
+                // If there are more, add them to the search param too
+                for (let i = 1; i < this.filtered_list.length; i++) {
+                    searchParam += "&filterSearchResults=" + this.filtered_list[i].canonical;
+                }
+
+                // Redirect to the map page with the search param
+                navigateTo('/' + searchParam);
             }
         }
     }
