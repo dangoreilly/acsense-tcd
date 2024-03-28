@@ -521,12 +521,15 @@ export default {
                 // If the url contains the canonical name of the area, overwrite the icon with the highlighted version
                 const urlParams = new URL(window.location.href).searchParams;
                 const highlight = urlParams.get('highlight');
+                const filterSearchResults = urlParams.getAll('filterSearchResults');
                 
-                if (highlight == area.canonical){
+                // Check if the highlight is the canonical name of the area
+                // Or if the filterSearchResults contains the canonical name of the area
+                if (highlight == area.canonical || filterSearchResults.includes(area.canonical)){
                     myIcon = L.icon({
                         iconUrl: icon_url, 
                         iconSize: [50, 50], 
-                        className: "sense-icon",
+                        className: "sense-icon sense-icon-highlighted",
                         shadowUrl: '/images/red-dot.png',
                         shadowSize: [60, 60],
                         // shadowAnchor: [22, 94]
@@ -832,6 +835,28 @@ export default {
 #map {
     height: 100dvh; /* dvh is important for some reason. Leaflet really doesn't like vh */
 }
+
+.leaflet-marker-shadow {
+    /* Animated flashing */
+    animation: pulse 1.5s infinite;    
+}
+
+.leaflet-marker-shadow:hover {
+    /* Stop the flashing on hover */
+    animation: none;
+}
+
+@keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+  }
 
 /* Styles for rotating a jump arrow */
 
