@@ -57,6 +57,44 @@
                     <!-- Column 2 contains a modal preview -->
                     <!-- The input boxes are paired to the components to allow for live editing -->
 
+                    <!-- Space type and parent building -->
+                    <div class="row border-bottom mb-1 pb-2">
+                        <!-- Space Type -->
+                        <div class="col d-flex flex-column">
+                            <label for="spaceType" class="form-label">Space Type</label>
+                            <select 
+                            class="form-select" 
+                            id="spaceType" 
+                            @change="updateSpaceIcon()"
+                            v-model="space.type">
+                                <option disabled value="">Select Space Type</option>
+                                <option 
+                                v-for="_type in space_types"
+                                :key="_type.category"
+                                :value="_type.category">
+                                {{ _type.category }}
+                                </option>
+                            </select>
+                        </div>
+                        <!-- Building, if any -->
+                        <div class="col d-flex flex-column">
+                            <label for="spaceType" class="form-label">Building</label>
+                            <select 
+                            class="form-select" 
+                            id="spaceType" 
+                            @change="updateSpaceIcon()"
+                            v-model="space.building">
+                                <option value="">~No building~</option>
+                                <option 
+                                v-for="build in buildings"
+                                :key="build.display_name"
+                                :value="build.canonical">
+                                {{ build.display_name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- <Summary> -->
                         <div class="row border-b">
                         <!-- Input -->
@@ -102,6 +140,18 @@
                             <div class="info-page-title" style="grid-area: title;">
                                 <h1>{{space.name}}</h1>
                                 <p v-if="space.aka" id="aka" style="display:block"><b>Also Known as:</b> {{space.aka}}</p>
+                                <p class="d-block pb-0 mb-0">
+                                    <em>{{space.type}}</em> 
+                                    <span v-if="space.building != null"> 
+                                        &#8212; 
+                                        <a href="#"> {{ building_display_name }}</a>
+                                    </span>
+                                </p>
+                                
+                                <!-- Pill link to highlight the building on the map -->
+                                <a class="btn badge rounded-pill text-bg-warning text-decoration-none mb-1"
+                                href="#">
+                                Highlight on map</a>
                             </div>
 
                             <!-- Primary Image -->
@@ -273,7 +323,7 @@
                             <!-- Preview -->
                             <div class="col">
                                 <AdminFacility 
-                                :facility="'food_and_drink_allowed'"
+                                :facility="'food_drink_allowed'"
                                 :available="space.food_drink_allowed"
                                 :note="space.food_drink_allowed_note"/>
                             </div>
@@ -468,9 +518,9 @@
                     <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="space.location">
                         <!-- Space type and location -->
                         <!-- Inputs -->
-                        <div style="grid-area: 'input';" class="me-2">    
-                            <!-- Lat and long inputs -->
+                        <div style="grid-area: 'input';" class="me-2"> 
                             <div>
+                            <!-- Lat and long inputs -->
                                 <div >
                                     <label for="lat" class="form-label">Lat // Lng</label>
                                     <input 
@@ -550,6 +600,15 @@
                                 </div>
 
                             </div>
+                            <div>
+                                <!-- Clickability toggle -->
+                                <div class="form-check form-switch mb-3 border-top pt-3">
+                                    <input class="form-check-input" type="checkbox" v-model="space.clickthrough" id="clickable">
+                                    <label class="form-check-label" for="clickable">
+                                        <em>Dummy Icon</em>
+                                    </label>
+                                </div>
+                            </div>   
                         </div>
                         <!-- Map -->
                         <div  id="space-placement-map" style="height: 700px; padding-top: 30px; grid-area: 'input';"></div>
@@ -566,49 +625,6 @@
         </main>
     </NuxtLayout>
 </template>
-
-<script setup>
-    
-//Script setup needed for UseHead
-// import '~/assets/css/leaflet.css'
-
-// useHead({
-
-//     link: [
-//         {
-//             rel:"stylesheet",
-//             href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-//         },
-//     ],
-//     script: [
-        // {
-        //     src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-        //     integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-        //     crossorigin: "",
-        // },
-        // {
-        //     src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-        //     body: true,
-        // },
-        // {
-        //     src: '/javascript/mapInit.js',
-        //     body: true,
-        // },
-        // {
-        //     src: 'https://unpkg.com/@supabase/supabase-js@2',
-        // },
-//         {
-//             src: '/javascript/adminMapFunctions.js',
-//         },
-//         {
-//             src: '/javascript/mapFunctions.js',
-//         },
-//     ]
-// });
-
-
-
-</script>
 
 <script>
 import {createClient} from '@supabase/supabase-js';
@@ -675,6 +691,18 @@ const campusBounds = [
                 // console.log(this.space_clean)
                 return JSON.stringify(this.space) !== JSON.stringify(this.space_clean);
             },
+
+            building_display_name(){
+                // Get the display name of the building
+                // This is used to display the building name in the space preview
+                for (let i = 0; i < this.buildings.length; i++) {
+                    if (this.buildings[i].canonical == this.space.building){
+                        // console.log(this.buildings[i].display_name)
+                        return this.buildings[i].display_name;
+                    }
+                }
+                return "Unknown Building";
+            }
         },
         // mounted() {
         // },
@@ -805,8 +833,8 @@ const campusBounds = [
                 if (this.space.outlets_note == '""' || this.space.outlets_note == "\"\""){
                     this.space.outlets_note = null;
                 }
-                if (this.space.food_and_drink_allowed_note == '""' || this.space.food_and_drink_allowed_note == "\"\""){
-                    this.space.food_and_drink_allowed_note = null;
+                if (this.space.food_drink_allowed_note == '""' || this.space.food_drink_allowed_note == "\"\""){
+                    this.space.food_drink_allowed_note = null;
                 }
                 if (this.space.kettle_note == '""' || this.space.kettle_note == "\"\""){
                     this.space.kettle_note = null;
