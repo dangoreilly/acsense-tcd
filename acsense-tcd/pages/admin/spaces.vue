@@ -611,7 +611,10 @@
                             </div>   
                         </div>
                         <!-- Map -->
-                        <div  id="space-placement-map" style="height: 700px; padding-top: 30px; grid-area: 'input';"></div>
+                        <div>
+                            <span class="fw-bold">{{hover.active ? hover.space : "Hover over a translucent space to see what it is"}}</span>
+                            <div  id="space-placement-map" style="height: 700px; padding-top: 30px; grid-area: 'input';"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -648,6 +651,7 @@ const campusBounds = [
                 space_types: [],
                 buildings: [], 
                 user: {},
+                hover: {active: false, space: ""},
 
                 map: {},
                 center_marker: {},
@@ -1188,10 +1192,25 @@ const campusBounds = [
                     });
 
                     // Create the marker object
-                    L.marker(space.location, {
+                    let marker = L.marker(space.location, {
                         icon: myIcon, 
                         opacity: DUMMY_SPACE_OPACITY,})
-                        .addTo(this.map);
+
+
+                    // Localise a function to update hover text
+                    let updateHoverText = (active, text) => {
+                        this.hover.active = active;
+                        this.hover.space = text;
+                    }
+                    // Add hover action to update the hover text
+                    marker.on('mouseover', function(e) {
+                        updateHoverText(true, space.name);
+                    });
+                    marker.on("mouseout", function(e) {
+                        updateHoverText(false, "")
+                    });
+
+                    marker.addTo(this.map);
 
                 });
             },
