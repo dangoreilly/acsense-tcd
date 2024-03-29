@@ -538,6 +538,7 @@ export default {
 
                 // Create the marker object
                 let marker;
+                let emitOpenModal = this.emitOpenModal;
                 
                 if (area.clickthrough){
                     // If it's a dummy space, don't make it interactive
@@ -546,19 +547,12 @@ export default {
                 else {
                     // Otherwise, it needs to be interactive so there's a click event
                     marker = L.marker(area.location, {icon: myIcon, alt: area.name});
-                }
-
-                let emitOpenModal = this.emitOpenModal;
-
-                // Add a click event to the marker, that opens the modal
-                // But only if the space is not a dummy space, marked by the "clickthrough" property
-                if (!area.clickthrough){
+                    // Add a click event to the marker, that opens the modal
                     marker.on('click', function (e){
                         // When the marker is clicked, emit the event to open the modal to display the area info
                         emitOpenModal("space", area);
                     });
                 }
-
 
                 if (styled_label in areas_sorted){
                     areas_sorted[styled_label].push(marker);
