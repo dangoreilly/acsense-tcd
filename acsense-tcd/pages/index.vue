@@ -378,6 +378,13 @@ export default {
 
         #map { height: 100dvh; }
 
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .map-label {
+                color: #fff;
+            }
+        }
+
         .primary-label {
             opacity: var(--primary-label-opacity);
             transition: opacity 0.5s ease-in-out;

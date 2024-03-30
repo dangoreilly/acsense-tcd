@@ -75,7 +75,17 @@ export default {
                 [53.341853, -6.249477]
             ]);
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //rastertiles/voyager_nolabels
+            // Check if the user is in darkmode or lightmode, and set the map style accordingly
+            let tile_source;
+
+            if (this.isDarkMode()){
+                tile_source = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
+            }
+            else {
+                tile_source = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png';
+            }
+
+            L.tileLayer(tile_source, { //rastertiles/voyager_nolabels
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 maxZoom:20
             }).addTo(map);
@@ -116,6 +126,10 @@ export default {
 
             // Check if there's a building in the URL, and if so, fly to it
             this.checkForBuildingOrSpaceInURL();
+        },
+
+        isDarkMode(){
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         },
 
         checkForBuildingOrSpaceInURL(){
@@ -177,9 +191,17 @@ export default {
         // Add the overlays to the map eg main campus
         addOverlays() {
             // Go through each overlay and add it to the map
-            // console.log('overlays', this.overlays)
+
+            let darkmode = this.isDarkMode();
             this.overlays.forEach(overlay => {
-                this.overlays_objects.push( L.imageOverlay(overlay.url, overlay.bounds).addTo(this.map) );
+                // If the user is in darkmode, add the dark version of the overlay, if it exists
+                if (this.isDarkMode() && overlay.url_dark != null){
+                    this.overlays_objects.push( L.imageOverlay(overlay.url_dark, overlay.bounds).addTo(this.map) );
+                }
+                // Otherwise, just add the default (lightmode) overlay
+                else {
+                    this.overlays_objects.push( L.imageOverlay(overlay.url, overlay.bounds).addTo(this.map) );
+                }
             });
         },
 
@@ -368,14 +390,14 @@ export default {
 
                 if (building.map_label_1 != null){
                     // Generate the content
-                    primaryLabelContent = "<p align='center' class='primary-label'>" + building.map_label_1 + " </p>";
+                    primaryLabelContent = "<p align='center' class='primary-label map-label'>" + building.map_label_1 + " </p>";
                     // Add it to the map
                     this.addToolTipToBuilding(building.geometry.coordinates, primaryLabelContent, map);
                     // layer.bindTooltip(primaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).addTo(map);
                 }
                 if (building.map_label_2 != null){
                     // Generate the content
-                    secondaryLabelContent = "<p align='center'  class='secondary-label'>" + building.map_label_2 + " </p>";
+                    secondaryLabelContent = "<p align='center'  class='secondary-label map-label'>" + building.map_label_2 + " </p>";
                     // Add it to the map
                     this.addToolTipToBuilding(building.geometry.coordinates, secondaryLabelContent, map);
                     // layer.bindTooltip(secondaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
@@ -733,7 +755,7 @@ export default {
                 });
 
                 // Add a label to the jump arrow
-                let content = "<p align='center'  class='flyover-label'>" + flyOver.label + " </p>"
+                let content = "<p align='center'  class='flyover-label  map-label'>" + flyOver.label + " </p>"
                 let label = L.tooltip( {direction: "bottom", offset:[0,0], opacity:1, permanent: true})
                     .setContent(content);
 
