@@ -490,7 +490,7 @@ export default {
             }
 
             return {
-                fillColor: '#0087A2',
+                fillColor: this.isDarkMode ? '#5f5a95' : '#0087A2',
                 weight: 1,
                 opacity: 0,
                 color: '#FCE891',
