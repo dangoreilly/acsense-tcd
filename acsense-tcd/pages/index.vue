@@ -7,6 +7,7 @@
     :studentSpaces="studentSpaces"
     :spaceStyles="spaceStyles"
     :dummy_studentSpaces="dummy_studentSpaces"
+    :isDarkMode="isDarkMode"
     @openBuildingModal="openBuildingModal"
     @openSpaceModal="openSpaceModal"
     @openLegendModal="legendModalOpen = true"
@@ -385,10 +386,18 @@ export default {
 
         #map { height: 100dvh; }
 
+        .map-label { 
+            color: #000;
+            /* Text outline for improved readability */
+            -webkit-text-stroke: 0.2px #ccc;
+        }
+
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             .map-label {
                 color: #fff;
+                /* Text outline for improved readability */
+                -webkit-text-stroke: 1px black;
             }
         }
 

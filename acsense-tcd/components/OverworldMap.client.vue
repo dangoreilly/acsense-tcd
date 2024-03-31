@@ -34,6 +34,11 @@ export default {
             type: Array,
             default: () => []
         },
+
+        isDarkMode: {
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {
@@ -78,7 +83,7 @@ export default {
             // Check if the user is in darkmode or lightmode, and set the map style accordingly
             let tile_source;
 
-            if (this.isDarkMode()){
+            if (this.isDarkMode){
                 tile_source = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
             }
             else {
@@ -126,10 +131,6 @@ export default {
 
             // Check if there's a building in the URL, and if so, fly to it
             this.checkForBuildingOrSpaceInURL();
-        },
-
-        isDarkMode(){
-            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         },
 
         checkForBuildingOrSpaceInURL(){
@@ -192,10 +193,10 @@ export default {
         addOverlays() {
             // Go through each overlay and add it to the map
 
-            let darkmode = this.isDarkMode();
+            let darkmode = this.isDarkMode;
             this.overlays.forEach(overlay => {
                 // If the user is in darkmode, add the dark version of the overlay, if it exists
-                if (this.isDarkMode() && overlay.url_dark != null){
+                if (darkmode && overlay.url_dark != null){
                     this.overlays_objects.push( L.imageOverlay(overlay.url_dark, overlay.bounds).addTo(this.map) );
                 }
                 // Otherwise, just add the default (lightmode) overlay
@@ -632,10 +633,6 @@ export default {
             // this.addPopupsToStudentSpaces(areas_sorted);
         },
 
-        // Allows for icons to be placed on the map without a corresponding student space
-        // For decorative purposes
-        addDummyStudentSpaces(){},
-
         // TODO: Add popups to student spaces
         addPopupsToStudentSpaces(areas){
             // Loop through the student spaces and add a popup to each one
@@ -671,48 +668,50 @@ export default {
         // Add anciallary buttons to the UI
         addControlButtons(){
 
-        let info = L.control({position:"bottomleft"});
-        let search = L.control({position:"bottomright"});
+            let info = L.control({position:"bottomleft"});
+            let search = L.control({position:"bottomright"});
+            // Set the button colour based on the dark mode
+            let buttonColour = this.isDarkMode ? "btn-light" : "btn-dark";
 
-        // Localise the the openModal function, to avoid hassle with the 'this' keyword
-        let openLegendModal = this.emitOpenModal;
-
-
-        //Info Box and Main Campus Button
-        info.onAdd = function () {
-
-            this.button = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-            this.button.value = "Legend";
-            this.button.innerHTML = '<button type="button" class="btn btn-dark border border-dark" style="margin-top:0">Legend</button>';
-            // this.button.innerHTML += '<button type="button" id="mainCampusButton" disabled class="btn btn-outline-primary btn-sm" onclick="flyHome()" style="display: none; margin-top:0; margin-left:0.5rem;">Main Campus</button>';
-            this.button.style = "padding:0;"
-
-            this.button.onclick = function(){
-                openLegendModal("legend", null);
-            }
-
-            return this.button;
-        };
-
-        // Add a click event to the info button, that opens the legend modal
-        // info.on('click', function (e){
-        //     openLegendModal;
-        // });
-
-        //Link to Search
-        search.onAdd = function () {
-
-            this.button = L.DomUtil.create('div', 'search'); // create a div with a class "info"
-            this.button.value = "Search";
-            this.button.innerHTML = '<a role="button" href="/info" class="btn btn-dark " style="margin-top:0; ">Search</button>';
-            this.button.style = "padding:0;"
-
-            return this.button;
-        };
+            // Localise the the openModal function, to avoid hassle with the 'this' keyword
+            let openLegendModal = this.emitOpenModal;
 
 
-        info.addTo(this.map);
-        search.addTo(this.map);
+            //Info Box and Main Campus Button
+            info.onAdd = function () {
+
+                this.button = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+                this.button.value = "Legend";
+                this.button.innerHTML = '<button type="button" class="btn ' + buttonColour + ' border border-dark" style="margin-top:0">Legend</button>';
+                // this.button.innerHTML += '<button type="button" id="mainCampusButton" disabled class="btn btn-outline-primary btn-sm" onclick="flyHome()" style="display: none; margin-top:0; margin-left:0.5rem;">Main Campus</button>';
+                this.button.style = "padding:0;"
+
+                this.button.onclick = function(){
+                    openLegendModal("legend", null);
+                }
+
+                return this.button;
+            };
+
+            // Add a click event to the info button, that opens the legend modal
+            // info.on('click', function (e){
+            //     openLegendModal;
+            // });
+
+            //Link to Search
+            search.onAdd = function () {
+
+                this.button = L.DomUtil.create('div', 'search'); // create a div with a class "info"
+                this.button.value = "Search";
+                this.button.innerHTML = '<a role="button" href="/info" class="btn ' + buttonColour + '" style="margin-top:0; ">Search</button>';
+                this.button.style = "padding:0;"
+
+                return this.button;
+            };
+
+
+            info.addTo(this.map);
+            search.addTo(this.map);
         },
 
         // Add the overworld fast travel jump arrows to the map
@@ -860,6 +859,15 @@ export default {
 <style>
 #map {
     height: 100dvh; /* dvh is important for some reason. Leaflet really doesn't like vh */
+}
+
+/* Style the attribute pane for dark mode */
+@media screen and (prefers-color-scheme: dark) {
+    .leaflet-control-attribution {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        color: white;
+    }
+    
 }
 
 .leaflet-marker-shadow {
