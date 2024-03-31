@@ -1,5 +1,5 @@
 <template>
-<div>
+<div :data-bs-theme="isDarkMode ? 'dark' : 'light'">
     <OverworldMap
     :flyOvers="flyovers"
     :overlays="overlays"
@@ -77,7 +77,6 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="welcomeModalLabel">Welcome</h5>
                     <button 
-                    :data-bs-theme="isDarkMode() ? 'dark' : 'light'"
                     type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen=false; legendModalOpen=true"></button>
                 </div>
 
@@ -287,12 +286,14 @@ export default {
                 mainContent: '',
                 footer: '',
             },
+            isDarkMode: false,
         }
     },
     mounted() {
         // console.log(this.$refs.welcome);
         // Check if the user has indicated they want to skip the welcome modal
         this.checkSkipWelcome();
+        this.checkDarkMode();
     },
     watch: {
         skipWelcome: function(){
@@ -362,10 +363,11 @@ export default {
             }
         },
 
-        isDarkMode(){
+        checkDarkMode(){
 
-            // if (window != null)
-                return window && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // if (window == undefined) return false;
+            // console.log("Checking dark mode")
+            this.isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
     }
 };
