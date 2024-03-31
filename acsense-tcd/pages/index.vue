@@ -76,7 +76,9 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title" id="welcomeModalLabel">Welcome</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen=false; legendModalOpen=true"></button>
+                    <button 
+                    :data-bs-theme="isDarkMode() ? 'dark' : 'light'"
+                    type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen=false; legendModalOpen=true"></button>
                 </div>
 
                 <div class="modal-body">
@@ -358,10 +360,13 @@ export default {
 
                 console.log(skipWelcomeCookie);
             }
-            
+        },
 
+        isDarkMode(){
+
+            // if (window != null)
+                return window && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
-
     }
 };
 </script>
