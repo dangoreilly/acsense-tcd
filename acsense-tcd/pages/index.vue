@@ -181,6 +181,7 @@ import { createClient } from '@supabase/supabase-js';
     const { data: buildings_data, error: building_error} = await supabase
         .from('buildings')
         .select('canonical, display_name, always_display, aka, description, map_label_1, map_label_2, map_label_3, geometry')
+        .eq("published", true)
 
     if (building_error) {
         console.log('An error occured while fetching buildings:');
@@ -194,6 +195,7 @@ import { createClient } from '@supabase/supabase-js';
     const { data: studentSpaces_data, error: studentSpace_error} = await supabase
         .from('spaces')
         .select('*')
+        .eq("published", true)
 
     if (studentSpace_error) {
         console.log('An error occured while fetching student spaces:');
