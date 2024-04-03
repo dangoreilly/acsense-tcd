@@ -17,14 +17,33 @@
                         Space Management | <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">{{ space.canonical }}</span>
                     </h1>
 
+                    <!-- Publish switch -->
+                    <!-- <div class="form-check form-switch form-check-reverse d-flex align-items-center m-3 fs-5">
+                        <label class="form-check-label me-1" for="publishedSwitched">{{ space.published ? "Published" : "Unpublished" }}</label>
+                        <input 
+                        class="form-check-input m-1" 
+                        type="checkbox" 
+                        role="switch" 
+                        id="publishedSwitch">
+                    </div> -->
+                    <!-- <div class="d-flex align-items-center m-3 fs-5">
+                        <input type="checkbox" class="btn-check" id="publishedSwitch" v-model="space.published">
+                        <label class="btn" :class="space.published ? 'btn-danger' : 'btn-success'" for="publishedSwitch">
+                            {{ space.published ? "Unpublish" : "Publish" }}
+                        </label>
+                    </div> -->
+
                     <div class="d-flex align-items-center m-3 fs-5">
-                        <!-- <span 
-                        @click="updateSpace()"
-                        :disabled="!spaceHasBeenChanged"
-                        class="badge rounded-pill text-bg-info" 
-                        style="cursor: pointer;">
-                            Save Changes
-                        </span> -->
+                        <div class="form-check form-switch form-check-reverse">
+                            <label class="form-check-label me-1 bg-green-100 px-1" for="publishedSwitched">{{ space_clean.published ? "Published" : "Publish?" }}</label>
+                            <input 
+                            class="form-check-input m-1" 
+                            type="checkbox" 
+                            role="switch" 
+                            v-model="space.published"
+                            @click="confirmChangePublishStatus()"
+                            id="publishedSwitch">
+                        </div>
                         <div class="btn-group" role="group">
                             <button 
                             type="button" 
@@ -96,7 +115,7 @@
                     </div>
 
                     <!-- <Summary> -->
-                        <div class="row border-b">
+                    <div class="row border-b">
                         <!-- Input -->
                         <div class="col d-flex flex-column">
                             <!-- Space Name -->
@@ -733,6 +752,31 @@ const campusBounds = [
                     }, 100);
                     this.space.primary_image_panorama = true;
                 }
+            },
+
+            confirmChangePublishStatus(){
+                // Check if the current status is different to the clean status
+                // ie, is the user resetting the status or changing it
+                if (this.space.published == this.space_clean.published){
+                    // Confirm the user wants to change the publish status
+                    if (confirm(`Are you sure you want to ${this.space.published ? "unpublish" : "publish"} ${this.space.name}?`)){
+                        // If they do, update the space
+                        this.changePublishStatus();
+                    }
+                    else {
+                        // If they don't, revert the checkbox
+                        this.space.published = !this.space.published;
+                    }
+                }
+                else {
+                    // If the status is the same, just let the user change
+                    this.changePublishStatus();
+                }
+            },
+
+            changePublishStatus(){
+                // Change the publish status of the space
+                this.space.published = !this.space.published;
             },
 
             setDefaultOpenTimesIfNull(data){

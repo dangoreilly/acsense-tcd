@@ -24,7 +24,7 @@
             v-for="(area, index) in sensoryAreas" 
             class="space-row py-2 link-body-emphasis link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
                 <div style="grid-area: icon;">
-                    <img :src="area.icon" :alt="area.type" style="width: 2.5rem; margin-right: .25rem;"/>
+                    <img :src="area.icon.url" :alt="area.type" style="width: 2.5rem; margin-right: .25rem;"/>
                 </div>
 
                 <div style="grid-area: name; align-self: start;" class=" pb-2">

@@ -443,12 +443,13 @@ import {createClient} from '@supabase/supabase-js'
             },
             
             async getListOfBuildings() {
-                // Select All buildings from supabase
+                // Select All buildings from supabase that are published
                 // Assign them the buildings array
 
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
                     .select('display_name, canonical, description, aka')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error
@@ -474,8 +475,8 @@ import {createClient} from '@supabase/supabase-js'
 
                 let { data: buildings, error } = await this.supabase
                     .from('spaces')
-                    // .select('*')
                     .select('name, building, aka, microwave, kettle, seating, outlets, food_drink_allowed, wheelchair, type, description, canonical, aka')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error
