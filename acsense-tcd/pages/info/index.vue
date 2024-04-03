@@ -209,12 +209,13 @@ Make sure the search with the url param converst dashes to spaces -->
             },
             
             async getListOfBuildings() {
-                // Select All buildings from supabase
+                // Select All buildings from supabase that are published
                 // Assign them the buildings array
 
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
                     .select('display_name, canonical, description, aka')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error
@@ -241,6 +242,7 @@ Make sure the search with the url param converst dashes to spaces -->
                 let { data: buildings, error } = await this.supabase
                     .from('spaces')
                     .select('*')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error
