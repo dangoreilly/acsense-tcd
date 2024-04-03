@@ -9,7 +9,7 @@
                 <div
                 @click="changeSpace(space)"
                 class="nav-link link-body-emphasis text-decoration-none space-selection"
-                :class="{'bg-yellow-300': space.canonical === activeSpace.canonical}"
+                :class="{'bg-blue-300': space.canonical === activeSpace.canonical, 'fst-italic bg-yellow-100': !space.published}"
                 style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
                 :title="space.name">
                     <span>{{space.name}}</span> <br>
@@ -74,7 +74,7 @@
 
                 let { data: spaces, error } = await this.supabase
                     .from('spaces')
-                    .select('name, canonical')
+                    .select('name, canonical, published')
                 if (error) {
                     console.log(error)
                     throw error
