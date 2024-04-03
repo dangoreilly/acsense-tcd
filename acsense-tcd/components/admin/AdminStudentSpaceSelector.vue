@@ -1,42 +1,54 @@
 <template>
-    <div class="d-flex flex-column flex-shrink-0 py-3 px-3 border-end border-secondary-subtle bg-body-tertiary position-sticky space-selection-sidebar">
-        <!-- TODO: Filter -->
-        <!-- TODO: Squash into one component with buildings that takes the list as an input -->
-        <!-- Pulling the data at the component level is really dumb -->
-        <ul class="nav nav-pills flex-column mb-auto">
-            <!-- Highlight the active page by matching it to the activeSpace -->
-            <li v-for="space in spaces" style="max-width: 100%;">
-                <div
-                @click="changeSpace(space)"
-                class="nav-link link-body-emphasis text-decoration-none space-selection"
-                :class="{'bg-blue-300': space.canonical === activeSpace.canonical, 'fst-italic bg-yellow-100': !space.published}"
-                style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
-                :title="space.name">
-                    <span>{{space.name}}</span> <br>
-                    <span class="font-monospace" style="font-size: 0.8rem;">{{ space.canonical }}</span>
-                </div>
-            </li>
-        </ul>
-        <hr>
-        <div class="input-group">
-            <input id="new-space" type="text" class="form-control" placeholder="new-spaceID" aria-label="New Space" aria-describedby="button-addon2"
-            v-model="newSpaceID">
-            <button 
-            :disabled="!newSpaceIDValid" 
-            class="btn"
-            :class="{'btn-primary': newSpaceIDValid, 'btn-outline-secondary': !newSpaceIDValid}" 
-            type="button" 
-            title="new ID must be at least 5 characters">
-                +
-            </button>
-            
+    <!-- Container for the sidebar -->
+    <div class="d-flex flex-column flex-shrink-0 py-3 px-1 border-end border-secondary-subtle bg-body-tertiary position-sticky">
+        <!-- Filter bar for spaces -->
+        <input 
+        id="new-space" 
+        type="text" 
+        class="form-control m-1 ms-0 me-2" 
+        placeholder="Filter..." 
+        @input="search()"
+        v-model="searchTerm">
+        <!-- Scrolling section -->
+        <div class=" space-selection-sidebar">
+            <!-- TODO: Squash into one component with buildings that takes the list as an input -->
+            <!-- Pulling the data at the component level is really dumb -->
+            <ul class="nav nav-pills flex-column mb-auto">
+                <!-- Highlight the active page by matching it to the activeSpace -->
+                <li v-for="space in spaces" style="max-width: 100%;">
+                    <div
+                    @click="changeSpace(space)"
+                    class="nav-link link-body-emphasis text-decoration-none space-selection"
+                    :class="{'bg-blue-300': space.canonical === activeSpace.canonical, 'fst-italic bg-yellow-100': !space.published}"
+                    style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
+                    :title="space.name">
+                        <span>{{space.name}}</span> <br>
+                        <span class="font-monospace" style="font-size: 0.8rem;">{{ space.canonical }}</span>
+                    </div>
+                </li>
+            </ul>
+            <!-- <hr>
+            <div class="input-group">
+                <input id="new-space" type="text" class="form-control" placeholder="new-spaceID" aria-label="New Space" aria-describedby="button-addon2"
+                v-model="newSpaceID">
+                <button 
+                :disabled="!newSpaceIDValid" 
+                class="btn"
+                :class="{'btn-primary': newSpaceIDValid, 'btn-outline-secondary': !newSpaceIDValid}" 
+                type="button" 
+                title="new ID must be at least 5 characters">
+                    +
+                </button>
+                
+            </div>
+            <div class="form-text" style="font-size: 0.75em;">spaceID cannot be updated</div> -->
         </div>
-        <div class="form-text" style="font-size: 0.75em;">spaceID cannot be updated</div>
     </div>
-    </template>
+</template>
     
-    <script>
+<script>
     import {createClient} from '@supabase/supabase-js';
+    import Fuse from 'fuse.js';
     
     
     export default {
@@ -44,7 +56,9 @@
             return {
                 newSpaceID: '',
                 activeSpace: {},
-                spaces: []
+                spaces: [],
+                spaces_clean: [],
+                searchTerm: '',
             }
         },
         created() {
@@ -82,6 +96,7 @@
                 else {
                     // Add the spaces to the spaces array, sorted by canonical
                     this.spaces = sortArrayOfObjectsByKey(spaces, "canonical");
+                    this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
                     // Set the active space to the first space in the array
                     this.activeSpace = this.spaces[0];
                     this.$emit('activeSpaceChanged', this.activeSpace.canonical);
@@ -94,7 +109,44 @@
                 console.log("Changing space to " + this.activeSpace.canonical);
             },
 
-            
+            // Functions for dealing with the search/filter
+            search() {
+                 
+                const fuse_options = {
+                    includeScore: true,
+                    // threshold: 1,
+                    keys: [ 
+                        // "display_name" 
+                        {name:'name', weight:5},
+                        {name:'canonical', weight:1},
+                    ]
+                }
+                // Create a new Fuse object
+                let fuse = new Fuse(this.spaces_clean, fuse_options);
+
+                //Use the static generated Fuse instance to get a list of matches
+                let result = fuse.search(this.searchTerm)
+                console.log(result)
+
+                // Check there is a result
+                // If there's no result and no text in the textbox, show everything except the apology
+                //TODO: Add an apology
+                if (result.length == 0 && this.searchTerm == ""){
+
+                    this.spaces = JSON.parse(JSON.stringify(this.spaces_clean));
+
+                }
+                else {
+
+                    // If the result is nonzero, clear the old results and add the new ones
+                    this.spaces = [];
+                    for (let i = 0; i < result.length; i++) {
+                        this.spaces.push(result[i].item);
+                    }
+
+                }
+
+            },
         }
     };
     
