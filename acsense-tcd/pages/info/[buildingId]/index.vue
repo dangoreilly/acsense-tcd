@@ -271,14 +271,7 @@ const { x, y } = useWindowScroll()
 
     // space_icons = ref(await getSpaceIcons());
 
-    async function getBuildingData() {
-        const route = useRoute();
-
-        // const response = await useFetch('/api/get/building/' + route.params.buildingId);
-        const canonical = route.params.buildingId;
-        const preview = route.query.preview;
-
-        console.log(preview)
+    async function getBuildingData(canonical) {
 
         const buildingFields = `
         canonical,
@@ -370,9 +363,13 @@ const { x, y } = useWindowScroll()
     let infoBoxContent = ref([]);
     let infoBoxDisplays = ref();
     
-    let _building = await getBuildingData();
+    const route = useRoute();
+    const canonical = route.params.buildingId;
+    const preview = route.query.preview;
+    
+    let _building = await getBuildingData(canonical);
     // Only set the building if it's set to published, otherwise keep it null
-    if (_building && _building.published) {
+    if (_building && (_building.published || preview)) {
         building = ref(_building);
     }
     else {
