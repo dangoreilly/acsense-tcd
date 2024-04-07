@@ -9,7 +9,7 @@
                 <div class="time-lead">
                     Mon-Fri
                 </div>
-                <div class="time-info">
+                <div class="time-info" id="weekday-open-times">
                     <p v-if="times.weekday.open"> {{ times.weekday.times[0] }} - {{ times.weekday.times[1] }} </p>
                     <p v-else><em> Closed </em></p>
                 </div>
@@ -19,7 +19,7 @@
                 <div class="time-lead">
                     Saturday
                 </div>
-                <div class="time-info">
+                <div class="time-info" id="saturday-open-times">
                     <p v-if="times.sat.open"> {{ times.sat.times[0] }} - {{ times.sat.times[1] }} </p>
                     <p v-else><em> Closed </em></p>
                 </div>
@@ -29,9 +29,9 @@
                 <div class="time-lead">
                     Sunday & Public Holidays
                 </div>
-                <div class="time-info">
+                <div class="time-info" id="holiday-open-times">
                     <p v-if="times.holidays.open"> {{ times.sat.times[0] }} - {{ times.sat.times[1] }} </p>
-                    <p v-else><em> Closed </em></p>
+                    <p v-else><em>Closed</em></p>
                 </div>
             </div>
 
@@ -42,7 +42,7 @@
             <p><em>Opening times not available for this building</em></p>
         </div>
         <!-- Render the footer if there's a note; there won't always be one -->
-        <div class="card-footer" v-if="times.note.length > 0">
+        <div class="card-footer" v-if="times.note && times.note.length > 0">
             {{ times.note }}
         </div>
     </div>
