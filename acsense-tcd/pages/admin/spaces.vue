@@ -34,16 +34,24 @@
                     </div> -->
 
                     <div class="d-flex align-items-center m-3 fs-5">
-                        <div class="form-check form-switch form-check-reverse">
+                        <!-- <div class="form-check form-switch form-check-reverse">
                             <label class="form-check-label me-1 bg-green-100 px-1" for="publishedSwitched">{{ space_clean.published ? "Published" : "Publish?" }}</label>
                             <input 
                             class="form-check-input m-1" 
                             type="checkbox" 
                             role="switch" 
                             v-model="space.published"
-                            @click="confirmChangePublishStatus()"
+                            @input="confirmChangePublishStatus()"
                             id="publishedSwitch">
-                        </div>
+                        </div> -->
+                        <button 
+                        type="button" 
+                        class="btn me-2" 
+                        :class="space.published ? 'btn-danger' : 'btn-outline-success'"
+                        @click="confirmChangePublishStatus()">
+                            {{ space.published ? "Unpublish" : "Publish" }}
+                        </button>
+                        
                         <div class="btn-group" role="group">
                             <button 
                             type="button" 
@@ -755,28 +763,42 @@ const campusBounds = [
             },
 
             confirmChangePublishStatus(){
-                // Check if the current status is different to the clean status
-                // ie, is the user resetting the status or changing it
-                if (this.space.published == this.space_clean.published){
-                    // Confirm the user wants to change the publish status
-                    if (confirm(`Are you sure you want to ${this.space.published ? "unpublish" : "publish"} ${this.space.name}?`)){
-                        // If they do, update the space
-                        this.changePublishStatus();
-                    }
-                    else {
-                        // If they don't, revert the checkbox
-                        this.space.published = !this.space.published;
-                    }
-                }
-                else {
-                    // If the status is the same, just let the user change
+                // Confirm the user wants to change the publish status
+                if (window.confirm(`Are you sure you want to ${this.space.published ? "unpublish" : "publish"} ${this.space.name}?`)){
+                    // If they do, update the space
                     this.changePublishStatus();
                 }
             },
 
-            changePublishStatus(){
+            async changePublishStatus(){
                 // Change the publish status of the space
-                this.space.published = !this.space.published;
+                // This happens instantly, outside of the normal save process
+
+                // Update the space in the database
+                const { data, error } = await this.supabase
+                .from('spaces')
+                .update({
+                    published: !this.space_clean.published
+                })
+                .eq('UUID', this.space.UUID)
+                .select()
+                
+                // If there is an error, log it
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    //TODO: Add a log entry
+                    // TODO: Check the response from the database to see if the update was successful
+                    // If the update was successful, update the clean space object
+                    this.space_clean.published = !this.space_clean.published;
+                    this.space.published = JSON.parse(JSON.stringify(this.space_clean.published));
+                    alert(this.space.name + " has been " + (this.space.published ? "published" : "unpublished"));
+                    console.log(data)
+                }
+
             },
 
             setDefaultOpenTimesIfNull(data){
