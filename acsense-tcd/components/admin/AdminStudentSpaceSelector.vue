@@ -19,7 +19,11 @@
                     <div
                     @click="changeSpace(space)"
                     class="nav-link link-body-emphasis text-decoration-none space-selection"
-                    :class="{'bg-blue-300': space.canonical === activeSpace.canonical, 'fst-italic bg-yellow-100': !space.published}"
+                    :class="{
+                        'bg-blue-300': space.canonical === activeSpace.canonical, 
+                        'fst-italic': !space.published, 
+                        'bg-yellow-100': !space.published && space.canonical !== activeSpace.canonical
+                        }"
                     style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
                     :title="space.name">
                         <span>{{space.name}}</span> <br>
@@ -52,6 +56,17 @@
     
     
     export default {
+        props: {
+            updateCount: { // Dummy prop to force a refresh
+                type: Number,
+                required: false
+            }
+        },
+        watch: {
+            updateCount: function() {
+                this.getListOfSpaces()
+            }
+        },
         data() {
             return {
                 newSpaceID: '',
@@ -96,10 +111,29 @@
                 else {
                     // Add the spaces to the spaces array, sorted by canonical
                     this.spaces = sortArrayOfObjectsByKey(spaces, "canonical");
-                    this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
-                    // Set the active space to the first space in the array
-                    this.activeSpace = this.spaces[0];
-                    this.$emit('activeSpaceChanged', this.activeSpace.canonical);
+                    // this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
+
+                    // Check if this is the first load
+                    if (this.activeSpace == {}) {
+                        // Set the active space to the first space in the array
+                        this.activeSpace = this.spaces[0];
+                        this.$emit('activeSpaceChanged', this.activeSpace.canonical);
+                    }
+                    else {
+                        // Check if the active space is still in the list
+                        let activeSpaceInList = false;
+                        for (let i = 0; i < this.spaces.length; i++) {
+                            if (this.spaces[i].canonical == this.activeSpace.canonical) {
+                                activeSpaceInList = true;
+                                break;
+                            }
+                        }
+                        // If the active space is not in the list, set the active space to the first space in the list
+                        if (!activeSpaceInList) {
+                            this.activeSpace = this.spaces[0];
+                            this.$emit('activeSpaceChanged', this.activeSpace.canonical);
+                        }
+                    }
                 }
             },
 

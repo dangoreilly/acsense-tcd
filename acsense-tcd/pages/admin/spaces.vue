@@ -6,7 +6,8 @@
 
             <!-- Sidebar for space selection -->
             <AdminStudentSpaceSelector 
-            @activeSpaceChanged="getStudentSpace($event)"/>
+            @activeSpaceChanged="getStudentSpace($event)"
+            :updateCount="updateCount"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
@@ -679,7 +680,7 @@ const campusBounds = [
                 buildings: [], 
                 user: {},
                 hover: {active: false, space: ""},
-
+                updateCount: 0, // Dummy variable to force a re-render on the space selector
                 map: {},
                 center_marker: {},
             }
@@ -798,6 +799,9 @@ const campusBounds = [
                     alert(this.space.name + " has been " + (this.space.published ? "published" : "unpublished"));
                     console.log(data)
                 }
+
+                // Update the dummy count to force a re-render
+                this.updateCount += 1;
 
             },
 
@@ -1284,6 +1288,7 @@ const campusBounds = [
             // It will save the current state of the building to the database
             async updateSpace() {
 
+
                 // If the primary image has changed, upload it to the storage bucket
                 if (document.getElementById("PrimaryImageInput").files.length > 0){
                     this.space.primary_image_url = await this.uploadNewPrimaryImage();
@@ -1315,6 +1320,9 @@ const campusBounds = [
                     alert(this.space.name + " updated successfully")
                     console.log(data)
                 }
+
+                // Update the dummy count to force a re-render
+                this.updateCount += 1;
             },
 
             resetIconToTypeDefault(){
