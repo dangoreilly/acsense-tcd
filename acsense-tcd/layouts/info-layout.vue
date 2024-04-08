@@ -72,35 +72,35 @@
         props: {
             searchBarDisabled: Boolean,
         },
-        computed: {
-            // Get the theme from local storage
-            prefersDarkTheme() {
-                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-            }
-        },
-        watch: {
-            // Watch for changes to the theme
-            prefersDarkTheme(wantsDark) {
-                if (wantsDark) {
-                    document.documentElement.setAttribute('data-bs-theme', 'dark')
-                } else {
-                    document.documentElement.setAttribute('data-bs-theme', 'light')
-                }
-            }
-        },
-        methods: {
-            // Set the theme on page load
-            setTheme() {
-                if (this.prefersDarkTheme) {
-                    document.documentElement.setAttribute('data-bs-theme', 'dark')
-                } else {
-                    document.documentElement.setAttribute('data-bs-theme', 'light')
-                }
-            }
-        },
-        mounted() {
-            this.setTheme()
-        }
+        // computed: {
+        //     // Get the theme from local storage
+        //     prefersDarkTheme() {
+        //         return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        //     }
+        // },
+        // watch: {
+        //     // Watch for changes to the theme
+        //     prefersDarkTheme(wantsDark) {
+        //         if (wantsDark) {
+        //             document.documentElement.setAttribute('data-bs-theme', 'dark')
+        //         } else {
+        //             document.documentElement.setAttribute('data-bs-theme', 'light')
+        //         }
+        //     }
+        // },
+        // methods: {
+        //     // Set the theme on page load
+        //     setTheme() {
+        //         if (this.prefersDarkTheme) {
+        //             document.documentElement.setAttribute('data-bs-theme', 'dark')
+        //         } else {
+        //             document.documentElement.setAttribute('data-bs-theme', 'light')
+        //         }
+        //     }
+        // },
+        // mounted() {
+        //     // this.setTheme()
+        // }
     
     }
 
