@@ -48,11 +48,6 @@
                 <p>No Wayfinding, sensory, or physical access information available</p>
             </div>
         </div>
-        <div class="infotabs card" v-else style="justify-self: start; align-self: start;">
-            <div class="card-body">
-                <p>No Wayfinding, sensory, or physical access information available</p>
-            </div>
-        </div>
     <!-- </div> -->
 
 </template>

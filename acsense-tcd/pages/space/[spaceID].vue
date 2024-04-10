@@ -186,7 +186,8 @@ import {createClient} from '@supabase/supabase-js';
         let { data: space, error } = await supabase
             .from('spaces')
             .select('*, building(display_name)')
-            .eq('canonical', canonical).single
+            .eq('canonical', canonical)
+            .single()
         if (error) {
             console.error(error)
             alert(error.message)
@@ -226,6 +227,7 @@ import {createClient} from '@supabase/supabase-js';
     let space = ref(null);
     let _space = await getStudentSpace(sb_client, canonical)
     // Only set the building if it's set to published, otherwise keep it null
+
     if (_space && _space.published) {
         space = ref(_space);
     }
