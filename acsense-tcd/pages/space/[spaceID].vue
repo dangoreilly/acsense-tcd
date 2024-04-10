@@ -228,8 +228,6 @@ import {createClient} from '@supabase/supabase-js';
     let _space = await getStudentSpace(sb_client, canonical)
     // Only set the building if it's set to published, otherwise keep it null
 
-    console.log(_space);
-
     if (_space && _space.published) {
         space = ref(_space);
     }
