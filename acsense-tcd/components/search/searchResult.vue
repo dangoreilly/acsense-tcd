@@ -1,14 +1,26 @@
 <template>
+<div>   
     <div
     class="card mx-3 my-1 searchresult"
     :class="result.type"    
     :style="{'background-color': (result.colour || '#dfdfdf') + '1b'}"
     @click="redirect()">
         <!-- Building card -->
-        <div v-if="result.type == 'building'" class="card-body">
-            <h5 class="card-title">{{ result.display_name }}</h5>
-            <h6 v-if="result.aka" class="card-subtitle mb-2 text-body-secondary">{{result.aka}}</h6>
-            <p style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{result.description}}</p>
+        <div v-if="result.type == 'building'">
+            <div class="card-body">
+                <h5 class="card-title">{{ result.display_name }}</h5>
+                <h6 v-if="result.aka" class="card-subtitle mb-2 text-body-secondary">{{result.aka}}</h6>
+                <p style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{result.description}}</p>
+            </div>
+            <!-- Optional footer for if the building has room results -->
+            <span class="mx-3" v-if="result.sorted_rooms.length != 0"><strong>Rooms</strong></span>
+            <ul class="p-0 m-0" v-if="result.sorted_rooms.length != 0">
+                <li v-for="room in result.sorted_rooms" class="list-group-item border-top px-3 py-1 my-0 room-result-listing">
+                    <span class="me-3"><strong>{{ room.cmis }}</strong></span>
+                    <span>{{ room.roomName }}</span>
+                </li>
+            </ul>
+            <!-- </div> -->
         </div>
         <!-- Space card -->
         <div v-else 
@@ -84,6 +96,7 @@
                 </div>
             </div>
         </div>
+    </div>
 </div>
 </template>
 
@@ -149,6 +162,12 @@ export default{
     vertical-align: middle;
     fill: currentColor;
     width: 1.5rem;
+}
+
+.room-result-listing{
+    /* grid layout */
+    display: grid;
+    grid-template-columns: 8rem auto;
 }
 .svg-icon-sash {
     position: absolute;
