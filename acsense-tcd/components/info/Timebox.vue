@@ -2,7 +2,7 @@
 
     <div class="time-card card">
         <!-- If there are any opening times, render the box -->
-        <div v-if="times.weekday.open || times.sat.open || times.holidays.open"
+        <div v-if="times && times.weekday.open || times.sat.open || times.holidays.open"
         class="time-container pt-2 mx-2">
 
             <div class="time-entry">
