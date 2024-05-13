@@ -18,8 +18,8 @@
         <li v-for="tab in tabs">
             <NuxtLink
             :to="tab.key" 
-            class="nav-link link-body-emphasis"
-            :class="tab.key == activeTab ? 'active' : ''">
+            :class="tab.key == activeTab ? 'active-sidebar-tab active' : ''"
+            class="nav-link link-body-emphasis">
                 <span class="admin-sidebar-span">
                     <i :class="tab.icon"></i>
                     {{ tab.name }}
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import {createClient} from '@supabase/supabase-js';
+// import {createClient} from '@supabase/supabase-js';
 
 
 export default {
@@ -53,7 +53,11 @@ export default {
         activeTab: {
             type: String,
             required: true,
-        }
+        },
+        supabase_client: {
+            type: Object,
+            required: true,
+        },
     },
     data() {
         return {
@@ -77,6 +81,16 @@ export default {
                 },
 
                 // {
+                //     name: 'Floorplans',
+                //     key: 'floorplans',
+                //     icon: 'bi bi-columns',
+                // },
+                {
+                    name: 'General Info',
+                    key: 'general-info',
+                    icon: 'bi bi-info-circle',
+                },
+                // {
                 //     name: 'Map',
                 //     key: 'map',
                 //     icon: 'bi bi-map',
@@ -86,11 +100,11 @@ export default {
                 //     key: 'branding',
                 //     icon: 'bi bi-brush',
                 // },
-                {
-                    name: 'Contributors',
-                    key: 'contributors',
-                    icon: 'bi bi-people',
-                },
+                // {
+                //     name: 'Contributors',
+                //     key: 'contributors',
+                //     icon: 'bi bi-people',
+                // },
                 // {
                 //     name: 'Audit Logs',
                 //     key: 'logs',
@@ -114,11 +128,11 @@ export default {
 
         async getCurrentUser() {
             
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
+            // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            // this.supabase = createClient(supabaseUrl, supabaseKey)
 
-            const { data, error } = await this.supabase.auth.getSession()
+            const { data, error } = await this.supabase_client.auth.getSession()
             // console.log("Session Data:")
             // console.log(data);
 
@@ -174,6 +188,9 @@ i {
     white-space: nowrap;
     transition: opacity 0.4s ease-in-out;
     /* display: none; */
+}
+.active-sidebar-tab {
+    color: white !important;
 }
 
 /* .admin-sidebar:hover {

@@ -1,12 +1,13 @@
 <!-- Admin page for displaying logs -->
 <!-- TODO: Turn these inputs into components for maintainability -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'buildings'" >
+    <NuxtLayout name="admin-layout" :activePage="'buildings'" :supabase_client="supabase">
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for building selection -->
             <AdminBuildingSelector 
-            @activeBuildingChanged="getBuilding($event)"/>
+            @activeBuildingChanged="getBuilding($event)"
+            :supabase_client="supabase"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 

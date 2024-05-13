@@ -33,10 +33,13 @@
     </template>
     
     <script>
-    import {createClient} from '@supabase/supabase-js';
+    // import {createClient} from '@supabase/supabase-js';
     
     
     export default {
+        props: {
+            supabase_client: Object
+        },
         data() {
             return {
                 newBuildingID: '',
@@ -57,7 +60,7 @@
                 ]
             }
         },
-        created() {
+        mounted() {
             this.getListOfBuildings()
         },
         computed: {
@@ -75,14 +78,20 @@
     
             async getListOfBuildings() {
                 
-                const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-                const supabaseKey = useRuntimeConfig().public.supabaseKey;
-                this.supabase = createClient(supabaseUrl, supabaseKey)
+                // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+                // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+                // this.supabase = createClient(supabaseUrl, supabaseKey)
     
                 // Select All buildings from supabase
                 // Assign them the buildings array
 
-                let { data: buildings, error } = await this.supabase
+                // Wait for the supabase object to be initialised and passed down
+                while (this.supabase_client == undefined) {
+                    console.log("Waiting for supabase to be initialised")
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                let { data: buildings, error } = await this.supabase_client
                     .from('buildings')
                     .select('display_name, canonical')
                 if (error) {

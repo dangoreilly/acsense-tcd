@@ -13,15 +13,99 @@
             v-model="searchTerm"
             style="font-size: 1.5rem;">
         </div>
+        <!-- Filters -->
+        <div class="mt-1 pt-1"> 
+            <!-- <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex">
+                            <div>
+                                <span>Filter by:</span>
+                                <span v-for="(filter, index) in facilty_filter" 
+                                :key="index" 
+                                class="badge ms-1 cursor-pointer" 
+                                @click="updateFilter(index)" 
+                                :class="filter.active ? 'bg-success' : 'bg-secondary opacity-50'">
+                                    {{filter.label}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                <!-- Count of results -->
+                <!-- <div class="row">
+                    <div class="col-12">
+                        <span>Showing {{filterActive ? filtered_list.length : sorted_list.length}} results</span>
+                    </div>
+                </div>
+            </div>  -->
+            <div class="container">
+                <span>Filter by:</span>
+                <!-- Grid of options -->
+                <div class="d-flex flex-wrap">
+                    <span v-for="(filter, index) in facilty_filter" 
+                    :key="index" 
+                    class="badge ms-1 cursor-pointer flex-fill my-1" 
+                    @click="updateFilter(index)" 
+                    :class="filter.active ? 'bg-success' : 'bg-secondary opacity-50'">
+                        {{filter.label}}
+                    </span>
+                </div>
+                
+            </div>
+            <div>
+                <!-- Count of results -->
+                <div class="container d-flex justify-content-between">
+                    <span>Showing {{filterActive ? filtered_list.length : sorted_list.length}} results</span>
+                    <!-- Pill link to highlight the filtered results on the map -->
+                    <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
+                    v-if="filterActive && filtered_list.length > 0"
+                    @click="highlightResultsOnMap()">
+                    Highlight on map</a>
+                </div>
+                
+            </div>
+        </div>
 
         <!-- Placeholder results -->
-        <div class="border-top mt-2 pt-1" v-if="sorted_list.length < 1"> 
-            <searchResultPlaceholder v-for="(n, index) in 8" :key="index" :index="index"/>
+        <div class="border-top mt-2 pt-1" v-if="sorted_list.length < 1 || filterActive && filtered_list.length == 0"> 
+            <!-- <searchResultPlaceholder v-for="(n, index) in 8" :key="index" :index="index"/> -->
+            <div class="container fs-3">
+                Sorry, no results found.
+            </div>
         </div>
         <!-- Results section -->
         <div class="border-top mt-2 pt-1" v-else> 
-            <searchResult v-for="result in sorted_list" :result="result" :searchterm="searchTerm" />
+            <!-- If there is a filter active, loop through the filtered list -->
+            <div v-if="filterActive">
+                <searchResult 
+                v-for="result in filtered_list" 
+                :result="result"
+                :searchterm="searchTerm" />
+            </div>
+            <!-- If there is no filter active, loop through the sorted list -->
+            <div v-else>
+                <searchResult 
+                v-for="result in sorted_list" 
+                :result="result"
+                :searchterm="searchTerm" />
+            </div>
         </div>
+
+        <!-- Back to top toast -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Back to top</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body
+                cursor-pointer" @click="scrollToTop()">
+                    Back to 
+                </div>
+            </div>
+        </div>
+
     </NuxtLayout>
 </template>
 <!-- Going to a building page that doesn't exist should redirect to
@@ -29,6 +113,13 @@ the search page with a URL param signalling that the link was broken
 Make sure the search with the url param converst dashes to spaces -->
 
 <script setup>
+import {createClient} from '@supabase/supabase-js'
+
+    // Create the supabase client
+    const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+    const supabaseKey = useRuntimeConfig().public.supabaseKey;
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    
     useHead({
         title: 'TCD Sense Map - Search',
         meta: [
@@ -53,6 +144,111 @@ Make sure the search with the url param converst dashes to spaces -->
         ],
     });
 
+    /**
+     * Takes in a list of buildings or spaces, and adds a show and type property to each one
+     * @param {Array} list
+     * @param {Boolean} isBuilding
+     */
+    function initList (list, isBuilding) {
+        // Normalise the result objects for sorting and styling
+        if (isBuilding) {
+            for (let i = 0; i < list.length; i++) {
+                list[i].type = "building";
+            }
+        }
+        else {
+            for (let i = 0; i < list.length; i++) {
+                list[i].display_name = list[i].name;
+            }
+        }
+
+        return list;
+    }
+                
+    async function getListOfBuildings() {
+        // Select All buildings from supabase
+        // Assign them the buildings array
+
+        let { data: buildings, error } = await supabase
+            .from('buildings')
+            .select('display_name, canonical, description, aka')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+            // Add them to the buildings list
+            // Add a show property to each building, so that it can later be controlled with the search function
+            let build_list = JSON.parse(JSON.stringify(buildings));
+            return initList(build_list, true);
+        }
+        
+    }
+
+    async function getListOfSpaces() {
+
+        // Select All spaces from supabase
+        // Assign them the spaces array
+
+        let { data: spaces, error } = await supabase
+            .from('spaces')
+            // .select('*')
+            .select('name, building, aka, microwave, kettle, seating, outlets, food_drink_allowed, wheelchair, type, description, canonical, aka')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+
+            // Add a show property to each space, so that it can later be controlled with the search function
+            let spaces_list_temp = JSON.parse(JSON.stringify(spaces));
+            return initList(spaces_list_temp, false);
+
+        }
+        
+    }
+
+    async function getSpaceIcons(spaces_list) {
+
+        let { data: icons, error } = await supabase
+            .from('space_styles')
+            .select('*')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+
+            for (let i = 0; i < spaces_list.length; i++) {
+                // Get the icon for the space type
+                let icon = icons.find(s => s.category == spaces_list[i].type);
+                // console.log(icon);
+                // Assign the icon to the space
+                spaces_list[i].icon = icon.icon;
+                spaces_list[i].colour = icon.colour;
+            }
+
+            // This will double as a flag for the load being finished
+            return spaces_list;
+        }
+    }
+
+    let buildings_list_temp = await getListOfBuildings();
+    // console.log("Buildings fetched")
+    let spaces_list_temp = await getListOfSpaces();
+    spaces_list_temp = await getSpaceIcons(spaces_list_temp);
+    // console.log("Spaces fetched")
+
+    const spaces = useState("spaces_list");
+    spaces.value = spaces_list_temp;
+    // console.log("Spaces stored")
+    // console.log(space.value)
+
+    const buildings = useState("buildings_list");
+    buildings.value = buildings_list_temp;
+    // console.log("Buildings stored")
+    // console.log(buildings_list.value)
+
 </script>
 
 <script>
@@ -70,15 +266,25 @@ Make sure the search with the url param converst dashes to spaces -->
                 sort_list: [],
                 // fuse: null,
                 sorted_list: [],
+                filtered_list: [],
                 spaceIcons: [],
+                facilty_filter: [
+                    {key: "microwave", label: "Has Microwave", active: false},
+                    {key: "kettle", label: "Has Kettle", active: false},
+                    {key: "seating", label: "Has Seating", active: false},
+                    {key: "outlets", label: "Has Plug Sockets", active: false},
+                    {key: "food_drink_allowed", label: "Food/Drink Allowed", active: false},
+                    {key: "wheelchair", label: "Wheelchair Accessible", active: false}
+                ],
+                filterActive: false,
             }
         },
+        // setup(){
+
+        // },
         created() {
 
-            // Create the supabase client
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
+            
 
             // Gather the list of buildings and spaces
             this.formSearchList()
@@ -87,22 +293,22 @@ Make sure the search with the url param converst dashes to spaces -->
 
 
         },
-        mounted() {
-            // Once there's a list to check, check it
-            // this.buildingSearch()
-        },
         methods: {
 
             async formSearchList(){
-                // Get the buildings, spaces and space icons
-                this.getListOfBuildings()
-                this.getListOfSpaces()
-                this.getSpaceIcons()
+                // Get the buildings and spaces
+                this.buildings_list = JSON.parse(JSON.stringify(useState("buildings_list").value));
+                // console.log("Buildings List")
+                // console.log(this.buildings_list)
+                this.spaces_list = useState("spaces_list").value;
+                // console.log("Spaces List")
+                // console.log(this.spaces_list)
+
 
                 // Wait for them all to be loaded
-                while (this.buildings_list.length == 0 || this.spaces_list.length == 0 || this.spaceIcons.length == 0){
-                    await new Promise(r => setTimeout(r, 100));
-                }
+                // while (this.buildings_list.length == 0 || this.spaces_list.length == 0 || this.spaceIcons.length == 0){
+                //     await new Promise(r => setTimeout(r, 100));
+                // }
 
                 this.assignBuildingNamesToSpaces(this.spaces_list);
 
@@ -121,14 +327,14 @@ Make sure the search with the url param converst dashes to spaces -->
 
             async checkForSearchParam() {
                 // Check if there is a search param
-                // console.log("Checking for search param")
-                // console.log(this.$route.query.search)
+                console.log("Checking for search param")
+                console.log(this.$route.query.search)
                 if (this.$route.query.search) {
                     // If there is, set the search bar to that value
                     this.searchTerm = this.normaliseSearchTerm(this.$route.query.search);
 
                     // And search for it, is the sort list is available
-                    while (this.sorted_list.length == 0){
+                    while (this.sort_list.length == 0){
                         await new Promise(r => setTimeout(r, 100));
                     }
 
@@ -136,24 +342,6 @@ Make sure the search with the url param converst dashes to spaces -->
                 }
             },
 
-            /**
-             * Takes in a list of buildings or spaces, and adds a show and type property to each one
-             * @param {Array} list
-             * @param {Boolean} isBuilding
-             */
-            initList (list, isBuilding) {
-                // Normalise the result objects for sorting and styling
-                if (isBuilding) {
-                    for (let i = 0; i < list.length; i++) {
-                        list[i].type = "building";
-                    }
-                }
-                else {
-                    for (let i = 0; i < list.length; i++) {
-                        list[i].display_name = list[i].name;
-                    }
-                }
-            },
 
             assignBuildingNamesToSpaces(list){
                 for (let i = 0; i < list.length; i++) {
@@ -164,40 +352,86 @@ Make sure the search with the url param converst dashes to spaces -->
                 }
             },
 
-            async getSpaceIcons() {
-                // Get the space icons from the database
-                // For showing in the result card
-                const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-                const supabaseKey = useRuntimeConfig().public.supabaseKey;
-                this.supabase = createClient(supabaseUrl, supabaseKey)
+            updateFilter(filter_index) {
+                // Get the filter object from the index
+                let filter = this.facilty_filter[filter_index];
+                // Toggle the active state of the filter
+                filter.active = !filter.active;
 
-                let { data: icons, error } = await this.supabase
-                    .from('space_styles')
-                    .select('*')
-                if (error) {
-                    console.log(error)
-                    throw error
+                // If a filter is active, filter the list
+                if (this.checkFilterActive()) {
+                    this.filterList();
                 }
-                else {
 
-                    // Wait for the spaces to be loaded, then assign them icons
-                    while (this.spaces_list.length == 0){
-                        await new Promise(r => setTimeout(r, 500));
+                // console.log(filter.key + " " + filter.active)
+                // // If there are any active filters, filter the list
+                // if (this.checkFilterActive()) {
+                //     this.filterList();
+                // }
+                // else {
+                //     // If there are no active filters, reset the list
+                //     this.search();
+                // }
+                
+            },
+
+            checkFilterActive() {
+                // Cycle through the facility_filter array and check if any are true
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    if (this.facilty_filter[i].active == true) {
+                        this.filterActive = true;
+                        return true;
                     }
+                }
+                // If none are true, return false
+                this.filterActive = false;
+                return false;
+            },
 
-                    for (let i = 0; i < this.spaces_list.length; i++) {
-                        // Get the icon for the space type
-                        let icon = icons.find(s => s.category == this.spaces_list[i].type);
-                        // console.log(icon);
-                        // Assign the icon to the space
-                        this.spaces_list[i].icon = icon.icon;
-                        this.spaces_list[i].colour = icon.colour;
+            filterList() {
+                // Filter the list based on the active filters
+
+                // Clean copy the sorted_list into the filtered_list
+                this.filtered_list = JSON.parse(JSON.stringify(this.sorted_list));
+                // For each active filter, filter the list
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    if (this.facilty_filter[i].active) {
+
+                        this.filtered_list = this.filtered_list.filter(item => item[this.facilty_filter[i].key] == true);
+                    
                     }
-
-                    // This will double as a flag for the load being finished
-                    this.spaceIcons = icons;
                 }
             },
+
+            checkFilter(item){
+                // Check if there is a filter active
+                if (!this.filterActive) {
+                    return true;
+                }
+
+                // Check if the item is a building. If it is, it has no facilities to filter
+                if (item.type == "building") {
+                    return false;
+                }
+
+                // Check if the item has the filter by cycling through the filter and matching the keys
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    if (this.facilty_filter[i].active) {
+                        if (item[this.facilty_filter[i].key] == false) {
+                            return false;
+                        }
+                    }
+                }
+            },
+
+            clearFilter(){
+                // Cycle through the filters and set them all to false
+                for (let i = 0; i < this.facilty_filter.length; i++) {
+                    this.facilty_filter[i].active = false;
+                }
+            },
+
+            
 
             getBuildingDisplayName(canonical){
                 // Get the display name of a building from it's canonical name
@@ -209,12 +443,13 @@ Make sure the search with the url param converst dashes to spaces -->
             },
             
             async getListOfBuildings() {
-                // Select All buildings from supabase
+                // Select All buildings from supabase that are published
                 // Assign them the buildings array
 
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
                     .select('display_name, canonical, description, aka')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error
@@ -240,7 +475,8 @@ Make sure the search with the url param converst dashes to spaces -->
 
                 let { data: buildings, error } = await this.supabase
                     .from('spaces')
-                    .select('*')
+                    .select('name, building, aka, microwave, kettle, seating, outlets, food_drink_allowed, wheelchair, type, description, canonical, aka')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error
@@ -290,7 +526,7 @@ Make sure the search with the url param converst dashes to spaces -->
 
                 //Use the static generated Fuse instance to get a list of matches
                 let result = fuse.search(this.searchTerm)
-                // console.log(result)
+                console.log(result)
 
                 // Check there is a result
                 // If there's no result and no text in the textbox, show everything except the apology
@@ -360,6 +596,21 @@ Make sure the search with the url param converst dashes to spaces -->
                 }
                 // Copy the sorted list
                 this.sorted_list = JSON.parse(JSON.stringify(b));
+            },
+
+            highlightResultsOnMap(){
+                // Collect up the canonical names of the filtered results and form
+                // a link back to the main map page with a URL param
+
+                // Add the first result to the search param
+                let searchParam = "?filterSearchResults=" + this.filtered_list[0].canonical
+                // If there are more, add them to the search param too
+                for (let i = 1; i < this.filtered_list.length; i++) {
+                    searchParam += "&filterSearchResults=" + this.filtered_list[i].canonical;
+                }
+
+                // Redirect to the map page with the search param
+                navigateTo('/' + searchParam);
             }
         }
     }
@@ -368,4 +619,8 @@ Make sure the search with the url param converst dashes to spaces -->
 
 
 <style>
+.cursor-pointer {
+    cursor: pointer;
+    transition: all 0.2s;
+}
 </style>
