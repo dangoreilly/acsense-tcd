@@ -1,6 +1,6 @@
 <!-- Admin page for displaying logs -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'map'" :supabase_client="supabase">
+    <NuxtLayout name="admin-layout" :activePage="'general-info'" :supabase_client="supabase">
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
