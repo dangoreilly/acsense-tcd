@@ -39,7 +39,7 @@
 
                 <!-- Main Matter -->
                 <!-- The main matter will depend on if the user is an admin -->
-                <div v-if="!currentUser.is_admin || true" class="mainMatter-admin">
+                <div v-if="!currentUser.is_admin" class="mainMatter-admin">
                     <!-- Section for viewing your own permissions - there is no edit functionality -->
                     <p>Below are the permissions associated with your Acsense account</p>
                     <AdminUserPermissionsEdit :permissions="currentUserPermissions" :disabled="true"/>
@@ -48,6 +48,8 @@
                 <div v-else class="mainMatter-admin">
                     <!-- Section for admins to edit user permissions, add/remove users etc -->
                     <p>This is the admin view</p>
+                    <button class="btn btn-warning" @click="getContributors">Get Contributors</button>
+                    <p v-for="profile in contributors">{{ profile }}</p>
 
                 </div>
             </div>
@@ -58,14 +60,16 @@
 <script lang="ts">
 import {createClient} from '@supabase/supabase-js';
 import type { PermissionsArray } from '~/assets/types/permissions';
+import type { UserProfile } from '~/assets/types/permissions';
 import permissionsKey from '~/assets/permissionsKey';
-import { sha256 } from 'crypto-hash';
+// import { sha256 } from 'crypto-hash';
 
 export default {
     data() {
         return {
             currentUser: {} as any,
             currentUserPermissions: {} as PermissionsArray,
+            contributors: [] as any[],
             supabase: {} as any,
             permissionsHaveChanged: false,
         };
@@ -83,16 +87,16 @@ export default {
     },
     methods: {
 
-        async printHash(baseData: string) {
-            // Get the current time in milliseconds
-            const time = new Date().getTime();
-            // Create a hash of the base data and the time
-            const hash = await sha256(baseData + time).then( hash => {
-                console.log(hash)
-                return hash;
-            })
+        // async printHash(baseData: string) {
+        //     // Get the current time in milliseconds
+        //     const time = new Date().getTime();
+        //     // Create a hash of the base data and the time
+        //     const hash = await sha256(baseData + time).then( hash => {
+        //         console.log(hash)
+        //         return hash;
+        //     })
             
-        },
+        // },
 
         async createUser() {
             // Send a POST request to the api/create-user route with a string payload
@@ -106,6 +110,58 @@ export default {
             // })
 
             // console.log(data)
+        },
+
+        async getSessionAccessToken(){
+
+            // Use supabase.auth.session() to get the current session
+            // This will return the session object if the user is logged in
+            // Otherwise it will return null
+            const { data, error } = await this.supabase.auth.getSession()
+
+            if (!error && data.session) {
+                // console.log("Setting current user: " + data.session.user.email)
+                return data.session.access_token;
+            }
+            else {
+                // If the user is not logged in, return null
+                return null;
+            }
+        },
+
+        async getContributors() {
+
+            // Get the current session access token
+            const access_token:string = await this.getSessionAccessToken();
+
+            // console.log("Access token: " + access_token)
+            // console.log("Getting contributors") 
+            const { data: contributors, error } = await permissionedFetch(access_token, "profiles");
+            // const { data, pending, error, status } = await useFetch(`/api/select/profiles`, {
+            //     method: 'POST',
+            //     body: JSON.stringify({ 
+            //         // jwt: access_token,
+            //         // target: target,
+            //         // data: {},
+            //         // select: select
+            //         // "jwt": "eyJhbGciOiJIUzI1NiIsImtpZCI6InJzWiszVVc2V2tNbjRjN2YiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzE3MzAzMDg4LCJpYXQiOjE3MTcyOTk0ODgsImlzcyI6Imh0dHBzOi8vaGFkeGVreXVoZGhmbmZoc2ZyY3guc3VwYWJhc2UuY28vYXV0aC92MSIsInN1YiI6IjE4MjU4YzZiLTU2ODctNDMyOC1iYWE1LTEyYjhmMThjOGVmNCIsImVtYWlsIjoiZGFuZ29yZWlsbHlAZ21haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6e30sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3MTE1OTkyMzN9XSwic2Vzc2lvbl9pZCI6IjMxNjAwNzRmLTk4NDgtNGNmOS04YzBiLTI2YjhjN2M5NzMyZCIsImlzX2Fub255bW91cyI6ZmFsc2V9.eLVaItT8GNSqwsiesdD3fCXrsn66Ei1Cx-UK4Cg9vWE",
+            //         "target": "profiles",
+            //         "data": {},
+            //         "select": ["*"]
+            //     })
+            // })
+
+            if (error) {
+                console.error("Error getting contributors: ", error)
+                // console.error(error)
+                // alert(error.message)
+                // throw error
+            }
+            else {
+                console.log("Contributors:")
+                console.log(contributors)
+                this.contributors = contributors;
+            }
         },
 
         async getCurrentUserPermissions() {
@@ -126,13 +182,24 @@ export default {
             }
             else {
                 
-                // Copy the user object
-                // This will highlight to the user when a field is about to be set to a default
+                // Copy the user object to avoid reactivity issues
                 this.currentUser = JSON.parse( JSON.stringify(user) );
-                // Temporary hard code for development
-                this.currentUser.is_admin = false;
 
-                this.currentUserPermissions = {
+                // Temporary hard code for development
+                // this.currentUser.is_admin = false;
+
+                this.currentUserPermissions = this.makeUserPermissionsArray(user);
+                
+            }
+
+        },
+
+        
+        makeUserPermissionsArray(user:UserProfile){
+
+            let userPermissionsArray = {} as PermissionsArray;
+
+            userPermissionsArray = {
                     email: user.email,
                     uuid: user.user_id,
                     isAdmin: user.is_admin,
@@ -200,43 +267,12 @@ export default {
                     general: []
     
                 }
-                
-            }
+
+            return userPermissionsArray;
 
         },
 
-        updatePermissions(newData: PermissionsArray) {
-            // Push updates to the contributors profiles table via the /api/update/profiles route
-
-            // Update the current user object
-            // The newData PermissionsArray does not have the same signature as the user object
-            // So we need to map the keys to the user object
-
-            this.currentUser.is_admin = newData.isAdmin;
-
-            // Loop through the categories of permissions
-            // Updating the user object with the new values
-            // buildings
-            for (let i = 0; i < newData.buildings.length; i++) {
-                this.currentUser[newData.buildings[i].key] = newData.buildings[i].value;
-            }
-            // spaces
-            for (let i = 0; i < newData.spaces.length; i++) {
-                this.currentUser[newData.spaces[i].key] = newData.spaces[i].value;
-            }
-            // map_misc
-            for (let i = 0; i < newData.map_misc.length; i++) {
-                this.currentUser[newData.map_misc[i].key] = newData.map_misc[i].value;
-            }
-            // general
-            for (let i = 0; i < newData.general.length; i++) {
-                this.currentUser[newData.general[i].key] = newData.general[i].value;
-            }
-
-            // Push object to the profiles table
-            // TBD
-
-        },
+        
 
         cancelChanges() {
             // Reset the modified permissions array to the original permissions array

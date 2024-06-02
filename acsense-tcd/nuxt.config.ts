@@ -27,9 +27,9 @@ export default defineNuxtConfig({
             // override with env var
             supabaseUrl: process.env.NUXT_SUPABASE_URL,
             supabaseKey: process.env.NUXT_SUPABASE_KEY,
-            supabaseServiceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
         },
         // Only available serverside
         plausibleAPIKey: process.env.NUXT_PLAUSIBLE_KEY,
+        supabaseServiceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
     }
 })
