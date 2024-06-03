@@ -28,6 +28,22 @@
             </div> -->
             
 
+        <!-- Admin status control -->
+        <div class="mb-3">
+            <!-- Badge to show admin status -->
+            <small 
+            v-if="modifiedPermissions.isAdmin"
+            class="d-inline-flex me-3 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
+            User is an admin
+            </small>
+            <!-- Add/remove admin status -->
+            <button 
+            class="btn btn-outline-danger"
+            @click="updateAdminStatus">
+                {{ modifiedPermissions.isAdmin ? "Remove admin status" : "Grant admin status" }}
+            </button>
+        </div>
+
         <!-- Cards to divide permissions into Building, Spaces, Map, General categories -->
         <div class="card-grid">
             <!-- Buildings -->
@@ -94,8 +110,8 @@
             </div>
         </div>
         <div class="card mt-3" v-if="modified">
-            <div class="card-boid">
-                <div class="row">
+            <div class="card-body py-0 px-0">
+                <div class="row rounded-2 px-0 mx-0">
                     <div class="col bg-success-subtle">
                         <!-- Permissions that have been added -->
                         <p v-for="p in addedPermissions">
@@ -135,6 +151,7 @@
 
 <script lang="ts">
 import type { PermissionsArray } from '~/assets/types/permissions';
+import type { UserProfile } from '~/assets/types/permissions';
 
 
 export default {
@@ -317,14 +334,16 @@ export default {
         //     return adminStatus;
         // },
 
-        // updateAdminStatus() {
-        //     // Confirm the user wants to change the admin status
-        //     if(window.confirm(`Are you sure you want to ${this.permissions.isAdmin ? "revoke" : "grant"} admin rights on ${this.modifiedPermissions.email}? Admins have full access to all features, including creating/removing other admins`)) {
-        //         this.modifiedPermissions.isAdmin = !this.permissions.isAdmin;
-        //     } else {
-        //         this.modifiedPermissions.isAdmin = this.permissions.isAdmin;
-        //     }
-        // },
+        updateAdminStatus() {
+            // Confirm the user wants to change the admin status
+            if(window.confirm(`Are you sure you want to ${this.modifiedPermissions.isAdmin ? "revoke" : "grant"} admin rights on ${this.modifiedPermissions.email}? Admins have full access to all features, including creating/removing other admins`)) {
+                this.modifiedPermissions.isAdmin = !this.modifiedPermissions.isAdmin;
+            } else {
+                this.modifiedPermissions.isAdmin = this.modifiedPermissions.isAdmin;
+            }
+
+            // Push the change to the server, ahead of the other permissions
+        },
 
         permissionsChanged() {
             // console.log(this.removedPermissions)
@@ -344,13 +363,62 @@ export default {
 
             this.modified = this.permissionsChanged();
         },
+
         updatePermissions() {
-            // Emit an event to publish the modified permissions back to the parent
-            // First, check if the permissions have *actually* changed
-            if (this.permissionsChanged()) {
-                this.$emit('permissions-updated', this.modifiedPermissions);
+            // Push updates to the contributors profiles table via the /api/update/profiles route
+
+            // Update the current user object
+            // The modifiedPermissions does not have the same signature as the user object
+            // So we need to map the keys to the user object
+
+            let userUpdateObject = {} as UserProfile;
+            userUpdateObject.user_id = this.modifiedPermissions.uuid;
+
+            // userUpdateObject = {
+            //     is_admin: this.modifiedPermissions.isAdmin,
+            //     email: this.modifiedPermissions.email,
+            //     uuid: this.modifiedPermissions.uuid,
+            //     bld_general: this.modifiedPermissions.buildings[].value,
+            //     bld_tabs: this.modifiedPermissions.buildings[1].value,
+            //     bld_gallery: this.modifiedPermissions.buildings[2].value,
+            //     bld_times: this.modifiedPermissions.buildings[3].value,
+            //     bld_tips: this.modifiedPermissions.buildings[4].value,
+            //     bld_further: this.modifiedPermissions.buildings[5].value,
+            //     bld_map: this.modifiedPermissions.buildings[6].value,
+            //     sense_general: this.modifiedPermissions.spaces[0].value,
+            //     sense_map: this.modifiedPermissions.spaces[1].value,
+            //     sense_facilities: this.modifiedPermissions.spaces[2].value,
+            //     sense_photos: this.modifiedPermissions.spaces[3].value,
+            // }
+
+            // I'm not 100% sure this is typesafe. There's probably a way to do what I'm doing
+            //  in a typesafe way, but I don't know it
+            // Loop through the categories of permissions
+            // Updating the user object with the new values
+            // buildings
+            for (let i = 0; i < this.modifiedPermissions.buildings.length; i++) {
+                // @ts-ignore
+                userUpdateObject[this.modifiedPermissions.buildings[i].key] = this.modifiedPermissions.buildings[i].value;
             }
-            // Otherwise, we're probably just doing the initial load
+            // spaces
+            for (let i = 0; i < this.modifiedPermissions.spaces.length; i++) {
+                // @ts-ignore
+                userUpdateObject[this.modifiedPermissions.spaces[i].key] = this.modifiedPermissions.spaces[i].value;
+            }
+            // map_misc
+            for (let i = 0; i < this.modifiedPermissions.map_misc.length; i++) {
+                // @ts-ignore
+                userUpdateObject[this.modifiedPermissions.map_misc[i].key] = this.modifiedPermissions.map_misc[i].value;
+            }
+            // general
+            for (let i = 0; i < this.modifiedPermissions.general.length; i++) {
+                // @ts-ignore
+                userUpdateObject[this.modifiedPermissions.general[i].key] = this.modifiedPermissions.general[i].value;
+            }
+
+            // Push object to the profiles table
+            // TBD
+
         },
         refreshPermissions() {
             // Copy the permissions array to the modifiedPermissions array

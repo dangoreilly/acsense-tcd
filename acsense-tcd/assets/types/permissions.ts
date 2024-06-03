@@ -15,3 +15,20 @@ export interface PermissionsArray {
     map_misc: Permission[],
     general: Permission[]
 }
+
+export interface UserProfile {
+    email: string,
+    user_id: string,
+    is_admin: boolean,
+    bld_general: boolean,
+    bld_tabs: boolean,
+    bld_gallery: boolean,
+    bld_times: boolean,
+    bld_tips: boolean,
+    bld_further: boolean,
+    bld_map: boolean,
+    sense_general: boolean,
+    sense_map: boolean,
+    sense_facilities: boolean,
+    sense_photos: boolean,
+}

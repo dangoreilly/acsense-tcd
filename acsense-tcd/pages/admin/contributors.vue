@@ -42,14 +42,30 @@
                 <div v-if="!currentUser.is_admin" class="mainMatter-admin">
                     <!-- Section for viewing your own permissions - there is no edit functionality -->
                     <p>Below are the permissions associated with your Acsense account</p>
-                    <AdminUserPermissionsEdit :permissions="currentUserPermissions" :disabled="true"/>
+                    <AdminUserPermissionsEdit :permissions="currentUserPermissions" :disabled="true"/> <!--  -->
                     
                 </div>
                 <div v-else class="mainMatter-admin">
                     <!-- Section for admins to edit user permissions, add/remove users etc -->
-                    <p>This is the admin view</p>
+                    <p>Manage the permissions of contributors</p>
                     <button class="btn btn-warning" @click="getContributors">Get Contributors</button>
-                    <p v-for="profile in contributors">{{ profile }}</p>
+
+                    <!-- Loop through all the profiles apart from the current user -->
+                    <div class="accordion">
+                        <div v-for="(profile, index) in contributors">
+                            <!-- There's no reason for an admin to be editing their own profile -->
+                            <!-- They can really only cause problems doing that -->
+                            <!-- There is also no reason for a regular admin to touch the Super Admin -->
+                            <AccordionStep v-if="profile.email != currentUser.email && !profile.isSuperAdmin ">
+                                <template #AccordionStepHeader>
+                                    {{ profile.email }}
+                                </template>
+                                <template #AccordionStepBody>
+                                    <AdminUserPermissionsEdit  :permissions="profile"/>
+                                </template> 
+                            </AccordionStep>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -160,7 +176,11 @@ export default {
             else {
                 console.log("Contributors:")
                 console.log(contributors)
-                this.contributors = contributors;
+                // this.contributors = contributors;
+                // Process the profile data into a permissions array
+                this.contributors = contributors.map( (profile:UserProfile) => {
+                    return this.makeUserPermissionsArray(profile);
+                })
             }
         },
 
