@@ -55,8 +55,7 @@
                         <div v-for="(profile, index) in contributors">
                             <!-- There's no reason for an admin to be editing their own profile -->
                             <!-- They can really only cause problems doing that -->
-                            <!-- There is also no reason for a regular admin to touch the Super Admin -->
-                            <AccordionStep v-if="profile.email != currentUser.email && !profile.isSuperAdmin ">
+                            <AccordionStep v-if="profile.email != currentUser.email">
                                 <template #AccordionStepHeader>
                                     {{ profile.email }}
                                 </template>

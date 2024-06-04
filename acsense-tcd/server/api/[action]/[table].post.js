@@ -91,6 +91,13 @@ export default defineEventHandler(async (event) => {
                 })
             }
 
+            // Special case for the profiles table: Remove the superadmin user from the results
+            if (table == 'profiles') {
+                let superAdminEmail = useRuntimeConfig().superAdminEmail;
+                console.log(`Super admin email: ${superAdminEmail}`);
+                return selectedData.filter((profile) => profile.email != superAdminEmail);
+            }
+
             return selectedData;
 
 

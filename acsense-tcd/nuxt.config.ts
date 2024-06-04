@@ -31,5 +31,6 @@ export default defineNuxtConfig({
         // Only available serverside
         plausibleAPIKey: process.env.NUXT_PLAUSIBLE_KEY,
         supabaseServiceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
+        superAdminEmail: process.env.NUXT_SUPER_ADMIN_EMAIL,
     }
 })
