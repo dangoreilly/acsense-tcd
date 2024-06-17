@@ -111,7 +111,7 @@
                 else {
                     // Add the spaces to the spaces array, sorted by canonical
                     this.spaces = sortArrayOfObjectsByKey(spaces, "canonical");
-                    // this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
+                    this.spaces_clean = JSON.parse(JSON.stringify(this.spaces));
 
                     // Check if this is the first load
                     if (this.activeSpace == {}) {
@@ -176,6 +176,20 @@
                     this.spaces = [];
                     for (let i = 0; i < result.length; i++) {
                         this.spaces.push(result[i].item);
+                    }
+
+                    // Check if the active space is still in the list
+                    let activeSpaceInList = false;
+                    for (let i = 0; i < this.spaces.length; i++) {
+                        if (this.spaces[i].canonical == this.activeSpace.canonical) {
+                            activeSpaceInList = true;
+                            break;
+                        }
+                    }
+                    // If the active space is not in the list, set the active space to the first space in the list
+                    if (!activeSpaceInList) {
+                        this.activeSpace = this.spaces[0];
+                        this.$emit('activeSpaceChanged', this.activeSpace.canonical);
                     }
 
                 }
