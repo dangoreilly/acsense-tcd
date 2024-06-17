@@ -524,7 +524,7 @@
                         <!-- Edit -->
                         <div class="col">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" v-model="space.furtherinfo_display" id="furtherInfoDisplay">
+                                <input class="form-check-input" type="checkbox" v-model="space.further_info_display" id="furtherInfoDisplay">
                                 <label class="form-check-label" for="furtherInfoDisplay">
                                     Further Information
                                 </label>
@@ -535,7 +535,7 @@
                         <!-- Display -->
                         <div class="col">
                             <div
-                            v-if="space.furtherinfo_display">
+                            v-if="space.further_info_display">
                                 <AdditionalInfo 
                                 :info="space.further_info"/>
                             </div>
