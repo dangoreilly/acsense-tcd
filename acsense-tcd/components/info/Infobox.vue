@@ -172,16 +172,16 @@ export default {
             // this.$emit('tabChanged', index);
         },
 
-        extractYoutubeID(youtube_embed_link) {
-            // Extract the youtube ID from the youtube link
-            // https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url
-            let youtubeID = youtube_embed_link.split('v=')[1];
-            let ampersandPosition = youtubeID.indexOf('&');
-            if (ampersandPosition != -1) {
-                youtubeID = youtubeID.substring(0, ampersandPosition);
-            }
-            return youtubeID;
-        },
+        // extractYoutubeID(youtube_embed_link) {
+        //     // Extract the youtube ID from the youtube link
+        //     // https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url
+        //     let youtubeID = youtube_embed_link.split('v=')[1];
+        //     let ampersandPosition = youtubeID.indexOf('&');
+        //     if (ampersandPosition != -1) {
+        //         youtubeID = youtubeID.substring(0, ampersandPosition);
+        //     }
+        //     return youtubeID;
+        // },
 
         firstValidTab() {
             // Cycle through tabs
