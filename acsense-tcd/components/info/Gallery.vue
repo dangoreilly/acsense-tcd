@@ -1,5 +1,5 @@
 <template>
-<div class="container gallery">
+<div class="container gallery mt-3">
     <h3 class="border-3 border-bottom mb-2">Gallery</h3>
     <!-- Grid Layout -->
     <div class="row row-cols-1 row-cols-md-3 gy-4">

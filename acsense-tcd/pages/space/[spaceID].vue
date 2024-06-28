@@ -11,7 +11,7 @@
                     <em>{{space.type}}</em> 
                     <span v-if="space.building != null"> 
                         &#8212; 
-                        <a :href="'/info/' + space.building"> {{ space.building.display_name }}</a>
+                        <a :href="'/info/' + space.building.canonical"> {{ space.building.display_name }}</a>
                     </span>
                 </p>
                 <!-- Pill link to highlight the building on the map -->
@@ -185,8 +185,9 @@ import {createClient} from '@supabase/supabase-js';
         // Since we are using the canonical name, we should only get one result
         let { data: space, error } = await supabase
             .from('spaces')
-            .select('*, building(display_name)')
-            .eq('canonical', canonical).single
+            .select('*, building(display_name, canonical)')
+            .eq('canonical', canonical)
+            .single()
         if (error) {
             console.error(error)
             alert(error.message)
@@ -226,6 +227,7 @@ import {createClient} from '@supabase/supabase-js';
     let space = ref(null);
     let _space = await getStudentSpace(sb_client, canonical)
     // Only set the building if it's set to published, otherwise keep it null
+
     if (_space && _space.published) {
         space = ref(_space);
     }

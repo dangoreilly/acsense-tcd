@@ -174,7 +174,7 @@ export default {
 
         if (facility == "microwave"){
             // If the note is empty, return the default text
-            if (this.space.microwave == null || this.space.microwave == "" || this.space.microwave_note == "\"\""){
+            if (this.space.microwave_note == null || this.space.microwave_note == "" || this.space.microwave_note == "\"\""){
                 if (this.space.microwave) return this.defaults.microwave[1];
                 else return this.defaults.microwave[0];
             }
