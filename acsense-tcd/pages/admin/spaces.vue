@@ -441,9 +441,14 @@
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
                                     <input id="videolink" type="text" class="form-control"
+                                    :class="{'is-invalid': space.sense_exp_video != null && space.sense_exp_video.length > 0 && extractYoutubeID(space.sense_exp_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
                                     v-model="space.sense_exp_video">
+                                    <div class="invalid-feedback"
+                                    :style="{'display:block' : space.sense_exp_video != null && space.sense_exp_video.length > 0 && extractYoutubeID(space.sense_exp_video) == null}">
+                                    Youtube link format is invalid
+                                    </div>
                                 </div>
                             </div>
                             <!-- Wayfinding -->
@@ -460,9 +465,14 @@
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
                                     <input id="videolink" type="text" class="form-control"
+                                    :class="{'is-invalid': space.wayfinding_video != null && space.wayfinding_video.length > 0 && extractYoutubeID(space.wayfinding_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
                                     v-model="space.wayfinding_video">
+                                    <div class="invalid-feedback"
+                                    :style="{'display:block' : space.wayfinding_video != null && space.wayfinding_video.length > 0 && extractYoutubeID(space.wayfinding_video) == null}">
+                                    Youtube link format is invalid
+                                    </div>
                                 </div>
                             </div>
                             <!-- Physical -->
@@ -479,9 +489,14 @@
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
                                     <input id="videolink" type="text" class="form-control"
+                                    :class="{'is-invalid': space.phys_access_video != null && space.phys_access_video.length > 0 && extractYoutubeID(space.phys_access_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
                                     v-model="space.phys_access_video">
+                                    <div class="invalid-feedback"
+                                    :style="{'display:block' : space.phys_access_video != null && space.phys_access_video.length > 0 && extractYoutubeID(space.phys_access_video) == null}">
+                                    Youtube link format is invalid
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -661,6 +676,7 @@
 import {createClient} from '@supabase/supabase-js';
 import L from 'leaflet';
 import '~/assets/css/leaflet.css'
+import extractYoutubeID from '~/composables/extractYoutubeID';
 
 const campusBounds = [
                     [53.345568, -6.259428],
@@ -686,7 +702,6 @@ const campusBounds = [
             }
         },
         created() {
-
 
             // Initialise the supabase client
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
