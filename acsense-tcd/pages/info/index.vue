@@ -268,7 +268,14 @@ import {createClient} from '@supabase/supabase-js'
                 sorted_list: [],
                 filtered_list: [],
                 spaceIcons: [],
-                facilty_filter: [],
+                facilty_filter: [
+                    {key: "microwave", label: "Has Microwave", active: false},
+                    {key: "kettle", label: "Has Kettle", active: false},
+                    {key: "seating", label: "Has Seating", active: false},
+                    {key: "outlets", label: "Has Plug Sockets", active: false},
+                    {key: "food_drink_allowed", label: "Food/Drink Allowed", active: false},
+                    {key: "wheelchair", label: "Wheelchair Accessible", active: false}
+                ],
                 filterActive: false,
             }
         },
@@ -285,21 +292,6 @@ import {createClient} from '@supabase/supabase-js'
             this.checkForSearchParam()
 
 
-        },
-        mounted() {
-            // Once there's a list to check, check it
-            // this.buildingSearch()
-            // Set up the facility filters
-            this.facilty_filter = [
-                {key: "microwave", label: "Has Microwave", active: false},
-                {key: "kettle", label: "Has Kettle", active: false},
-                {key: "seating", label: "Has Seating", active: false},
-                {key: "outlets", label: "Has Plug Sockets", active: false},
-                {key: "food_drink_allowed", label: "Food/Drink Allowed", active: false},
-                {key: "wheelchair", label: "Wheelchair Accessible", active: false}
-            ]
-
-            // console.log(useState("test").value)
         },
         methods: {
 
@@ -451,12 +443,13 @@ import {createClient} from '@supabase/supabase-js'
             },
             
             async getListOfBuildings() {
-                // Select All buildings from supabase
+                // Select All buildings from supabase that are published
                 // Assign them the buildings array
 
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
                     .select('display_name, canonical, description, aka')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error
@@ -482,8 +475,8 @@ import {createClient} from '@supabase/supabase-js'
 
                 let { data: buildings, error } = await this.supabase
                     .from('spaces')
-                    // .select('*')
                     .select('name, building, aka, microwave, kettle, seating, outlets, food_drink_allowed, wheelchair, type, description, canonical, aka')
+                    .eq("published", true)
                 if (error) {
                     console.log(error)
                     throw error

@@ -2,8 +2,7 @@
 <NuxtLayout name="info-layout">
     <div 
     v-if="building"
-    class="building-info"
-    :class="infoBoxDisplays ? 'infobox-display' : 'infobox-no-display'">
+    class="building-info infobox-display">
 
         <div class="info-page-title" style="grid-area: title;">
 
@@ -23,7 +22,7 @@
             
         <div style="grid-area: sense-areas; align-self: end;">
             <SenseSpaces 
-            :sensoryAreas="building.student_spaces"
+            :sensoryAreas="building.spaces"
             :spaceIcons="space_icons"
             />
         </div>
@@ -41,7 +40,8 @@
         </div>
 
         
-        <div style="grid-area: tabs;">
+        <div style="grid-area: tabs;"
+        class="my-4">
             <Infobox
             :contentArray="infoBoxContent"
             :activeInfoTab="activeInfoBoxTab"
@@ -163,18 +163,6 @@
         "gallery gallery gallery gallery";
 }
 
-.infobox-no-display {
-    grid-template-areas: 
-        "title title main-photo main-photo"
-        "desc desc main-photo main-photo"
-        "sense-areas sense-areas sense-areas sense-areas"
-        ". open-times open-times ."
-        "tips tips tips tips"
-        ". . . ." /* ". rooms floorplan ." */
-        "additional-info additional-info additional-info additional-info"
-        "gallery gallery gallery gallery";
-}
-
 @media screen and (max-width: 992px){
     .building-info {
         padding: 1rem;
@@ -231,6 +219,10 @@ body {
 import {createClient} from '@supabase/supabase-js'
 import { useWindowScroll } from '@vueuse/core'
 
+const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+const supabaseKey = useRuntimeConfig().public.supabaseKey;
+const supabase = createClient(supabaseUrl, supabaseKey)
+
 // Track the scroll amount, this can be passed to components to trigger
 // view rectangle tracking
 const { x, y } = useWindowScroll()
@@ -255,18 +247,17 @@ const { x, y } = useWindowScroll()
     //     ];
     // }
 
-    let space_icons = ref([]);
 
     async function getSpaceIcons() {
         // Get the space icons from the database
         // For showing in the info modal
-        const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-        const supabaseKey = useRuntimeConfig().public.supabaseKey;
-        const supabase = createClient(supabaseUrl, supabaseKey)
+        // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+        // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+        // const supabase = createClient(supabaseUrl, supabaseKey)
 
         let { data: icons, error } = await supabase
             .from('space_styles')
-            .select('category, icon')
+            .select('category, icon, descriptor')
         if (error) {
             console.log(error)
             throw error
@@ -280,26 +271,79 @@ const { x, y } = useWindowScroll()
 
     // space_icons = ref(await getSpaceIcons());
 
-    async function getBuildingData() {
-        const route = useRoute();
+    async function getBuildingData(canonical) {
 
-        const response = await useFetch('/api/get/building/' + route.params.buildingId);
+        const buildingFields = `
+        canonical,
+        display_name,
+        aka,
+        description,
+        sense_exp,
+        wayfinding,
+        phys_access,
+        tips,
+        further_info,
+        opening_times,
+        sense_exp_display,
+        phys_access_display,
+        wayfinding_display,
+        furtherinfo_display,
+        primary_image_url,
+        primary_image_alt,
+        UUID,
+        sense_exp_video,
+        wayfinding_video,
+        phys_access_video,
+        entry_floor,
+        published
+        `
 
-        if (response.data.value != "" && response.data.value != null) {
 
-            // Clone it to avoid proxy nonsense
-            return JSON.parse(JSON.stringify(response.data.value));
-            
-            // Set the info box content
-            // this.setInfoBoxContent();
+        const spaceFields = `
+        canonical,
+        name,
+        type,
+        aka,
+        description,
+        microwave, 
+        kettle, 
+        kettle_note,
+        seating, 
+        seating_note,
+        outlets, 
+        outlets_note,
+        food_drink_allowed,
+        food_drink_allowed_note, 
+        wheelchair,
+        wheelchair_note,
+        icon:space_styles(url:icon),
+        icon_override
+        `
+
+
+
+        let { data: building, error } = await supabase
+        .from('buildings')
+        .select(`
+            ${buildingFields}, 
+            spaces!spaces_building_fkey(${spaceFields}), 
+            gallery_images:building_gallery_images!building_gallery_images_building_fkey(*)`
+        )
+        .eq('canonical', canonical)
+        .single()
+        if (error) {
+            console.error(error)
+            // useRouter().push('./?search=' + route.params.buildingId);
+            // navigateTo('/?search=' + route.params.buildingId);
+            return null;
         }
         else {
-            console.log("No building data found");
-            // Redirect 
-            useRouter().push('./?search=' + route.params.buildingId);
+            // console.log(building)
+            // document.getElementById('print').innerText = JSON.stringify(building, null, 2)
+            console.log("Building data retrieved");
+            // console.log(building);
+            return JSON.parse(JSON.stringify(building));
         }
-        // console.warn("Building data:")
-        // console.log(this.building);
     }
 
     function infoBoxDisplayCheck(infoBoxContent) {
@@ -314,25 +358,48 @@ const { x, y } = useWindowScroll()
     }
 
     
-    const { data: building, error: building_err } = await useAsyncData('building', () => getBuildingData());
+    let space_icons = ref([]);
+    let building = ref({});
+    let infoBoxContent = ref([]);
+    let infoBoxDisplays = ref();
+    
+    const route = useRoute();
+    const canonical = route.params.buildingId;
+    const preview = route.query.preview;
+    
+    let _building = await getBuildingData(canonical);
+    // Only set the building if it's set to published, otherwise keep it null
+    if (_building && (_building.published || preview)) {
+        building = ref(_building);
+    }
+    else {
+        building = ref(null);
+    }
+
+    // Using ref and useState() at the same time like this definitely poor practice
+    // But the documentation is unclear and I'm not bothered experimenting right now
+    const building_check = useState("building");
+    building_check.value = building;
 
     // space_icons = await useAsyncData('space_icons', () => getSpaceIcons())
     space_icons = await getSpaceIcons();
 
     // console.log(building);
 
-    const infoBoxContent = ref(setInfoBoxContent(building.value));
-    // console.log(infoBoxContent);
-    const infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
+    if (building.value) {
+        infoBoxContent = ref(setInfoBoxContent(building.value));
+        infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
+    }
 
-    // console.log(infoBoxContent.value);
+    let pageTitle = (building.value ? building.value.display_name : "Building not found") + '- TCD Sense';
+    let pageDescription = (building.value ? building.value.description : "Building not found");
 
     useHead({
-        title: building.value.display_name + '- TCD Sense',
+        title: pageTitle,
         meta: [
             {
                 name: 'description',
-                content: building.value.description,
+                content: pageDescription,
             },
             {
                 name: 'keywords',
@@ -365,6 +432,15 @@ const { x, y } = useWindowScroll()
             // linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
             // linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
             }
+        },
+        created() {
+            // Check if the building exists
+            let building = useState("building");
+            // If it doesn't, redirect to the search page
+            if (!building.value) {
+                this.$router.push('/info/?search=' + this.$route.params.buildingId);
+            }
+            
         },
         // head() {
         //     return {

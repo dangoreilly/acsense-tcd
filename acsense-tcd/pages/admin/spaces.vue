@@ -6,7 +6,8 @@
 
             <!-- Sidebar for space selection -->
             <AdminStudentSpaceSelector 
-            @activeSpaceChanged="getStudentSpace($event)"/>
+            @activeSpaceChanged="getStudentSpace($event)"
+            :updateCount="updateCount"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
@@ -17,14 +18,41 @@
                         Space Management | <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">{{ space.canonical }}</span>
                     </h1>
 
+                    <!-- Publish switch -->
+                    <!-- <div class="form-check form-switch form-check-reverse d-flex align-items-center m-3 fs-5">
+                        <label class="form-check-label me-1" for="publishedSwitched">{{ space.published ? "Published" : "Unpublished" }}</label>
+                        <input 
+                        class="form-check-input m-1" 
+                        type="checkbox" 
+                        role="switch" 
+                        id="publishedSwitch">
+                    </div> -->
+                    <!-- <div class="d-flex align-items-center m-3 fs-5">
+                        <input type="checkbox" class="btn-check" id="publishedSwitch" v-model="space.published">
+                        <label class="btn" :class="space.published ? 'btn-danger' : 'btn-success'" for="publishedSwitch">
+                            {{ space.published ? "Unpublish" : "Publish" }}
+                        </label>
+                    </div> -->
+
                     <div class="d-flex align-items-center m-3 fs-5">
-                        <!-- <span 
-                        @click="updateSpace()"
-                        :disabled="!spaceHasBeenChanged"
-                        class="badge rounded-pill text-bg-info" 
-                        style="cursor: pointer;">
-                            Save Changes
-                        </span> -->
+                        <!-- <div class="form-check form-switch form-check-reverse">
+                            <label class="form-check-label me-1 bg-green-100 px-1" for="publishedSwitched">{{ space_clean.published ? "Published" : "Publish?" }}</label>
+                            <input 
+                            class="form-check-input m-1" 
+                            type="checkbox" 
+                            role="switch" 
+                            v-model="space.published"
+                            @input="confirmChangePublishStatus()"
+                            id="publishedSwitch">
+                        </div> -->
+                        <button 
+                        type="button" 
+                        class="btn me-2" 
+                        :class="space.published ? 'btn-danger' : 'btn-outline-success'"
+                        @click="confirmChangePublishStatus()">
+                            {{ space.published ? "Unpublish" : "Publish" }}
+                        </button>
+                        
                         <div class="btn-group" role="group">
                             <button 
                             type="button" 
@@ -57,8 +85,46 @@
                     <!-- Column 2 contains a modal preview -->
                     <!-- The input boxes are paired to the components to allow for live editing -->
 
+                    <!-- Space type and parent building -->
+                    <div class="row border-bottom mb-1 pb-2">
+                        <!-- Space Type -->
+                        <div class="col d-flex flex-column">
+                            <label for="spaceType" class="form-label">Space Type</label>
+                            <select 
+                            class="form-select" 
+                            id="spaceType" 
+                            @change="updateSpaceIcon()"
+                            v-model="space.type">
+                                <option disabled value="">Select Space Type</option>
+                                <option 
+                                v-for="_type in space_types"
+                                :key="_type.category"
+                                :value="_type.category">
+                                {{ _type.category }}
+                                </option>
+                            </select>
+                        </div>
+                        <!-- Building, if any -->
+                        <div class="col d-flex flex-column">
+                            <label for="spaceType" class="form-label">Building</label>
+                            <select 
+                            class="form-select" 
+                            id="spaceType" 
+                            @change="updateSpaceIcon()"
+                            v-model="space.building">
+                                <option value="">~No building~</option>
+                                <option 
+                                v-for="build in buildings"
+                                :key="build.display_name"
+                                :value="build.canonical">
+                                {{ build.display_name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- <Summary> -->
-                        <div class="row border-b">
+                    <div class="row border-b">
                         <!-- Input -->
                         <div class="col d-flex flex-column">
                             <!-- Space Name -->
@@ -102,6 +168,18 @@
                             <div class="info-page-title" style="grid-area: title;">
                                 <h1>{{space.name}}</h1>
                                 <p v-if="space.aka" id="aka" style="display:block"><b>Also Known as:</b> {{space.aka}}</p>
+                                <p class="d-block pb-0 mb-0">
+                                    <em>{{space.type}}</em> 
+                                    <span v-if="space.building != null"> 
+                                        &#8212; 
+                                        <a href="#"> {{ building_display_name }}</a>
+                                    </span>
+                                </p>
+                                
+                                <!-- Pill link to highlight the building on the map -->
+                                <a class="btn badge rounded-pill text-bg-warning text-decoration-none mb-1"
+                                href="#">
+                                Highlight on map</a>
                             </div>
 
                             <!-- Primary Image -->
@@ -273,7 +351,7 @@
                             <!-- Preview -->
                             <div class="col">
                                 <AdminFacility 
-                                :facility="'food_and_drink_allowed'"
+                                :facility="'food_drink_allowed'"
                                 :available="space.food_drink_allowed"
                                 :note="space.food_drink_allowed_note"/>
                             </div>
@@ -363,9 +441,14 @@
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
                                     <input id="videolink" type="text" class="form-control"
+                                    :class="{'is-invalid': space.sense_exp_video != null && space.sense_exp_video.length > 0 && extractYoutubeID(space.sense_exp_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
                                     v-model="space.sense_exp_video">
+                                    <div class="invalid-feedback"
+                                    :style="{'display:block' : space.sense_exp_video != null && space.sense_exp_video.length > 0 && extractYoutubeID(space.sense_exp_video) == null}">
+                                    Youtube link format is invalid
+                                    </div>
                                 </div>
                             </div>
                             <!-- Wayfinding -->
@@ -382,9 +465,14 @@
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
                                     <input id="videolink" type="text" class="form-control"
+                                    :class="{'is-invalid': space.wayfinding_video != null && space.wayfinding_video.length > 0 && extractYoutubeID(space.wayfinding_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
                                     v-model="space.wayfinding_video">
+                                    <div class="invalid-feedback"
+                                    :style="{'display:block' : space.wayfinding_video != null && space.wayfinding_video.length > 0 && extractYoutubeID(space.wayfinding_video) == null}">
+                                    Youtube link format is invalid
+                                    </div>
                                 </div>
                             </div>
                             <!-- Physical -->
@@ -401,9 +489,14 @@
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
                                     <input id="videolink" type="text" class="form-control"
+                                    :class="{'is-invalid': space.phys_access_video != null && space.phys_access_video.length > 0 && extractYoutubeID(space.phys_access_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
                                     v-model="space.phys_access_video">
+                                    <div class="invalid-feedback"
+                                    :style="{'display:block' : space.phys_access_video != null && space.phys_access_video.length > 0 && extractYoutubeID(space.phys_access_video) == null}">
+                                    Youtube link format is invalid
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -446,7 +539,7 @@
                         <!-- Edit -->
                         <div class="col">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" v-model="space.furtherinfo_display" id="furtherInfoDisplay">
+                                <input class="form-check-input" type="checkbox" v-model="space.further_info_display" id="furtherInfoDisplay">
                                 <label class="form-check-label" for="furtherInfoDisplay">
                                     Further Information
                                 </label>
@@ -457,7 +550,7 @@
                         <!-- Display -->
                         <div class="col">
                             <div
-                            v-if="space.furtherinfo_display">
+                            v-if="space.further_info_display">
                                 <AdditionalInfo 
                                 :info="space.further_info"/>
                             </div>
@@ -468,9 +561,9 @@
                     <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="space.location">
                         <!-- Space type and location -->
                         <!-- Inputs -->
-                        <div style="grid-area: 'input';" class="me-2">    
-                            <!-- Lat and long inputs -->
+                        <div style="grid-area: 'input';" class="me-2"> 
                             <div>
+                            <!-- Lat and long inputs -->
                                 <div >
                                     <label for="lat" class="form-label">Lat // Lng</label>
                                     <input 
@@ -550,9 +643,21 @@
                                 </div>
 
                             </div>
+                            <div>
+                                <!-- Clickability toggle -->
+                                <div class="form-check form-switch mb-3 border-top pt-3">
+                                    <input class="form-check-input" type="checkbox" v-model="space.clickthrough" id="clickable">
+                                    <label class="form-check-label" for="clickable">
+                                        <em>Dummy Icon</em>
+                                    </label>
+                                </div>
+                            </div>   
                         </div>
                         <!-- Map -->
-                        <div  id="space-placement-map" style="height: 700px; padding-top: 30px; grid-area: 'input';"></div>
+                        <div>
+                            <span class="fw-bold">{{hover.active ? hover.space : "Hover over a translucent space to see what it is"}}</span>
+                            <div  id="space-placement-map" style="height: 700px; padding-top: 30px; grid-area: 'input';"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -567,53 +672,11 @@
     </NuxtLayout>
 </template>
 
-<script setup>
-    
-//Script setup needed for UseHead
-// import '~/assets/css/leaflet.css'
-
-// useHead({
-
-//     link: [
-//         {
-//             rel:"stylesheet",
-//             href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-//         },
-//     ],
-//     script: [
-        // {
-        //     src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-        //     integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-        //     crossorigin: "",
-        // },
-        // {
-        //     src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-        //     body: true,
-        // },
-        // {
-        //     src: '/javascript/mapInit.js',
-        //     body: true,
-        // },
-        // {
-        //     src: 'https://unpkg.com/@supabase/supabase-js@2',
-        // },
-//         {
-//             src: '/javascript/adminMapFunctions.js',
-//         },
-//         {
-//             src: '/javascript/mapFunctions.js',
-//         },
-//     ]
-// });
-
-
-
-</script>
-
 <script>
 import {createClient} from '@supabase/supabase-js';
 import L from 'leaflet';
 import '~/assets/css/leaflet.css'
+import extractYoutubeID from '~/composables/extractYoutubeID';
 
 const campusBounds = [
                     [53.345568, -6.259428],
@@ -632,13 +695,13 @@ const campusBounds = [
                 space_types: [],
                 buildings: [], 
                 user: {},
-
+                hover: {active: false, space: ""},
+                updateCount: 0, // Dummy variable to force a re-render on the space selector
                 map: {},
                 center_marker: {},
             }
         },
         created() {
-
 
             // Initialise the supabase client
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
@@ -675,6 +738,18 @@ const campusBounds = [
                 // console.log(this.space_clean)
                 return JSON.stringify(this.space) !== JSON.stringify(this.space_clean);
             },
+
+            building_display_name(){
+                // Get the display name of the building
+                // This is used to display the building name in the space preview
+                for (let i = 0; i < this.buildings.length; i++) {
+                    if (this.buildings[i].canonical == this.space.building){
+                        // console.log(this.buildings[i].display_name)
+                        return this.buildings[i].display_name;
+                    }
+                }
+                return "Unknown Building";
+            }
         },
         // mounted() {
         // },
@@ -701,6 +776,48 @@ const campusBounds = [
                     }, 100);
                     this.space.primary_image_panorama = true;
                 }
+            },
+
+            confirmChangePublishStatus(){
+                // Confirm the user wants to change the publish status
+                if (window.confirm(`Are you sure you want to ${this.space.published ? "unpublish" : "publish"} ${this.space.name}?`)){
+                    // If they do, update the space
+                    this.changePublishStatus();
+                }
+            },
+
+            async changePublishStatus(){
+                // Change the publish status of the space
+                // This happens instantly, outside of the normal save process
+
+                // Update the space in the database
+                const { data, error } = await this.supabase
+                .from('spaces')
+                .update({
+                    published: !this.space_clean.published
+                })
+                .eq('UUID', this.space.UUID)
+                .select()
+                
+                // If there is an error, log it
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    //TODO: Add a log entry
+                    // TODO: Check the response from the database to see if the update was successful
+                    // If the update was successful, update the clean space object
+                    this.space_clean.published = !this.space_clean.published;
+                    this.space.published = JSON.parse(JSON.stringify(this.space_clean.published));
+                    alert(this.space.name + " has been " + (this.space.published ? "published" : "unpublished"));
+                    console.log(data)
+                }
+
+                // Update the dummy count to force a re-render
+                this.updateCount += 1;
+
             },
 
             setDefaultOpenTimesIfNull(data){
@@ -805,8 +922,8 @@ const campusBounds = [
                 if (this.space.outlets_note == '""' || this.space.outlets_note == "\"\""){
                     this.space.outlets_note = null;
                 }
-                if (this.space.food_and_drink_allowed_note == '""' || this.space.food_and_drink_allowed_note == "\"\""){
-                    this.space.food_and_drink_allowed_note = null;
+                if (this.space.food_drink_allowed_note == '""' || this.space.food_drink_allowed_note == "\"\""){
+                    this.space.food_drink_allowed_note = null;
                 }
                 if (this.space.kettle_note == '""' || this.space.kettle_note == "\"\""){
                     this.space.kettle_note = null;
@@ -1160,16 +1277,32 @@ const campusBounds = [
                     });
 
                     // Create the marker object
-                    L.marker(space.location, {
+                    let marker = L.marker(space.location, {
                         icon: myIcon, 
                         opacity: DUMMY_SPACE_OPACITY,})
-                        .addTo(this.map);
+
+
+                    // Localise a function to update hover text
+                    let updateHoverText = (active, text) => {
+                        this.hover.active = active;
+                        this.hover.space = text;
+                    }
+                    // Add hover action to update the hover text
+                    marker.on('mouseover', function(e) {
+                        updateHoverText(true, space.name);
+                    });
+                    marker.on("mouseout", function(e) {
+                        updateHoverText(false, "")
+                    });
+
+                    marker.addTo(this.map);
 
                 });
             },
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             async updateSpace() {
+
 
                 // If the primary image has changed, upload it to the storage bucket
                 if (document.getElementById("PrimaryImageInput").files.length > 0){
@@ -1202,6 +1335,9 @@ const campusBounds = [
                     alert(this.space.name + " updated successfully")
                     console.log(data)
                 }
+
+                // Update the dummy count to force a re-render
+                this.updateCount += 1;
             },
 
             resetIconToTypeDefault(){
