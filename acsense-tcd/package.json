@@ -18,7 +18,7 @@
     "sass": "^1.69.5",
     "sass-loader": "^13.2.2",
     "snaplet": "^0.73.0",
-    "supabase": "^1.178.2"
+    "supabase": "^1.110.1"
   },
   "dependencies": {
     "@photo-sphere-viewer/autorotate-plugin": "^5.4.4",
