@@ -3,7 +3,7 @@ name: Deploy Migrations to Staging
 on:
   push:
     branches:
-      - dev
+      - main
       - supasbase-setup
   workflow_dispatch:
 
