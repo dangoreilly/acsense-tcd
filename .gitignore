@@ -1,1 +1,11 @@
-scratch-pad/
+node_modules
+*.log*
+.nuxt
+.nitro
+.cache
+.output
+.env
+dist
+.DS_Store
+.snaplet/
+.dev-assets/
