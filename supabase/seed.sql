@@ -169,24 +169,4 @@ VALUES
   ('Main Campus', '{53.3424235755702,-6.29233360290527}', '{{53.3463174455211,-6.2550289948375},{53.3416369031652,-6.25874599282782}}'),
   ('Main Campus', '{53.313756146321,-6.26095505477957}', '{{53.3463174455211,-6.2550289948375},{53.3416369031652,-6.25874599282782}}');
 
--- Setting up the dummy profiles is a little funky because of all the relationships
-
--- Seed the auth.users and auth.identities table
-insert into auth.users (instance_id, id, aud, role, email, encrypted_password, raw_app_meta_data, raw_user_meta_data, email_confirmed_at, created_at)
-VALUES
-  ('00000000-0000-0000-0000-000000000000', '18258c6b-5687-4328-baa5-12b8f18c8ef4', 'authenticated', 'authenticated', 'acsense-test-user@tcd.ie', '$2a$10$6yjGL6Snc3Yar9gEjzPoxOazeBD02mzf8WqohBWwYlrsPvO22ANbu', '{"provider":"email","providers":["email"]}', '{}', timezone('utc'::text, now()), timezone('utc'::text, now())),
-  ('00000000-0000-0000-0000-000000000000', '52eb8eab-dd2a-4487-8ff9-dea022eabf83', 'authenticated', 'authenticated', 'acsense-test-observer@tcd.ie', '$2a$10$6yjGL6Snc3Yar9gEjzPoxOazeBD02mzf8WqohBWwYlrsPvO22ANbu', '{"provider":"email","providers":["email"]}', '{}', timezone('utc'::text, now()), timezone('utc'::text, now())),
-  ('00000000-0000-0000-0000-000000000000', 'f2ea8521-6ac1-4cca-9353-a8fb890fd38c', 'authenticated', 'authenticated', 'acsense-test-admin@tcd.ie', '$2a$10$6yjGL6Snc3Yar9gEjzPoxOazeBD02mzf8WqohBWwYlrsPvO22ANbu', '{"provider":"email","providers":["email"]}', '{}', timezone('utc'::text, now()), timezone('utc'::text, now()));
-
-insert into auth.identities (id, user_id, provider_id, identity_data, provider, created_at)
-VALUES 
-  ('18258c6b-5687-4328-baa5-12b8f18c8ef4', '18258c6b-5687-4328-baa5-12b8f18c8ef4', '18258c6b-5687-4328-baa5-12b8f18c8ef4',	'{"sub": "18258c6b-5687-4328-baa5-12b8f18c8ef4"}', 'email', timezone('utc'::text, now())),
-  ('52eb8eab-dd2a-4487-8ff9-dea022eabf83', '52eb8eab-dd2a-4487-8ff9-dea022eabf83', '52eb8eab-dd2a-4487-8ff9-dea022eabf83',	'{"sub": "52eb8eab-dd2a-4487-8ff9-dea022eabf83"}', 'email', timezone('utc'::text, now())),
-  ('f2ea8521-6ac1-4cca-9353-a8fb890fd38c', 'f2ea8521-6ac1-4cca-9353-a8fb890fd38c', 'f2ea8521-6ac1-4cca-9353-a8fb890fd38c',	'{"sub": "f2ea8521-6ac1-4cca-9353-a8fb890fd38c"}', 'email', timezone('utc'::text, now()));
-
--- Then the dummy users table
-INSERT INTO PUBLIC.profiles (created_at, bld_general, bld_tabs, bld_gallery, sense_general, bld_map, email, bld_times, bld_tips, bld_further, sense_map, sense_facilities, sense_photos, user_id, is_admin, name)
-VALUES
-  ('2023-10-01 07:14:47.376721+00', true, true, true, true, true, 'acsense-test-user@tcd.ie', true, true, true, true, true, true, '18258c6b-5687-4328-baa5-12b8f18c8ef4', false, NULL),
-  ('2024-05-15 00:37:54.874856+00', false, false, false, true, false, 'acsense-test-observer@tcd.ie', false, false, false, false, false, false, '52eb8eab-dd2a-4487-8ff9-dea022eabf83', false, NULL),
-  ('2023-08-06 03:20:47.950794+00', true, true, true, true, true, 'acsense-test-admin@tcd.ie', true, true, true, true, true, true, 'f2ea8521-6ac1-4cca-9353-a8fb890fd38c', true, NULL);
+-- Seeding the users table does not work. This is handled by the seed_users.js script
