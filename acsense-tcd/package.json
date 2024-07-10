@@ -7,7 +7,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "start": "node .output/server/index.mjs"
+    "start": "node .output/server/index.mjs",
+    "gentypes": "supabase gen types typescript --local > acsense-tcd/assets/types/supabase_types.gen.ts"
   },
   "devDependencies": {
     "@nuxt/content": "^2.6.0",
@@ -18,7 +19,7 @@
     "sass": "^1.69.5",
     "sass-loader": "^13.2.2",
     "snaplet": "^0.73.0",
-    "supabase": "^1.110.1"
+    "supabase": "^1.178.2"
   },
   "dependencies": {
     "@photo-sphere-viewer/autorotate-plugin": "^5.4.4",

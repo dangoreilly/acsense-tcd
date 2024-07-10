@@ -6,7 +6,6 @@
     :buildings="buildings"
     :studentSpaces="studentSpaces"
     :spaceStyles="spaceStyles"
-    :dummy_studentSpaces="dummy_studentSpaces"
     :isDarkMode="isDarkMode"
     @openBuildingModal="openBuildingModal"
     @openSpaceModal="openSpaceModal"
@@ -161,8 +160,6 @@ import { createClient } from '@supabase/supabase-js';
     let spaceStyles = ref([]);
     let welcome = ref({});
 
-    let dummy_studentSpaces = ref([]);
-
 
     // Flyovers
     const { data: flyovers_data, error: flyover_error} = await supabase
@@ -205,19 +202,6 @@ import { createClient } from '@supabase/supabase-js';
     }
     else {
         studentSpaces = ref(studentSpaces_data);
-    }
-
-    // Dummy Student Spaces
-    const { data: dummy_studentSpaces_data, error: dummy_studentSpace_error} = await supabase
-        .from('space_dummy')
-        .select('*')
-
-    if (studentSpace_error) {
-        console.log('An error occured while fetching dummy student spaces:');
-        console.log(studentSpace_error);
-    }
-    else {
-        dummy_studentSpaces = ref(dummy_studentSpaces_data);
     }
 
     // Overlays
