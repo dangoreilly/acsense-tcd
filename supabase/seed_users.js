@@ -14,43 +14,35 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     }
   });
 
-// Array of user IDs
-const userIds = [
-    "18258c6b-5687-4328-baa5-12b8f18c8ef4",
-    "52eb8eab-dd2a-4487-8ff9-dea022eabf83",
-    "f2ea8521-6ac1-4cca-9353-a8fb890fd38c"
-];
+//   Define the users
+let users = [
+    { 
+        email: "user@acsense.ie"
+    },
+    { 
+        email: "admin@acsense.ie"
+    },
+    { 
+        email: "superadmin@acsense.ie"
+    },
+]
 
-// Function to update user emails
-async function updateEmails() {
-    for (const id of userIds) {
-        const email = `email-${id}@test.ie`;
+// Create the users
+async function createUsers() {
+    for (const user of users) {
 
-        // Update user email
-        const { data: user, error } = await supabase.auth.admin.updateUserById(
-            id,
-            { password: "Password123" }
-          )
+        const { data, error } = await supabase.auth.admin.createUser({
+            email: user.email,
+            password: "password123",
+            email_confirm: true
+          })
 
         if (error) {
-            console.error(`Error updating email for user with ID ${id}:`, error);
+            console.error(`Error creating user ${user.email}:`, error);
         } else {
-            console.log(`Email updated for user with ID ${id}`);
+            console.log(`Created user ${user.email}`);
         }
     }
 }
 
-// Function to list users
-async function listUsers() {
-    const { data: { users }, error } = await supabase.auth.admin.listUsers()
-
-    if (error) {
-        console.error('Error listing users:', error);
-    } else {
-        console.log('Users:', users);
-    }
-}
-
-// Call the function to update emails
-// updateEmails();
-listUsers();
+createUsers();
