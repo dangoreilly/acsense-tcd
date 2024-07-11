@@ -1,1 +1,3 @@
-scratch-pad/
+node_modules/*
+scratch-pad/*
+.env
