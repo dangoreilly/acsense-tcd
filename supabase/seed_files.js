@@ -92,14 +92,24 @@ async function uploadFiles(files, bucket){
         if (error) {
             console.error("["+(i+1)+"/"+n+"] Error uploading file: ", bucket+"/"+files[i]);
             console.error(error);
+            console.error("Retrying...")
+            err_count++;
             // Retry upload, maximum of 3 times
             if (err_count < 3) {
                 i = i - 1;
             }
+            else {
+                console.error("Maximum retries attempted. Skipping file")
+            }
             // Timeout for half a second to avoid rate limiting
             await new Promise(r => setTimeout(r, 500));
         } else {
-            // console.log("["+(i+1)+"/"+n+"] File uploaded: ", bucket+"/"+files[i]);
+            // If there has been an error, report that the retry was successful
+            if (err_count > 0){
+                console.log("Retry successful")
+            }
+            // Reset the error count
+            err_count = 0
         }
     }
 
@@ -119,11 +129,9 @@ async function clearBucket(bucket) {
 
 async function seed_files() {
 
-    // First clear the contents of the buckets
-    // await clearBucket("floorplans");
-    // await clearBucket("icons");
-    // await clearBucket("overlays");
-    // Then fill them back up
+    // Give the server a few ticks to get the buckets set up that were just created in the SQL seed step
+    await new Promise(r => setTimeout(r, 500));
+    // Then actually fill them
     await uploadFiles(floorplans, "floorplans");
     await uploadFiles(icons, "icons");
     await uploadFiles(overlays, "overlays");
