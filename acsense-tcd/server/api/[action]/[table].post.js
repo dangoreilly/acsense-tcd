@@ -23,14 +23,11 @@ export default defineEventHandler(async (event) => {
 
     console.log(`Performing ${action} operation on ${table} table`);
     // console.log(`Data:`, data);
-    console.log(`Target:`, target);
+    // console.log(`Target:`, target);
     // console.log(`JWT:`, jwt);
 
     // Check the permissions of the user based on the JWT token
     const { data: currentUser, error: jwt_error } = await supabase.auth.getUser(jwt);
-
-    // console.log(`Current user:`, currentUser);
-    // return currentUser;
 
     if (jwt_error) {
         // setResponseStatus(event, 401);
@@ -41,7 +38,6 @@ export default defineEventHandler(async (event) => {
     }
 
     const user_id = currentUser.user.id;
-    // console.log(`User ID:`, user_id);
 
     // Then look up the users permissions in the profiles table
     let permissions = null;
@@ -60,7 +56,16 @@ export default defineEventHandler(async (event) => {
         })
         // })
     }
-    permissions = user_permissions//.permissions;
+    permissions = user_permissions
+
+    // Get the email of the superadmin from the runtime config
+    const superadminEmail = useRuntimeConfig().superAdminEmail;
+
+    // If the user is the superadmin, then they have admin permissions
+    if (permissions.email == superadminEmail) {
+        permissions.is_admin = true;
+        permissions.is_super_admin = true;
+    }
 
     let adminRestrictedTables = ['profiles', 'logs'];
 
@@ -71,6 +76,12 @@ export default defineEventHandler(async (event) => {
             statusCode: 403,
             statusMessage: 'Forbidden'
         })
+    }
+
+    // SPECIAL CASE: Is the user an admin and requesting the superadmin profile?
+    if (table == "superadmin" && permissions.is_admin) {
+        console.log("Superadmin email fetched:", superadminEmail)
+        return superadminEmail;
     }
 
     // Perform the Supabase operation based on the action and table
@@ -92,11 +103,11 @@ export default defineEventHandler(async (event) => {
             }
 
             // Special case for the profiles table: Remove the superadmin user from the results
-            if (table == 'profiles') {
-                let superAdminEmail = useRuntimeConfig().superAdminEmail;
-                console.log(`Super admin email: ${superAdminEmail}`);
-                return selectedData.filter((profile) => profile.email != superAdminEmail);
-            }
+            // if (table == 'profiles') {
+            //     let superAdminEmail = useRuntimeConfig().superAdminEmail;
+            //     console.log(`Super admin email: ${superAdminEmail}`);
+            //     return selectedData.filter((profile) => profile.email != superAdminEmail);
+            // }
 
             return selectedData;
 

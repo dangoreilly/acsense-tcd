@@ -42,7 +42,7 @@
                 <div v-if="!currentUser.is_admin" class="mainMatter-admin">
                     <!-- Section for viewing your own permissions - there is no edit functionality -->
                     <p>Below are the permissions associated with your Acsense account</p>
-                    <AdminUserPermissionsEdit :permissions="currentUserPermissions" :disabled="true"/> <!--  -->
+                    <!-- <AdminUserPermissionsEdit :permissions="currentUserPermissions" :disabled="true"/>  -->
                     
                 </div>
                 <div v-else class="mainMatter-admin">
@@ -60,7 +60,7 @@
                                     {{ profile.email }}
                                 </template>
                                 <template #AccordionStepBody>
-                                    <AdminUserPermissionsEdit  :permissions="profile"/>
+                                    <!-- <AdminUserPermissionsEdit  :permissions="profile"/> -->
                                 </template> 
                             </AccordionStep>
                         </div>
@@ -175,121 +175,142 @@ export default {
             else {
                 console.log("Contributors:")
                 console.log(contributors)
-                // this.contributors = contributors;
+                this.contributors = contributors;
                 // Process the profile data into a permissions array
-                this.contributors = contributors.map( (profile:UserProfile) => {
-                    return this.makeUserPermissionsArray(profile);
-                })
+                // this.contributors = contributors.map( (profile:UserProfile) => {
+                //     return this.makeUserPermissionsArray(profile);
+                // })
             }
         },
 
         async getCurrentUserPermissions() {
+
+            // First, we can check if the user is the superadmin
+            // Get the current session access token
+            const access_token:string = await this.getSessionAccessToken();
+            const { data: superadmin, error: superadmin_fetch_error } = await permissionedFetch(access_token, "superadmin");
+
+            if (superadmin_fetch_error) {
+                console.error("Error getting superadmin status: ", superadmin_fetch_error)
+                console.error(superadmin_fetch_error)
+                alert(superadmin_fetch_error.message)
+                throw superadmin_fetch_error
+            }
+            else {
+                console.log("Superadmin:")
+                console.log(superadmin)
+                if (superadmin == this.currentUser.email){
+                    this.currentUser.is_super_admin = true;
+                }
+            }
             
             // To get to this page, the user must be logged in
             // So we can just just select * from the contributors list
             // The RLS policies on supabase will handle the selection
 
-            let { data: user, error } = await this.supabase
+            let { data: user, error: user_permissions_error } = await this.supabase
                 .from('profiles')
                 .select('*')
                 .single()
-            if (error) {
+            if (user_permissions_error) {
                 console.error("Error getting user permissions:")
-                console.error(error)
-                alert(error.message)
-                throw error
+                console.error(user_permissions_error)
+                alert(user_permissions_error.message)
+                throw user_permissions_error
             }
             else {
                 
                 // Copy the user object to avoid reactivity issues
                 this.currentUser = JSON.parse( JSON.stringify(user) );
 
+                // Check if the user is the superadmin
+
                 // Temporary hard code for development
                 // this.currentUser.is_admin = false;
 
-                this.currentUserPermissions = this.makeUserPermissionsArray(user);
+                // this.currentUserPermissions = this.makeUserPermissionsArray(user);
                 
             }
 
         },
 
         
-        makeUserPermissionsArray(user:UserProfile){
+        // makeUserPermissionsArray(user:UserProfile){
 
-            let userPermissionsArray = {} as PermissionsArray;
+        //     let userPermissionsArray = {} as PermissionsArray;
 
-            userPermissionsArray = {
-                    email: user.email,
-                    uuid: user.user_id,
-                    isAdmin: user.is_admin,
-                    // Categories of permissions
-                    buildings: [
-                        {   
-                            key: "bld_general",
-                            value: user.bld_general,
-                            label: permissionsKey.bld_general
-                        },
-                        {   
-                            key: "bld_tabs",
-                            value: user.bld_tabs,
-                            label: permissionsKey.bld_tabs
-                        },
-                        {   
-                            key: "bld_gallery",
-                            value: user.bld_gallery,
-                            label: permissionsKey.bld_gallery
-                        },
-                        {   
-                            key: "bld_times",
-                            value: user.bld_times,
-                            label: permissionsKey.bld_times
-                        },
-                        {   
-                            key: "bld_tips",
-                            value: user.bld_tips,
-                            label: permissionsKey.bld_tips
-                        },
-                        {   
-                            key: "bld_further",
-                            value: user.bld_further,
-                            label: permissionsKey.bld_further
-                        },
-                        {   
-                            key: "bld_map",
-                            value: user.bld_map,
-                            label: permissionsKey.bld_map
-                        }
-                    ],
-                    spaces: [
-                        {   
-                            key: "sense_general",
-                            value: user.sense_general,
-                            label: permissionsKey.sense_general
-                        },
-                        {   
-                            key: "sense_map",
-                            value: user.sense_map,
-                            label: permissionsKey.sense_map
-                        },
-                        {   
-                            key: "sense_facilities",
-                            value: user.sense_facilities,
-                            label: permissionsKey.sense_facilities
-                        },
-                        {   
-                            key: "sense_photos",
-                            value: user.sense_photos,
-                            label: permissionsKey.sense_photos
-                        }
-                    ],
-                    map_misc: [],
-                    general: []
+        //     userPermissionsArray = {
+        //             email: user.email,
+        //             uuid: user.user_id,
+        //             isAdmin: user.is_admin,
+        //             // Categories of permissions
+        //             buildings: [
+        //                 {   
+        //                     key: "bld_general",
+        //                     value: user.bld_general,
+        //                     label: permissionsKey.bld_general
+        //                 },
+        //                 {   
+        //                     key: "bld_tabs",
+        //                     value: user.bld_tabs,
+        //                     label: permissionsKey.bld_tabs
+        //                 },
+        //                 {   
+        //                     key: "bld_gallery",
+        //                     value: user.bld_gallery,
+        //                     label: permissionsKey.bld_gallery
+        //                 },
+        //                 {   
+        //                     key: "bld_times",
+        //                     value: user.bld_times,
+        //                     label: permissionsKey.bld_times
+        //                 },
+        //                 {   
+        //                     key: "bld_tips",
+        //                     value: user.bld_tips,
+        //                     label: permissionsKey.bld_tips
+        //                 },
+        //                 {   
+        //                     key: "bld_further",
+        //                     value: user.bld_further,
+        //                     label: permissionsKey.bld_further
+        //                 },
+        //                 {   
+        //                     key: "bld_map",
+        //                     value: user.bld_map,
+        //                     label: permissionsKey.bld_map
+        //                 }
+        //             ],
+        //             spaces: [
+        //                 {   
+        //                     key: "sense_general",
+        //                     value: user.sense_general,
+        //                     label: permissionsKey.sense_general
+        //                 },
+        //                 {   
+        //                     key: "sense_map",
+        //                     value: user.sense_map,
+        //                     label: permissionsKey.sense_map
+        //                 },
+        //                 {   
+        //                     key: "sense_facilities",
+        //                     value: user.sense_facilities,
+        //                     label: permissionsKey.sense_facilities
+        //                 },
+        //                 {   
+        //                     key: "sense_photos",
+        //                     value: user.sense_photos,
+        //                     label: permissionsKey.sense_photos
+        //                 }
+        //             ],
+        //             map_misc: [],
+        //             general: []
     
-                }
+        //         }
 
-            return userPermissionsArray;
+        //     return userPermissionsArray;
 
-        },
+        // },
 
         
 

@@ -18,44 +18,455 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 let users = [
     { 
         email: "user.all@acsense.ie",
-        bld_general: true,
-        bld_tabs: true,
-        bld_gallery: true,
-        sense_general: true,
-        bld_map: true,
-        bld_times: true,
-        bld_tips: true,
-        bld_further: true,
-        sense_map: true,
-        sense_facilities: true,
-        sense_photos: true,
+        is_admin: false,
+        buildings: {
+            general: {
+                name: true,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: true,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: true,
+                sensory: true
+            },
+            gallery: {
+                images: true,
+                captions: true,
+                alt: true
+            },
+            times: true,
+            tips: true,
+            further: true,
+            map: {
+                labels: true,
+                location: true
+            }
+        },
+        spaces: {
+            general: {
+                name: true,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: true,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: true,
+                sensory: true
+            },
+            gallery: {
+                images: true,
+                captions: true,
+                alt: true
+            },
+            times: true,
+            tips: true,
+            further: true,
+            map: {
+                labels: true,
+                location: true
+            }
+        },
     },
     { 
-        email: "user.buildings@acsense.ie",
-        bld_general: true,
-        bld_tabs: true,
-        bld_gallery: true,
-        bld_map: true,
-        bld_times: true,
-        bld_tips: true,
-        bld_further: true,
+        email: "user.buildings@acsense.ie",  
+        is_admin: false,
+        buildings: {
+            general: {
+                name: true,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: true,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: true,
+                sensory: true
+            },
+            gallery: {
+                images: true,
+                captions: true,
+                alt: true
+            },
+            times: true,
+            tips: true,
+            further: true,
+            map: {
+                labels: true,
+                location: true
+            }
+        }
     },
     { 
         email: "user.spaces@acsense.ie",
-        sense_general: true,
-        sense_map: true,
-        sense_facilities: true,
-        sense_photos: true,
+        is_admin: false,
+        buildings: {
+            general: {
+                name: false,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: false,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: false,
+                sensory: false
+            },
+            gallery: {
+                images: false,
+                captions: false,
+                alt: false
+            },
+            times: false,
+            tips: false,
+            further: false,
+            map: {
+                labels: false,
+                location: false
+            }
+        },
+        spaces: {
+            general: {
+                name: true,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: true,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: true,
+                sensory: true
+            },
+            gallery: {
+                images: true,
+                captions: true,
+                alt: true
+            },
+            times: true,
+            tips: true,
+            further: true,
+            map: {
+                labels: true,
+                location: true
+            }
+        },
+    },
+    { 
+        email: "user.mix1@acsense.ie",
+        is_admin: false,
+        buildings: {
+            general: {
+                name: false,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: false,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: false,
+                sensory: true
+            },
+            gallery: {
+                images: false,
+                captions: true,
+                alt: true
+            },
+            times: false,
+            tips: true,
+            further: false,
+            map: {
+                labels: true,
+                location: false
+            }
+        },
+        spaces: {
+            general: {
+                name: true,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: true,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: true,
+                sensory: false
+            },
+            gallery: {
+                images: true,
+                captions: false,
+                alt: true
+            },
+            times: true,
+            tips: false,
+            further: true,
+            map: {
+                labels: false,
+                location: true
+            }
+        },
+    },
+    { 
+        email: "user.mix2@acsense.ie",
+        is_admin: false,
+        spaces: {
+            general: {
+                name: false,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: false,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: false,
+                sensory: true
+            },
+            gallery: {
+                images: false,
+                captions: true,
+                alt: true
+            },
+            times: false,
+            tips: true,
+            further: false,
+            map: {
+                labels: true,
+                location: false
+            }
+        },
+        buildings: {
+            general: {
+                name: true,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: true,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: true,
+                sensory: false
+            },
+            gallery: {
+                images: true,
+                captions: false,
+                alt: true
+            },
+            times: true,
+            tips: false,
+            further: true,
+            map: {
+                labels: false,
+                location: true
+            }
+        },
     },
     { 
         email: "admin@acsense.ie",
         is_admin: true,
+        buildings: {
+            general: {
+                name: true,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: true,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: true,
+                sensory: true
+            },
+            gallery: {
+                images: true,
+                captions: true,
+                alt: true
+            },
+            times: true,
+            tips: true,
+            further: true,
+            map: {
+                labels: true,
+                location: true
+            }
+        },
+        spaces: {
+            general: {
+                name: true,
+                aka: true,
+                desc: true,
+            },
+            primary_image: {
+                image: true,
+                alt: true
+            },
+            tabs: {
+                physical: true,
+                wayfinding: true,
+                sensory: true
+            },
+            gallery: {
+                images: true,
+                captions: true,
+                alt: true
+            },
+            times: true,
+            tips: true,
+            further: true,
+            map: {
+                labels: true,
+                location: true
+            }
+        },
     },
     { 
         email: "observer@acsense.ie",
+        is_admin: false,
+        buildings: {
+            general: {
+                name: false,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: false,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: false,
+                sensory: false
+            },
+            gallery: {
+                images: false,
+                captions: false,
+                alt: false
+            },
+            times: false,
+            tips: false,
+            further: false,
+            map: {
+                labels: false,
+                location: false
+            }
+        },
+        spaces: {
+            general: {
+                name: false,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: false,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: false,
+                sensory: false
+            },
+            gallery: {
+                images: false,
+                captions: false,
+                alt: false
+            },
+            times: false,
+            tips: false,
+            further: false,
+            map: {
+                labels: false,
+                location: false
+            }
+        },
     },
     { 
         email: "superadmin@acsense.ie",
+        is_admin: false,
+        buildings: {
+            general: {
+                name: false,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: false,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: false,
+                sensory: false
+            },
+            gallery: {
+                images: false,
+                captions: false,
+                alt: false
+            },
+            times: false,
+            tips: false,
+            further: false,
+            map: {
+                labels: false,
+                location: false
+            }
+        },
+        spaces: {
+            general: {
+                name: false,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: false,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: false,
+                sensory: false
+            },
+            gallery: {
+                images: false,
+                captions: false,
+                alt: false
+            },
+            times: false,
+            tips: false,
+            further: false,
+            map: {
+                labels: false,
+                location: false
+            }
+        },
     },
 ]
 
