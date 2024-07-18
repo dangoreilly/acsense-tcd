@@ -483,12 +483,15 @@ async function createUsers() {
 
         if (error) {
             console.error(`Error creating user ${users[i].email}:`, error);
+            break;
         } else {
-            console.log(`Created user ${users[i].email}`);
+            // console.log(`Created user ${users[i].email}`);
+            process.stdout.write(`Created user [${i+1}/${users.length}](${users[i].email})                     \r`);
             // Log the new user ID so we can use it in the profiles table
             users[i].user_id = data.user.id;
         }
     }
+    console.log(`[${i}/${users.length}] users created                         `);
 }
 
 async function createUserProfiles(){
@@ -501,11 +504,13 @@ async function createUserProfiles(){
 
         if (error) {
             console.error(`Error creating profile for ${users[i].email}:`, error);
+            break;
         } else {
-            console.log(`Created profile for ${users[i].email}`);
+            // console.log(`Created profile for ${users[i].email}`);
+            process.stdout.write(`Created profile [${i+1}/${users.length}](${users[i].email})                     \r`);
         }
     }
-
+    console.log(`[${i}/${users.length}] profiles created                         `);
 }
 
 async function seed(){
