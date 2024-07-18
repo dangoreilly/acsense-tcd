@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import pkg from './package.json'
+
 export default defineNuxtConfig({
     routeRules: {
         // '/info/*': {ssr: true},
@@ -27,6 +29,7 @@ export default defineNuxtConfig({
             // override with env var
             supabaseUrl: process.env.NUXT_SUPABASE_URL,
             supabaseKey: process.env.NUXT_SUPABASE_KEY,
+            version: pkg.version,
         },
         // Only available serverside
         plausibleAPIKey: process.env.NUXT_PLAUSIBLE_KEY,
