@@ -42,7 +42,7 @@ import Chart from 'chart.js/auto';
 // const supabaseKey = useRuntimeConfig().public.supabaseKey;
 // const supabase = createClient(supabaseUrl, supabaseKey)
 
-const { supabase, session } = await adminSupabaseInit();
+const supabase = adminSupabaseInit();
 
 async function getAnalytics() {
     // Pull the timeseries data from the get/analytics endpoint
