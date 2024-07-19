@@ -20,6 +20,7 @@ export interface UserProfile {
     email: string,
     user_id: string,
     is_admin: boolean,
+    is_super_admin?: boolean,
     buildings: PermissionsObject,
     spaces: PermissionsObject,
 }

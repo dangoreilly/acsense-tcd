@@ -478,6 +478,11 @@ useHead({
 });
 
 
+// const { supabase, session } = await adminSupabaseInit();
+
+// // Add the supabase client to the nuxt app
+// const nuxtApp = useNuxtApp();
+// nuxtApp.provide('supabase', supabase);
 
 </script>
 
@@ -498,14 +503,27 @@ import {createClient} from '@supabase/supabase-js';
                     alt: "",
                     caption: "",
                 },
+                currentUser: {},
             }
         },
         created() {
             // Initialise the supabase client
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
+            // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            // this.supabase = createClient(supabaseUrl, supabaseKey)
 
+            // const { data, error } = this.supabase.auth.getSession();
+
+            // this.session = data;
+            
+            // Get the supabase client from the nuxt app
+            // const nuxtApp = useNuxtApp();
+            
+            // // this.startSupabase();
+            this.supabase = adminSupabaseInit();
+            this.getUser();
+            
+            
             // this.mapInit();
             
         },
@@ -537,6 +555,13 @@ import {createClient} from '@supabase/supabase-js';
             
         },
         methods: {
+            // Resolve the promise of the user object
+            // So that we can check the permissions on it
+            async getUser(){
+                this.currentUser = JSON.parse(JSON.stringify(await getCurrentUserPermissions()));
+            },
+
+
             // Create the map
             async mapInit(){
                 // Initialise the map
