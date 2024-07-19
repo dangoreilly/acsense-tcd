@@ -42,7 +42,7 @@
                 <div v-if="!currentUser.is_admin" class="mainMatter-admin">
                     <!-- Section for viewing your own permissions - there is no edit functionality -->
                     <p>Below are the permissions associated with your Acsense account</p>
-                    <!-- <AdminUserPermissionsEdit :permissions="currentUserPermissions" :disabled="true"/>  -->
+                    <AdminUserPermissionsEdit :user="currentUser" :disabled="true"/> 
                     
                 </div>
                 <div v-else class="mainMatter-admin">
@@ -82,9 +82,9 @@ import permissionsKey from '~/assets/permissionsKey';
 export default {
     data() {
         return {
-            currentUser: {} as any,
-            currentUserPermissions: {} as PermissionsArray,
-            contributors: [] as any[],
+            currentUser: {} as UserProfile,
+            // currentUserPermissions: {} as PermissionsArray,
+            contributors: [] as UserProfile[],
             supabase: {} as any,
             permissionsHaveChanged: false,
         };
@@ -184,54 +184,7 @@ export default {
         },
 
         async getCurrentUserPermissions() {
-
-            // First, we can check if the user is the superadmin
-            // Get the current session access token
-            const access_token:string = await this.getSessionAccessToken();
-            const { data: superadmin, error: superadmin_fetch_error } = await permissionedFetch(access_token, "superadmin");
-
-            if (superadmin_fetch_error) {
-                console.error("Error getting superadmin status: ", superadmin_fetch_error)
-                console.error(superadmin_fetch_error)
-                alert(superadmin_fetch_error.message)
-                throw superadmin_fetch_error
-            }
-            else {
-                console.log("Superadmin:")
-                console.log(superadmin)
-                if (superadmin == this.currentUser.email){
-                    this.currentUser.is_super_admin = true;
-                }
-            }
-            
-            // To get to this page, the user must be logged in
-            // So we can just just select * from the contributors list
-            // The RLS policies on supabase will handle the selection
-
-            let { data: user, error: user_permissions_error } = await this.supabase
-                .from('profiles')
-                .select('*')
-                .single()
-            if (user_permissions_error) {
-                console.error("Error getting user permissions:")
-                console.error(user_permissions_error)
-                alert(user_permissions_error.message)
-                throw user_permissions_error
-            }
-            else {
-                
-                // Copy the user object to avoid reactivity issues
-                this.currentUser = JSON.parse( JSON.stringify(user) );
-
-                // Check if the user is the superadmin
-
-                // Temporary hard code for development
-                // this.currentUser.is_admin = false;
-
-                // this.currentUserPermissions = this.makeUserPermissionsArray(user);
-                
-            }
-
+            this.currentUser = await getCurrentUserPermissions();
         },
 
         
