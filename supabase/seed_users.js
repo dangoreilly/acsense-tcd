@@ -106,7 +106,35 @@ let users = [
                 labels: true,
                 location: true
             }
-        }
+        },
+        spaces: {
+            general: {
+                name: false,
+                aka: false,
+                desc: false,
+            },
+            primary_image: {
+                image: false,
+                alt: false
+            },
+            tabs: {
+                physical: false,
+                wayfinding: false,
+                sensory: false
+            },
+            gallery: {
+                images: false,
+                captions: false,
+                alt: false
+            },
+            times: false,
+            tips: false,
+            further: false,
+            map: {
+                labels: false,
+                location: false
+            }
+        },
     },
     { 
         email: "user.spaces@acsense.ie",
