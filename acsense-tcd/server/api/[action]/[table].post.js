@@ -79,9 +79,16 @@ export default defineEventHandler(async (event) => {
     }
 
     // SPECIAL CASE: Is the user an admin and requesting the superadmin profile?
-    if (table == "superadmin" && permissions.is_admin) {
-        console.log("Superadmin email fetched:", superadminEmail)
-        return superadminEmail;
+    if (table == "superadmin") {
+        if(permissions.is_admin) {
+            console.log("Superadmin email fetched:", superadminEmail)
+            return superadminEmail;
+        }
+        else {
+            // If a non-admin user is trying to access the superadmin, just return a string that
+            // won't match with their email address.
+            return "Forbidden"
+        }
     }
 
     // Perform the Supabase operation based on the action and table
