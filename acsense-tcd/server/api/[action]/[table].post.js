@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 export default defineEventHandler(async (event) => {
     // Log the current time
     // console.log("Request received at POST /api/[table]");
-    console.log(`Current time: ${new Date().toISOString()}`)
+    // console.log(`Current time: ${new Date().toISOString()}`)
 
     // throw createError({
     //     statusCode: 500,
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     const { jwt, data, target, select} = body;
 
 
-    console.log(`Performing ${action} operation on ${table} table`);
+    // console.log(`Performing ${action} operation on ${table} table`);
     // console.log(`Data:`, data);
     // console.log(`Target:`, target);
     // console.log(`JWT:`, jwt);
@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
     // SPECIAL CASE: Is the user an admin and requesting the superadmin profile?
     if (table == "superadmin") {
         if(permissions.is_admin) {
-            console.log("Superadmin email fetched:", superadminEmail)
+            // console.log("Superadmin email fetched:", superadminEmail)
             return superadminEmail;
         }
         else {
@@ -109,12 +109,20 @@ export default defineEventHandler(async (event) => {
                 })
             }
 
-            // Special case for the profiles table: Remove the superadmin user from the results
-            // if (table == 'profiles') {
-            //     let superAdminEmail = useRuntimeConfig().superAdminEmail;
-            //     console.log(`Super admin email: ${superAdminEmail}`);
-            //     return selectedData.filter((profile) => profile.email != superAdminEmail);
-            // }
+            // Special case for the profiles table: Remove the superadmin from the list
+            if (table == 'profiles') {
+                let profiles = JSON.parse(JSON.stringify(selectedData));
+                let superAdminEmail = useRuntimeConfig().superAdminEmail;
+                // console.log("Superadmin email fetched:", superAdminEmail)
+                for (let i = 0; i < selectedData.length; i++) {
+                    // console.log(selectedData[i].email);
+                    if (selectedData[i].email == superAdminEmail) {
+                        profiles.splice(i, 1);
+                        break;
+                    }
+                }
+                return profiles;
+            }
 
             return selectedData;
 
