@@ -38,34 +38,37 @@
                 </div>
 
                 <!-- Main Matter -->
-                <!-- The main matter will depend on if the user is an admin -->
-                <div v-if="!currentUser.is_admin" class="mainMatter-admin">
-                    <!-- Section for viewing your own permissions - there is no edit functionality -->
-                    <p>Below are the permissions associated with your Acsense account</p>
-                    <AdminUserPermissionsEdit :user="currentUser" :disabled="true"/> 
-                    
-                </div>
-                <div v-else class="mainMatter-admin">
-                    <!-- Section for admins to edit user permissions, add/remove users etc -->
-                    <p>Manage the permissions of contributors</p>
-                    <button class="btn btn-warning" @click="getContributors">Get Contributors</button>
+                 <!-- Add in a guard to avoid annoying hydration issues -->
+                <div v-if="loaded">
+                    <!-- The main matter will depend on if the user is an admin -->
+                    <div v-if="!currentUser.is_admin" class="mainMatter-admin">
+                        <!-- Section for viewing your own permissions - there is no edit functionality -->
+                        <p>Below are the permissions associated with your Acsense account</p>
+                        <p>{{ currentUser }}</p>
+                        <AdminUserPermissionsEdit :user="currentUser" :disabled="true"/> 
+                        
+                    </div>
+                    <div v-else class="mainMatter-admin">
+                        <!-- Section for admins to edit user permissions, add/remove users etc -->
+                        <p>Manage the permissions of contributors</p>
+                        <button class="btn btn-warning" @click="getContributors">Get Contributors</button>
 
-                    <!-- Loop through all the profiles apart from the current user -->
-                    <div class="accordion">
-                        <div v-for="(profile, index) in contributors">
-                            <!-- There's no reason for an admin to be editing their own profile -->
-                            <!-- They can really only cause problems doing that -->
-                            <AccordionStep v-if="profile.email != currentUser.email">
-                                <template #AccordionStepHeader>
-                                    {{ profile.email }}
-                                </template>
-                                <template #AccordionStepBody>
-                                    <!-- <AdminUserPermissionsEdit  :permissions="profile"/> -->
-                                </template> 
-                            </AccordionStep>
+                        <!-- Loop through all the profiles apart from the current user -->
+                        <div class="accordion">
+                            <div v-for="(profile, index) in contributors">
+                                <!-- There's no reason for an admin to be editing their own profile -->
+                                <!-- They can really only cause problems doing that -->
+                                <AccordionStep v-if="profile.email != currentUser.email">
+                                    <template #AccordionStepHeader>
+                                        {{ profile.email }}
+                                    </template>
+                                    <template #AccordionStepBody>
+                                        <AdminUserPermissionsEdit  :user="profile" :disabled="profile.is_admin && !currentUser.is_super_admin"/>
+                                    </template> 
+                                </AccordionStep>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </main>
@@ -74,9 +77,9 @@
 
 <script lang="ts">
 import {createClient} from '@supabase/supabase-js';
-import type { PermissionsArray } from '~/assets/types/permissions';
+// import type { PermissionsArray } from '~/assets/types/permissions';
 import type { UserProfile } from '~/assets/types/permissions';
-import permissionsKey from '~/assets/permissionsKey';
+// import permissionsKey from '~/assets/permissionsKey';
 // import { sha256 } from 'crypto-hash';
 
 export default {
@@ -87,6 +90,7 @@ export default {
             contributors: [] as UserProfile[],
             supabase: {} as any,
             permissionsHaveChanged: false,
+            loaded: false
         };
     },
     created() {
@@ -175,7 +179,7 @@ export default {
             else {
                 console.log("Contributors:")
                 console.log(contributors)
-                this.contributors = contributors;
+                this.contributors = JSON.parse(JSON.stringify(contributors));
                 // Process the profile data into a permissions array
                 // this.contributors = contributors.map( (profile:UserProfile) => {
                 //     return this.makeUserPermissionsArray(profile);
@@ -184,7 +188,17 @@ export default {
         },
 
         async getCurrentUserPermissions() {
+            // Keep requesting a user object until it is returned
+            // This is to avoid SSR related issues
             this.currentUser = await getCurrentUserPermissions();
+            // while (this.currentUser.email == undefined) {
+            //     console.log("Waiting for current user to be initialised")
+            //     await new Promise(resolve => setTimeout(resolve, 100));
+            //     this.currentUser = await getCurrentUserPermissions();
+            // }
+            this.loaded = true;
+            console.log("Current user:")
+            console.log(this.currentUser)
         },
 
         

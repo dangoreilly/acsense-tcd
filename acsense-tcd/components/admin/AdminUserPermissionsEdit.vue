@@ -32,20 +32,21 @@
         <div class="mb-3">
             <!-- Badge to show admin status -->
             <small 
-            v-if="modifiedPermissions.isAdmin"
+            v-if="modifiedPermissions.is_admin"
             class="d-inline-flex me-3 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
             User is an admin
             </small>
             <!-- Add/remove admin status -->
             <button 
-            class="btn btn-outline-danger"
-            @click="updateAdminStatus">
-                {{ modifiedPermissions.isAdmin ? "Remove admin status" : "Grant admin status" }}
+            v-if="isSuperAdmin"
+            class="btn btn-outline-danger">
+            <!-- @click="updateAdminStatus"> -->
+                {{ modifiedPermissions.is_admin ? "Remove admin status" : "Grant admin status" }}
             </button>
         </div>
 
         <!-- Cards to divide permissions into Building, Spaces, Map, General categories -->
-        <div class="card-grid">
+        <div class="card-grid" v-if="modifiedPermissions">
             <!-- Buildings -->
             <div class="card">
                 <div class="card-header">
@@ -53,16 +54,157 @@
                 </div>
                 <div class="card-body">
                     <!-- Switches for all the building permissions -->
-                    <div class="form-check" v-for="permission in modifiedPermissions.buildings">
-                        <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        :id="permission.key"
-                        v-model="permission.value"
-                        :disabled="disabled || modifiedPermissions.isAdmin">
-                        <label class="form-check-label" :for="permission.key" :title="permission.key">
-                            {{ permission.label }}
-                        </label>
+                    <!-- General -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.general.name"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.general.name != user.buildings.general.name}"> 
+                            Modify the name 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.general.aka"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.general.aka != user.buildings.general.aka}"> 
+                            Modify the "aka" field 
+                        </label>  
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.general.desc"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.general.desc != user.buildings.general.desc}"> 
+                            Modify the description 
+                        </label>  
+                    </div>
+                    <!-- Primary Image -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.primary_image.image"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.primary_image.image != user.buildings.primary_image.image}"> 
+                            Upload new Primary Image 
+                        </label>  
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.primary_image.alt"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.primary_image.alt != user.buildings.primary_image.alt}"> 
+                            Modify Primary Image alt text 
+                        </label>  
+                    </div>
+                    <!-- Tabs -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.tabs.physical"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.tabs.physical != user.buildings.tabs.physical}"> 
+                            Modify the "Physical Access" tab in the infobox 
+                        </label>   
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.tabs.wayfinding"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.tabs.wayfinding != user.buildings.tabs.wayfinding}"> 
+                            Modify the "Wayfinding" tab in the infobox 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.tabs.sensory"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.tabs.sensory != user.buildings.tabs.sensory}"> 
+                            Modify the "Sensory Information" tab in the infobox 
+                        </label> 
+                    </div>
+                    <!-- Gallery -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.gallery.images"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.gallery.images != user.buildings.gallery.images}"> 
+                            Upload/Delete Gallery images 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.gallery.captions"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.gallery.captions != user.buildings.gallery.captions}"> 
+                            Modify Gallery Image captions 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.gallery.alt"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.gallery.alt != user.buildings.gallery.alt}"> 
+                            Modify Gallery Image Alt Text 
+                        </label> 
+                    </div>
+                    <!-- Times -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.times"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.times != user.buildings.times}"> 
+                            Modify Opening Times box 
+                        </label> 
+                    </div>
+                    <!-- Tips -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.tips"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.tips != user.buildings.tips}"> 
+                            Add/Remove/Modify Access Tips 
+                        </label> 
+                    </div>
+                    <!-- Further Information -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.further"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.further != user.buildings.further}"> 
+                            Modify "Further Information & Links" section 
+                        </label> 
+                    </div>
+                    <!-- Map -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.map.labels"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.map.labels != user.buildings.map.labels}"> 
+                            Modify Space Type and icon 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.map.location"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.map.location != user.buildings.map.location}"> 
+                            Modify space location on map and building 
+                        </label> 
                     </div>
                 </div>
             </div>
@@ -75,67 +217,198 @@
                 
                 <div class="card-body">
                     <!-- Switches for all the Student Spaces permissions -->
-                    <div class="form-check" v-for="permission in modifiedPermissions.spaces">
-                        <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        :id="permission.key"
-                        v-model="permission.value"
-                        :disabled="disabled || modifiedPermissions.isAdmin">
-                        <label class="form-check-label" :for="permission.key" :title="permission.key">
-                            {{ permission.label }}
-                        </label>
+                    <!-- General -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.general.name"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.general.name != user.spaces.general.name}"> 
+                            Modify the name 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.general.aka"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.general.aka != user.spaces.general.aka}"> 
+                            Modify the "aka" field 
+                        </label>  
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.general.desc"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.general.desc != user.spaces.general.desc}"> 
+                            Modify the description 
+                        </label>  
+                    </div>
+                    <!-- Primary Image -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.primary_image.image"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.primary_image.image != user.spaces.primary_image.image}"> 
+                            Upload new Primary Image 
+                        </label>  
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.primary_image.alt"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.primary_image.alt != user.spaces.primary_image.alt}"> 
+                            Modify Primary Image alt text 
+                        </label>  
+                    </div>
+                    <!-- Tabs -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.tabs.physical"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.tabs.physical != user.spaces.tabs.physical}"> 
+                            Modify the "Physical Access" tab in the infobox 
+                        </label>   
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.tabs.wayfinding"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.tabs.wayfinding != user.spaces.tabs.wayfinding}"> 
+                            Modify the "Wayfinding" tab in the infobox 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.tabs.sensory"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.tabs.sensory != user.spaces.tabs.sensory}"> 
+                            Modify the "Sensory Information" tab in the infobox 
+                        </label> 
+                    </div>
+                    <!-- Gallery -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.gallery.images"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.gallery.images != user.spaces.gallery.images}"> 
+                            Upload/Delete Gallery images 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.gallery.captions"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.gallery.captions != user.spaces.gallery.captions}"> 
+                            Modify Gallery Image captions 
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.gallery.alt"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.gallery.alt != user.spaces.gallery.alt}"> 
+                            Modify Gallery Image Alt Text 
+                        </label> 
+                    </div>
+                    <!-- Times -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.times"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.times != user.spaces.times}"> 
+                            Modify Opening Times box 
+                        </label> 
+                    </div>
+                    <!-- Tips -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.tips"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.tips != user.spaces.tips}"> 
+                            Add/Remove/Modify Access Tips 
+                        </label> 
+                    </div>
+                    <!-- Further Information -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.further"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.further != user.spaces.further}"> 
+                            Modify "Further Information & Links" section 
+                        </label> 
+                    </div>
+                    <!-- Map -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.map.labels"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.map.labels != user.spaces.map.labels}"> 
+                            Modify labels on map
+                        </label> 
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.map.location"
+                        :disabled="disabled">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.map.location != user.spaces.map.location}"> 
+                            Modify building shape/location on map 
+                        </label> 
                     </div>
                 </div>
             </div>
             <!-- Map Misc -->
-            <div class="card">
+            <!-- TODO: Add permissions related to flyovers, overlays -->
+            <!-- <div class="card">
                 <div class="card-header">
                     Map Misc
                 </div>
                 <div class="card-body">
-                    <!-- Switches for all the building permissions -->
 
                 </div>
-            </div>
-            <!-- General -->
-            <div class="card">
-                <div class="card-header">
-                    General Info
-                </div>
-                <div class="card-body">
-                    <!-- Switches for all the building permissions -->
-
-                </div>
-            </div>
+            </div> -->
         </div>
-        <div class="card mt-3" v-if="modified">
+        <div class="card mt-3 border-0" v-if="permissionsChanged">
             <div class="card-body py-0 px-0">
-                <div class="row rounded-2 px-0 mx-0">
-                    <div class="col bg-success-subtle">
+                <!-- <div class="row rounded-2 px-0 mx-0">
+                    <div class="col bg-success-subtle"> -->
                         <!-- Permissions that have been added -->
-                        <p v-for="p in addedPermissions">
+                        <!-- <p v-for="p in addedPermissions">
                             ++ {{ p }}
-                        </p>
-                    </div>
-                    <div class="col bg-danger-subtle">
+                        </p> -->
+                    <!-- </div>
+                    <div class="col bg-danger-subtle"> -->
                         <!-- Permissions that have been removed -->
-                        <p v-for="p in removedPermissions">
+                        <!-- <p v-for="p in removedPermissions">
                             -- {{ p }}
-                        </p>
-                    </div>
+                        </p> -->
+                    <!-- </div>
                 </div>
             </div>
-            <div class="card-footer">
+            <div class="card-footer"> -->
                 <!-- <div class="row bg-info text-center my-1" v-if="getAdminChanged()">
                         <span v-if="getAdminChanged() == 1" class="fs-5 bg-danger">Admin status granted</span>
                         <span v-if="getAdminChanged() == 2" class="fs-5 bg-warn">Admin status revoked</span> 
                 </div> -->
                 <div class="row">
-                    <div class="col d-grid">
+                    <!-- <div class="col d-grid">
                         <span>{{ addedPermissions.length }} permissions granted</span>
                         <span>{{ removedPermissions.length }} permissions revoked</span>
-                    </div>
+                    </div> -->
                     <div class="col d-grid">
                         <button class="btn btn-success mx-5" @click="updatePermissions">Save</button>
                     </div>
@@ -150,19 +423,25 @@
 </template>
 
 <script lang="ts">
-import type { PermissionsArray } from '~/assets/types/permissions';
+import type { PermissionsObject } from '~/assets/types/permissions';
 import type { UserProfile } from '~/assets/types/permissions';
+import { getChangesUserProfile } from '~/utils/getChanges';
 
 
 export default {
     props: {
-        permissions: {
+        user: {
             // The permissions array to be edited
-            type: Object as () => PermissionsArray,
+            type: Object as () => UserProfile,
             required: true
         },
         // For the view-only mode
         disabled: {
+            type: Boolean,
+            default: false
+        },
+        // Flag for if the operator is the superadmin
+        isSuperAdmin: {
             type: Boolean,
             default: false
         }
@@ -170,151 +449,122 @@ export default {
     },
     data() {
         return {
-            modifiedPermissions: {} as PermissionsArray,
+            modifiedPermissions: {} as UserProfile,
             modified: false,
-            addedPermissions: [] as string[],
-            removedPermissions: [] as string[]
+            // addedPermissions: [] as string[],
+            // removedPermissions: [] as string[]
         }
+    },
+    computed: {
+        // Check if the permissions have been modified
+        permissionsChanged() {
+            return JSON.stringify(this.user) != JSON.stringify(this.modifiedPermissions);
+        },
     },
     watch: {
-        permissions: {
-            handler: function() {
-                // Update the modifiedPermissions array when the permissions array changes
-                this.refreshPermissions()
-            },
-            deep: true
-        },
-        modifiedPermissions: {
-            handler: function() {
-                // Update the modified flag when the modifiedPermissions array changes
-                this.modifyPermissions()
-            },
-            deep: true
-        }
+        // permissions: {
+        //     handler: function() {
+        //         // Update the modifiedPermissions array when the permissions array changes
+        //         this.refreshPermissions()
+        //     },
+        //     deep: true
+        // },
+        // modifiedPermissions: {
+        //     handler: function() {
+        //         // Update the modified flag when the modifiedPermissions array changes
+        //         // this.modifyPermissions()
+        //     },
+        //     deep: true
+        // }
     },
-    mounted() {
+    created() {
         // Copy the permissions array to the modifiedPermissions array
         this.refreshPermissions()
     },
     methods: {
         // Count number of permissions that added compared to the original permissions
-        getRemovedPermissions() {
-            // Count the number of permissions that are true in the modifiedPermissions array but not in the permissions array
+        // getRemovedPermissions(permissionsObject: PermissionsObject, modifiedPermissionsObject: PermissionsObject): string[] {
+        //     // Count the number of permissions that are true in the modifiedPermissions array but not in the permissions array
 
-            // If the permissions object is not defined, return an empty array
-            // This is is to prevent loading errors
-            if (this.permissions.email == undefined) {
-                console.log("Permissions object not defined")
-                return [];
-            }
+        //     // If the permissions object is not defined, return an empty array
+        //     // This is is to prevent loading errors
+        //     if (this.user.email == undefined) {
+        //         console.log("Permissions object not defined")
+        //         return [];
+        //     }
 
-            let count = 0;
-            let list = []
+        //     let count = 0;
+        //     let list = [] as string[];
             
-            // Loop through the categories of permissions
-            // Updating the user object with the new values
-            // buildings
-            for (let i = 0; i < this.modifiedPermissions.buildings.length; i++) {
-                let old_val = this.permissions.buildings[i].value
-                let new_val = this.modifiedPermissions.buildings[i].value
+        //     // Go through the permissions objects and count the number of permissions that are true in the modifiedPermissions array but not in the permissions array
+        //     // General
+        //     if (permissionsObject.general.name && !modifiedPermissionsObject.general.name) {
+        //         count += 1
+        //         list.push("General Info")
+        //     }
+        //     if 
 
-                if (old_val && !new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.buildings[i].label)
-                }
-            }
-            // spaces
-            for (let i = 0; i < this.modifiedPermissions.spaces.length; i++) {
-                let old_val = this.permissions.spaces[i].value
-                let new_val = this.modifiedPermissions.spaces[i].value
+        //     return list;
+        // },
+        // // Count number of permissions that removed compared to the original permissions
+        // getAddedPermissions() {
+        //     // Count the number of permissions that are true in the permissions array but not in the modifiedPermissions array
+
+        //     // If the permissions object is not defined, return an empty array
+        //     // This is is to prevent loading errors
+        //     if (this.permissions.email == undefined) {
+        //         return [];
+        //     }
+
+        //     let count = 0;
+        //     let list = []
+
+
+        //     // Loop through the categories of permissions
+        //     // Updating the user object with the new values
+        //     // buildings
+        //     for (let i = 0; i < this.modifiedPermissions.buildings.length; i++) {
+        //         let old_val = this.permissions.buildings[i].value
+        //         let new_val = this.modifiedPermissions.buildings[i].value
+
+        //         if (!old_val && new_val) {
+        //             count++;
+        //             list.push(this.modifiedPermissions.buildings[i].label)
+        //         }
+        //     }
+        //     // spaces
+        //     for (let i = 0; i < this.modifiedPermissions.spaces.length; i++) {
+        //         let old_val = this.permissions.spaces[i].value
+        //         let new_val = this.modifiedPermissions.spaces[i].value
                 
-                if (old_val && !new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.spaces[i].label)
-                }
-            }
-            // map_misc
-            for (let i = 0; i < this.modifiedPermissions.map_misc.length; i++) {
-                let old_val = this.permissions.map_misc[i].value
-                let new_val = this.modifiedPermissions.map_misc[i].value
+        //         if (!old_val && new_val) {
+        //             count++;
+        //             list.push(this.modifiedPermissions.spaces[i].label)
+        //         }
+        //     }
+        //     // map_misc
+        //     for (let i = 0; i < this.modifiedPermissions.map_misc.length; i++) {
+        //         let old_val = this.permissions.map_misc[i].value
+        //         let new_val = this.modifiedPermissions.map_misc[i].value
                 
-                if (old_val && !new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.map_misc[i].label)
-                }
-            }
-            // general
-            for (let i = 0; i < this.modifiedPermissions.general.length; i++) {
-                let old_val = this.permissions.general[i].value
-                let new_val = this.modifiedPermissions.general[i].value
+        //         if (!old_val && new_val) {
+        //             count++;
+        //             list.push(this.modifiedPermissions.map_misc[i].label)
+        //         }
+        //     }
+        //     // general
+        //     for (let i = 0; i < this.modifiedPermissions.general.length; i++) {
+        //         let old_val = this.permissions.general[i].value
+        //         let new_val = this.modifiedPermissions.general[i].value
                 
-                if (old_val && !new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.general[i].label)
-                }
-            }
+        //         if (!old_val && new_val) {
+        //             count++;
+        //             list.push(this.modifiedPermissions.general[i].label)
+        //         }
+        //     }
 
-            return list;
-        },
-        // Count number of permissions that removed compared to the original permissions
-        getAddedPermissions() {
-            // Count the number of permissions that are true in the permissions array but not in the modifiedPermissions array
-
-            // If the permissions object is not defined, return an empty array
-            // This is is to prevent loading errors
-            if (this.permissions.email == undefined) {
-                return [];
-            }
-
-            let count = 0;
-            let list = []
-
-
-            // Loop through the categories of permissions
-            // Updating the user object with the new values
-            // buildings
-            for (let i = 0; i < this.modifiedPermissions.buildings.length; i++) {
-                let old_val = this.permissions.buildings[i].value
-                let new_val = this.modifiedPermissions.buildings[i].value
-
-                if (!old_val && new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.buildings[i].label)
-                }
-            }
-            // spaces
-            for (let i = 0; i < this.modifiedPermissions.spaces.length; i++) {
-                let old_val = this.permissions.spaces[i].value
-                let new_val = this.modifiedPermissions.spaces[i].value
-                
-                if (!old_val && new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.spaces[i].label)
-                }
-            }
-            // map_misc
-            for (let i = 0; i < this.modifiedPermissions.map_misc.length; i++) {
-                let old_val = this.permissions.map_misc[i].value
-                let new_val = this.modifiedPermissions.map_misc[i].value
-                
-                if (!old_val && new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.map_misc[i].label)
-                }
-            }
-            // general
-            for (let i = 0; i < this.modifiedPermissions.general.length; i++) {
-                let old_val = this.permissions.general[i].value
-                let new_val = this.modifiedPermissions.general[i].value
-                
-                if (!old_val && new_val) {
-                    count++;
-                    list.push(this.modifiedPermissions.general[i].label)
-                }
-            }
-
-            return list;
-        },
+        //     return list;
+        // },
 
         // TODO: Figure out how to handle admin status changes
 
@@ -334,95 +584,57 @@ export default {
         //     return adminStatus;
         // },
 
-        updateAdminStatus() {
-            // Confirm the user wants to change the admin status
-            if(window.confirm(`Are you sure you want to ${this.modifiedPermissions.isAdmin ? "revoke" : "grant"} admin rights on ${this.modifiedPermissions.email}? Admins have full access to all features, including creating/removing other admins`)) {
-                this.modifiedPermissions.isAdmin = !this.modifiedPermissions.isAdmin;
-            } else {
-                this.modifiedPermissions.isAdmin = this.modifiedPermissions.isAdmin;
-            }
+        // updateAdminStatus() {
+        //     // Confirm the user wants to change the admin status
+        //     if(window.confirm(`Are you sure you want to ${this.modifiedPermissions.isAdmin ? "revoke" : "grant"} admin rights on ${this.modifiedPermissions.email}? Admins have full access to all features, including creating/removing other admins`)) {
+        //         this.modifiedPermissions.isAdmin = !this.modifiedPermissions.isAdmin;
+        //     } else {
+        //         this.modifiedPermissions.isAdmin = this.modifiedPermissions.isAdmin;
+        //     }
 
-            // Push the change to the server, ahead of the other permissions
-        },
+        //     // Push the change to the server, ahead of the other permissions
+        // },
 
-        permissionsChanged() {
-            // console.log(this.removedPermissions)
-            return this.addedPermissions.length + this.removedPermissions.length > 0;
-            return false
-        },
+        // permissionsChanged() {
+        //     // console.log(this.removedPermissions)
+        //     return this.addedPermissions.length + this.removedPermissions.length > 0;
+        //     return false
+        // },
 
-        modifyPermissions() {
-            // Update the modifications arrays, update the permissionsChanged flag
-            console.log('Permissions modified')
+        // modifyPermissions() {
+        //     // Update the modifications arrays, update the permissionsChanged flag
+        //     console.log('Permissions modified')
 
-            this.addedPermissions = this.getAddedPermissions();
-            console.log(JSON.parse(JSON.stringify(this.addedPermissions)))
+        //     this.addedPermissions = this.getAddedPermissions();
+        //     console.log(JSON.parse(JSON.stringify(this.addedPermissions)))
 
-            this.removedPermissions = this.getRemovedPermissions();
-            console.log(JSON.parse(JSON.stringify(this.removedPermissions)))
+        //     this.removedPermissions = this.getRemovedPermissions();
+        //     console.log(JSON.parse(JSON.stringify(this.removedPermissions)))
 
-            this.modified = this.permissionsChanged();
-        },
+        //     this.modified = this.permissionsChanged();
+        // },
 
         updatePermissions() {
             // Push updates to the contributors profiles table via the /api/update/profiles route
 
-            // Update the current user object
-            // The modifiedPermissions does not have the same signature as the user object
-            // So we need to map the keys to the user object
-
             let userUpdateObject = {} as UserProfile;
-            userUpdateObject.user_id = this.modifiedPermissions.uuid;
 
-            // userUpdateObject = {
-            //     is_admin: this.modifiedPermissions.isAdmin,
-            //     email: this.modifiedPermissions.email,
-            //     uuid: this.modifiedPermissions.uuid,
-            //     bld_general: this.modifiedPermissions.buildings[].value,
-            //     bld_tabs: this.modifiedPermissions.buildings[1].value,
-            //     bld_gallery: this.modifiedPermissions.buildings[2].value,
-            //     bld_times: this.modifiedPermissions.buildings[3].value,
-            //     bld_tips: this.modifiedPermissions.buildings[4].value,
-            //     bld_further: this.modifiedPermissions.buildings[5].value,
-            //     bld_map: this.modifiedPermissions.buildings[6].value,
-            //     sense_general: this.modifiedPermissions.spaces[0].value,
-            //     sense_map: this.modifiedPermissions.spaces[1].value,
-            //     sense_facilities: this.modifiedPermissions.spaces[2].value,
-            //     sense_photos: this.modifiedPermissions.spaces[3].value,
-            // }
+            console.log(getChangesUserProfile("userProfile", this.user, this.modifiedPermissions))
 
-            // I'm not 100% sure this is typesafe. There's probably a way to do what I'm doing
-            //  in a typesafe way, but I don't know it
-            // Loop through the categories of permissions
-            // Updating the user object with the new values
-            // buildings
-            for (let i = 0; i < this.modifiedPermissions.buildings.length; i++) {
-                // @ts-ignore
-                userUpdateObject[this.modifiedPermissions.buildings[i].key] = this.modifiedPermissions.buildings[i].value;
-            }
-            // spaces
-            for (let i = 0; i < this.modifiedPermissions.spaces.length; i++) {
-                // @ts-ignore
-                userUpdateObject[this.modifiedPermissions.spaces[i].key] = this.modifiedPermissions.spaces[i].value;
-            }
-            // map_misc
-            for (let i = 0; i < this.modifiedPermissions.map_misc.length; i++) {
-                // @ts-ignore
-                userUpdateObject[this.modifiedPermissions.map_misc[i].key] = this.modifiedPermissions.map_misc[i].value;
-            }
-            // general
-            for (let i = 0; i < this.modifiedPermissions.general.length; i++) {
-                // @ts-ignore
-                userUpdateObject[this.modifiedPermissions.general[i].key] = this.modifiedPermissions.general[i].value;
-            }
-
-            // Push object to the profiles table
-            // TBD
+            console.log("Updating permissions")
 
         },
-        refreshPermissions() {
+        async refreshPermissions() {
+            // Wait for the user to be set
+            while (!this.user || !this.user.email) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            console.log("Refreshing permissions, user is set")
+            console.log(this.user)
+            console.log("Copying permissions")
             // Copy the permissions array to the modifiedPermissions array
-            this.modifiedPermissions = JSON.parse(JSON.stringify(this.permissions));
+            this.modifiedPermissions = JSON.parse(JSON.stringify(this.user));
+            console.log(this.modifiedPermissions)
         }
     }
 }
