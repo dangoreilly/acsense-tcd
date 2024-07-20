@@ -12,8 +12,8 @@ export default async function() : Promise<UserProfile> {
     const {data, error} = await supabase.auth.getSession();
 
     const session = data.session;
-    console.log("Getting current user permissions")
-    console.log(session)
+    // console.log("Getting current user permissions")
+    // console.log(session)
 
     if (!session) {
         console.error("No session found")
@@ -35,8 +35,8 @@ export default async function() : Promise<UserProfile> {
         throw superadmin_fetch_error
     }
     else {
-        console.log("Superadmin:")
-        console.log(superadmin)
+        // console.log("Superadmin:")
+        // console.log(superadmin)
         if (superadmin == session.user.email){
             user_is_super_admin = true;
         }
