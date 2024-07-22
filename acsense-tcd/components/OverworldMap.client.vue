@@ -30,11 +30,6 @@ export default {
             default: () => {}
         },
 
-        dummy_studentSpaces: {
-            type: Array,
-            default: () => []
-        },
-
         isDarkMode: {
             type: Boolean,
             default: false
@@ -530,7 +525,7 @@ export default {
 
                 // Figure out what the icon will be by matching the area type to the area type in the area_types array
                 // TODO: Replace with composable for finding the icon that includes icon_override
-                let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
+                let icon_url = area.icon_override || area_types.find(area_type => area_type.category == area.type).icon;
                 let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
 
                 // Create the icon object
@@ -576,33 +571,6 @@ export default {
                         emitOpenModal("space", area);
                     });
                 }
-
-                if (styled_label in areas_sorted){
-                    areas_sorted[styled_label].push(marker);
-                }
-            });
-
-            // Repeat for the dummy spaces, but without any interaction
-            this.dummy_studentSpaces.forEach(area => {
-
-                // Figure out what the icon will be by matching the area type to the area type in the area_types array
-                let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
-                let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
-
-                // Create the icon object
-                // The className is used to make the icon fade in and out when the zoom changes
-                let myIcon = L.icon({
-                    iconUrl: icon_url, 
-                    iconSize: [50, 50], 
-                    className: "sense-icon",
-                });
-
-                // Create the marker object, pushing the click through to the building behind
-                let marker = L.marker(area.location, {
-                    icon: myIcon, 
-                    alt: area.name,
-                    interactive: false,
-                });
 
                 if (styled_label in areas_sorted){
                     areas_sorted[styled_label].push(marker);
