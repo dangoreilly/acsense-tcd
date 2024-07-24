@@ -12,6 +12,7 @@ export default defineNuxtConfig({
     modules: [
         '@vueuse/nuxt',
         '@nuxt/content',
+        '@nuxt/test-utils/module'
       ],
     components: [
         { path: '~/components/admin'},
