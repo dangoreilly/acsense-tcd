@@ -29,11 +29,15 @@ export default function (table:string) : PermissionsKey | null {
                 opening_times: "buildings.times",
                 primary_image_url: "buildings.primary_image.image",
                 primary_image_alt: "buildings.primary_image.alt",
-                entry_floor: "buildings.floorplans",
-                internal_map_size: "buildings.floorplans",
+                entry_floor: "is_admin",
+                internal_map_size: "is_admin",
                 published: "is_admin",
                 floorplans_published: "is_admin",
                 rooms_published: "is_admin",
+
+                created_at: "service",
+                updated_at: "service",
+                UUID: "service",
             } as PermissionsKey
         case "spaces":
             return null

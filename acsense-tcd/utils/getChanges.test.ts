@@ -439,7 +439,6 @@ const user_superadmin: UserProfile = {
   },
 }
 
-// Buildings
 const building = {
   canonical: "example-building-A",
   display_name: "Example Building A",
