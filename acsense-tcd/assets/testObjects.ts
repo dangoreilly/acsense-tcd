@@ -2,8 +2,9 @@
 import type { UserProfile } from '~/assets/types/permissions';
 export const user_all: UserProfile = { 
     email: "user.all@acsense.ie",
-    is_admin: false,
     user_id: "0",
+    is_admin: false,
+    is_super_admin: false,
     buildings: {
         general: {
             name: true,

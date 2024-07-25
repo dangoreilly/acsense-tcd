@@ -42,6 +42,15 @@ export default function (table:string) : PermissionsKey | null {
         case "spaces":
             return null
 
+        case "profiles":
+            return {
+                email: "is_admin",
+                user_id: "service",
+                is_admin: "is_admin",
+                is_super_admin: "service",
+                buildings: "is_admin",
+                spaces: "is_admin",
+            } as PermissionsKey
         default:
             return null
     }

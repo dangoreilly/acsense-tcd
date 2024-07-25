@@ -29,7 +29,47 @@ describe('Buildings permissions properly provisioned', () => {
         for (let permission of permissions) {
             // First, check if the permission is a special one
             // That doesn't exist on the userProfile but can be injected by the service
-            if (permission == 'service' || permission == 'is_super_admin') {
+            if (permission == 'service') {
+                continue;
+            }
+
+            // If not, check that when querying a userProfile, we do
+            // not get an undefined value
+            let userProfile = user_all;
+            let userProfileHasPermission = _.get(userProfile, permission);
+            if (userProfileHasPermission === undefined) {
+                console.log(`${permission} does not exist on userProfile`);
+            }
+            // console.log(`user has permission: ${permission}`);
+            // console.log(userProfileHasPermission);
+            expect(userProfileHasPermission).toBeDefined();
+        }
+        
+    });
+});
+
+describe('User Profiles management is properly provisioned', () => {
+
+    it('All User Profile keys have a corresponding permission', () => {
+        const permissionedKeys = Object.keys(getPermissionsKey('profiles') as Object);
+        // console.log(permissionedKeys);
+        const tableKeys = Object.keys(user_all as Object);
+        // console.log(buildingKeys);
+        expect(permissionedKeys).toEqual(tableKeys);
+    });
+
+    it('All permissions are real fields', () => {
+        // For each permission required on the permissions key
+        // Make sure it is a real field on the userProfile
+        // Or is a service field
+        const permissionsKey = getPermissionsKey('profiles');
+        const permissions = Object.values(permissionsKey as Object);
+        
+        // Loop through the listed permissions
+        for (let permission of permissions) {
+            // First, check if the permission is a special one
+            // That doesn't exist on the userProfile but can be injected by the service
+            if (permission == 'service') {
                 continue;
             }
 
