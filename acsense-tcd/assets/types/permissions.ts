@@ -1,22 +1,25 @@
 import { Interface } from "readline/promises"
 
-export interface Permission {
-    key: string,
-    label: string,
-    value: boolean
-}
+// export interface Permission {
+//     key: string,
+//     label: string,
+//     value: boolean
+// }
 
-export interface PermissionsArray {
-    email: string,
-    uuid: string,
-    isAdmin: boolean,
-    buildings: Permission[],
-    spaces: Permission[],
-    map_misc: Permission[],
-    general: Permission[]
-}
+// export interface PermissionsArray {
+//     email: string,
+//     uuid: string,
+//     isAdmin: boolean,
+//     buildings: Permission[],
+//     spaces: Permission[],
+//     map_misc: Permission[],
+//     general: Permission[]
+// }
 
-export interface UserProfile {
+// import type { user_profile } from "./supabase_types";
+// import type { Json } from "./supabase_types.gen";
+
+export type UserProfile = {
     email: string,
     user_id: string,
     is_admin: boolean,
