@@ -74,6 +74,20 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="card mt-3">
+                        <div class="input-group mb-3">
+                            <input 
+                            type="text" 
+                            class="form-control" 
+                            placeholder="New Contributor Email" 
+                            v-model="newUserEmail">
+                            <button 
+                            class="btn btn-outline-secondary"
+                             type="button" 
+                             id="button-addon2">Add Contributor</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -97,7 +111,8 @@ export default {
             supabase: {} as any,
             permissionsHaveChanged: false,
             loaded: false,
-            sessionAccessToken: ""
+            sessionAccessToken: "",
+            newUserEmail: ""
         };
     },
     created() {
@@ -199,6 +214,9 @@ export default {
 
     }
 }
+    definePageMeta({
+        middleware: 'auth'
+    })
 
 </script>
 

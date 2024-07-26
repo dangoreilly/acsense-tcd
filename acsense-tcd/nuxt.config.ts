@@ -28,6 +28,7 @@ export default defineNuxtConfig({
         // Will be available in both server and client-side
         public: {
             // override with env var
+            baseUrl: process.env.NUXT_BASE_URL || 'http://localhost:3000',
             supabaseUrl: process.env.NUXT_SUPABASE_URL,
             supabaseKey: process.env.NUXT_SUPABASE_KEY,
             version: pkg.version,
