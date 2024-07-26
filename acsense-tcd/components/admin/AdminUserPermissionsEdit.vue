@@ -39,8 +39,8 @@
             <!-- Add/remove admin status -->
             <button 
             v-if="isSuperAdmin"
-            class="btn btn-outline-danger">
-            <!-- @click="updateAdminStatus"> -->
+            class="btn btn-outline-danger"
+            @click="updateAdminStatus">
                 {{ modifiedPermissions.is_admin ? "Remove admin status" : "Grant admin status" }}
             </button>
         </div>
@@ -58,7 +58,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.general.name"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.general.name != user.buildings.general.name}"> 
                             Modify the name 
@@ -67,7 +67,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.general.aka"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.general.aka != user.buildings.general.aka}"> 
                             Modify the "aka" field 
@@ -76,7 +76,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.general.desc"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.general.desc != user.buildings.general.desc}"> 
                             Modify the description 
@@ -86,7 +86,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.primary_image.image"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.primary_image.image != user.buildings.primary_image.image}"> 
                             Upload new Primary Image 
@@ -95,7 +95,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.primary_image.alt"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.primary_image.alt != user.buildings.primary_image.alt}"> 
                             Modify Primary Image alt text 
@@ -105,7 +105,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.tabs.physical"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.tabs.physical != user.buildings.tabs.physical}"> 
                             Modify the "Physical Access" tab in the infobox 
@@ -114,7 +114,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.tabs.wayfinding"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.tabs.wayfinding != user.buildings.tabs.wayfinding}"> 
                             Modify the "Wayfinding" tab in the infobox 
@@ -123,7 +123,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.tabs.sensory"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.tabs.sensory != user.buildings.tabs.sensory}"> 
                             Modify the "Sensory Information" tab in the infobox 
@@ -133,7 +133,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.gallery.images"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.gallery.images != user.buildings.gallery.images}"> 
                             Upload/Delete Gallery images 
@@ -142,7 +142,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.gallery.captions"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.gallery.captions != user.buildings.gallery.captions}"> 
                             Modify Gallery Image captions 
@@ -151,7 +151,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.gallery.alt"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.gallery.alt != user.buildings.gallery.alt}"> 
                             Modify Gallery Image Alt Text 
@@ -161,7 +161,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.times"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.times != user.buildings.times}"> 
                             Modify Opening Times box 
@@ -171,7 +171,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.tips"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.tips != user.buildings.tips}"> 
                             Add/Remove/Modify Access Tips 
@@ -181,7 +181,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.further"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.further != user.buildings.further}"> 
                             Modify "Further Information & Links" section 
@@ -191,7 +191,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.map.labels"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.map.labels != user.buildings.map.labels}"> 
                             Modify Space Type and icon 
@@ -200,7 +200,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.buildings.map.location"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.map.location != user.buildings.map.location}"> 
                             Modify space location on map and building 
@@ -221,7 +221,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.general.name"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.general.name != user.spaces.general.name}"> 
                             Modify the name 
@@ -230,7 +230,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.general.aka"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.general.aka != user.spaces.general.aka}"> 
                             Modify the "aka" field 
@@ -239,7 +239,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.general.desc"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.general.desc != user.spaces.general.desc}"> 
                             Modify the description 
@@ -249,7 +249,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.primary_image.image"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.primary_image.image != user.spaces.primary_image.image}"> 
                             Upload new Primary Image 
@@ -258,7 +258,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.primary_image.alt"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.primary_image.alt != user.spaces.primary_image.alt}"> 
                             Modify Primary Image alt text 
@@ -268,7 +268,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.tabs.physical"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.tabs.physical != user.spaces.tabs.physical}"> 
                             Modify the "Physical Access" tab in the infobox 
@@ -277,7 +277,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.tabs.wayfinding"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.tabs.wayfinding != user.spaces.tabs.wayfinding}"> 
                             Modify the "Wayfinding" tab in the infobox 
@@ -286,7 +286,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.tabs.sensory"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.tabs.sensory != user.spaces.tabs.sensory}"> 
                             Modify the "Sensory Information" tab in the infobox 
@@ -296,7 +296,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.gallery.images"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.gallery.images != user.spaces.gallery.images}"> 
                             Upload/Delete Gallery images 
@@ -305,7 +305,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.gallery.captions"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.gallery.captions != user.spaces.gallery.captions}"> 
                             Modify Gallery Image captions 
@@ -314,7 +314,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.gallery.alt"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.gallery.alt != user.spaces.gallery.alt}"> 
                             Modify Gallery Image Alt Text 
@@ -324,7 +324,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.times"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.times != user.spaces.times}"> 
                             Modify Opening Times box 
@@ -334,7 +334,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.tips"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.tips != user.spaces.tips}"> 
                             Add/Remove/Modify Access Tips 
@@ -344,7 +344,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.further"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.further != user.spaces.further}"> 
                             Modify "Further Information & Links" section 
@@ -354,7 +354,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.map.labels"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.map.labels != user.spaces.map.labels}"> 
                             Modify labels on map
@@ -363,7 +363,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.map.location"
-                        :disabled="disabled">
+                        :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.map.location != user.spaces.map.location}"> 
                             Modify building shape/location on map 
@@ -425,7 +425,7 @@
 <script lang="ts">
 import type { PermissionsObject } from '~/assets/types/permissions';
 import type { UserProfile } from '~/assets/types/permissions';
-import { getChangesUserProfile } from '~/utils/getChanges';
+import { getChanges } from '~/utils/getChanges';
 
 
 export default {
@@ -444,8 +444,21 @@ export default {
         isSuperAdmin: {
             type: Boolean,
             default: false
+        },
+        // To allow for updates
+        sessionAccessToken: {
+            type: String,
+            default: "null",
         }
-        
+    },
+    watch: {
+        user: {
+            handler: function() {
+                // Update the modifiedPermissions array when the permissions array changes
+                this.refreshPermissions()
+            },
+            deep: true
+        }
     },
     data() {
         return {
@@ -460,22 +473,6 @@ export default {
         permissionsChanged() {
             return JSON.stringify(this.user) != JSON.stringify(this.modifiedPermissions);
         },
-    },
-    watch: {
-        // permissions: {
-        //     handler: function() {
-        //         // Update the modifiedPermissions array when the permissions array changes
-        //         this.refreshPermissions()
-        //     },
-        //     deep: true
-        // },
-        // modifiedPermissions: {
-        //     handler: function() {
-        //         // Update the modified flag when the modifiedPermissions array changes
-        //         // this.modifyPermissions()
-        //     },
-        //     deep: true
-        // }
     },
     created() {
         // Copy the permissions array to the modifiedPermissions array
@@ -584,16 +581,17 @@ export default {
         //     return adminStatus;
         // },
 
-        // updateAdminStatus() {
-        //     // Confirm the user wants to change the admin status
-        //     if(window.confirm(`Are you sure you want to ${this.modifiedPermissions.isAdmin ? "revoke" : "grant"} admin rights on ${this.modifiedPermissions.email}? Admins have full access to all features, including creating/removing other admins`)) {
-        //         this.modifiedPermissions.isAdmin = !this.modifiedPermissions.isAdmin;
-        //     } else {
-        //         this.modifiedPermissions.isAdmin = this.modifiedPermissions.isAdmin;
-        //     }
+        updateAdminStatus() {
+            // Confirm the user wants to change the admin status
+            if(window.confirm(`Are you sure you want to ${this.modifiedPermissions.is_admin ? "revoke" : "grant"} admin rights on ${this.modifiedPermissions.email}? Admins have full access to all features, including creating/removing other contributors.`)) {
+                this.modifiedPermissions.is_admin = !this.modifiedPermissions.is_admin;
+            } else {
+                this.modifiedPermissions.is_admin = this.modifiedPermissions.is_admin;
+            }
 
-        //     // Push the change to the server, ahead of the other permissions
-        // },
+            // Push the change to the server, ahead of the other permissions
+            this.updatePermissions()
+        },
 
         // permissionsChanged() {
         //     // console.log(this.removedPermissions)
@@ -614,27 +612,37 @@ export default {
         //     this.modified = this.permissionsChanged();
         // },
 
-        updatePermissions() {
+        async updatePermissions() {
             // Push updates to the contributors profiles table via the /api/update/profiles route
 
-            let userUpdateObject = {} as UserProfile;
+            console.log("Updating permissions...")
 
-            console.log(getChangesUserProfile("userProfile", this.user, this.modifiedPermissions))
+            console.log(getChanges(this.user, this.modifiedPermissions))
 
-            console.log("Updating permissions")
+            const { data, error } = await updateTable(
+                this.sessionAccessToken, 
+                "profiles", 
+                this.modifiedPermissions,
+                {col: "user_id", eq: this.user.user_id}
+            )
+
+            // Notify the parent component that the permissions have been updated
+            this.$emit('permissions-updated')
+
 
         },
+        
         async refreshPermissions() {
             // Wait for the user to be set
             while (!this.user || !this.user.email) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
-            console.log("Refreshing permissions, user is set")
-            console.log(this.user)
-            console.log("Copying permissions")
+            // console.log("Refreshing permissions, user is set")
+            // console.log(this.user)
+            // console.log("Copying permissions")
             // Copy the permissions array to the modifiedPermissions array
             this.modifiedPermissions = JSON.parse(JSON.stringify(this.user));
-            console.log(this.modifiedPermissions)
+            // console.log(this.modifiedPermissions)
         }
     }
 }

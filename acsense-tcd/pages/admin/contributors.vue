@@ -44,14 +44,14 @@
                     <div v-if="!currentUser.is_admin" class="mainMatter-admin">
                         <!-- Section for viewing your own permissions - there is no edit functionality -->
                         <p>Below are the permissions associated with your Acsense account</p>
-                        <p>{{ currentUser }}</p>
+                        <!-- <p>{{ currentUser }}</p> -->
                         <AdminUserPermissionsEdit :user="currentUser" :disabled="true"/> 
                         
                     </div>
                     <div v-else class="mainMatter-admin">
                         <!-- Section for admins to edit user permissions, add/remove users etc -->
-                        <p>Manage the permissions of contributors</p>
-                        <button class="btn btn-warning" @click="getContributors">Get Contributors</button>
+                        <!-- <p>Manage the permissions of contributors</p>
+                        <button class="btn btn-warning" @click="getContributors">Get Contributors</button> -->
 
                         <!-- Loop through all the profiles apart from the current user -->
                         <div class="accordion">
@@ -63,7 +63,12 @@
                                         {{ profile.email }}
                                     </template>
                                     <template #AccordionStepBody>
-                                        <AdminUserPermissionsEdit  :user="profile" :disabled="profile.is_admin && !currentUser.is_super_admin"/>
+                                        <AdminUserPermissionsEdit 
+                                        :user="profile" 
+                                        :disabled="profile.is_admin && !currentUser.is_super_admin" 
+                                        :sessionAccessToken="sessionAccessToken" 
+                                        :isSuperAdmin="currentUser.is_super_admin"
+                                        @permissions-updated="getContributorsifAdmin()"/>
                                     </template> 
                                 </AccordionStep>
                             </div>
@@ -77,6 +82,7 @@
 
 <script lang="ts">
 import {createClient} from '@supabase/supabase-js';
+import { get } from 'lodash';
 // import type { PermissionsArray } from '~/assets/types/permissions';
 import type { UserProfile } from '~/assets/types/permissions';
 // import permissionsKey from '~/assets/permissionsKey';
@@ -90,7 +96,8 @@ export default {
             contributors: [] as UserProfile[],
             supabase: {} as any,
             permissionsHaveChanged: false,
-            loaded: false
+            loaded: false,
+            sessionAccessToken: ""
         };
     },
     created() {
@@ -103,6 +110,9 @@ export default {
     mounted(){
         // Trigger on mount to avoid SSR related issues
         this.getCurrentUserPermissions();
+
+        // Check if the current user is an admin, and if they are, get the contributors
+        this.getContributorsifAdmin();
     },
     methods: {
 
@@ -131,44 +141,27 @@ export default {
             // console.log(data)
         },
 
-        async getSessionAccessToken(){
-
-            // Use supabase.auth.session() to get the current session
-            // This will return the session object if the user is logged in
-            // Otherwise it will return null
-            const { data, error } = await this.supabase.auth.getSession()
-
-            if (!error && data.session) {
-                // console.log("Setting current user: " + data.session.user.email)
-                return data.session.access_token;
+        async getContributorsifAdmin() {
+            // Wait for the current user to be initialised
+            while (this.currentUser.email == undefined) {
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
-            else {
-                // If the user is not logged in, return null
-                return null;
+
+            // Check if the current user is an admin
+            if (this.currentUser.is_admin) {
+                // If they are, get the contributors
+                this.getContributors();
             }
         },
 
         async getContributors() {
 
             // Get the current session access token
-            const access_token:string = await this.getSessionAccessToken();
+            const access_token:string = await getSessionAccessToken(this.supabase);
 
             // console.log("Access token: " + access_token)
             // console.log("Getting contributors") 
             const { data: contributors, error } = await permissionedFetch(access_token, "profiles");
-            // const { data, pending, error, status } = await useFetch(`/api/select/profiles`, {
-            //     method: 'POST',
-            //     body: JSON.stringify({ 
-            //         // jwt: access_token,
-            //         // target: target,
-            //         // data: {},
-            //         // select: select
-            //         // "jwt": "eyJhbGciOiJIUzI1NiIsImtpZCI6InJzWiszVVc2V2tNbjRjN2YiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzE3MzAzMDg4LCJpYXQiOjE3MTcyOTk0ODgsImlzcyI6Imh0dHBzOi8vaGFkeGVreXVoZGhmbmZoc2ZyY3guc3VwYWJhc2UuY28vYXV0aC92MSIsInN1YiI6IjE4MjU4YzZiLTU2ODctNDMyOC1iYWE1LTEyYjhmMThjOGVmNCIsImVtYWlsIjoiZGFuZ29yZWlsbHlAZ21haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6e30sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3MTE1OTkyMzN9XSwic2Vzc2lvbl9pZCI6IjMxNjAwNzRmLTk4NDgtNGNmOS04YzBiLTI2YjhjN2M5NzMyZCIsImlzX2Fub255bW91cyI6ZmFsc2V9.eLVaItT8GNSqwsiesdD3fCXrsn66Ei1Cx-UK4Cg9vWE",
-            //         "target": "profiles",
-            //         "data": {},
-            //         "select": ["*"]
-            //     })
-            // })
 
             if (error) {
                 console.error("Error getting contributors: ", error)
@@ -180,10 +173,6 @@ export default {
                 console.log("Contributors:")
                 console.log(contributors)
                 this.contributors = JSON.parse(JSON.stringify(contributors));
-                // Process the profile data into a permissions array
-                // this.contributors = contributors.map( (profile:UserProfile) => {
-                //     return this.makeUserPermissionsArray(profile);
-                // })
             }
         },
 
@@ -191,100 +180,23 @@ export default {
             // Keep requesting a user object until it is returned
             // This is to avoid SSR related issues
             this.currentUser = await getCurrentUserPermissions();
-            // while (this.currentUser.email == undefined) {
-            //     console.log("Waiting for current user to be initialised")
-            //     await new Promise(resolve => setTimeout(resolve, 100));
-            //     this.currentUser = await getCurrentUserPermissions();
-            // }
             this.loaded = true;
-            console.log("Current user:")
-            console.log(this.currentUser)
+
+            // If the current user is an admin, Get additional data
+            if (this.currentUser.is_admin){
+
+                // Get the session access token for updating the tables, if applicable
+                this.sessionAccessToken = await getSessionAccessToken(this.supabase);
+                const { data, error } = await permissionedFetch(this.sessionAccessToken, "superadmin");
+                // Check if the user is a super admin
+                if(this.currentUser.email == data){
+                    this.currentUser.is_super_admin = true;
+                }
+            }
+
+            
         },
 
-        
-        // makeUserPermissionsArray(user:UserProfile){
-
-        //     let userPermissionsArray = {} as PermissionsArray;
-
-        //     userPermissionsArray = {
-        //             email: user.email,
-        //             uuid: user.user_id,
-        //             isAdmin: user.is_admin,
-        //             // Categories of permissions
-        //             buildings: [
-        //                 {   
-        //                     key: "bld_general",
-        //                     value: user.bld_general,
-        //                     label: permissionsKey.bld_general
-        //                 },
-        //                 {   
-        //                     key: "bld_tabs",
-        //                     value: user.bld_tabs,
-        //                     label: permissionsKey.bld_tabs
-        //                 },
-        //                 {   
-        //                     key: "bld_gallery",
-        //                     value: user.bld_gallery,
-        //                     label: permissionsKey.bld_gallery
-        //                 },
-        //                 {   
-        //                     key: "bld_times",
-        //                     value: user.bld_times,
-        //                     label: permissionsKey.bld_times
-        //                 },
-        //                 {   
-        //                     key: "bld_tips",
-        //                     value: user.bld_tips,
-        //                     label: permissionsKey.bld_tips
-        //                 },
-        //                 {   
-        //                     key: "bld_further",
-        //                     value: user.bld_further,
-        //                     label: permissionsKey.bld_further
-        //                 },
-        //                 {   
-        //                     key: "bld_map",
-        //                     value: user.bld_map,
-        //                     label: permissionsKey.bld_map
-        //                 }
-        //             ],
-        //             spaces: [
-        //                 {   
-        //                     key: "sense_general",
-        //                     value: user.sense_general,
-        //                     label: permissionsKey.sense_general
-        //                 },
-        //                 {   
-        //                     key: "sense_map",
-        //                     value: user.sense_map,
-        //                     label: permissionsKey.sense_map
-        //                 },
-        //                 {   
-        //                     key: "sense_facilities",
-        //                     value: user.sense_facilities,
-        //                     label: permissionsKey.sense_facilities
-        //                 },
-        //                 {   
-        //                     key: "sense_photos",
-        //                     value: user.sense_photos,
-        //                     label: permissionsKey.sense_photos
-        //                 }
-        //             ],
-        //             map_misc: [],
-        //             general: []
-    
-        //         }
-
-        //     return userPermissionsArray;
-
-        // },
-
-        
-
-        cancelChanges() {
-            // Reset the modified permissions array to the original permissions array
-            // this.modifiedPermissions = this.permissions;
-        }
     }
 }
 

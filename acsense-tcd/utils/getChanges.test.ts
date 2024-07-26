@@ -77,7 +77,8 @@ describe('checkUserHasPermission', () => {
 		}, 
 		list: [
 			'description'
-		] 
+		],
+        error: null
 	};
 
     const hasPermission = checkUserHasPermission(user_all, 'buildings', changes);
@@ -96,7 +97,8 @@ describe('checkUserHasPermission', () => {
 		}, 
 		list: [
 			'description'
-		] 
+		],
+        error: null
 	};
 
     const hasPermission = checkUserHasPermission(user_none, 'buildings', changes);
@@ -118,7 +120,8 @@ describe('checkUserHasPermission', () => {
 		list: [
 			'description',
 			'published'
-		] 
+		],
+        error: null 
 	};
 
     const hasPermission = checkUserHasPermission(user_all, 'buildings', changes);
