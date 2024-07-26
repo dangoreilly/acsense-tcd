@@ -106,13 +106,13 @@ enable_confirmations = false
 max_frequency = "1s"
 
 # Use a production-ready SMTP server
-# [auth.email.smtp]
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+[auth.email.smtp]
+host = "smtp.sendgrid.net"
+port = 465
+user = "apikey"
+pass = "env(SENDGRID_API_KEY)"
+admin_email = "no-reply@tcdsensemap.ie"
+sender_name = "TCD Sense Map"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
