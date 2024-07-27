@@ -37,12 +37,16 @@
             User is an admin
             </small>
             <!-- Add/remove admin status -->
-            <button 
-            v-if="isSuperAdmin"
-            class="btn btn-outline-danger"
-            @click="updateAdminStatus">
-                {{ modifiedPermissions.is_admin ? "Remove admin status" : "Grant admin status" }}
-            </button>
+            <div v-if="isSuperAdmin">
+                <button 
+                class="btn btn-outline-danger"
+                @click="updateAdminStatus">
+                    {{ modifiedPermissions.is_admin ? "Remove admin status" : "Grant admin status" }}
+                </button>
+
+                <button 
+                class="btn btn-warning">Reset Password</button>
+            </div>
         </div>
 
         <!-- Cards to divide permissions into Building, Spaces, Map, General categories -->
