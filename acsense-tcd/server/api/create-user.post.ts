@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     // const action = getRouterParam(event, 'action') as string; 
     // // console.log("action", action)
     const body = await readBody(event)
-    const { jwt, data, target, select} = body;
+    const { jwt, data} = body;
 
     // const permissions = await getUserPermissionsByToken(supabase, jwt);
     // // console.log("Permissions:", permissions)
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
         type: 'recovery',
         email: 'user.all@acsense.ie',
         options: {
-            redirectTo: useRuntimeConfig().public.baseUrl + '/reset-password',
+            redirectTo: useRuntimeConfig().public.baseUrl + '/admin/password-reset',
         }
     })
 
