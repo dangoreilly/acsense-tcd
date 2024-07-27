@@ -438,7 +438,7 @@ let users = [
     },
     { 
         email: "superadmin@acsense.ie",
-        is_admin: false,
+        is_admin: true,
         buildings: {
             general: {
                 name: false,
