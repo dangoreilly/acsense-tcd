@@ -900,13 +900,35 @@ const campusBounds = [
                 const { data, error:upload_error } = await this.supabase.storage
                 .from('icons')
                 .upload(`custom/${this.space.canonical}.${extension}`, file)
+
                 if (upload_error) {
-                    console.error(upload_error)
-                    return error
+                    // if the file already exists, it's not an error
+                    // We just need to update the existing file
+                    if (upload_error.statusCode == "409"){
+                        console.warn(upload_error)
+                        // Update the file
+                        const { data, error:update_error } = await this.supabase.storage
+                        .from('icons')
+                            .update(`custom/${this.space.canonical}.${extension}`, file, {
+                                upsert: true
+                            })
+
+                        if (update_error) {
+                            console.error(update_error)
+                            alert(update_error.message)
+                            return ""
+                        }
+                    }
+                    else
+                    {
+                        console.error(upload_error)
+                        alert(upload_error.message)
+                        return ""
+                    }
                 }
                 
-                // Clear the primary image input
-                document.getElementById("PrimaryImageInput").value = "";
+                // Clear the icon input
+                document.getElementById("IconOverrideInput").value = "";
 
                 return newUrl;
 
