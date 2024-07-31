@@ -11,12 +11,12 @@ export default async function(access_token: string, table: string, payload: any,
     let _data: any = null;
     let _error: any = null;
     
-    console.log({
-        access_token,
-        table,
-        target,
-        payload
-    })
+    // console.log({
+    //     access_token,
+    //     table,
+    //     target,
+    //     payload
+    // })
 
     try {
         const data = await $fetch(`/api/update/${table}`, {
