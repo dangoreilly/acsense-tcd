@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     
     const { data: recovery_email_data, error } = await supabase.auth.admin.generateLink({
         type: 'recovery',
-        email: 'user.all@acsense.ie',
+        email: data,
         options: {
             redirectTo: useRuntimeConfig().public.baseUrl + '/admin/password-reset',
         }
