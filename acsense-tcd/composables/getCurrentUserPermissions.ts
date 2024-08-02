@@ -30,7 +30,7 @@ export default async function() : Promise<UserProfile> {
 
     if (superadmin_fetch_error) {
         console.error("Error getting superadmin status: ", superadmin_fetch_error)
-        console.error(superadmin_fetch_error)
+        // console.error(superadmin_fetch_error)
         alert(superadmin_fetch_error.message)
         throw superadmin_fetch_error
     }
@@ -63,13 +63,6 @@ export default async function() : Promise<UserProfile> {
         current_user.is_super_admin = user_is_super_admin;
 
         return current_user;
-
-        // Check if the user is the superadmin
-
-        // Temporary hard code for development
-        // this.currentUser.is_admin = false;
-
-        // this.currentUserPermissions = this.makeUserPermissionsArray(user);
         
     }
 

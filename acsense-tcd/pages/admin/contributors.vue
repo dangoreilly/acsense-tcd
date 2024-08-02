@@ -61,6 +61,12 @@
                                 <AccordionStep v-if="profile.email != currentUser.email">
                                     <template #AccordionStepHeader>
                                         {{ profile.email }}
+                                        <!-- Badge to show admin status -->
+                                        <small 
+                                        v-if="profile.is_admin"
+                                        class="d-inline-flex mx-3 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
+                                        Admin
+                                        </small>
                                     </template>
                                     <template #AccordionStepBody>
                                         <AdminUserPermissionsEdit 
@@ -68,7 +74,8 @@
                                         :disabled="profile.is_admin && !currentUser.is_super_admin" 
                                         :sessionAccessToken="sessionAccessToken" 
                                         :isSuperAdmin="currentUser.is_super_admin"
-                                        @permissions-updated="getContributorsifAdmin()"/>
+                                        @permissions-updated="getContributorsifAdmin()"
+                                        @user-deleted="getContributors"/>
                                     </template> 
                                 </AccordionStep>
                             </div>
@@ -89,9 +96,9 @@
                             id="button-addon2">Add Contributor</button>
                         </div>
 
-                        <div v-if="createUserActionLink != ''" class="mt-3">
+                        <div v-if="createUserActionLink != ''" class="m-3">
                             <p>Contributor added successfully.</p>
-                            <p><a :href="makeInviteMail">Click here to generate an email with link to the signup page so they can set their password</a></p>
+                            <p><a :href="mailToLink">Click here to generate an email with link to the signup page so they can set their password</a></p>
                             <p>Alternatively, Copy and paste the following link and send it to them to complete their registration. <strong>The link can only be clicked once, so do not click it yourself</strong></p>
                             <p>{{ createUserActionLink }}</p>
                         </div>
@@ -121,7 +128,8 @@ export default {
             loaded: false,
             sessionAccessToken: "",
             newUserEmail: "",
-            createUserActionLink: ""
+            createUserActionLink: "",
+            mailToLink: ""
         };
     },
     created() {
@@ -157,15 +165,18 @@ export default {
             const access_token:string = await getSessionAccessToken(this.supabase);
 
             let initialSignupLink = "";
+            let mailToLink = "";
+
+            // First, check that the email is valid
+            if (!this.newUserEmail.includes("@") || !this.newUserEmail.includes(".")) {
+                alert("Invalid email address")
+                return;
+            }
 
             // Send a POST request to the api/create-user route with a string payload
             try {
                 const data = await $fetch(`/api/create-user`, {
                     method: 'POST',
-                    // headers: {
-                    //     'Authorization': `Bearer ${access_token}`,
-                    //     'Content-Type': 'application/json'
-                    // },
                     body: JSON.stringify({ 
                         jwt: access_token,
                         data: this.newUserEmail,
@@ -174,6 +185,8 @@ export default {
                 })
 
                 initialSignupLink = data.recovery_email_data.properties?.action_link as string;
+                mailToLink = makeInviteMail(data.recovery_email_data);
+                console.log(data.recovery_email_data)
                 // alert("User Creation Successful")
             }
             catch (error) {
@@ -182,6 +195,10 @@ export default {
             }
 
             this.createUserActionLink = initialSignupLink;
+            this.mailToLink = mailToLink;
+
+            // Get the contributors again to update the list
+            this.getContributors();
 
         },
 
@@ -240,12 +257,6 @@ export default {
 
             
         },
-
-        makeInviteMail(newUserData: any) :string {
-            // Take in user data from api/create-user and return a formatted mailto link
-            const mailto = `mailto:${newUserData.email}?subject=Welcome to Acsense!&body=Hello ${newUserData.first_name},%0D%0A%0D%0AWelcome to Acsense!%0D%0A%0D%0AWe're excited to have you on board. Please click the link below to set up your account.%0D%0A%0D%0A${newUserData.action_link}%0D%0A%0D%0AIf you have any questions, please don't hesitate to get in touch.%0D%0A%0D%0AKind regards,%0D%0AThe Acsense Team`
-            return mailto;
-        }
 
     }
 }

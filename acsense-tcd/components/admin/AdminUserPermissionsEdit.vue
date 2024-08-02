@@ -31,13 +31,13 @@
         <!-- Admin status control -->
         <div class="mb-3">
             <!-- Badge to show admin status -->
-            <small 
+            <!-- <small 
             v-if="modifiedPermissions.is_admin"
             class="d-inline-flex me-3 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
             User is an admin
-            </small>
+            </small> -->
             <!-- Add/remove admin status -->
-            <div v-if="isSuperAdmin">
+            <div v-if="isSuperAdmin" class="mt-2">
                 <button 
                 class="btn btn-outline-danger"
                 @click="updateAdminStatus">
@@ -45,7 +45,20 @@
                 </button>
 
                 <button 
-                class="btn btn-warning">Reset Password</button>
+                class="btn btn-warning ms-3"
+                @click="resetPassword">
+                Reset Password</button>
+
+                <button 
+                class="btn btn-danger ms-3"
+                @click="deleteUser">
+                Remove Contributor</button>
+            </div>
+            <div v-if="resetLink != ''" class="m-3">
+                <p>Password Reset Request Set</p>
+                <p><a :href="mailToLink">Click here to generate an email with link to reset their password</a></p>
+                <p>Alternatively, Copy and paste the following link and send it to them. <strong>The link can only be clicked once, so do not click it yourself</strong></p>
+                <p>{{ resetLink }}</p>
             </div>
         </div>
 
@@ -198,7 +211,7 @@
                         :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.map.labels != user.buildings.map.labels}"> 
-                            Modify Space Type and icon 
+                            Modify labels on map 
                         </label> 
                     </div>
                     <div class="form-check">
@@ -207,7 +220,7 @@
                         :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.buildings.map.location != user.buildings.map.location}"> 
-                            Modify space location on map and building 
+                            Modify building shape/location on map 
                         </label> 
                     </div>
                 </div>
@@ -233,11 +246,11 @@
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
-                        v-model="modifiedPermissions.spaces.general.aka"
+                        v-model="modifiedPermissions.spaces.facilities"
                         :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
-                        :class="{'text-warning' : modifiedPermissions.spaces.general.aka != user.spaces.general.aka}"> 
-                            Modify the "aka" field 
+                        :class="{'text-warning' : modifiedPermissions.spaces.facilities != user.spaces.facilities}"> 
+                            Modify the Facilities section 
                         </label>  
                     </div>
                     <div class="form-check">
@@ -361,7 +374,7 @@
                         :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.map.labels != user.spaces.map.labels}"> 
-                            Modify labels on map
+                            Modify Space Type and icon
                         </label> 
                     </div>
                     <div class="form-check">
@@ -370,7 +383,7 @@
                         :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.map.location != user.spaces.map.location}"> 
-                            Modify building shape/location on map 
+                            Modify space location on map and building 
                         </label> 
                     </div>
                 </div>
@@ -468,8 +481,8 @@ export default {
         return {
             modifiedPermissions: {} as UserProfile,
             modified: false,
-            // addedPermissions: [] as string[],
-            // removedPermissions: [] as string[]
+            resetLink: "",
+            mailToLink: "",
         }
     },
     computed: {
@@ -483,107 +496,64 @@ export default {
         this.refreshPermissions()
     },
     methods: {
-        // Count number of permissions that added compared to the original permissions
-        // getRemovedPermissions(permissionsObject: PermissionsObject, modifiedPermissionsObject: PermissionsObject): string[] {
-        //     // Count the number of permissions that are true in the modifiedPermissions array but not in the permissions array
+        async resetPassword() {
 
-        //     // If the permissions object is not defined, return an empty array
-        //     // This is is to prevent loading errors
-        //     if (this.user.email == undefined) {
-        //         console.log("Permissions object not defined")
-        //         return [];
-        //     }
+            // Get the current session access token
+            // const access_token:string = await getSessionAccessToken(this.supabase);
 
-        //     let count = 0;
-        //     let list = [] as string[];
-            
-        //     // Go through the permissions objects and count the number of permissions that are true in the modifiedPermissions array but not in the permissions array
-        //     // General
-        //     if (permissionsObject.general.name && !modifiedPermissionsObject.general.name) {
-        //         count += 1
-        //         list.push("General Info")
-        //     }
-        //     if 
+            let resetLink = "";
+            let mailToLink = "";
+            // Send a POST request to the api/create-user route with a string payload
+            try {
+                const data = await $fetch(`/api/create-user`, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        jwt: this.sessionAccessToken,
+                        data: this.user.email,
+                    })
 
-        //     return list;
-        // },
-        // // Count number of permissions that removed compared to the original permissions
-        // getAddedPermissions() {
-        //     // Count the number of permissions that are true in the permissions array but not in the modifiedPermissions array
+                })
 
-        //     // If the permissions object is not defined, return an empty array
-        //     // This is is to prevent loading errors
-        //     if (this.permissions.email == undefined) {
-        //         return [];
-        //     }
+                resetLink = data.recovery_email_data.properties?.action_link as string;
+                mailToLink = makeInviteMail(data.recovery_email_data);
+                console.log(data.recovery_email_data)
+                // alert("User Creation Successful")
+            }
+            catch (error) {
+                console.error("Error creating user", error)
+                alert("Error creating user. See console for details")
+            }
 
-        //     let count = 0;
-        //     let list = []
+            this.resetLink = resetLink;
+            this.mailToLink = mailToLink;
 
+        },
 
-        //     // Loop through the categories of permissions
-        //     // Updating the user object with the new values
-        //     // buildings
-        //     for (let i = 0; i < this.modifiedPermissions.buildings.length; i++) {
-        //         let old_val = this.permissions.buildings[i].value
-        //         let new_val = this.modifiedPermissions.buildings[i].value
+        async deleteUser() {
+            // Confirm the user wants to delete the user
+            if(window.confirm(`Are you sure you want to remove ${this.modifiedPermissions.email} from the contributors list?`)) {
+                // Send a DELETE request to the api/delete-user route with a string payload
+                try {
+                    const data = await $fetch(`/api/delete-user`, {
+                        method: 'DELETE',
+                        body: JSON.stringify({ 
+                            jwt: this.sessionAccessToken,
+                            data: this.user.email,
+                        })
 
-        //         if (!old_val && new_val) {
-        //             count++;
-        //             list.push(this.modifiedPermissions.buildings[i].label)
-        //         }
-        //     }
-        //     // spaces
-        //     for (let i = 0; i < this.modifiedPermissions.spaces.length; i++) {
-        //         let old_val = this.permissions.spaces[i].value
-        //         let new_val = this.modifiedPermissions.spaces[i].value
-                
-        //         if (!old_val && new_val) {
-        //             count++;
-        //             list.push(this.modifiedPermissions.spaces[i].label)
-        //         }
-        //     }
-        //     // map_misc
-        //     for (let i = 0; i < this.modifiedPermissions.map_misc.length; i++) {
-        //         let old_val = this.permissions.map_misc[i].value
-        //         let new_val = this.modifiedPermissions.map_misc[i].value
-                
-        //         if (!old_val && new_val) {
-        //             count++;
-        //             list.push(this.modifiedPermissions.map_misc[i].label)
-        //         }
-        //     }
-        //     // general
-        //     for (let i = 0; i < this.modifiedPermissions.general.length; i++) {
-        //         let old_val = this.permissions.general[i].value
-        //         let new_val = this.modifiedPermissions.general[i].value
-                
-        //         if (!old_val && new_val) {
-        //             count++;
-        //             list.push(this.modifiedPermissions.general[i].label)
-        //         }
-        //     }
+                    })
 
-        //     return list;
-        // },
+                    alert("User Deletion Successful")
+                    // Emit an event to notify the parent component that the user has been deleted
+                    this.$emit('user-deleted')
 
-        // TODO: Figure out how to handle admin status changes
-
-        // getAdminChanged() {
-        //     // Because admin status is different from the other permissions, we need a separate function to check if it has changed
-        //     // Check if the admin status has changed
-        //     // 0 -> Admin status not changed
-        //     // 1 -> Admin status granted
-        //     // 2 -> Admin status revoked
-        //     let adminStatus = 0 
-        //     if (this.permissions.isAdmin && !this.modifiedPermissions.isAdmin) {
-        //         adminStatus = 2
-        //     } else if (!this.permissions.isAdmin && this.modifiedPermissions.isAdmin) {
-        //         adminStatus = 1
-        //     };
-
-        //     return adminStatus;
-        // },
+                }
+                catch (error) {
+                    console.error("Error deleting user", error)
+                    alert("Error deleting user. See console for details")
+                }
+            }
+        },
 
         updateAdminStatus() {
             // Confirm the user wants to change the admin status
@@ -596,25 +566,6 @@ export default {
             // Push the change to the server, ahead of the other permissions
             this.updatePermissions()
         },
-
-        // permissionsChanged() {
-        //     // console.log(this.removedPermissions)
-        //     return this.addedPermissions.length + this.removedPermissions.length > 0;
-        //     return false
-        // },
-
-        // modifyPermissions() {
-        //     // Update the modifications arrays, update the permissionsChanged flag
-        //     console.log('Permissions modified')
-
-        //     this.addedPermissions = this.getAddedPermissions();
-        //     console.log(JSON.parse(JSON.stringify(this.addedPermissions)))
-
-        //     this.removedPermissions = this.getRemovedPermissions();
-        //     console.log(JSON.parse(JSON.stringify(this.removedPermissions)))
-
-        //     this.modified = this.permissionsChanged();
-        // },
 
         async updatePermissions() {
             // Push updates to the contributors profiles table via the /api/update/profiles route
