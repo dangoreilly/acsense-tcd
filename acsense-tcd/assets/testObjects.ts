@@ -36,7 +36,6 @@ export const user_all: UserProfile = {
     spaces: {
         general: {
             name: true,
-            aka: true,
             desc: true,
         },
         primary_image: {
@@ -59,7 +58,8 @@ export const user_all: UserProfile = {
         map: {
             labels: true,
             location: true
-        }
+        },
+        facilities: false
     },
   }
   
@@ -98,7 +98,6 @@ export const user_buildingsOnly: UserProfile = {
       spaces: {
           general: {
               name: false,
-              aka: false,
               desc: false,
           },
           primary_image: {
@@ -121,7 +120,8 @@ export const user_buildingsOnly: UserProfile = {
           map: {
               labels: false,
               location: false
-          }
+          },
+          facilities: false
         },
   }
     
@@ -160,22 +160,21 @@ export const user_admin: UserProfile = {
     spaces: {
         general: {
             name: true,
-            aka: true,
             desc: true,
         },
         primary_image: {
             image: true,
             alt: true
         },
+        gallery: {
+            images: false,
+            captions: false,
+            alt: false
+          },
         tabs: {
             physical: true,
             wayfinding: true,
             sensory: true
-        },
-        gallery: {
-            images: true,
-            captions: true,
-            alt: true
         },
         times: true,
         tips: true,
@@ -183,7 +182,8 @@ export const user_admin: UserProfile = {
         map: {
             labels: true,
             location: true
-        }
+        },
+        facilities: false
     },
   }
   
@@ -222,22 +222,21 @@ export const user_none: UserProfile = {
     spaces: {
         general: {
             name: false,
-            aka: false,
             desc: false,
         },
         primary_image: {
             image: false,
             alt: false
         },
-        tabs: {
-            physical: false,
-            wayfinding: false,
-            sensory: false
-        },
         gallery: {
             images: false,
             captions: false,
             alt: false
+          },
+        tabs: {
+            physical: false,
+            wayfinding: false,
+            sensory: false
         },
         times: false,
         tips: false,
@@ -245,7 +244,8 @@ export const user_none: UserProfile = {
         map: {
             labels: false,
             location: false
-        }
+        },
+        facilities: false
     },
   }
   
@@ -284,22 +284,21 @@ export const user_superadmin: UserProfile = {
     spaces: {
       general: {
         name: false,
-        aka: false,
         desc: false,
       },
       primary_image: {
         image: false,
         alt: false
       },
+      gallery: {
+          images: false,
+          captions: false,
+          alt: false
+        },
       tabs: {
       physical: false,
       wayfinding: false,
       sensory: false
-      },
-      gallery: {
-        images: false,
-        captions: false,
-        alt: false
       },
       times: false,
       tips: false,
@@ -307,7 +306,9 @@ export const user_superadmin: UserProfile = {
       map: {
         labels: false,
         location: false
-      }
+      },
+        facilities: false
+
     },
   }
   
@@ -348,4 +349,167 @@ export const building: Building = {
     created_at: "2021-09-01T12:00:00.000Z",
     updated_at: "2021-09-01T12:00:00.000Z",
     UUID: "00000000-0000-0000-0000-000000000000",
-  }
+}
+
+import type { Space } from '~/assets/types/supabase_types';
+//   Spaces
+
+export const space_inside: Space = {
+    "name": "Example Space 1",
+    "canonical": "example-space-1",
+    "description": "Description for Example Space 1",
+    "type": "CSC Space",
+    "updated_at": "2024-08-01 14:51:30.697118+00",
+    "food_drink_allowed": true,
+    "microwave": false,
+    "kettle": false,
+    "wheelchair": false,
+    "location": [
+        53.3446430066463,
+        -6.25911171722129
+    ],
+    "building": "example-building-1",
+    "outlets": true,
+    "icon_override": "",
+    "seating": true,
+    "UUID": "49cdcd7f-6b4d-4a11-abd0-2d41d2bbfbfb",
+    "building_uuid": "e5172612-24ac-43ad-a01c-503bbc7edaf0",
+    "food_drink_allowed_note": "Food and Drink Note",
+    "microwave_note": "Microwave Note\\n",
+    "kettle_note": "Kettle Note\\n",
+    "wheelchair_note": "Wheelchair note",
+    "seating_note": "Seating Note\\n\\n",
+    "outlets_note": "Outlets Note",
+    "primary_image_url": "/images/ex-primary-portrait.jpg",
+    "primary_image_alt": "Alt Text for Primary Image",
+    "tips": [
+        "Tip 1",
+        "Tip 2",
+        "Tip 3"
+    ],
+    "primary_image_panorama": false,
+    "sense_exp": "Sensory Experience for space 1",
+    "sense_exp_display": false,
+    "wayfinding": "Wayfinding for Space 1",
+    "wayfinding_display": true,
+    "phys_access": "Physical Access for Space 1",
+    "phys_access_display": false,
+    "further_info": "*Further* _information_\\n *Bullet Point 1\\n *Bullet Point 2\\n *Bullet Point 3",
+    "further_info_display": false,
+    "aka": "Ex Space 1",
+    "phys_access_video": "https://www.youtube.com/watch?v=Q3YC90i2HbM",
+    "sense_exp_video": "https://www.youtube.com/watch?v=hnpsEwAAs3M",
+    "wayfinding_video": "https://www.youtube.com/watch?v=WyYjD8VGGWM",
+    "opening_times": {
+        "weekday": {
+            "open": false,
+            "times": [
+            "08:00",
+            "17:00"
+            ]
+        },
+        "sat": {
+            "open": false,
+            "times": [
+            "08:00",
+            "17:00"
+            ]
+        },
+        "holidays": {
+            "open": false,
+            "times": [
+            "08:00",
+            "17:00"
+            ]
+        },
+        "note": "This area can be booked through the CSC."
+        },
+    "floor": 1,
+    "location_internal": [
+        454,
+        350
+    ],
+    "clickthrough": false,
+    "published": true,
+    "updated_by": null
+}
+
+export const space_outside: Space = {
+    "name": "Example Space 2",
+    "canonical": "example-space-2",
+    "description": "Description for Example Space 2",
+    "type": "CSC Space",
+    "updated_at": "2024-08-01 14:51:30.697118+00",
+    "food_drink_allowed": true,
+    "microwave": true,
+    "kettle": false,
+    "wheelchair": true,
+    "location": [
+        53.3450721473786,
+        -6.25781334419746
+    ],
+    "building": null,
+    "outlets": true,
+    "icon_override": "",
+    "seating": true,
+    "UUID": "b416eab6-5fb2-4d44-9683-24c7500a18ec",
+    "building_uuid": null,
+    "food_drink_allowed_note": "\"\"",
+    "microwave_note": "\"\"",
+    "kettle_note": "\"\"",
+    "wheelchair_note": "\"\"",
+    "seating_note": "\"\"",
+    "outlets_note": "\"\"",
+    "primary_image_url": "/images/ex-primary-landscape.jpg",
+    "primary_image_alt": "",
+    "tips": [
+        "Tip 1",
+        "Tip 2",
+        "Tip 3"
+    ],
+    "primary_image_panorama": false,
+    "sense_exp": "Sensory Experience for space 2",
+    "sense_exp_display": true,
+    "wayfinding": "Wayfinding for Space 2",
+    "wayfinding_display": false,
+    "phys_access": "Physical Access for Space 2",
+    "phys_access_display": false,
+    "further_info": "*Further* _information_\\n *Bullet Point 1\\n *Bullet Point 2\\n *Bullet Point 3",
+    "further_info_display": false,
+    "aka": "Ex Space 2",
+    "phys_access_video": "https://youtu.be/Q3YC90i2HbM",
+    "sense_exp_video": "https://youtu.be/hnpsEwAAs3M",
+    "wayfinding_video": "https://youtu.be/WyYjD8VGGWM",
+    "opening_times": {
+        "weekday": {
+            "open": true,
+            "times": [
+            "07:00",
+            "22:00"
+            ]
+        },
+        "sat": {
+            "open": true,
+            "times": [
+            "07:00",
+            "22:00"
+            ]
+        },
+        "holidays": {
+            "open": true,
+            "times": [
+            "07:00",
+            "22:00"
+            ]
+        },
+        "note": "These areas can be booked through the CSC."
+    },
+    "floor": 2,
+    "location_internal": [
+        454,
+        350
+    ],
+    "clickthrough": false,
+    "published": true,
+    "updated_by": null
+}

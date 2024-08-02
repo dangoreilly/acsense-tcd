@@ -24,14 +24,14 @@ export type UserProfile = {
     user_id: string,
     is_admin: boolean,
     is_super_admin?: boolean,
-    buildings: PermissionsObject,
-    spaces: PermissionsObject,
+    buildings: BuildingsPermissions,
+    spaces: SpacesPermissions,
 }
 
 export interface PermissionsObject {
     general: {
         name: boolean,
-        aka: boolean,
+        // aka: boolean,
         desc: boolean,
     },
     primary_image: {
@@ -55,4 +55,16 @@ export interface PermissionsObject {
         labels: boolean,
         location: boolean
     }
+}
+
+export interface BuildingsPermissions extends PermissionsObject {
+    general: {
+        name: boolean,
+        aka: boolean,
+        desc: boolean,
+    }
+}
+
+export interface SpacesPermissions extends PermissionsObject {
+    facilities: boolean,
 }

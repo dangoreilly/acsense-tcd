@@ -40,7 +40,52 @@ export default function (table:string) : PermissionsKey | null {
                 UUID: "service",
             } as PermissionsKey
         case "spaces":
-            return null
+            return {
+                name:                       "spaces.general.name",
+                canonical:                  "is_super_admin",
+                description:                "spaces.general.desc",
+                type:                       "spaces.map.labels",
+                food_drink_allowed:         "spaces.facilties",
+                microwave:                  "spaces.facilties",
+                kettle:                     "spaces.facilties",
+                wheelchair:                 "spaces.facilties",
+                location:                   "spaces.map.location",
+                building:                   "spaces.map.location",
+                outlets:                    "spaces.facilties",
+                icon_override:              "spaces.map.labels",
+                seating:					"spaces.facilties",
+                building_uuid:				"spaces.map.location",
+                food_drink_allowed_note:	"spaces.facilties",
+                microwave_note:             "spaces.facilties",
+                kettle_note:                "spaces.facilties",
+                wheelchair_note:            "spaces.facilties",
+                seating_note:               "spaces.facilties",
+                outlets_note:               "spaces.facilties",
+				sense_exp: 					"spaces.tabs.sensory",
+                sense_exp_display: 			"spaces.tabs.sensory",
+                sense_exp_video: 			"spaces.tabs.sensory",
+                wayfinding: 				"spaces.tabs.wayfinding",
+                wayfinding_display: 		"spaces.tabs.wayfinding",
+                wayfinding_video: 			"spaces.tabs.wayfinding",
+                phys_access: 				"spaces.tabs.physical",
+                phys_access_display: 		"spaces.tabs.physical",
+                phys_access_video: 			"spaces.tabs.physical",
+                tips: 						"spaces.tips",
+                further_info: 				"spaces.further",
+                furtherinfo_display: 		"spaces.further",
+                opening_times: 				"spaces.times",
+                primary_image_url: 			"spaces.primary_image.image",
+                primary_image_alt: 			"spaces.primary_image.alt",
+                primary_image_panorama:     "is_admin",
+                floor: 						"spaces.map.location",
+                location_internal: 			"spaces.map.location",
+                clickthrough: 				"spaces.map.location",
+                published: 					"is_admin",
+
+                updated_at: "service",
+                UUID: "service",
+                updated_by: "service" 
+            } as PermissionsKey
 
         case "profiles":
             return {
