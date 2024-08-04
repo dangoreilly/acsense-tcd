@@ -47,6 +47,7 @@
                         </div> -->
                         <button 
                         type="button" 
+                        :disabled="!checkPermission('published')"
                         class="btn me-2" 
                         :class="space.published ? 'btn-danger' : 'btn-outline-success'"
                         @click="confirmChangePublishStatus()">
@@ -91,6 +92,7 @@
                         <div class="col d-flex flex-column">
                             <label for="spaceType" class="form-label">Space Type</label>
                             <select 
+                            :disabled="!checkPermission('type')"
                             class="form-select" 
                             id="spaceType" 
                             @change="updateSpaceIcon()"
@@ -108,6 +110,7 @@
                         <div class="col d-flex flex-column">
                             <label for="spaceType" class="form-label">Building</label>
                             <select 
+                            :disabled="!checkPermission('building_uuid')"
                             class="form-select" 
                             id="spaceType" 
                             @change="updateSpaceIcon()"
@@ -131,6 +134,7 @@
                             <div class="mb-3">
                                 <label for="TitleInput" class="form-label">Space Name</label>
                                 <input id="TitleInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('name')"
                                 v-model="space.name">
                             </div>
 
@@ -138,6 +142,7 @@
                             <div class="mb-3">
                                 <label for="AkaInput" class="form-label">AKA <small>(optional)</small></label>
                                 <input id="AkaInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('aka')"
                                 v-model="space.aka">
                             </div>
 
@@ -145,12 +150,14 @@
                             <div class="mb-3">
                                 <label for="PrimaryImageInput" class="form-label">Primary Image</label>
                                 <input id="PrimaryImageInput" type="file" class="form-control" 
+                                :disabled="!checkPermission('primary_image_url')"
                                 @change="handlePrimaryImageSelect">
                             </div>
                             <!-- Primary image alt text -->
                             <div class="mb-3">
                                 <label for="PrimaryImageAltInput" class="form-label">Primary Image Alt Text</label>
                                 <input id="PrimaryImageAltInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('primary_image_alt')"
                                 v-model="space.primary_image_alt">
                             </div>
 
@@ -202,6 +209,7 @@
                         <div class="col">
                             <label for="descInput" class="form-label">Description</label>
                             <textarea class="form-control" id="descInput" rows="4" 
+                            :disabled="!checkPermission('description')"
                             v-model="space.description"></textarea>
                         </div>
                         <!-- Preview -->
@@ -219,19 +227,20 @@
                                 <div class="col">
                                     <label for="weekDay-checkbox" >Weekdays</label>
                                     <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="space.opening_times.weekday.open" />
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Opening Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
                                     v-model="space.opening_times.weekday.times[0]" 
-                                    :disabled="!space.opening_times.weekday.open"/>
+                                    :disabled="!space.opening_times.weekday.open || !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Closing Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
                                     v-model="space.opening_times.weekday.times[1]" 
-                                    :disabled="!space.opening_times.weekday.open"/>
+                                    :disabled="!space.opening_times.weekday.open || !checkPermission('opening_times')"/>
                                 </div>
                             </div>
                             <!-- Saturdays -->
@@ -239,19 +248,20 @@
                                 <div class="col">
                                     <label for="sat-checkbox">Saturday</label>
                                     <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="space.opening_times.sat.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sat-open">Opening Time</label>
                                     <input type="time" id="sat-open" class="form-control"
                                     v-model="space.opening_times.sat.times[0]" 
-                                    :disabled="!space.opening_times.sat.open"/>
+                                    :disabled="!space.opening_times.sat.open || !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="sat-close">Closing Time</label>
                                     <input type="time" id="sat-close" class="form-control"
                                     v-model="space.opening_times.sat.times[1]" 
-                                    :disabled="!space.opening_times.sat.open"/>
+                                    :disabled="!space.opening_times.sat.open || !checkPermission('opening_times')"/>
                                 </div>
                             </div>
                             <!-- Sundays -->
@@ -259,19 +269,20 @@
                                 <div class="col">
                                     <label for="sunday-checkbox">Sunday & Public Holidays</label>
                                     <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="space.opening_times.holidays.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sunday-open">Opening Time</label>
                                     <input type="time" id="sunday-open" class="form-control"
                                     v-model="space.opening_times.holidays.times[0]" 
-                                    :disabled="!space.opening_times.holidays.open"/>
+                                    :disabled="!space.opening_times.holidays.open || !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="sunday-close">Closing Time</label>
                                     <input type="time" id="sunday-close" class="form-control"
                                     v-model="space.opening_times.holidays.times[1]" 
-                                    :disabled="!space.opening_times.holidays.open"/>
+                                    :disabled="!space.opening_times.holidays.open || !checkPermission('opening_times')"/>
                                 </div>
                             </div>
 
@@ -279,6 +290,7 @@
                             <div class="mt-3">
                                 <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
                                 <input id="timeNoteInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('opening_times')"
                                 v-model="space.opening_times.note">
                             </div>
                         </div>
@@ -296,12 +308,16 @@
                             <!-- Input -->
                             <div class="col">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.seating" id="SeatingAvailable">
+                                    <input 
+                                    :disabled="!checkPermission('seating')"
+                                    class="form-check-input" type="checkbox" v-model="space.seating" id="SeatingAvailable">
                                     <label class="form-check-label" for="SeatingAvailable">
                                         Seating Available?
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                <textarea  
+                                    :disabled="!checkPermission('seating')"
+                                    class="form-control" id="descInput" rows="2" placeholder="Default text" 
                                 v-model="space.seating_note"></textarea>
                             </div>
                             <!-- Preview -->
@@ -676,6 +692,8 @@
 import {createClient} from '@supabase/supabase-js';
 import L from 'leaflet';
 import '~/assets/css/leaflet.css'
+import getPermissionsKey from "~/assets/permissionsKey"
+import { userHasPermission } from '~/utils/getChanges';
 import extractYoutubeID from '~/composables/extractYoutubeID';
 
 const campusBounds = [
@@ -699,6 +717,7 @@ const campusBounds = [
                 updateCount: 0, // Dummy variable to force a re-render on the space selector
                 map: {},
                 center_marker: {},
+                permissionsKey: {},
             }
         },
         created() {
@@ -707,8 +726,10 @@ const campusBounds = [
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
             this.supabase = createClient(supabaseUrl, supabaseKey)
-            // Get the user's api key
-            this.user = this.getUserData();
+            // Get the user's permissions
+            this.getUserData();
+            // Get the permissionsKey for Spaces
+            this.permissionsKey = getPermissionsKey("spaces");
             // Grab all the space types
             this.getSpaceTypes();
             // Grab all the buildings
@@ -754,11 +775,17 @@ const campusBounds = [
         // mounted() {
         // },
         methods: {
+            checkPermission(permission){
+                // If the user is an admin, they have all permissions on this page
+                if (this.user.is_admin){
+                    return true;
+                }
+                // Else, check if the user has the permission to perform an action
+                return userHasPermission(this.user, this.permissionsKey, permission);
+            },
             async getUserData(){
-                
-                const { data, error } = await this.supabase.auth.getSession()
 
-                return data;
+                this.user = await getCurrentUserPermissions();
             },
 
             handlePrimaryImageSelect(evt) { 

@@ -31,7 +31,7 @@ export type UserProfile = {
 export interface PermissionsObject {
     general: {
         name: boolean,
-        // aka: boolean,
+        aka: boolean,
         desc: boolean,
     },
     primary_image: {
@@ -58,11 +58,6 @@ export interface PermissionsObject {
 }
 
 export interface BuildingsPermissions extends PermissionsObject {
-    general: {
-        name: boolean,
-        aka: boolean,
-        desc: boolean,
-    }
 }
 
 export interface SpacesPermissions extends PermissionsObject {

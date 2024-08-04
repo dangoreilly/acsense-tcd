@@ -118,7 +118,7 @@ export function checkUserHasPermission(user: UserProfile, table: string, changes
  * @param field - The field for which the permission is being checked.
  * @returns A boolean indicating whether the user has the required permission.
  */
-function userHasPermission(user: UserProfile, permissionsKey_table: PermissionsKey, field: string): boolean {
+export function userHasPermission(user: UserProfile, permissionsKey_table: PermissionsKey, field: string): boolean {
 
     // Check the permissionKey to see what permission is needed for this field
     let requiredPermission = permissionsKey_table[field];

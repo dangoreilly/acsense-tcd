@@ -36,6 +36,7 @@ export const user_all: UserProfile = {
     spaces: {
         general: {
             name: true,
+            aka: true,
             desc: true,
         },
         primary_image: {
@@ -59,7 +60,7 @@ export const user_all: UserProfile = {
             labels: true,
             location: true
         },
-        facilities: false
+        facilities: true
     },
   }
   
@@ -98,6 +99,7 @@ export const user_buildingsOnly: UserProfile = {
       spaces: {
           general: {
               name: false,
+              aka: false,
               desc: false,
           },
           primary_image: {
@@ -160,6 +162,7 @@ export const user_admin: UserProfile = {
     spaces: {
         general: {
             name: true,
+            aka: false,
             desc: true,
         },
         primary_image: {
@@ -222,6 +225,7 @@ export const user_none: UserProfile = {
     spaces: {
         general: {
             name: false,
+            aka: false,
             desc: false,
         },
         primary_image: {
@@ -284,6 +288,7 @@ export const user_superadmin: UserProfile = {
     spaces: {
       general: {
         name: false,
+        aka: false,
         desc: false,
       },
       primary_image: {
