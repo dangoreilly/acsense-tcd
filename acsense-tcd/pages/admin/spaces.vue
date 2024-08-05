@@ -1247,6 +1247,9 @@ const campusBounds = [
                 // Get the icon for this space's type
                 let iconURL = this.getImageForSpaceType(this.space);
 
+                // Check the user has permission to move the marker
+                let draggable = this.checkPermission('location');
+
                 // Initialise the marker at the location of the space
                 this.center_marker = L.marker(this.space.location, {
                     icon: L.icon({
@@ -1254,7 +1257,7 @@ const campusBounds = [
                         iconSize: [50, 50],
                         iconAnchor: [25, 25],
                     }),
-                    draggable: checkPermission('location'),
+                    draggable: draggable,
                     zIndexOffset: 1000,
                 }).addTo(this.map);
 
