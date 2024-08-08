@@ -233,6 +233,33 @@ export type Database = {
         }
         Relationships: []
       }
+      logs: {
+        Row: {
+          action: string | null
+          created_at: string
+          data: Json | null
+          id: number
+          subject: string | null
+          user: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: number
+          subject?: string | null
+          user?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: number
+          subject?: string | null
+          user?: string | null
+        }
+        Relationships: []
+      }
       nav_nodes: {
         Row: {
           building: string

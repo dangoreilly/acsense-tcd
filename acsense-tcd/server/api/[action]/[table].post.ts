@@ -98,7 +98,42 @@ export default defineEventHandler(async (event) => {
             }
             else {
                 // Add to the logs table
-                createLogEntry(supabase, permissions.user_id, "UPDATE", table+":"+target.eq, changes);
+                let subject = table+":"+target.eq;
+
+                // If the table is the users table, then the subject is the user's email
+                switch (table) {
+                    case 'users':
+                        subject = data.email;
+                        break;
+                    case 'spaces':
+                        // Get the canonical name of the space
+                        const { data: spaceData, error: spaceError } = await supabase
+                        .from('spaces')
+                        .select('canonical')
+                        .eq(target.col, target.eq)
+
+                        // If there's an error, just use the space ID
+                        if (!spaceError) {
+                            subject = spaceData[0].canonical;
+                        }
+
+                        break;
+                    case 'buildings':
+                        // Get the canonical name of the space
+                        const { data: buildingData, error: buildingError } = await supabase
+                        .from('buildings')
+                        .select('canonical')
+                        .eq(target.col, target.eq)
+
+                        // If there's an error, just use the space ID
+                        if (!buildingError) {
+                            subject = buildingData[0].canonical;
+                        }
+                        break;
+                }
+
+
+                createLogEntry(supabase, permissions.user_id, "UPDATE", subject, changes);
             }
             // If the update was successful, return the updated data
             return updatedData;
