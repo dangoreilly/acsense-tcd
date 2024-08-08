@@ -89,12 +89,6 @@
                     //     key: 'floorplans',
                     //     icon: 'bi bi-columns',
                     // },
-                    {
-                        name: 'General Info',
-                        key: 'general-info',
-                        icon: 'bi bi-info-circle',
-                        admin: true
-                    },
                     // {
                     //     name: 'Map',
                     //     key: 'map',
@@ -110,12 +104,18 @@
                         key: 'contributors',
                         icon: 'bi bi-people',
                     },
-                    // {
-                    //     name: 'Audit Logs',
-                    //     key: 'logs',
-                    //     icon: 'bi bi-card-checklist',
-                    //     admin: true,
-                    // },
+                ],
+                adminTabs: [
+                    {
+                        name: 'General Info',
+                        key: 'general-info',
+                        icon: 'bi bi-info-circle',
+                    },
+                    {
+                        name: 'Audit Logs',
+                        key: 'logs',
+                        icon: 'bi bi-card-checklist',
+                    },
                 ],
                 currentUser: null,
             }
@@ -156,25 +156,17 @@
             },
 
             async filterMenuItems(){
-                // Cycle through the tabs 
-                // If the current user is not an admin, remove the "admin" tabs
-                // Is this a slightly backwards way of handling it? Sure
-                // But security is handled serverside
-                // So even if users bypass this and get to the page, they won't see anything
+                // If the current user is not an admin, add the "admin" tabs
+                // Function is named "filter" because this was carried out backwards for a time
 
                 // Pause to let the user load
                 while (!this.currentUser) {
                     await new Promise(r => setTimeout(r, 100));
                 }
 
-                for (let i = this.tabs.length-1; i >= 0 ; i--){ 
-                    // console.log(this.tabs[i])
-                    // console.log(`Checking tab ${i}: ${this.tabs[i].name}`)
-                    // console.log(this.tabs[i].admin)
-                    if (this.currentUser.is_admin == false && this.tabs[i].admin == true){
-                        // console.log(`Removing tab ${i}: ${this.tabs[i].name}`)
-                        this.tabs.splice(i, 1);
-                    }
+                // if the user is an admin, show the admin tabs
+                if (this.currentUser.is_admin) {
+                    this.tabs = this.tabs.concat(this.adminTabs);
                 }
             }
         }

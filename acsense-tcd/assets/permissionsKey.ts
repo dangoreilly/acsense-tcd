@@ -39,6 +39,18 @@ export default function (table:string) : PermissionsKey | null {
                 updated_at: "service",
                 UUID: "service",
             } as PermissionsKey
+        case "building_gallery_images":
+            return {
+                url: "buildings.gallery.images",
+                alt: "buildings.gallery.alt",
+                caption: "buildings.gallery.caption",
+
+                building: "service",
+
+                created_at: "service",
+                // updated_at: "service",
+                id: "service",
+            } as PermissionsKey
         case "spaces":
             return {
                 name:                       "spaces.general.name",

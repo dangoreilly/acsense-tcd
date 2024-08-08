@@ -104,6 +104,14 @@ export function checkUserHasPermission(user: UserProfile, table: string, changes
 
     for (let field of changes.list) {
         if (!userHasPermission(user, permissionsKey_table, field)) {
+            // TODO: Have the reason for the permission failure in the error message
+            // console.log("User doesn't have permission to change field: ", field);
+            // console.log("Required permission: ", permissionsKey_table[field]);
+            // If the user doesn't have permission to change a field,
+            // Check if they're an admin, and that the field isn't a service or super admin field
+            if (field == "is_super_admin" && !user.is_super_admin) return false;
+            if (field == "service") return false;
+            if (user.is_admin) return true;
             return false;
         }
     }

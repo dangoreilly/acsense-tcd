@@ -246,11 +246,11 @@
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
-                        v-model="modifiedPermissions.spaces.facilities"
+                        v-model="modifiedPermissions.spaces.general.aka"
                         :disabled="disabled || modifiedPermissions.is_admin">
                         <label class="form-check-label"
-                        :class="{'text-warning' : modifiedPermissions.spaces.facilities != user.spaces.facilities}"> 
-                            Modify the Facilities section 
+                        :class="{'text-warning' : modifiedPermissions.spaces.general.aka != user.spaces.general.aka}"> 
+                            Modify the "aka" field
                         </label>  
                     </div>
                     <div class="form-check">
@@ -310,7 +310,7 @@
                         </label> 
                     </div>
                     <!-- Gallery -->
-                    <div class="form-check">
+                    <!-- <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                         v-model="modifiedPermissions.spaces.gallery.images"
                         :disabled="disabled || modifiedPermissions.is_admin">
@@ -335,6 +335,16 @@
                         <label class="form-check-label"
                         :class="{'text-warning' : modifiedPermissions.spaces.gallery.alt != user.spaces.gallery.alt}"> 
                             Modify Gallery Image Alt Text 
+                        </label> 
+                    </div> -->
+                    <!-- Facilities -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.spaces.facilities"
+                        :disabled="disabled || modifiedPermissions.is_admin">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.spaces.facilities != user.spaces.facilities}"> 
+                            Modify Facilities badges/notes 
                         </label> 
                     </div>
                     <!-- Times -->

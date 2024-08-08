@@ -6,7 +6,7 @@
  * @param target - The target condition for the update operation.
  * @returns A promise that resolves to an object containing the updated data and any error that occurred during the update.
  */
-export default async function(access_token: string, table: string, payload: any, target: {col: string, eq: string}): Promise<{data: any, error: any}> {
+export default async function(access_token: string, table: string, payload: any): Promise<{data: any, error: any}> {
     
     let _data: any = null;
     let _error: any = null;
@@ -19,26 +19,20 @@ export default async function(access_token: string, table: string, payload: any,
     // })
 
     try {
-        const data = await $fetch(`/api/update/${table}`, {
+        const data = await $fetch(`/api/insert/${table}`, {
             method: 'POST',
-            // headers: {
-            //     'Authorization': `Bearer ${access_token}`,
-            //     'Content-Type': 'application/json'
-            // },
             body: JSON.stringify({ 
                 jwt: access_token,
-                target: target,
+                target: null,
                 data: payload,
-                select: ""
             })
 
         })
 
         _data = data
-        // alert("Update successful")
     }
     catch (error) {
-        console.error("Error updating table: ", error)
+        console.error("Error inserting to table: ", error)
         _error = error
     }
 

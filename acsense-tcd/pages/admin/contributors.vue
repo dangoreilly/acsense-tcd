@@ -82,7 +82,7 @@
                         </div>
                     </div>
 
-                    <div class="card mt-3">
+                    <div class="card mt-3" v-if="currentUser.is_super_admin">
                         <div class="input-group">
                             <input 
                             type="text" 

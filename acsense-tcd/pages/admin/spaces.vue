@@ -870,24 +870,25 @@ const campusBounds = [
                 // Change the publish status of the space
                 // This happens instantly, outside of the normal save process
 
+                // Get the session access token
+                const access_token = await getSessionAccessToken(this.supabase);
+                // Set up a dummy building object to toggle the published status
+                let dummySpace = JSON.parse(JSON.stringify(this.space_clean));
+                dummySpace.published = !dummySpace.published;
+
                 // Update the space in the database
-                const { data, error } = await this.supabase
-                .from('spaces')
-                .update({
-                    published: !this.space_clean.published
-                })
-                .eq('UUID', this.space.UUID)
-                .select()
-                
-                // If there is an error, log it
-                if (error) {
+                const { data, error } = await updateTable(
+                    access_token, 
+                    "spaces", 
+                    dummySpace,
+                    {col: "UUID", eq: this.space.UUID},
+                )
+                if(error) {
                     console.error(error)
                     alert(error.message)
                     throw error
                 }
                 else {
-                    //TODO: Add a log entry
-                    // TODO: Check the response from the database to see if the update was successful
                     // If the update was successful, update the clean space object
                     this.space_clean.published = !this.space_clean.published;
                     this.space.published = JSON.parse(JSON.stringify(this.space_clean.published));
@@ -1397,12 +1398,14 @@ const campusBounds = [
                     this.space.icon_override = await this.uploadNewCustomIcon();
                 }
 
+                const access_token = await getSessionAccessToken(this.supabase);
                 // Update the space in the database
-                const { data, error } = await this.supabase
-                    .from('spaces')
-                    .update(this.space)
-                    .eq('UUID', this.space.UUID)
-                    .select()
+                const { data, error } = await updateTable(
+                    access_token, 
+                    "spaces", 
+                    this.space,
+                    {col: "UUID", eq: this.space.UUID},
+                )
                 
                 // If there is an error, log it
                 if (error) {

@@ -70,17 +70,6 @@ export default defineEventHandler(async (event) => {
 
 
             break;
-        case 'INSERT':
-            // To create a new user profile, we first need to register the user
-            // And then create the new profile linked to the user ID
-
-            // TODO: Implement the INSERT operation
-            throw createError({
-                statusCode: 501,
-                statusMessage: 'Create operation not implemented',
-            })
-
-            break;
         case 'UPDATE':
             // Update the user profile using the payload
 
@@ -111,26 +100,12 @@ export default defineEventHandler(async (event) => {
             return updatedData;
 
             break;
-        case 'DELETE':
-            // To delete a user profile, we need to delete the profile
-            // And then delete the user
-            // DELETE can only be performed by the superadmin
-
-            if (!permissions.is_super_admin) {
-                throw createError({
-                    statusCode: 403,
-                    statusMessage: 'Forbidden'
-                })
-            }
-
-            // TODO: Implement the DELETE operation
-            throw createError({
-                statusCode: 501,
-                statusMessage: 'Delete operation not implemented',
-            })
-            break;
         default:
             // If the action is not recognised, return a 403 error
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden'
+            })
 
     }
 });

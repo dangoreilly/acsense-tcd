@@ -27,6 +27,15 @@
 
                     <!-- Construction Badge -->
                     <div class="d-flex align-items-center m-3 fs-5">
+                        <button 
+                        type="button" 
+                        :disabled="!checkPermission('published')"
+                        class="btn me-2" 
+                        :class="building.published ? 'btn-danger' : 'btn-outline-success'"
+                        @click="confirmChangePublishStatus()">
+                            {{ building.published ? "Unpublish" : "Publish" }}
+                        </button>
+                        
                         <div class="btn-group" role="group">
                             <button 
                             type="button" 
@@ -67,13 +76,15 @@
                             <div class="mb-3">
                                 <label for="TitleInput" class="form-label">Building Name</label>
                                 <input id="TitleInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('display_name')"
                                 v-model="building.display_name">
                             </div>
 
                             <!-- Aka -->
                             <div class="mb-3">
                                 <label for="AkaInput" class="form-label">AKA <small>(optional)</small></label>
-                                <input id="AkaInput" type="text" class="form-control" 
+                                <input id="AkaInput" type="text" class="form-control"  
+                                :disabled="!checkPermission('aka')"
                                 v-model="building.aka">
                             </div>
 
@@ -81,12 +92,14 @@
                             <div class="mb-3">
                                 <label for="PrimaryImageInput" class="form-label">Primary Image</label>
                                 <input id="PrimaryImageInput" type="file" class="form-control" 
+                                :disabled="!checkPermission('primary_image_url')"
                                 @change="handlePrimaryImageSelect">
                             </div>
                             <!-- Primary image alt text -->
                             <div class="mb-3">
                                 <label for="PrimaryImageAltInput" class="form-label">Primary Image Alt Text</label>
                                 <input id="PrimaryImageAltInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('primary_image_alt')"
                                 v-model="building.primary_image_alt">
                             </div>
                         </div>
@@ -117,6 +130,7 @@
                         <div class="col">
                             <label for="descInput" class="form-label">Description</label>
                             <textarea class="form-control" id="descInput" rows="4" 
+                            :disabled="!checkPermission('description')"
                             v-model="building.description"></textarea>
                         </div>
                         <!-- Preview -->
@@ -135,19 +149,20 @@
                                 <div class="col">
                                     <label for="weekDay-checkbox" >Weekdays</label>
                                     <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="building.opening_times.weekday.open" />
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Opening Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
                                     v-model="building.opening_times.weekday.times[0]" 
-                                    :disabled="!building.opening_times.weekday.open"/>
+                                    :disabled="!building.opening_times.weekday.open && !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Closing Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
                                     v-model="building.opening_times.weekday.times[1]" 
-                                    :disabled="!building.opening_times.weekday.open"/>
+                                    :disabled="!building.opening_times.weekday.open && !checkPermission('opening_times')"/>
                                 </div>
                             </div>
                             <!-- Saturdays -->
@@ -155,19 +170,20 @@
                                 <div class="col">
                                     <label for="sat-checkbox">Saturday</label>
                                     <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="building.opening_times.sat.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sat-open">Opening Time</label>
                                     <input type="time" id="sat-open" class="form-control"
                                     v-model="building.opening_times.sat.times[0]" 
-                                    :disabled="!building.opening_times.sat.open"/>
+                                    :disabled="!building.opening_times.sat.open && !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="sat-close">Closing Time</label>
                                     <input type="time" id="sat-close" class="form-control"
                                     v-model="building.opening_times.sat.times[1]" 
-                                    :disabled="!building.opening_times.sat.open"/>
+                                    :disabled="!building.opening_times.sat.open && !checkPermission('opening_times')"/>
                                 </div>
                             </div>
                             <!-- Sundays -->
@@ -175,19 +191,20 @@
                                 <div class="col">
                                     <label for="sunday-checkbox">Sunday & Public Holidays</label>
                                     <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="building.opening_times.holidays.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sunday-open">Opening Time</label>
                                     <input type="time" id="sunday-open" class="form-control"
                                     v-model="building.opening_times.holidays.times[0]" 
-                                    :disabled="!building.opening_times.holidays.open"/>
+                                    :disabled="!building.opening_times.holidays.open && !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="sunday-close">Closing Time</label>
                                     <input type="time" id="sunday-close" class="form-control"
                                     v-model="building.opening_times.holidays.times[1]" 
-                                    :disabled="!building.opening_times.holidays.open"/>
+                                    :disabled="!building.opening_times.holidays.open && !checkPermission('opening_times')"/>
                                 </div>
                             </div>
 
@@ -195,6 +212,7 @@
                             <div class="mt-3">
                                 <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
                                 <input id="timeNoteInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('opening_times')"
                                 v-model="building.opening_times.note">
                             </div>
                         </div>
@@ -211,12 +229,15 @@
                             <!-- Sensory -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="building.sense_exp_display" id="SenseDisplay">
+                                    <input class="form-check-input" type="checkbox" 
+                                    :disabled="!checkPermission('sense_exp_display')"
+                                    v-model="building.sense_exp_display" id="SenseDisplay">
                                     <label class="form-check-label" for="SenseDisplay">
                                         Sensory Experience
                                     </label>
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
+                                :disabled="!checkPermission('sense_exp')"
                                 v-model="building.sense_exp"></textarea>
                                 <!-- video link -->
                                 <div class="mt-3">
@@ -224,18 +245,22 @@
                                     <input id="videolink" type="text" class="form-control" 
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
+                                    :disabled="!checkPermission('sense_exp_video')"
                                     v-model="building.sense_exp_video">
                                 </div>
                             </div>
                             <!-- Wayfinding -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="building.wayfinding_display" id="WayfindDisplay">
+                                    <input class="form-check-input" type="checkbox" 
+                                    :disabled="!checkPermission('wayfinding_display')"
+                                    v-model="building.wayfinding_display" id="WayfindDisplay">
                                     <label class="form-check-label" for="WayfindDisplay">
                                         Wayfinding
                                     </label>
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
+                                :disabled="!checkPermission('wayfinding')"
                                 v-model="building.wayfinding"></textarea>
                                 <!-- video link -->
                                 <div class="mt-3">
@@ -243,25 +268,30 @@
                                     <input id="videolink" type="text" class="form-control" 
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
+                                    :disabled="!checkPermission('wayfinding_video')"
                                     v-model="building.wayfinding_video">
                                 </div>
                             </div>
                             <!-- Physical -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="building.phys_access_display" id="PhysicalDisplay">
+                                    <input class="form-check-input" type="checkbox" 
+                                    :disabled="!checkPermission('phys_access_display')"
+                                    v-model="building.phys_access_display" id="PhysicalDisplay">
                                     <label class="form-check-label" for="PhysicalDisplay">
                                         Physical Experience
                                     </label>
                                 </div>
                                 <textarea class="form-control" id="descInput" rows="4" 
-                                v-model="building.phys_access"></textarea>
+                                :disabled="!checkPermission('phys_access')"
+                                    v-model="building.phys_access"></textarea>
                                 <!-- video link -->
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
                                     <input id="videolink" type="text" class="form-control"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
+                                    :disabled="!checkPermission('phys_access_video')"
                                     v-model="building.phys_access_video">
                                 </div>
                             </div>
@@ -281,11 +311,17 @@
                             <!-- Loop through the tips as text inputs -->
                             <div class="mb-3">
                                 <div v-for="(tip, index) in building.tips" :key="index" class="input-group mb-2">
-                                    <input type="text" class="form-control" v-model="building.tips[index]" placeholder="New Tip">
-                                    <button class="btn btn-warning" type="button" @click="removeTip(index)">Remove</button>
+                                    <input type="text" class="form-control" 
+                                    :disabled="!checkPermission('tips')"
+                                    v-model="building.tips[index]" placeholder="New Tip">
+                                    <button 
+                                    :disabled="!checkPermission('tips')"
+                                    class="btn btn-warning" type="button" @click="removeTip(index)">Remove</button>
                                 </div>
                                 <!-- Button to add a new tip -->
-                                <button class="btn btn-success" type="button" @click="addTip()">Add Tip</button>
+                                <button 
+                                :disabled="!checkPermission('tips')"
+                                class="btn btn-success" type="button" @click="addTip()">Add Tip</button>
                             </div>
                             
                         </div>
@@ -305,12 +341,15 @@
                         <!-- Edit -->
                         <div class="col">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" v-model="building.furtherinfo_display" id="furtherInfoDisplay">
+                                <input 
+                                :disabled="!checkPermission('furtherinfo_display')"
+                                class="form-check-input" type="checkbox" v-model="building.furtherinfo_display" id="furtherInfoDisplay">
                                 <label class="form-check-label" for="furtherInfoDisplay">
                                     Further Information
                                 </label>
                             </div>
                             <textarea class="form-control" id="descInput" rows="4" 
+                            :disabled="!checkPermission('further_info')"
                             v-model="building.further_info"></textarea>
                         </div>
                         <!-- Display -->
@@ -341,7 +380,9 @@
                             </div>
                             <!-- Display Settings -->
                             <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" v-model="building.always_display" id="always_display">
+                                <input  
+                                :disabled="!checkPermission('always_display')"
+                                class="form-check-input" type="checkbox" v-model="building.always_display" id="always_display">
                                 <label class="form-check-label" for="always_display">
                                     Always Display
                                 </label>
@@ -369,8 +410,12 @@
                                     <td style="white-space: nowrap; text-overflow: ellipsis; overflow: clip; max-width: 400px;">
                                         <a :href="image.url" target="_blank"> {{ image.url }}</a>
                                     </td>
-                                    <td><input type="text" placeholder="Alt Text" v-model="image.alt"></td>
-                                    <td><input type="text" placeholder="Caption" v-model="image.caption"></td>
+                                    <td><input 
+                                    :disabled="!checkPermission('alt', 'building_gallery_images')"
+                                    type="text" placeholder="Alt Text" v-model="image.alt"></td>
+                                    <td><input 
+                                    :disabled="!checkPermission('caption', 'building_gallery_images')"
+                                    type="text" placeholder="Caption" v-model="image.caption"></td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <!-- Save -->
@@ -394,6 +439,7 @@
                                             </button>
                                             <!-- Delete -->
                                             <button 
+                                            :disabled="!checkPermission('url', 'building_gallery_images')"
                                             class="btn btn-danger" 
                                             type="button" 
                                             title="This cannot be undone"
@@ -404,21 +450,26 @@
                                 <tr>
                                     <td>
                                         <input 
+                                        :disabled="!checkPermission('url', 'building_gallery_images')"
                                         type="file" 
                                         id="myFile" 
                                         name="newGalleryImage" 
                                         accept="image/png, image/jpg, image/jpeg"
                                         @change="handleFileUpload">
                                     </td>
-                                    <td><input type="text" placeholder="Alt Text" v-model="newGalleryImage.alt"></td>
-                                    <td><input type="text" placeholder="Caption" v-model="newGalleryImage.caption"></td>
+                                    <td><input 
+                                        :disabled="!checkPermission('url', 'building_gallery_images')"
+                                        type="text" placeholder="Alt Text" v-model="newGalleryImage.alt"></td>
+                                    <td><input 
+                                        :disabled="!checkPermission('url', 'building_gallery_images')"
+                                        type="text" placeholder="Caption" v-model="newGalleryImage.caption"></td>
                                     <td>
                                         <!-- The add button will only become active when a file has been uploaded, and alt text have been provided -->
                                         <button 
                                         class="btn btn-success" 
                                         type="button"
                                         @click="addGalleryImage()"
-                                        :disabled="!(newGalleryImage.selectedFile && newGalleryImage.alt.length > 0)">
+                                        :disabled="!(newGalleryImage.selectedFile && newGalleryImage.alt.length > 0) && !checkPermission('url', 'building_gallery_images')">
                                             Add
                                         </button>
                                     </td>
@@ -488,6 +539,7 @@ useHead({
 
 <script>
 import {createClient} from '@supabase/supabase-js';
+import getPermissionsKey from "~/assets/permissionsKey"
 
     export default {
         data() {
@@ -503,7 +555,9 @@ import {createClient} from '@supabase/supabase-js';
                     alt: "",
                     caption: "",
                 },
-                currentUser: {},
+                user: {},
+                permissionsKey: {},
+                permissionsKey_gallery: {},
             }
         },
         created() {
@@ -522,6 +576,9 @@ import {createClient} from '@supabase/supabase-js';
             // // this.startSupabase();
             this.supabase = adminSupabaseInit();
             this.getUser();
+            // Get the permissionsKey for Buildings
+            this.permissionsKey = getPermissionsKey("buildings");
+            this.permissionsKey_gallery = getPermissionsKey("building_gallery_images");
             
             
             // this.mapInit();
@@ -529,23 +586,6 @@ import {createClient} from '@supabase/supabase-js';
         },
         computed: {
             infoBoxContent() {
-                // return [
-                //     {
-                //         title: "Sensory Experience",
-                //         content: this.building.sense_exp || "No information provided",
-                //         display: this.building.sense_exp_display || false
-                //     },
-                //     {
-                //         title: "Wayfinding",
-                //         content: this.building.wayfinding || "No information provided",
-                //         display: this.building.wayfinding_display || false
-                //     },
-                //     {
-                //         title: "Physical Access",
-                //         content: this.building.phys_access || "No information provided",
-                //         display: this.building.phys_access_display || false
-                //     },
-                // ];
                 return setInfoBoxContent(this.building);
             },
             buildingHasBeenChanged() {
@@ -558,7 +598,22 @@ import {createClient} from '@supabase/supabase-js';
             // Resolve the promise of the user object
             // So that we can check the permissions on it
             async getUser(){
-                this.currentUser = JSON.parse(JSON.stringify(await getCurrentUserPermissions()));
+                this.user = JSON.parse(JSON.stringify(await getCurrentUserPermissions()));
+            },
+
+            checkPermission(permission, table="buildings"){
+                // If the user is an admin, they have all permissions on this page
+                if (this.user.is_admin){
+                    return true;
+                }
+
+                // Then check if we're looking at the gallery permissions
+                if (table == "building_gallery_images"){
+                    return userHasPermission(this.user, this.permissionsKey_gallery, permission);
+                }
+
+                // Else, check if the user has the permission to perform an action
+                return userHasPermission(this.user, this.permissionsKey, permission);
             },
 
 
@@ -575,32 +630,48 @@ import {createClient} from '@supabase/supabase-js';
                 buildingSelectMapInit(this.updateBuildingGeometry, this.supabase);
             },
 
+            confirmChangePublishStatus(){
+                // Confirm the user wants to change the publish status
+                if (window.confirm(`Are you sure you want to ${this.building.published ? "unpublish" : "publish"} ${this.building.display_name}?`)){
+                    // If they do, update the space
+                    this.changePublishStatus();
+                }
+            },
+
+            async changePublishStatus(){
+                // Change the publish status of the space
+                // This happens instantly, outside of the normal save process
+
+                // Get the session access token
+                const access_token = await getSessionAccessToken(this.supabase);
+                // Set up a dummy building object to toggle the published status
+                let dummyBuilding = JSON.parse(JSON.stringify(this.building_clean));
+                dummyBuilding.published = !dummyBuilding.published;
+
+                // Update the space in the database
+                const { data, error } = await updateTable(
+                    access_token, 
+                    "buildings", 
+                    dummyBuilding,
+                    {col: "UUID", eq: this.building.UUID},
+                )
+                if(error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                // If the update was successful, update the clean building object
+                this.building_clean.published = !this.building_clean.published;
+                this.building.published = JSON.parse(JSON.stringify(this.building_clean.published));
+                alert(this.building.display_name + " has been " + (this.building.published ? "published" : "unpublished"));
+
+            },
+
             // This function is called when the user clicks the "Save" button
             // It will save the current state of the building to the database
             async updateBuilding() {
-
-                // Create an empty object to store the update query
-                // Only contains the things we want to update
-                let update_vehicle = {
-                    display_name: this.building.display_name,
-                    description: this.building.description,
-                    aka: this.building.aka,
-                    opening_times: this.building.opening_times,
-
-                    sense_exp: this.building.sense_exp,
-                    sense_exp_display: this.building.sense_exp_display,
-                    wayfinding: this.building.wayfinding,
-                    wayfinding_display: this.building.wayfinding_display,
-                    phys_access: this.building.phys_access,
-                    phys_access_display: this.building.phys_access_display,
-
-                    further_info: this.building.further_info,
-                    furtherinfo_display: this.building.furtherinfo_display,
-                    tips: this.building.tips,
-
-                    always_display: this.building.always_display,
-                    coordinates: this.building.coordinates,
-                }
+                // Deep copy the building object, as things get messy otherwise
+                let update_vehicle = JSON.parse(JSON.stringify(this.building));
 
                 // If the primary image has been changed, upload the new image and update the url
                 try {
@@ -621,11 +692,8 @@ import {createClient} from '@supabase/supabase-js';
                 }
 
                 // Update the building in the database
-                const { data, error } = await this.supabase
-                    .from('buildings')
-                    .update(update_vehicle)
-                    .eq('UUID', this.building.UUID)
-                    .select()
+                const access_token = await getSessionAccessToken(this.supabase);
+                const {data, error} = await updateTable(access_token, "buildings", update_vehicle, {col: "UUID", eq: this.building.UUID})
                 
                 // If there is an error, log it
                 if (error) {
@@ -695,23 +763,39 @@ import {createClient} from '@supabase/supabase-js';
                 }
                 console.log(data)
                 // Create a new image object
+                const baseURL = this.supabase.storageUrl + "/object/public/gallery-images/";
                 let newImage = {
-                    url: "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/gallery-images/" + data.path,
+                    url: baseURL + data.path,
                     alt: this.newGalleryImage.alt,
                     caption: this.newGalleryImage.caption,
                 }
 
                 // Add the image to the database
-                let { data: img, error:db_insert_error } = await this.supabase
-                    .from('building_gallery_images')
-                    .insert([
-                        { 
-                            building: this.building.canonical,
-                            url: newImage.url,
-                            alt: newImage.alt,
-                            caption: newImage.caption,
-                        }
-                    ])
+                // let { data: img, error:db_insert_error } = await this.supabase
+                //     .from('building_gallery_images')
+                //     .insert([
+                //         { 
+                //             building: this.building.canonical,
+                //             url: newImage.url,
+                //             alt: newImage.alt,
+                //             caption: newImage.caption,
+                //         }
+                //     ])
+
+                
+                // Add gallery image to the database
+                const access_token = await getSessionAccessToken(this.supabase);
+                const {data: img, error:db_insert_error} = await insertToTable(
+                    access_token, 
+                    "building_gallery_images", 
+                    { 
+                        building: this.building.canonical,
+                        url: newImage.url,
+                        alt: newImage.alt,
+                        caption: newImage.caption,
+                    }
+                )
+                
 
                 if (db_insert_error) {
                     console.error(db_insert_error)
