@@ -73,15 +73,27 @@
                 <div class="row mt-3">
                     <!-- input -->
                     <div class="col">
-                        <div class="mb-3" v-for="spaceType in space_types">
-                            <div class="row mb-2">
-                                <input type="color" :id="'colour-space-' + spaceType.id" class="form-control form-control-color" v-model="spaceType.colour">
-                                <label :for="'colour-space-' + spaceType.id" class="col-lg-10 col-form-label">{{ spaceType.category }}</label>
+                        <div class="row mb-3" v-for="spaceType in space_types">
+                            <div class="col">
+                                <div class="row mb-2">
+                                    <input type="color" :id="'colour-space-' + spaceType.id" class="form-control form-control-color" v-model="spaceType.colour">
+                                    <label :for="'colour-space-' + spaceType.id" class="col-lg-10 col-form-label">{{ spaceType.category }}</label>
+                                </div>
+                                <div class="row">
+                                    <textarea class="form-control" :id="'space-' + spaceType.id" rows="4"  
+                                    v-model="spaceType.descriptor"></textarea>
+                                </div>
                             </div>
-                            <div class="row">
-                                <textarea class="form-control" :id="'space-' + spaceType.id" rows="4"  
-                                v-model="spaceType.descriptor"></textarea>
-                            </div>
+                            <!-- Icon Display -->
+                            <!-- <div class="col">
+                                <div class="mt-3 position-relative">
+                                    <img 
+                                    :src="spaceType.icon" 
+                                    style="width: 100%;">
+                                    <input id="IconOverrideInput" type="file" class="form-control" 
+                                    @change="handleCustomIconSelect(e, spaceType.id)">
+                                </div>
+                            </div> -->
                         </div>
                     </div>
                     <!-- Preview -->
@@ -115,11 +127,150 @@
                                         </div>
 
                                         <div class="row px-4" v-for="spaceType in space_types">
-                                            <p class="position-relative">
-                                                <span class="position-absolute top-50 start-0 translate-middle p-2 border border-dark rounded-circle" :style="{'background-color': spaceType.colour}"> </span>
-                                                <span class="ps-3"><strong>{{ spaceType.category }}</strong></span>
-                                            </p>
-                                            <p>{{ spaceType.descriptor }}</p>
+                                            <div v-if="spaceType.descriptor?.length>0">
+                                                <p class="position-relative">
+                                                    <span class="position-absolute top-50 start-0 translate-middle p-2 border border-dark rounded-circle" :style="{'background-color': spaceType.colour}"> </span>
+                                                    <span class="ps-3"><strong>{{ spaceType.category }}</strong></span>
+                                                </p>
+                                                <p>{{ spaceType.descriptor }}</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- List all the facilities icons, in FALSE then TRUE state, and then what they represent -->
+                                        <h4>Facilities</h4>
+                                        <p>The symbols beside the student space show what facilities are provided in them. Green shows the facility is available, Red with a strike-through shows the facility is unavailable</p>
+                                        <div class="mx-4">
+                                            <div class="row bottom-bottom border-2 border-gray-500 my-1" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                <!-- Seating -->
+                                                <!-- FALSE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                title="No Seating Available">
+                                                    <img class="svg-icon" src="/images/icons/chair-solid.svg">
+                                                    <!-- Strikethrough for RG blindness -->
+                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                </div>
+                                                <!-- TRUE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                title="Seating Available">
+                                                    <img class="svg-icon" src="/images/icons/chair-solid.svg">
+                                                </div>
+                                                <!-- Facility -->
+                                                <div>
+                                                    <span>Seating Available</span>
+                                                </div>
+
+                                            </div>
+                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                <!-- Electrical Sockets -->
+                                                <!-- FALSE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                title="No Plug Sockets">
+                                                    <img class="svg-icon" src="/images/icons/plug-solid.svg">
+                                                    <!-- Strikethrough for RG blindness -->
+                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                </div>
+                                                <!-- TRUE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                title="Plug Sockets">
+                                                    <img class="svg-icon" src="/images/icons/plug-solid.svg">
+                                                </div>
+                                                <div>
+                                                    <!-- Facility -->
+                                                    <span>Plug Sockets available</span>
+                                                </div>
+
+                                            </div>
+                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                <!-- Food and Drink allowed -->
+                                                <!-- FALSE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                title="No Food or Drink Allowed">
+                                                    <img class="svg-icon" src="/images/icons/utensils-solid.svg">
+                                                    <!-- Strikethrough for RG blindness -->
+                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                </div>
+                                                <!-- TRUE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                title="Food and Drink Allowed">
+                                                    <img class="svg-icon" src="/images/icons/utensils-solid.svg">
+                                                </div>
+                                                <div>
+                                                    <!-- Facility -->
+                                                    <span>Food and Drink allowed</span>
+                                                </div>
+
+                                            </div>
+                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                <!-- Kettle provided -->
+                                                <!-- FALSE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                title="No Kettle Available">
+                                                    <img class="svg-icon" src="/images/icons/kettle.svg">
+                                                    <!-- Strikethrough for RG blindness -->
+                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                </div>
+                                                <!-- TRUE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                title="Kettle Available">
+                                                    <img class="svg-icon" src="/images/icons/kettle.svg">
+                                                </div>
+                                                <div>
+                                                    <!-- Facility -->
+                                                    <span>Kettle provided</span>
+                                                </div>
+
+                                            </div>
+                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                <!-- Microwave provided -->
+                                                <!-- FALSE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                title="No Microwave Available">
+                                                    <img class="svg-icon" src="/images/icons/microwave.svg">
+                                                    <!-- Strikethrough for RG blindness -->
+                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                </div>
+                                                <!-- TRUE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                title="Microwave Available">
+                                                    <img class="svg-icon" src="/images/icons/microwave.svg">
+                                                </div>
+                                                <div>
+                                                    <!-- Facility -->
+                                                    <span>Microwave provided</span>
+                                                </div>
+
+                                            </div>
+                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                <!-- Wheelchair Accessible -->
+                                                <!-- FALSE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                title="No Wheelchair Access">
+                                                    <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
+                                                    <!-- Strikethrough for RG blindness -->
+                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                </div> 
+                                                <!-- TRUE -->
+                                                <div
+                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                title="Wheelchair Access">
+                                                    <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
+                                                </div>
+                                                <div>
+                                                    <!-- Facility -->
+                                                    <span>Wheelchair Accessibility</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -203,6 +354,73 @@ export default {
             this.space_types_clean = JSON.parse(JSON.stringify(data));
         },
 
+        handleCustomIconSelect(evt, id){
+            // Get the file from the input
+            // Set the iconOverride to the file to preview
+            const file = evt.target.files[0];
+            // Find the space type with the matching id
+            for (let i = 0; i < this.space_types.length; i++) {
+                if (this.space_types[i].id === id) {
+                    this.space_types[i].icon = URL.createObjectURL(file);
+                    break;
+                }
+            }
+
+        },
+
+        // async uploadNewCustomIcon(){
+        //         // Get the file object from the primary image upload input
+        //         // Upsert to the storage bucket as the canonical name
+        //         // TODO: Check if the file already exists under a different extension, and if so, delete it
+
+        //         // Get the file
+        //         let file = document.getElementById("IconOverrideInput").files[0];
+        //         // Get the file extension
+        //         let extension = file.name.split('.').pop();
+
+        //         make 
+                
+        //         // Build the new url for the file
+        //         let newUrl = this.supabase.storageUrl + "/object/public/icons/" + this.space.canonical + "." + extension;
+
+        //         // Upload the file to the storage bucket
+        //         const { data, error:upload_error } = await this.supabase.storage
+        //         .from('icons')
+        //         .upload(`custom/${this.space.canonical}.${extension}`, file)
+
+        //         if (upload_error) {
+        //             // if the file already exists, it's not an error
+        //             // We just need to update the existing file
+        //             if (upload_error.statusCode == "409"){
+        //                 console.warn(upload_error)
+        //                 // Update the file
+        //                 const { data, error:update_error } = await this.supabase.storage
+        //                 .from('icons')
+        //                     .update(`custom/${this.space.canonical}.${extension}`, file, {
+        //                         upsert: true
+        //                     })
+
+        //                 if (update_error) {
+        //                     console.error(update_error)
+        //                     alert(update_error.message)
+        //                     return ""
+        //                 }
+        //             }
+        //             else
+        //             {
+        //                 console.error(upload_error)
+        //                 alert(upload_error.message)
+        //                 return ""
+        //             }
+        //         }
+                
+        //         // Clear the icon input
+        //         document.getElementById("IconOverrideInput").value = "";
+
+        //         return newUrl;
+
+        //     },
+
         cancelChanges(){
             // Reset the welcome text
             this.welcome.mainContent = this.welcome_clean.mainContent
@@ -211,25 +429,28 @@ export default {
         },
         
         async updateContent() {
+
+            const access_token = await getSessionAccessToken(this.supabase)
             // Update the welcome text
-            let {data, error:welcome_update_error} = await this.supabase
-                .from('site_settings')
-                .update({ data: this.welcome })
-                .eq('key', "welcome")
+            let {data, error:welcome_update_error} = await updateTable(access_token, 'site_settings', 
+            {
+                data: {mainContent: this.welcome.mainContent},
+            }, 
+            {col:"key", eq:'welcome'})
 
                 
             if (welcome_update_error) {
-                console.error(style_update_error)
-                alert(style_update_error.message)
-                throw style_update_error
+                console.error(welcome_update_error)
+                alert(welcome_update_error)
+                throw welcome_update_error
             }
 
             // Update the space types
             for (let i = 0; i < this.space_types.length; i++) {
-                let {data, error:style_update_error} = await this.supabase
-                    .from('space_styles')
-                    .update(this.space_types[i])
-                    .eq('id', this.space_types[i].id)
+                let {data, error:style_update_error} = await updateTable(access_token, 'space_styles',
+                    this.space_types[i],
+                    {col:'id', eq:this.space_types[i].id},
+                )
 
                 if (style_update_error) {
                     console.error(style_update_error)

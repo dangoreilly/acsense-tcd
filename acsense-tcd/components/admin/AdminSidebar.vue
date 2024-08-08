@@ -111,11 +111,11 @@
                         key: 'general-info',
                         icon: 'bi bi-info-circle',
                     },
-                    {
-                        name: 'Audit Logs',
-                        key: 'logs',
-                        icon: 'bi bi-card-checklist',
-                    },
+                    // {
+                    //     name: 'Audit Logs',
+                    //     key: 'logs',
+                    //     icon: 'bi bi-card-checklist',
+                    // },
                 ],
                 currentUser: null,
             }
