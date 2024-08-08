@@ -41,6 +41,16 @@
                             </div>
                         </template>
                     </div>
+
+                    <div class="row px-4" v-for="spaceType in spaceIcons">
+                        <div v-if="spaceType.descriptor?.length>0">
+                            <p class="position-relative">
+                                <span class="position-absolute top-50 start-0 translate-middle p-2 border border-dark rounded-circle" :style="{'background-color': spaceType.colour}"> </span>
+                                <span class="ps-3"><strong>{{ spaceType.category }}</strong></span>
+                            </p>
+                            <p>{{ spaceType.descriptor }}</p>
+                        </div>
+                    </div>
                     <!-- List all the facilities icons, in FALSE then TRUE state, and then what they represent -->
                     <h4>Facilities</h4>
                     <p>The symbols beside the student space show what facilities are provided in them. Green shows the facility is available, Red with a strike-through shows the facility is unavailable</p>

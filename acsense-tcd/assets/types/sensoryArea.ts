@@ -14,4 +14,4 @@ type sensoryArea = {
     "icon": string,
 }
 
-export {sensoryArea}
+export type {sensoryArea}

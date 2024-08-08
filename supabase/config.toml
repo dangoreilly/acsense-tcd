@@ -76,10 +76,10 @@ enabled = true
 # in emails.
 # This needs to be changed for developing inside codespaces
 # Github Actions can't get the env variable to run the CI
-site_url = "https://127.0.0.1:3000"
+site_url = "http://localhost:3000"
 #site_url = "env(SUPABASE_SITE_URL)"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+additional_redirect_urls = ["http://localhost:3000", "env(SUPABASE_SITE_URL)"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # If disabled, the refresh token will never expire.
@@ -106,13 +106,13 @@ enable_confirmations = false
 max_frequency = "1s"
 
 # Use a production-ready SMTP server
-# [auth.email.smtp]
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+[auth.email.smtp]
+#host = "smtp.sendgrid.net"
+#port = 465
+#user = "apikey"
+#pass = "env(SENDGRID_API_KEY)"
+#admin_email = "no-reply@tcdsensemap.ie"
+#sender_name = "TCD Sense Map"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

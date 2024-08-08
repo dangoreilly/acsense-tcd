@@ -47,6 +47,7 @@
                         </div> -->
                         <button 
                         type="button" 
+                        :disabled="!checkPermission('published')"
                         class="btn me-2" 
                         :class="space.published ? 'btn-danger' : 'btn-outline-success'"
                         @click="confirmChangePublishStatus()">
@@ -91,6 +92,7 @@
                         <div class="col d-flex flex-column">
                             <label for="spaceType" class="form-label">Space Type</label>
                             <select 
+                            :disabled="!checkPermission('type')"
                             class="form-select" 
                             id="spaceType" 
                             @change="updateSpaceIcon()"
@@ -108,6 +110,7 @@
                         <div class="col d-flex flex-column">
                             <label for="spaceType" class="form-label">Building</label>
                             <select 
+                            :disabled="!checkPermission('building_uuid')"
                             class="form-select" 
                             id="spaceType" 
                             @change="updateSpaceIcon()"
@@ -131,6 +134,7 @@
                             <div class="mb-3">
                                 <label for="TitleInput" class="form-label">Space Name</label>
                                 <input id="TitleInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('name')"
                                 v-model="space.name">
                             </div>
 
@@ -138,6 +142,7 @@
                             <div class="mb-3">
                                 <label for="AkaInput" class="form-label">AKA <small>(optional)</small></label>
                                 <input id="AkaInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('aka')"
                                 v-model="space.aka">
                             </div>
 
@@ -145,12 +150,14 @@
                             <div class="mb-3">
                                 <label for="PrimaryImageInput" class="form-label">Primary Image</label>
                                 <input id="PrimaryImageInput" type="file" class="form-control" 
+                                :disabled="!checkPermission('primary_image_url')"
                                 @change="handlePrimaryImageSelect">
                             </div>
                             <!-- Primary image alt text -->
                             <div class="mb-3">
                                 <label for="PrimaryImageAltInput" class="form-label">Primary Image Alt Text</label>
                                 <input id="PrimaryImageAltInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('primary_image_alt')"
                                 v-model="space.primary_image_alt">
                             </div>
 
@@ -202,6 +209,7 @@
                         <div class="col">
                             <label for="descInput" class="form-label">Description</label>
                             <textarea class="form-control" id="descInput" rows="4" 
+                            :disabled="!checkPermission('description')"
                             v-model="space.description"></textarea>
                         </div>
                         <!-- Preview -->
@@ -219,19 +227,20 @@
                                 <div class="col">
                                     <label for="weekDay-checkbox" >Weekdays</label>
                                     <input type="checkbox" id="weekDay-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="space.opening_times.weekday.open" />
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Opening Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
                                     v-model="space.opening_times.weekday.times[0]" 
-                                    :disabled="!space.opening_times.weekday.open"/>
+                                    :disabled="!space.opening_times.weekday.open || !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="weekDay-open">Closing Time</label>
                                     <input type="time" id="weekDay-open" class="form-control"
                                     v-model="space.opening_times.weekday.times[1]" 
-                                    :disabled="!space.opening_times.weekday.open"/>
+                                    :disabled="!space.opening_times.weekday.open || !checkPermission('opening_times')"/>
                                 </div>
                             </div>
                             <!-- Saturdays -->
@@ -239,19 +248,20 @@
                                 <div class="col">
                                     <label for="sat-checkbox">Saturday</label>
                                     <input type="checkbox" id="sat-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="space.opening_times.sat.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sat-open">Opening Time</label>
                                     <input type="time" id="sat-open" class="form-control"
                                     v-model="space.opening_times.sat.times[0]" 
-                                    :disabled="!space.opening_times.sat.open"/>
+                                    :disabled="!space.opening_times.sat.open || !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="sat-close">Closing Time</label>
                                     <input type="time" id="sat-close" class="form-control"
                                     v-model="space.opening_times.sat.times[1]" 
-                                    :disabled="!space.opening_times.sat.open"/>
+                                    :disabled="!space.opening_times.sat.open || !checkPermission('opening_times')"/>
                                 </div>
                             </div>
                             <!-- Sundays -->
@@ -259,19 +269,20 @@
                                 <div class="col">
                                     <label for="sunday-checkbox">Sunday & Public Holidays</label>
                                     <input type="checkbox" id="sunday-checkbox" class="form-check-input form-control"
+                                    :disabled="!checkPermission('opening_times')"
                                     v-model="space.opening_times.holidays.open" />
                                 </div>
                                 <div class="col">
                                     <label for="sunday-open">Opening Time</label>
                                     <input type="time" id="sunday-open" class="form-control"
                                     v-model="space.opening_times.holidays.times[0]" 
-                                    :disabled="!space.opening_times.holidays.open"/>
+                                    :disabled="!space.opening_times.holidays.open || !checkPermission('opening_times')"/>
                                 </div>
                                 <div class="col">
                                     <label for="sunday-close">Closing Time</label>
                                     <input type="time" id="sunday-close" class="form-control"
                                     v-model="space.opening_times.holidays.times[1]" 
-                                    :disabled="!space.opening_times.holidays.open"/>
+                                    :disabled="!space.opening_times.holidays.open || !checkPermission('opening_times')"/>
                                 </div>
                             </div>
 
@@ -279,6 +290,7 @@
                             <div class="mt-3">
                                 <label for="timeNoteInput" class="form-label">Note <small>(optional)</small></label>
                                 <input id="timeNoteInput" type="text" class="form-control" 
+                                :disabled="!checkPermission('opening_times')"
                                 v-model="space.opening_times.note">
                             </div>
                         </div>
@@ -296,12 +308,16 @@
                             <!-- Input -->
                             <div class="col">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.seating" id="SeatingAvailable">
+                                    <input 
+                                    :disabled="!checkPermission('seating')"
+                                    class="form-check-input" type="checkbox" v-model="space.seating" id="SeatingAvailable">
                                     <label class="form-check-label" for="SeatingAvailable">
                                         Seating Available?
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                <textarea  
+                                    :disabled="!checkPermission('seating_note')"
+                                    class="form-control" id="descInput" rows="2" placeholder="Default text" 
                                 v-model="space.seating_note"></textarea>
                             </div>
                             <!-- Preview -->
@@ -318,12 +334,16 @@
                             <!-- Input -->
                             <div class="col">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.outlets" id="OutletsAvailable">
+                                    <input 
+                                    :disabled="!checkPermission('outlets')"
+                                    class="form-check-input" type="checkbox" v-model="space.outlets" id="OutletsAvailable">
                                     <label class="form-check-label" for="OutletsAvailable">
                                         Plug Sockets Available?
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                <textarea 
+                                    :disabled="!checkPermission('outlets_note')"
+                                    class="form-control" id="descInput" rows="2" placeholder="Default text" 
                                 v-model="space.outlets_note"></textarea>
                             </div>
                             <!-- Preview -->
@@ -340,12 +360,16 @@
                             <!-- Input -->
                             <div class="col">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.food_drink_allowed" id="FoodAllowed">
+                                    <input 
+                                    :disabled="!checkPermission('food_drink_allowed')"
+                                    class="form-check-input" type="checkbox" v-model="space.food_drink_allowed" id="FoodAllowed">
                                     <label class="form-check-label" for="FoodAllowed">
                                         Food and Drink Allowed?
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                <textarea 
+                                    :disabled="!checkPermission('food_drink_allowed_note')"
+                                    class="form-control" id="descInput" rows="2" placeholder="Default text" 
                                 v-model="space.food_drink_allowed_note"></textarea>
                             </div>
                             <!-- Preview -->
@@ -362,12 +386,16 @@
                             <!-- Input -->
                             <div class="col">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.kettle" id="kettle">
+                                    <input  
+                                    :disabled="!checkPermission('kettle')"
+                                    class="form-check-input" type="checkbox" v-model="space.kettle" id="kettle">
                                     <label class="form-check-label" for="kettle">
                                         Kettle Available?
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                <textarea  
+                                    :disabled="!checkPermission('kettle_note')"
+                                    class="form-control" id="descInput" rows="2" placeholder="Default text" 
                                 v-model="space.kettle_note"></textarea>
                             </div>
                             <!-- Preview -->
@@ -384,12 +412,16 @@
                             <!-- Input -->
                             <div class="col">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.microwave" id="microwave">
+                                    <input  
+                                    :disabled="!checkPermission('microwave')"
+                                    class="form-check-input" type="checkbox" v-model="space.microwave" id="microwave">
                                     <label class="form-check-label" for="microwave">
                                         Microwave Available?
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                <textarea  
+                                    :disabled="!checkPermission('microwave_note')"
+                                    class="form-control" id="descInput" rows="2" placeholder="Default text" 
                                 v-model="space.microwave_note"></textarea>
                             </div>
                             <!-- Preview -->
@@ -406,12 +438,16 @@
                             <!-- Input -->
                             <div class="col">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.wheelchair" id="wheelchair">
+                                    <input  
+                                    :disabled="!checkPermission('wheelchair')"
+                                    class="form-check-input" type="checkbox" v-model="space.wheelchair" id="wheelchair">
                                     <label class="form-check-label" for="wheelchair">
                                         Wheelchair Accessible?
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="2" placeholder="Default text" 
+                                <textarea  
+                                    :disabled="!checkPermission('wheelchair_note')"
+                                    class="form-control" id="descInput" rows="2" placeholder="Default text" 
                                 v-model="space.wheelchair_note"></textarea>
                             </div>
                             <!-- Preview -->
@@ -430,17 +466,23 @@
                             <!-- Sensory -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.sense_exp_display" id="SenseDisplay">
+                                    <input  
+                                    :disabled="!checkPermission('sense_exp_display')"
+                                    class="form-check-input" type="checkbox" v-model="space.sense_exp_display" id="SenseDisplay">
                                     <label class="form-check-label" for="SenseDisplay">
                                         Sensory Experience
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="4" 
+                                <textarea  
+                                :disabled="!checkPermission('sense_exp')"
+                                class="form-control" id="descInput" rows="4" 
                                 v-model="space.sense_exp"></textarea>
                                 <!-- video link -->
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
-                                    <input id="videolink" type="text" class="form-control"
+                                    <input  
+                                    :disabled="!checkPermission('sense_exp_video')"
+                                    id="videolink" type="text" class="form-control"
                                     :class="{'is-invalid': space.sense_exp_video != null && space.sense_exp_video.length > 0 && extractYoutubeID(space.sense_exp_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
@@ -454,17 +496,23 @@
                             <!-- Wayfinding -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.wayfinding_display" id="WayfindDisplay">
+                                    <input  
+                                    :disabled="!checkPermission('wayfinding_display')"
+                                    class="form-check-input" type="checkbox" v-model="space.wayfinding_display" id="WayfindDisplay">
                                     <label class="form-check-label" for="WayfindDisplay">
                                         Wayfinding
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="4" 
+                                <textarea   
+                                    :disabled="!checkPermission('wayfinding')"
+                                    class="form-control" id="descInput" rows="4" 
                                 v-model="space.wayfinding"></textarea>
                                 <!-- video link -->
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
-                                    <input id="videolink" type="text" class="form-control"
+                                    <input   
+                                    :disabled="!checkPermission('wayfinding_video')"
+                                    id="videolink" type="text" class="form-control"
                                     :class="{'is-invalid': space.wayfinding_video != null && space.wayfinding_video.length > 0 && extractYoutubeID(space.wayfinding_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
@@ -478,17 +526,23 @@
                             <!-- Physical -->
                             <div class="mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" v-model="space.phys_access_display" id="PhysicalDisplay">
+                                    <input   
+                                    :disabled="!checkPermission('phys_access_display')"
+                                    class="form-check-input" type="checkbox" v-model="space.phys_access_display" id="PhysicalDisplay">
                                     <label class="form-check-label" for="PhysicalDisplay">
                                         Physical Experience
                                     </label>
                                 </div>
-                                <textarea class="form-control" id="descInput" rows="4" 
+                                <textarea   
+                                :disabled="!checkPermission('phys_access')"
+                                class="form-control" id="descInput" rows="4" 
                                 v-model="space.phys_access"></textarea>
                                 <!-- video link -->
                                 <div class="mt-3">
                                     <!-- <label for="videolink" class="form-label"><small>Youtube link</small></label> -->
-                                    <input id="videolink" type="text" class="form-control"
+                                    <input   
+                                    :disabled="!checkPermission('phys_access_video')"
+                                    id="videolink" type="text" class="form-control"
                                     :class="{'is-invalid': space.phys_access_video != null && space.phys_access_video.length > 0 && extractYoutubeID(space.phys_access_video) == null}"
                                     placeholder="Youtube link" 
                                     title="Youtube link for embedding"
@@ -515,11 +569,17 @@
                             <!-- Loop through the tips as text inputs -->
                             <div class="mb-3">
                                 <div v-for="(tip, index) in space.tips" :key="index" class="input-group mb-2">
-                                    <input type="text" class="form-control" v-model="space.tips[index]" placeholder="New Tip">
-                                    <button class="btn btn-warning" type="button" @click="removeTip(index)">Remove</button>
+                                    <input   
+                                    :disabled="!checkPermission('tips')"
+                                    type="text" class="form-control" v-model="space.tips[index]" placeholder="New Tip">
+                                    <button  
+                                    :disabled="!checkPermission('tips')"
+                                    class="btn btn-warning" type="button" @click="removeTip(index)">Remove</button>
                                 </div>
                                 <!-- Button to add a new tip -->
-                                <button class="btn btn-success" type="button" @click="addTip()">Add Tip</button>
+                                <button  
+                                :disabled="!checkPermission('tips')"
+                                class="btn btn-success" type="button" @click="addTip()">Add Tip</button>
                             </div>
                             
                         </div>
@@ -539,12 +599,16 @@
                         <!-- Edit -->
                         <div class="col">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" v-model="space.further_info_display" id="furtherInfoDisplay">
+                                <input  
+                                :disabled="!checkPermission('further_info_display')"
+                                class="form-check-input" type="checkbox" v-model="space.further_info_display" id="furtherInfoDisplay">
                                 <label class="form-check-label" for="furtherInfoDisplay">
                                     Further Information
                                 </label>
                             </div>
-                            <textarea class="form-control" id="descInput" rows="4" 
+                            <textarea   
+                            :disabled="!checkPermission('further_info')"
+                            class="form-control" id="descInput" rows="4" 
                             v-model="space.further_info"></textarea>
                         </div>
                         <!-- Display -->
@@ -606,7 +670,8 @@
                             <!-- Space Type -->
                             <div class="my-3">
                                 <label for="spaceType" class="form-label">Space Type</label>
-                                <select 
+                                <select  
+                                :disabled="!checkPermission('type')"
                                 class="form-select" 
                                 id="spaceType" 
                                 @change="updateSpaceIcon()"
@@ -627,7 +692,8 @@
                                     style="width: 100%;">
                                     <!-- Button to reset the icon to defaults, if an override is in place -->
                                     <button
-                                    v-if="space.icon_override && space.icon_override.length > 0"
+                                    v-if="space.icon_override && space.icon_override.length > 0" 
+                                    :disabled="!checkPermission('icon_override')"
                                     type="button"
                                     class="badge rounded-pill text-bg-danger position-absolute bottom-0 start-0"
                                     @click="resetIconToTypeDefault">
@@ -639,6 +705,7 @@
                                 <div class="mt-3">
                                     <label for="IconOverrideInput" class="form-label"><small>Custom Icon</small></label>
                                     <input id="IconOverrideInput" type="file" class="form-control" 
+                                    :disabled="!checkPermission('icon_override')"
                                     @change="handleCustomIconSelect">
                                 </div>
 
@@ -646,7 +713,9 @@
                             <div>
                                 <!-- Clickability toggle -->
                                 <div class="form-check form-switch mb-3 border-top pt-3">
-                                    <input class="form-check-input" type="checkbox" v-model="space.clickthrough" id="clickable">
+                                    <input 
+                                    :disabled="!checkPermission('clickthrough')"
+                                    class="form-check-input" type="checkbox" v-model="space.clickthrough" id="clickable">
                                     <label class="form-check-label" for="clickable">
                                         <em>Dummy Icon</em>
                                     </label>
@@ -676,6 +745,8 @@
 import {createClient} from '@supabase/supabase-js';
 import L from 'leaflet';
 import '~/assets/css/leaflet.css'
+import getPermissionsKey from "~/assets/permissionsKey"
+import { userHasPermission } from '~/utils/getChanges';
 import extractYoutubeID from '~/composables/extractYoutubeID';
 
 const campusBounds = [
@@ -699,6 +770,7 @@ const campusBounds = [
                 updateCount: 0, // Dummy variable to force a re-render on the space selector
                 map: {},
                 center_marker: {},
+                permissionsKey: {},
             }
         },
         created() {
@@ -707,8 +779,10 @@ const campusBounds = [
             const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
             const supabaseKey = useRuntimeConfig().public.supabaseKey;
             this.supabase = createClient(supabaseUrl, supabaseKey)
-            // Get the user's api key
-            this.user = this.getUserData();
+            // Get the user's permissions
+            this.getUserData();
+            // Get the permissionsKey for Spaces
+            this.permissionsKey = getPermissionsKey("spaces");
             // Grab all the space types
             this.getSpaceTypes();
             // Grab all the buildings
@@ -754,11 +828,17 @@ const campusBounds = [
         // mounted() {
         // },
         methods: {
+            checkPermission(permission){
+                // If the user is an admin, they have all permissions on this page
+                if (this.user.is_admin){
+                    return true;
+                }
+                // Else, check if the user has the permission to perform an action
+                return userHasPermission(this.user, this.permissionsKey, permission);
+            },
             async getUserData(){
-                
-                const { data, error } = await this.supabase.auth.getSession()
 
-                return data;
+                this.user = await getCurrentUserPermissions();
             },
 
             handlePrimaryImageSelect(evt) { 
@@ -790,24 +870,25 @@ const campusBounds = [
                 // Change the publish status of the space
                 // This happens instantly, outside of the normal save process
 
+                // Get the session access token
+                const access_token = await getSessionAccessToken(this.supabase);
+                // Set up a dummy building object to toggle the published status
+                let dummySpace = JSON.parse(JSON.stringify(this.space_clean));
+                dummySpace.published = !dummySpace.published;
+
                 // Update the space in the database
-                const { data, error } = await this.supabase
-                .from('spaces')
-                .update({
-                    published: !this.space_clean.published
-                })
-                .eq('UUID', this.space.UUID)
-                .select()
-                
-                // If there is an error, log it
-                if (error) {
+                const { data, error } = await updateTable(
+                    access_token, 
+                    "spaces", 
+                    dummySpace,
+                    {col: "UUID", eq: this.space.UUID},
+                )
+                if(error) {
                     console.error(error)
                     alert(error.message)
                     throw error
                 }
                 else {
-                    //TODO: Add a log entry
-                    // TODO: Check the response from the database to see if the update was successful
                     // If the update was successful, update the clean space object
                     this.space_clean.published = !this.space_clean.published;
                     this.space.published = JSON.parse(JSON.stringify(this.space_clean.published));
@@ -1189,6 +1270,9 @@ const campusBounds = [
                 // Get the icon for this space's type
                 let iconURL = this.getImageForSpaceType(this.space);
 
+                // Check the user has permission to move the marker
+                let draggable = this.checkPermission('location');
+
                 // Initialise the marker at the location of the space
                 this.center_marker = L.marker(this.space.location, {
                     icon: L.icon({
@@ -1196,7 +1280,7 @@ const campusBounds = [
                         iconSize: [50, 50],
                         iconAnchor: [25, 25],
                     }),
-                    draggable: true,
+                    draggable: draggable,
                     zIndexOffset: 1000,
                 }).addTo(this.map);
 
@@ -1336,12 +1420,14 @@ const campusBounds = [
                     this.space.icon_override = await this.uploadNewCustomIcon();
                 }
 
+                const access_token = await getSessionAccessToken(this.supabase);
                 // Update the space in the database
-                const { data, error } = await this.supabase
-                    .from('spaces')
-                    .update(this.space)
-                    .eq('UUID', this.space.UUID)
-                    .select()
+                const { data, error } = await updateTable(
+                    access_token, 
+                    "spaces", 
+                    this.space,
+                    {col: "UUID", eq: this.space.UUID},
+                )
                 
                 // If there is an error, log it
                 if (error) {
