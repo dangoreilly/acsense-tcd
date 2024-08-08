@@ -132,6 +132,13 @@ async function seed_files() {
     // Give the server a few ticks to get the buckets set up that were just created in the SQL seed step
     await new Promise(r => setTimeout(r, 500));
     // Then actually fill them
+  
+    // First clear the contents of the buckets
+    // await clearBucket("floorplans");
+    // await clearBucket("icons");
+    // await clearBucket("overlays");
+  
+    // Then fill them back up
     await uploadFiles(floorplans, "floorplans");
     await uploadFiles(icons, "icons");
     await uploadFiles(overlays, "overlays");

@@ -76,8 +76,8 @@ enabled = true
 # in emails.
 # This needs to be changed for developing inside codespaces
 # Github Actions can't get the env variable to run the CI
-#site_url = "http://localhost:3000"
-site_url = "env(SUPABASE_SITE_URL)"
+site_url = "http://localhost:3000"
+#site_url = "env(SUPABASE_SITE_URL)"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = ["http://localhost:3000", "env(SUPABASE_SITE_URL)"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
