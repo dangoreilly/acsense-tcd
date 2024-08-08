@@ -525,7 +525,7 @@ export default {
 
                 // Figure out what the icon will be by matching the area type to the area type in the area_types array
                 // TODO: Replace with composable for finding the icon that includes icon_override
-                let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
+                let icon_url = area.icon_override || area_types.find(area_type => area_type.category == area.type).icon;
                 let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
 
                 // Create the icon object
