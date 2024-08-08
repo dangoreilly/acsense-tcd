@@ -10,8 +10,8 @@
     <!-- Change the background colour to show if an action is a create or delete -->
     <div class="detail-container position-sticky top-0"
     :class="{
-        'bg-success-subtle': selectedLog.action == 'create', 
-        'bg-danger-subtle': selectedLog.action == 'delete',
+        'bg-success-subtle': selectedLog.action == 'INSERT', 
+        'bg-danger-subtle': selectedLog.action == 'DELETE',
         'detail-container-horz': orientation == 'horizontal',
         'detail-container-vert': orientation == 'vertical',
         }">
@@ -24,7 +24,7 @@
                 <label for="timestamp" class="form-label">
                     Timestamp
                 </label>
-                <input type="email" class="form-control" id="timestamp" :value="selectedLog.time" readonly>
+                <input type="email" class="form-control" id="timestamp" :value="selectedLog.created_at" readonly>
             </div>
             <!-- User who carried out action -->
             <div class="detail d-user">
@@ -36,29 +36,40 @@
             <!-- The building or setting that was changed -->
             <div class="detail d-item">
                 <label for="target" class="form-label">
-                    Target
+                    Subject
                 </label>
-                <input type="email" class="form-control" id="target" :value="selectedLog.target" readonly>
+                <input type="email" class="form-control" id="target" :value="selectedLog.subject" readonly>
             </div>
             <!-- Field that was changed -->
-            <div class="detail d-field">
+            <!-- <div class="detail d-field">
                 <label for="field" class="form-label">
                     Field
                 </label>
                 <input type="email" class="form-control" id="field" :value="selectedLog.field" readonly>
-            </div>
+            </div> -->
         </div>
 
         <!-- Change the width depending on the view orientation -->
         <div 
+        v-if="selectedLog.action == 'UPDATE'"
         class="detail d-particulars d-col">
             <div class="detail d-oldValue">
                 <label for="oldValue" class="form-label">
                     Old Value
                 </label>
-                <textarea class="form-control" id="oldValue" :value="selectedLog.oldValue" readonly
-                :disabled="selectedLog.action == 'create' || selectedLog.action == 'delete'"
-                ></textarea>
+                <!-- <textarea class="form-control" id="oldValue" :value="selectedLog.data?.old" readonly></textarea> -->
+                <div class="card">
+                    <div class="card-body">
+                        <span class="card-text">
+                            <p v-for="key in Object.keys(selectedLog.data?.old as Object)">
+                                {{ key }}: <br> 
+                                {{ //@ts-ignore
+                                    selectedLog.data.old[key] 
+                                }}
+                            </p>
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -69,7 +80,27 @@
                 <label for="newValue" class="form-label">
                     New Value
                 </label>
-                <textarea class="form-control" id="oldValue" :value="getNewValue()" readonly></textarea>
+                <!-- <textarea class="form-control" id="oldValue" :value="selectedLog.data?.new" readonly></textarea> -->
+                <div class="card" style="max-height: 100%;">
+                    <div class="card-body" style="overflow-y: auto;">
+                        <span class="card-text" v-if="selectedLog.action == 'UPDATE'">
+                            <p v-for="key in Object.keys(selectedLog.data?.new as Object)">
+                                {{ key }}: <br> 
+                                {{ //@ts-ignore
+                                    selectedLog.data.new[key] 
+                                }}
+                            </p>
+                        </span>
+                        <div class="card-text" v-else>
+                            <p v-for="key in Object.keys(selectedLog.data as Object)">
+                                {{ key }}: <br> 
+                                {{ //@ts-ignore
+                                    selectedLog.data[key] 
+                                }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -78,13 +109,13 @@
 
 <script lang="ts">
 
-import { LogEntry } from 'assets/types/adminPageTypes'
+import type { Audit_Log } from '~/assets/types/supabase_types'
 
 export default {
     props: {
         // The selected log entry object
         selectedLog: {
-            type: Object as () => LogEntry,
+            type: Object as () => Audit_Log,
             required: true
         },
         orientation: {
@@ -92,17 +123,8 @@ export default {
             required: true,
         },
     },
-    methods: {
-        getNewValue() {
-            // If this is a building being created or deleted, report that
-            if (this.selectedLog.action == 'create' || this.selectedLog.action == 'delete') {
-                let verb = this.selectedLog.action == 'create' ? 'Created' : 'Deleted'
-                return `${verb} ${this.selectedLog.target}`
-            }
-            // Otherwise return the new value of the field
-            return this.selectedLog.newValue
-        }
-    }
+    // methods: {
+    // }
 }
 
 </script>

@@ -1,6 +1,6 @@
 <!-- Admin page for displaying logs -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'logs'">
+    <NuxtLayout name="admin-layout" :activePage="'logs'" :supabase_client="supabase">
         <!-- Header -->
         <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
             <!-- Div to contain construction badge -->
@@ -11,11 +11,11 @@
                 </h1>
 
                 <!-- Construction Badge -->
-                <div class="d-flex align-items-center m-3 fs-5">
+                <!-- <div class="d-flex align-items-center m-3 fs-5">
                     <span class="badge rounded-pill text-bg-success">
                         Demonstration
                     </span>
-                </div>
+                </div> -->
 
             </div>
 
@@ -46,6 +46,7 @@
         <!-- Display panes as rows if viewOrientation is horizontal -->
         <!-- Display panes as cols if viewOrientation is vertical -->
         <div 
+        v-if="logs.length > 0"
         class="d-flex flex-nowrap" 
         :style="viewOrientation == 'vertical' ? 'flex-direction: row;' : 'flex-direction: column;'">
             <AdminAuditLogDetail
@@ -61,22 +62,108 @@
     </NuxtLayout>
 </template>
 
-<script>
-import Logs from 'assets/example-audit-logs'
+<script lang="ts">
+// import Logs from 'assets/example-audit-logs'
+import type { Audit_Log } from '~/assets/types/supabase_types';
+import type { UserProfile } from '~/assets/types/permissions';
+import type { ChangesObject } from '~/utils/getChanges';
+import { createClient } from '@supabase/supabase-js';
 
 export default {
     data(){
         return {
-            logs: Logs,
-            selectedLog: {},
+            logs: [] as Audit_Log[],
+            selectedLog: {} as Audit_Log,
             viewOrientation: 'horizontal',
+            supabase: {} as any,
+            users: [] as UserProfile[]
         }
     },
+    created() {
+        // Set up supabase
+        const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+        const supabaseKey = useRuntimeConfig().public.supabaseKey;
+        this.supabase = createClient(supabaseUrl, supabaseKey)
+
+    },
     mounted() {
-        // Set the first log entry as the selected log
-        this.selectedLog = this.logs[0];
+        this.getUsers();
+        this.getLogs();
     },
     methods: {
+        async getLogs() {
+            // Get the logs from the server
+            // Get the current session access token
+            const access_token:string = await getSessionAccessToken(this.supabase);
+
+            const { data: logs, error } = await permissionedFetch(access_token, "logs");
+
+            if (error) {
+                console.error("Error getting audit logs: ", error)
+                // console.error(error)
+                // alert(error.message)
+                // throw error
+            }
+            else {
+                // console.log("Logs:")
+                // console.log(logs)
+                this.logs = JSON.parse(JSON.stringify(logs));
+                // Set the first log entry as the selected log
+                this.selectedLog = this.logs[0];
+
+                // await this.getUsers();
+                // Then decode the users
+                for (let i = 0; i < this.logs.length; i++) {
+                    this.logs[i].user = await this.decodeUser(this.logs[i].user as string);
+                }
+            }
+
+        },
+        async getUsers(){
+            // Get the current session access token
+            const access_token:string = await getSessionAccessToken(this.supabase);
+
+            const { data: users, error } = await permissionedFetch(access_token, "profiles");
+
+            if (error) {
+                console.error("Error getting user profiles: ", error)
+                // console.error(error)
+                // alert(error.message)
+                // throw error
+            }
+            else {
+                // console.log("Logs:")
+                // console.log(logs)
+                this.users = JSON.parse(JSON.stringify(users));
+            }
+
+            return users;
+        },
+        async decodeUser(userID: string): Promise<string> {
+            // Entries in the audit log are stored as a string of the UUID of the user
+            // We need to search the users table to find the email of the user
+            // If the user has been deleted, we should show the UUID
+            
+            // First make sure the userID isn't null, and return an error if it is
+            if (userID == null) {
+                return "Error: User ID is null";
+            }
+
+            // Wait for the users to be loaded
+            while (this.users.length == 0) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Search the users table for the user
+            for (let i = 0; i < this.users.length; i++) {
+                if (this.users[i].user_id == userID) {
+                    return this.users[i].email;
+                }
+            }
+            // If the user is not found, return the UUID
+            return userID;
+
+        },
         // Flip the view orientation
         changeView() {
             if (this.viewOrientation == 'horizontal') {
@@ -101,12 +188,19 @@ export default {
             link.click();
         },
         // Convert the logs to a CSV
-        logsToCSV(logs) {
+        logsToCSV(logs: Audit_Log[]) {
             // Create the header row
-            let csv = 'Date,User,Action,Target,Old Value,New Value\n';
+            let csv = 'Date,User,Action,Subject,New Value,Old Value\n';
             // Add each log entry to the CSV
             logs.forEach(log => {
-                csv += `${log.date},${log.user},${log.action},${log.target},${log.oldValue},${log.newValue}\n`;
+                // If the log entry is an UPDATE, add the old and new values
+                if (log.action == "UPDATE"){
+                    // @ts-ignore
+                    csv += `${log.created_at},${log.user},${log.action},${log.subject},${log.data?.new},${log.data?.old}\n`;
+                } else {
+                    csv += `${log.created_at},${log.user},${log.action},${log.subject},${log.data},\n`;
+                }
+                // csv += `${log.created_at},${log.user},${log.action},${log.target},${log.oldValue},${log.newValue}\n`;
             });
             return csv;
         },
