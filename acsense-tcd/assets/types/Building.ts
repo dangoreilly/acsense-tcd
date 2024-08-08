@@ -1,4 +1,4 @@
-import { Photo, OpeningTimes } from 'assets/types/infoPageTypes'
+import type { Photo, OpeningTimes } from 'assets/types/infoPageTypes'
 
 type Building = {
     name: string;
@@ -25,4 +25,4 @@ type Building = {
     lastUpdated: string;
 };
 
-export { Building }
+export type { Building }
