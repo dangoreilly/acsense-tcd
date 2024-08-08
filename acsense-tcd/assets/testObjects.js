@@ -1,6 +1,7 @@
-// Data for testing
-import type { UserProfile } from '~/assets/types/permissions';
-export const user_all: UserProfile = { 
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.space_outside = exports.space_inside = exports.building = exports.user_superadmin = exports.user_none = exports.user_admin = exports.user_buildingsOnly = exports.user_all = void 0;
+exports.user_all = {
     email: "user.all@acsense.ie",
     user_id: "0",
     is_admin: false,
@@ -62,72 +63,70 @@ export const user_all: UserProfile = {
         },
         facilities: true
     },
-  }
-  
-export const user_buildingsOnly: UserProfile = { 
-      email: "user.buildingsOnly@acsense.ie",
-      is_admin: false,
-      user_id: "0",
-      buildings: {
-          general: {
-              name: true,
-              aka: true,
-              desc: true,
-          },
-          primary_image: {
-              image: true,
-              alt: true
-          },
-          tabs: {
-              physical: true,
-              wayfinding: true,
-              sensory: true
-          },
-          gallery: {
-              images: true,
-              captions: true,
-              alt: true
-          },
-          times: true,
-          tips: true,
-          further: true,
-          map: {
-              labels: true,
-              location: true
-          }
-      },
-      spaces: {
-          general: {
-              name: false,
-              aka: false,
-              desc: false,
-          },
-          primary_image: {
-              image: false,
-              alt: false
-          },
-          tabs: {
-              physical: false,
-              wayfinding: false,
-              sensory: false
-            },
-          gallery: {
-              images: false,
-              captions: false,
-              alt: false
-            },
-          times: false,
-          tips: false,
-          further: false,
-          map: {
-              labels: false,
-              location: false
-          },
-          facilities: false
+};
+exports.user_buildingsOnly = {
+    email: "user.buildingsOnly@acsense.ie",
+    is_admin: false,
+    user_id: "0",
+    buildings: {
+        general: {
+            name: true,
+            aka: true,
+            desc: true,
         },
-  }
-    
-export const user_admin: UserProfile = { 
+        primary_image: {
+            image: true,
+            alt: true
+        },
+        tabs: {
+            physical: true,
+            wayfinding: true,
+            sensory: true
+        },
+        gallery: {
+            images: true,
+            captions: true,
+            alt: true
+        },
+        times: true,
+        tips: true,
+        further: true,
+        map: {
+            labels: true,
+            location: true
+        }
+    },
+    spaces: {
+        general: {
+            name: false,
+            aka: false,
+            desc: false,
+        },
+        primary_image: {
+            image: false,
+            alt: false
+        },
+        tabs: {
+            physical: false,
+            wayfinding: false,
+            sensory: false
+        },
+        gallery: {
+            images: false,
+            captions: false,
+            alt: false
+        },
+        times: false,
+        tips: false,
+        further: false,
+        map: {
+            labels: false,
+            location: false
+        },
+        facilities: false
+    },
+};
+exports.user_admin = {
     email: "admin@acsense.ie",
     user_id: "0",
     is_admin: true,
@@ -173,7 +172,7 @@ export const user_admin: UserProfile = {
             images: false,
             captions: false,
             alt: false
-          },
+        },
         tabs: {
             physical: true,
             wayfinding: true,
@@ -188,9 +187,8 @@ export const user_admin: UserProfile = {
         },
         facilities: false
     },
-  }
-  
-export const user_none: UserProfile = { 
+};
+exports.user_none = {
     email: "user.none@acsense.ie",
     user_id: "0",
     is_admin: false,
@@ -236,7 +234,7 @@ export const user_none: UserProfile = {
             images: false,
             captions: false,
             alt: false
-          },
+        },
         tabs: {
             physical: false,
             wayfinding: false,
@@ -251,76 +249,71 @@ export const user_none: UserProfile = {
         },
         facilities: false
     },
-  }
-  
-export const user_superadmin: UserProfile = { 
+};
+exports.user_superadmin = {
     email: "superadmin@acsense.ie",
     user_id: "0",
     is_admin: true,
     buildings: {
-    general: {
-      name: false,
-      aka: false,
-      desc: false,
-    },
-    primary_image: {
-      image: false,
-      alt: false
-    },
-    tabs: {
-      physical: false,
-      wayfinding: false,
-      sensory: false
-    },
-    gallery: {
-      images: false,
-      captions: false,
-      alt: false
-    },
-    times: false,
-    tips: false,
-    further: false,
-    map: {
-      labels: false,
-      location: false
-    }
+        general: {
+            name: false,
+            aka: false,
+            desc: false,
+        },
+        primary_image: {
+            image: false,
+            alt: false
+        },
+        tabs: {
+            physical: false,
+            wayfinding: false,
+            sensory: false
+        },
+        gallery: {
+            images: false,
+            captions: false,
+            alt: false
+        },
+        times: false,
+        tips: false,
+        further: false,
+        map: {
+            labels: false,
+            location: false
+        }
     },
     spaces: {
-      general: {
-        name: false,
-        aka: false,
-        desc: false,
-      },
-      primary_image: {
-        image: false,
-        alt: false
-      },
-      gallery: {
-          images: false,
-          captions: false,
-          alt: false
+        general: {
+            name: false,
+            aka: false,
+            desc: false,
         },
-      tabs: {
-      physical: false,
-      wayfinding: false,
-      sensory: false
-      },
-      times: false,
-      tips: false,
-      further: false,
-      map: {
-        labels: false,
-        location: false
-      },
+        primary_image: {
+            image: false,
+            alt: false
+        },
+        gallery: {
+            images: false,
+            captions: false,
+            alt: false
+        },
+        tabs: {
+            physical: false,
+            wayfinding: false,
+            sensory: false
+        },
+        times: false,
+        tips: false,
+        further: false,
+        map: {
+            labels: false,
+            location: false
+        },
         facilities: false
-
     },
-  }
-  
-import type { Building } from '~/assets/types/supabase_types';
-
+};
 // Buildings
-export const building: Building = {
+exports.building = {
     canonical: "example-building-A",
     display_name: "Example Building A",
     aka: "Ex Building A",
@@ -328,7 +321,7 @@ export const building: Building = {
     map_label_1: "Example Building A",
     map_label_2: "Ex Building A",
     map_label_3: "A",
-    geometry: {"coordinates":[[[-6.2,53.3],[-6.2,54.3],[-7.2,54.3],[-7.2,53.3]]]},
+    geometry: { "coordinates": [[[-6.2, 53.3], [-6.2, 54.3], [-7.2, 54.3], [-7.2, 53.3]]] },
     always_display: true,
     sense_exp: "Sensory Experience for Example Building A",
     sense_exp_display: true,
@@ -342,24 +335,20 @@ export const building: Building = {
     tips: ["Tip 1", "Tip 2", "Tip 3"],
     further_info: "Further Information",
     furtherinfo_display: true,
-    opening_times: {"weekday":{"open":true,"times":["08:00","17:00"]},"sat":{"open":true,"times":["08:00","17:00"]},"holidays":{"open":false,"times":["08:00","17:00"]},"note":"Tcdard access only on weekends"},
+    opening_times: { "weekday": { "open": true, "times": ["08:00", "17:00"] }, "sat": { "open": true, "times": ["08:00", "17:00"] }, "holidays": { "open": false, "times": ["08:00", "17:00"] }, "note": "Tcdard access only on weekends" },
     primary_image_url: "/images/ex-primary-portrait.jpg",
     primary_image_alt: "Primary Image Alt Text",
     entry_floor: 1,
-    internal_map_size: [100,100],
+    internal_map_size: [100, 100],
     published: true,
     floorplans_published: false,
     rooms_published: false,
-
     created_at: "2021-09-01T12:00:00.000Z",
     updated_at: "2021-09-01T12:00:00.000Z",
     UUID: "00000000-0000-0000-0000-000000000000",
-}
-
-import type { Space } from '~/assets/types/supabase_types';
+};
 //   Spaces
-
-export const space_inside: Space = {
+exports.space_inside = {
     "name": "Example Space 1",
     "canonical": "example-space-1",
     "description": "Description for Example Space 1",
@@ -409,26 +398,26 @@ export const space_inside: Space = {
         "weekday": {
             "open": false,
             "times": [
-            "08:00",
-            "17:00"
+                "08:00",
+                "17:00"
             ]
         },
         "sat": {
             "open": false,
             "times": [
-            "08:00",
-            "17:00"
+                "08:00",
+                "17:00"
             ]
         },
         "holidays": {
             "open": false,
             "times": [
-            "08:00",
-            "17:00"
+                "08:00",
+                "17:00"
             ]
         },
         "note": "This area can be booked through the CSC."
-        },
+    },
     "floor": 1,
     "location_internal": [
         454,
@@ -437,9 +426,8 @@ export const space_inside: Space = {
     "clickthrough": false,
     "published": true,
     "updated_by": null
-}
-
-export const space_outside: Space = {
+};
+exports.space_outside = {
     "name": "Example Space 2",
     "canonical": "example-space-2",
     "description": "Description for Example Space 2",
@@ -489,22 +477,22 @@ export const space_outside: Space = {
         "weekday": {
             "open": true,
             "times": [
-            "07:00",
-            "22:00"
+                "07:00",
+                "22:00"
             ]
         },
         "sat": {
             "open": true,
             "times": [
-            "07:00",
-            "22:00"
+                "07:00",
+                "22:00"
             ]
         },
         "holidays": {
             "open": true,
             "times": [
-            "07:00",
-            "22:00"
+                "07:00",
+                "22:00"
             ]
         },
         "note": "These areas can be booked through the CSC."
@@ -517,4 +505,4 @@ export const space_outside: Space = {
     "clickthrough": false,
     "published": true,
     "updated_by": null
-}
+};
