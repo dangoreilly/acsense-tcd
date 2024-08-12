@@ -821,17 +821,34 @@ import getPermissionsKey from "~/assets/permissionsKey"
                 this.gallery_clean.splice(index, 1);
                 
                 // Remove the database entry
-                const { data:db_response, error:db_error } = await this.supabase
-                .from('building_gallery_images')
-                .delete()
-                .eq('url', url)
+                // const { data:db_response, error:db_error } = await this.supabase
+                // .from('building_gallery_images')
+                // .delete()
+                // .eq('url', url)
 
-                if (db_error) {
-                    console.error(db_error)
-                    alert(db_error.message)
-                    throw db_error
+                // if (db_error) {
+                //     console.error(db_error)
+                //     alert(db_error.message)
+                //     throw db_error
+                // }
+                // console.log(db_response)
+
+                const access_token = await getSessionAccessToken(this.supabase);
+                const {data: img, error:db_delete_error} = await removeFromTable(
+                    access_token, 
+                    "building_gallery_images", 
+                    { 
+                        col: 'url', 
+                        eq: url,
+                    }
+                )
+                
+
+                if (db_delete_error) {
+                    console.error(db_delete_error)
+                    alert(db_delete_error.message)
+                    throw db_delete_error
                 }
-                console.log(db_response)
 
                 // Get the path by subtracting the supabase url from the image url
                 let path = url.replace(this.supabase.storageUrl + "/object/public/gallery-images/", "");
