@@ -643,13 +643,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "public_spaces_type_fkey"
-            columns: ["type"]
-            isOneToOne: false
-            referencedRelation: "space_styles"
-            referencedColumns: ["category"]
-          },
-          {
             foreignKeyName: "spaces_building_fkey"
             columns: ["building"]
             isOneToOne: false
@@ -662,6 +655,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "buildings"
             referencedColumns: ["UUID"]
+          },
+          {
+            foreignKeyName: "spaces_type_fkey"
+            columns: ["type"]
+            isOneToOne: false
+            referencedRelation: "space_styles"
+            referencedColumns: ["category"]
           },
           {
             foreignKeyName: "spaces_updated_by_fkey"

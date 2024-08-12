@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.space_outside = exports.space_inside = exports.building = exports.user_superadmin = exports.user_none = exports.user_admin = exports.user_buildingsOnly = exports.user_all = void 0;
+exports.logs = exports.space_outside = exports.space_inside = exports.building = exports.user_superadmin = exports.user_none = exports.user_admin = exports.user_buildingsOnly = exports.user_all = void 0;
 exports.user_all = {
     email: "user.all@acsense.ie",
     user_id: "0",
@@ -506,3 +506,40 @@ exports.space_outside = {
     "published": true,
     "updated_by": null
 };
+exports.logs = [
+    {
+        "id": 1,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "UPDATE",
+        "subject": "buildings:example-building-1",
+        "data": {
+            "old": {
+                "aka": "Ex. B1 test"
+            },
+            "new": {
+                "aka": "Ex. B1 test d"
+            },
+            "list": [
+                "aka"
+            ],
+            "error": null
+        }
+    },
+    {
+        "id": 2,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "INSERT",
+        "subject": "buildings:example-building-2",
+        "data": exports.building
+    },
+    {
+        "id": 3,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "DELETE",
+        "subject": "example-building-1",
+        "data": null
+    }
+];

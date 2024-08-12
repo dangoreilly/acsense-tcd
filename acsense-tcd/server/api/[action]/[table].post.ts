@@ -170,7 +170,7 @@ export default defineEventHandler(async (event) => {
             }
             else {
                 // Add to the logs table
-                createLogEntry(supabase, permissions.user_id, "UPDATE", table+":"+target.eq, {});
+                createLogEntry(supabase, permissions.user_id, "UPDATE", table+":"+target.eq, null);
             }
             // If the delete was successful, return the deleted data
             return deletedData;

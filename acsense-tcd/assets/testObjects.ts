@@ -518,3 +518,43 @@ export const space_outside: Space = {
     "published": true,
     "updated_by": null
 }
+
+import type { Audit_Log } from '~/assets/types/supabase_types';
+
+export const logs: Audit_Log[] = [
+    {
+        "id": 1,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "UPDATE",
+        "subject": "buildings:example-building-1",
+        "data": {
+        "old": {
+            "aka": "Ex. B1 test"
+        },
+        "new": {
+            "aka": "Ex. B1 test d"
+        },
+        "list": [
+            "aka"
+        ],
+        "error": null
+        }
+    },
+    {
+        "id": 2,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "INSERT",
+        "subject": "buildings:example-building-2",
+        "data": building
+    },
+    {
+        "id": 3,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "DELETE",
+        "subject": "example-building-1",
+        "data": null
+    }
+]

@@ -15,6 +15,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   });
 
 let { user_all, user_admin, user_none, user_buildingsOnly, user_superadmin } = require('../acsense-tcd/assets/testObjects.js');
+let { logs } = require('../acsense-tcd/assets/testObjects.js');
 
 // Create the users
 async function createUsers(users) {
@@ -79,12 +80,60 @@ function cleanUpTestProfiles(){
     return users;
 }
 
+function cleanupLogs(){
+    // Process the logs from the testObjects file 
+    // Remove the fields that are not required
+    // Return an array of appropriate logs
+    let temp_logs = JSON.parse(JSON.stringify(logs));
+
+    for (i = 0; i < logs.length; i++) {
+        if (logs[i].hasOwnProperty('id')) {
+            delete temp_logs[i].id;
+        }
+        if (logs[i].hasOwnProperty('created_at')) {
+            delete temp_logs[i].created_at;
+        }
+        if (logs[i].hasOwnProperty('user')) {
+            delete temp_logs[i].user;
+        }
+    }
+
+    return temp_logs;
+}
+
+async function assignLogsToUsers(users, logs){
+
+    // Loop through the logs and assign them to random users
+
+    for (i = 0; i < logs.length; i++) {
+        // Pick a random user
+        let user = users[Math.floor(Math.random() * users.length)];
+        logs[i].user = user.user_id;
+
+        // Insert the log
+        const {data, error} = await supabase
+            .from('logs')
+            .insert(logs[i])
+            
+            if(error){
+                console.error(`Error inserting log ${i}/${logs.length} for user ${user.email}:`, error);
+                // break;
+                console.log("Retrying...");
+                i--;
+            }
+    }
+
+}
+
 async function seed(){
 
     const users = cleanUpTestProfiles();
 
     await createUsers(users);
     createUserProfiles(users);
+
+    const log_templates = cleanupLogs();
+    assignLogsToUsers(users, log_templates);
 }
 
 seed();

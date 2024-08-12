@@ -4,7 +4,7 @@
         "dev": "cd acsense-tcd && npx nuxt dev",
         "sbstart": "supabase start && supabase db reset && node supabase/seed_users.js && node supabase/seed_files.js",
         "gentypes": "supabase gen types typescript --local > acsense-tcd/assets/types/supabase_types.gen.ts",
-        "match:UserTestData": "tsc acsense-tcd/assets/testObjects.ts"
+        "matchtestdata": "tsc acsense-tcd/assets/testObjects.ts"
     },
     "devDependencies": {
         "@supabase/supabase-js": "^2.44.3",
