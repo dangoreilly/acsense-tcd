@@ -45,7 +45,7 @@ async function createUserProfiles(users){
 
     for (i = 0; i < users.length; i++) {
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('profiles')
             .insert(users[i])
 
@@ -55,6 +55,7 @@ async function createUserProfiles(users){
         } else {
             // console.log(`Created profile for ${users[i].email}`);
             process.stdout.write(`Created profile [${i+1}/${users.length}](${users[i].email})                     \r`);
+            // console.log(data)
         }
     }
     console.log(`[${i}/${users.length}] profiles created                         `);
@@ -130,7 +131,7 @@ async function seed(){
     const users = cleanUpTestProfiles();
 
     await createUsers(users);
-    createUserProfiles(users);
+    await createUserProfiles(users);
 
     const log_templates = cleanupLogs();
     assignLogsToUsers(users, log_templates);
