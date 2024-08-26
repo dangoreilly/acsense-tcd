@@ -1,4 +1,3 @@
-import type { C } from "vitest/dist/reporters-yx5ZTtEV";
 import type { Database } from "~/assets/types/supabase_types.gen";
 import type { ChangesObject } from "~/utils/getChanges";
 export type Building = Database['public']['Tables']['buildings']['Row'];
