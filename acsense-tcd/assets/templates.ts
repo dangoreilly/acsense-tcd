@@ -148,7 +148,7 @@ export const space_template = (): any => {
     delete space_template.updated_at;
 }
 
-  export const building_template: Building = {
+let building_template_full: Building = {
     canonical: "example-building-A",
     display_name: "Example Building A",
     aka: "Ex Building A",
@@ -182,4 +182,15 @@ export const space_template = (): any => {
     created_at: "2021-09-01T12:00:00.000Z",
     updated_at: "2021-09-01T12:00:00.000Z",
     UUID: "00000000-0000-0000-0000-000000000000",
+}
+
+export const building_template = (): any => {
+    // Return space_template_full, with all unnecessary fields removed
+    let building_template = building_template_full;
+    // @ts-ignore
+    delete building_template.UUID;
+    // @ts-ignore
+    delete building_template.updated_at;
+    // @ts-ignore
+    delete building_template.created_at;
 }
