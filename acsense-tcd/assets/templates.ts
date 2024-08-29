@@ -1,7 +1,6 @@
-import type { UserProfile } from "~/assets/types/permissions";
-export const user_template: UserProfile = { 
+import type { UserProfile_Template } from "~/assets/types/permissions";
+export const user_template: UserProfile_Template = { 
     email: "template@template.ie",
-    user_id: "0",
     is_admin: false,
     buildings: {
         general: {
@@ -62,13 +61,12 @@ export const user_template: UserProfile = {
     },
   }
 
-  import type { Building, Space } from "~/assets/types/supabase_types"
-  let space_template_full: Space = {
+  import type { Building, Building_Template, Space, Space_Template } from "~/assets/types/supabase_types"
+export const space_template: Space_Template = {
     "name": "New Space",
     "canonical": "new-space",
     "description": "",
     "type": "Study Space",
-    "updated_at": "2024-08-01 14:51:30.697118+00",
     "food_drink_allowed": false,
     "microwave": false,
     "kettle": false,
@@ -81,8 +79,6 @@ export const user_template: UserProfile = {
     "outlets": false,
     "icon_override": "",
     "seating": false,
-    "UUID": "0",
-    "building_uuid": null,
     "food_drink_allowed_note": "",
     "microwave_note": "",
     "kettle_note": "",
@@ -136,19 +132,9 @@ export const user_template: UserProfile = {
     ],
     "clickthrough": false,
     "published": false,
-    "updated_by": null
 }
 
-export const space_template = (): any => {
-    // Return space_template_full, with all unnecessary fields removed
-    let space_template = space_template_full;
-    // @ts-ignore
-    delete space_template.UUID;
-    // @ts-ignore
-    delete space_template.updated_at;
-}
-
-let building_template_full: Building = {
+export const building_template: Building_Template = {
     canonical: "example-building-A",
     display_name: "Example Building A",
     aka: "Ex Building A",
@@ -178,19 +164,4 @@ let building_template_full: Building = {
     published: true,
     floorplans_published: false,
     rooms_published: false,
-
-    created_at: "2021-09-01T12:00:00.000Z",
-    updated_at: "2021-09-01T12:00:00.000Z",
-    UUID: "00000000-0000-0000-0000-000000000000",
-}
-
-export const building_template = (): any => {
-    // Return space_template_full, with all unnecessary fields removed
-    let building_template = building_template_full;
-    // @ts-ignore
-    delete building_template.UUID;
-    // @ts-ignore
-    delete building_template.updated_at;
-    // @ts-ignore
-    delete building_template.created_at;
 }
