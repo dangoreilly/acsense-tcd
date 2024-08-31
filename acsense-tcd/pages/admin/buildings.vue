@@ -327,7 +327,7 @@
                         </div>
                         <!-- Display -->
                         <div class="col" v-if="building.tips.length > 0">
-                            <AccessTips :tips="building.tips" />
+                            <AccessTips :tips="building.tips" entity="building"/>
                         </div>
                         <div class="col" v-else>
                             <!-- <p><em> &lt;&lt; Tip box will not display >> </em></p> -->
@@ -363,23 +363,70 @@
                     </div>
 
                     <!-- Map Preview-->
-                    <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="building.geometry" style="display: none;">
-                        <!-- Space type and location -->
+                    <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="building.geometry">
                         <!-- Inputs -->
                         <div style="grid-area: 'input';" class="me-2">    
                             <!-- Lat and long inputs -->
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <label for="coordinates">Building Shape</label>
                                 <textarea 
                                 class="form-control" 
                                 id="coordinates" 
                                 rows="4" 
-                                v-model="building.further_info">
+                                :value="JSON.stringify(building.geometry.coordinates)">
                                 </textarea>
+                                <button 
+                                type="button" 
+                                class="btn btn-sm btn-primary mx-1 mt-1" 
+                                @click="console.print('Geometry Update')">
+                                    Geometry Editor
+                                </button>
+                                <button 
+                                title="Warning: Confirm new geometry renders as expected in preview before saving"
+                                type="button" 
+                                class="btn btn-sm btn-warning mx-1 mt-1" 
+                                @click="console.print('Geometry Update')">
+                                    Update geometry
+                                </button>
+                            </div> -->
+                            <!-- Views -->
+                            <div>
+                                <span class="d-block">Center map</span>
+                                <button 
+                                type="button" 
+                                class="btn btn-sm btn-outline-primary mx-1" 
+                                @click="centerViewOnCampus()">
+                                    Campus
+                                </button>
+
+                                <button 
+                                type="button" 
+                                class="btn btn-sm btn-outline-primary mx-1" 
+                                @click="centerViewOnBuilding()">
+                                    Building
+                                </button>
+                            </div>
+                            <!-- Labels -->
+                            <div class="mt-3">
+                                <label for="coordinates">Primary Label</label>
+                                <input  
+                                :disabled="!checkPermission('map_label_1')"
+                                @input="updateCurrentBuildingLabels()"
+                                type="text" class="form-control mb-2" v-model="building.map_label_1">
                                 
+                                    <label for="coordinates">Secondary Label</label>
+                                <input  
+                                :disabled="!checkPermission('map_label_2')"
+                                @input="updateCurrentBuildingLabels()"
+                                type="text" class="form-control" v-model="building.map_label_2">
+                                
+                                    <!-- <label for="coordinates">Tertiary Label</label>
+                                <input  
+                                :disabled="!checkPermission('map_label_3')"
+                                    type="text" class="form-control" v-model="building.map_label_3"> -->
                             </div>
                             <!-- Display Settings -->
-                            <div class="form-check mb-3">
+                            <div class="form-check mb-3 mt-3" title="Select for satellite buildings that are not already included in an overlay">
                                 <input  
                                 :disabled="!checkPermission('always_display')"
                                 class="form-check-input" type="checkbox" v-model="building.always_display" id="always_display">
@@ -389,8 +436,19 @@
                             </div>
                         </div>
                         <!-- Map -->
-                        <div  id="building-placement-map" style="height: 600px; padding-top: 30px; grid-area: 'input';"></div>
+                        <div style="grid-area: 'input';">
+                            <span class="fw-bold">{{hover.active ? hover.space : "Hover over space or building to see what it is"}}</span>
+                            <div id="building-placement-map" style="height: 600px; padding-top: 30px; "></div>
+                        </div>
                     </div>
+                    <!-- <AdminBuildingGeometryEdit v-if="mapDataLoaded()"
+                    :building="building"
+                    :checkPermission="checkPermission"
+                    :buildings_list="buildings_list" 
+                    :space_types="space_types"
+                    :spaces_list="spaces_list"
+                    :overlays="overlays"
+                    ></AdminBuildingGeometryEdit> -->
                     <p></p>
                     <!-- Gallery -->
                     <div class="row">
@@ -540,6 +598,24 @@ useHead({
 <script>
 import {createClient} from '@supabase/supabase-js';
 import getPermissionsKey from "~/assets/permissionsKey"
+// @ts-ignore
+import * as L from "leaflet";
+import '~/assets/css/leaflet.css'
+// import "@geoman-io/leaflet-geoman-free";
+// import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+import 'leaflet.fullscreen';
+import 'leaflet.fullscreen/Control.FullScreen.css';
+// L.PM.setOptIn(false);
+
+import { addBuildings, addLabelsToMap, addOverlays, addSpaces, addZoomHandling } from '~/utils/adminMapUtils'
+// import type { Building, Space, Space_Type, Overlay } from '~/assets/types/supabase_types'
+// import type { Building_Partial, Space_Partial } from "~/utils/adminMapUtils";
+
+
+const campusBounds = [
+                    [53.345568, -6.259428],
+                    [53.341853, -6.249477]
+                ];
 
     export default {
         data() {
@@ -558,6 +634,18 @@ import getPermissionsKey from "~/assets/permissionsKey"
                 user: {},
                 permissionsKey: {},
                 permissionsKey_gallery: {},
+
+                // Map stuff
+                buildings_list: [],
+                space_types: [],
+                spaces_list: [],
+                overlays: [],
+                map: {},
+                hover: {
+                    active: false,
+                    space: ''
+                },
+                buildingLabels: {},
             }
         },
         created() {
@@ -580,8 +668,8 @@ import getPermissionsKey from "~/assets/permissionsKey"
             this.permissionsKey = getPermissionsKey("buildings");
             this.permissionsKey_gallery = getPermissionsKey("building_gallery_images");
             
-            
-            // this.mapInit();
+            // Get the lists of buildings, overlays, and spaces to display on the map
+            this.getMapObjects();
             
         },
         computed: {
@@ -595,6 +683,14 @@ import getPermissionsKey from "~/assets/permissionsKey"
             
         },
         methods: {
+
+            async getMapObjects(){
+                // Get the lists of buildings, overlays, and spaces to display on the map
+                this.buildings_list = await getBuildingList(this.supabase);
+                this.overlays = await getOverlays(this.supabase);
+                this.space_types = await getSpaceTypes(this.supabase);
+                this.spaces_list = await getSpaces(this.supabase);
+            },
             // Resolve the promise of the user object
             // So that we can check the permissions on it
             async getUser(){
@@ -616,18 +712,159 @@ import getPermissionsKey from "~/assets/permissionsKey"
                 return userHasPermission(this.user, this.permissionsKey, permission);
             },
 
-
-            // Create the map
-            async mapInit(){
-                // Initialise the map
-                // Wait for this function to have loaded
-                while (typeof buildingSelectMapInit !== "function") {
+            async loadBuildingToMap(){
+                // Wait for the page to be loaded
+                while (!this.mapDataLoaded()) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
-                // Once the function is loaded, we can call it
-                // This function will initialise the map and add the marker
-                // We provide a callback function to update the space's location when the marker is moved
-                buildingSelectMapInit(this.updateBuildingGeometry, this.supabase);
+
+                // Regenerate and Set up the basics of the map
+                this.initMap();
+
+                // Add the editable building to the map
+                this.addCurrentBuildingToMap();
+                // Add the editable labels to the map
+                this.addCurrentBuildingLabelsToMap();
+
+                // Move the view to the building
+                this.centerViewOnBuilding();
+
+                
+                // Init a callback function to update hover text
+                let updateHoverText = (active, text) => {
+                    this.hover.active = active;
+                    this.hover.space = text;
+                }
+
+                // Add the overlays to the map
+                // this.map = 
+                addOverlays(L, this.map, this.overlays, null, false);
+
+                // Add the buildings to the map
+                // this.map = 
+                addBuildings(L, this.map, this.buildings_list, this.building, true, updateHoverText);
+                addLabelsToMap(L, this.map, this.buildings_list, this.building);
+
+                // Add the other spaces to the map
+                // this.map = 
+                addSpaces(L, this.map, this.spaces_list, this.space_types, null, true, updateHoverText);
+            },
+
+            addCurrentBuildingLabelsToMap(){
+                this.buildingLabels = makeLabels(L, this.map, this.building);
+            },
+
+            addCurrentBuildingToMap(){
+                // Add a new layer to the map for the building
+                let building_geojson = {
+                    "type": "Feature",
+                    "geometry": {
+                        "coordinates": this.building.geometry.coordinates,
+                        "type": "Polygon"
+                    }
+                }
+                let buildingLayer = L.geoJSON(building_geojson, {
+                    style: {
+                        color: '#E53397',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.75,
+                        fillColor: "#E53397"
+                    },
+                    // onEachFeature: function(feature, layer) {
+                    //     layer.options.pmIgnore = false;
+                    //     L.PM.reInitLayer(layer);
+                    //     console.log(layer);
+                    // }
+                })
+                // buildingLayer.options.pmIgnore = false;
+                // L.PM.reInitLayer(buildingLayer);
+                
+                buildingLayer.addTo(this.map);
+
+                // this.currentBuildingLayer = buildingLayer;
+            },
+
+            initMap(){
+                // Check if there is already a map object, remove if there is
+                try {
+                    this.map.remove();
+                }
+                catch (error) {
+                    console.log("No map to remove");
+                }
+
+                // Initialise the map
+                let map = L.map('building-placement-map', {
+                    zoomSnap: 0.25,
+                    zoomDelta: 0.25,
+                    maxZoom: 20,
+                    renderer: L.canvas({padding: 1}),
+                    fullscreenControl: true,
+                    fullscreenControlOptions: {
+                        position: 'topleft'
+                    },
+                    // pmIgnore: false,
+                }).fitBounds(campusBounds);
+
+                // add Leaflet-Geoman controls with some options to the map  
+                // map.pm.addControls({  
+                //     position: 'topleft',  
+                //     drawControls: false,
+                //     cutPolygon: false,
+                //     removalMode: false,
+                // }); 
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //rastertiles/voyager_nolabels
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    maxZoom:20
+                }).addTo(map);
+
+                // Cheap debug
+                // map.on('click', function(e) {
+                //     let cheapDebugObject = {
+                //         latlng: e.latlng,
+                //         bounds: map.getBounds(),
+                //         zoom: map.getZoom(),
+                //         center: map.getCenter()
+                //     }
+            
+                //     console.log(cheapDebugObject);
+                    
+                // });
+
+                // map.on("pm:enable", function(e) {
+                //     console.log("pm:enable", e);
+                // });
+
+                // Add zoom handling
+                addZoomHandling(map);
+
+                // // Add the current building to the map
+                // this.addCurrentBuildingToMap(map);
+
+                this.map = map;
+                // return map;
+
+            },
+
+            updateCurrentBuildingLabels(){
+                // Remove the current labels from the map
+                this.buildingLabels.primary_label?.remove();
+                this.buildingLabels.secondary_label?.remove();
+                this.buildingLabels.tertiary_label?.remove();
+                // Add the new labels to the map
+                this.addCurrentBuildingLabelsToMap();
+            },
+
+            centerViewOnCampus(){
+                // When called, update the map to be centred on the campus
+                this.map.fitBounds(campusBounds);
+            },
+
+            centerViewOnBuilding(){
+                // When called, update the map to be centred on the building
+                this.map.setView(getGeometricCenter(this.building.geometry.coordinates), 18);
             },
 
             confirmChangePublishStatus(){
@@ -821,18 +1058,6 @@ import getPermissionsKey from "~/assets/permissionsKey"
                 this.gallery_clean.splice(index, 1);
                 
                 // Remove the database entry
-                // const { data:db_response, error:db_error } = await this.supabase
-                // .from('building_gallery_images')
-                // .delete()
-                // .eq('url', url)
-
-                // if (db_error) {
-                //     console.error(db_error)
-                //     alert(db_error.message)
-                //     throw db_error
-                // }
-                // console.log(db_response)
-
                 const access_token = await getSessionAccessToken(this.supabase);
                 const {data: img, error:db_delete_error} = await removeFromTable(
                     access_token, 
@@ -881,49 +1106,6 @@ import getPermissionsKey from "~/assets/permissionsKey"
 
             },
 
-            // This function compares the current state of the building against the state it was in when the page was loaded
-            // It returns a list of the fields that have been changed
-            getChanges() {},
-
-            // Attempts to create a new building with the given canonical name
-            async newBuilding(canonical) {
-                // Check if the building already exists
-                let { data: bld, error } = await this.supabase
-                    .from('buildings')
-                    .select('*')
-                    .eq('canonical', canonical)
-                if (error) {
-                    console.error(error)
-                    alert(error.message)
-                    throw error
-                }
-                else {
-                    // If the building already exists, return false
-                    if (bld.length > 0) {
-                        return false;
-                    }
-                    // If the building does not exist, create it
-                    else {
-                        let { data: bld, error } = await this.supabase
-                            .from('buildings')
-                            .insert([
-                                { canonical: canonical }
-                            ])
-                        if (error) {
-                            console.error(error)
-                            alert(error.message)
-                            throw error
-                        }
-                        else {
-                            return true;
-                        }
-                    }
-                }
-            },
-
-            // This function adds a log entry to the database
-            logChange() {},
-
             // This function fetches the building from the database based on it's canonical name
             async getBuilding(canonical){
                 console.log("Fetching building: " + canonical);
@@ -952,10 +1134,28 @@ import getPermissionsKey from "~/assets/permissionsKey"
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
                     
                     // Update the map to show the building
-                    // this.loadBuildingToMap();
+                    // Wait for the space_types and buildings list to have loaded first
+                    while (!this.mapDataLoaded()) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                    // Now we have the space types and buildings, we can load the space to the map
+                    this.loadBuildingToMap();
 
                 }
                 
+            },
+            mapDataLoaded(){
+
+                // Checks if the arrays for the map data have been populated
+                // Returns true if all are populated, false otherwise
+                if (this.space_types.length == 0) return false; 
+                if(this.buildings_list.length == 0) return false;
+                if(this.spaces_list.length == 0) return false;
+                if(this.overlays.length == 0) return false;
+                if(document.getElementById("building-placement-map") == null) return false;
+
+                return true
+
             },
 
             // this function fetches all the images for a given building
@@ -1044,14 +1244,6 @@ import getPermissionsKey from "~/assets/permissionsKey"
 </script>
 
 <style>
-
-.map-section{
-    /* Define the grid to give enough room for the map */
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-    grid-template-areas: "input map";
-    grid-template-rows: auto;
-}
 
 .primary-image-preview{
     border-bottom-right-radius: 0.5rem;
