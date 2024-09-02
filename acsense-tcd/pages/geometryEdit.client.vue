@@ -1,11 +1,27 @@
 <template>
-<div id="map" style="width: 800px; height: 600px">
-    
-</div>
+<main class="geometry-edit-main" style="height:100vh">
+    <!-- Map input side -->
+    <div class="geometry-edit-input" id="map"></div>
+    <!-- Textbox output side -->
+    <div class="geometry-edit-output mx-2">
+        <!-- Don't try and log the UI until there's something to load, or the renderer gets sad -->
+        <div v-if="building.display_name">
+            <label for="buildingName">Building Name</label>
+            <input type="text" class="form-control" id="buildingName" disabled
+            :value="building.display_name"
+            >
+            <label for="coordinates">Building Shape</label>
+            <textarea class="form-control" id="coordinates" style="height:80dvh; user-select: all;" readonly 
+            :value="JSON.stringify(building.geometry.coordinates)">
+            </textarea>
+        </div>
+    </div>
+
+</main>
 </template>
 
 <script>
-
+import { createClient } from '@supabase/supabase-js';
 import * as L from "leaflet";
 import '~/assets/css/leaflet.css'
 import "@geoman-io/leaflet-geoman-free";
@@ -13,7 +29,7 @@ import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import 'leaflet.fullscreen';
 import 'leaflet.fullscreen/Control.FullScreen.css';
 
-import { addBuildings, addLabelsToMap, addOverlays, addSpaces, addZoomHandling } from '~/utils/adminMapUtils'
+import { getBuildingList, addBuildings, addLabelsToMap, getOverlays, addOverlays, getSpaces, getSpaceTypes, addSpaces, addZoomHandling } from '~/utils/adminMapUtils'
 
 L.PM.setOptIn(false);
 
@@ -26,8 +42,8 @@ L.PM.setOptIn(false);
 
 const buildings = [
     {
-        canonical: "string", 
-        display_name: "string", 
+        canonical: "string1", 
+        display_name: "string1", 
         UUID: "string", 
         always_display: true, 
         geometry: {
@@ -57,8 +73,8 @@ const buildings = [
         map_label_3: "string"
     },
     {
-        canonical: "string", 
-        display_name: "string", 
+        canonical: "string2", 
+        display_name: "string2", 
         UUID: "string", 
         always_display: true, 
         geometry: {
@@ -93,18 +109,50 @@ const buildings = [
 export default {
     data() {
         return {
+            supabase: {},
             map: {},
+            building: {},
+            buildings: [],
+            spaces: [],
+            overlays: [],
         }
     },
+    computed: {
+        // building_shape() {
+        //     return JSON.stringify(this.building.geometry.coordinates);
+        // }
+    },
+    created() {
+        // Init supabase
+        // this.initSupabase();
+        const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+        const supabaseKey = useRuntimeConfig().public.supabaseKey;
+        this.supabase = createClient(supabaseUrl, supabaseKey)
+
+    },
     mounted() {
-        // console.log(this.$refs.welcome);
-        // Check if the user has indicated they want to skip the welcome modal
-        this.InitMap();
+        this.makeAndPopulateMap();
     },
 
     methods: {
+        async initSupabase() {
+            // Create the supabase client that will gather all our data
+            
+        },
+        async makeAndPopulateMap(){
 
-        async InitMap(){
+            // Get all the map data
+            this.buildings = await getBuildingList(this.supabase);
+            this.building = this.buildings[0];
+            this.spaces = await getSpaces(this.supabase);
+            this.overlays = await getOverlays(this.supabase);
+            let spaceTypes = await getSpaceTypes(this.supabase);
+
+            this.InitMap();
+            
+        },
+
+        InitMap(){
 
             // Wait 
 
@@ -142,17 +190,103 @@ export default {
                 maxZoom:20
             }).addTo(map);
 
-            // Add the buildings
-            addBuildings(L, map, buildings, null, true, (active, space) => {
-                console.log(space);
-            });
-
             // Add zoom handling
             addZoomHandling(map);
+
+            // Add all the map elements
+            addBuildings(L, map, this.buildings, null, true, (active, space) => {console.log(space)}, this.updateBuilding);
+            addLabelsToMap(L, map, this.buildings, null);
+            addOverlays(L, map, this.overlays);
+            addSpaces(L, map, this.spaces, spaceTypes, null, true, (active, space) => {console.log(space)});
 
             this.map = map;
 
         },
+
+        updateBuilding(feature, layer){
+
+            let update = (feature, layer=null) => {
+                this.building = {
+                    canonical: feature.properties.canonical, 
+                    display_name: feature.properties.name, 
+                    UUID: feature.properties.UUID, 
+                    always_display: feature.properties.always_display, 
+                    geometry: { coordinates: feature.geometry.coordinates },
+                    map_label_1: feature.properties.map_label_1,
+                    map_label_2: feature.properties.map_label_2,
+                    map_label_3: feature.properties.map_label_3
+                };
+            }
+
+            // On click, update the building
+            layer.on('click', (e) => {
+                update(e.target.feature);
+            });
+
+            // On edit, update the building
+            layer.on('pm:edit', (e) => {
+                // update(e.target.feature);
+                // console.log(e)
+                console.log(e.target.getLatLngs())
+            });
+
+        }
     }
 };
 </script>
+
+
+<style >
+.geometry-edit-main {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+}
+
+.geometry-edit-input {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: #F5F5F5;
+}
+
+:root{
+    /* --primary-label-opacity: 1;
+    --secondary-label-opacity: 0;
+    --tertiary-label-opacity: 0; */
+    transition: opacity 0.5s ease-in-out;
+}
+
+#map { height: 100dvh; }
+
+.map-label { 
+    color: #000;
+    /* Text outline for improved readability */
+    -webkit-text-stroke: 0.2px #ccc;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .map-label {
+        color: #fff;
+        /* Text outline for improved readability */
+        -webkit-text-stroke: 1px black;
+    }
+}
+
+.primary-label {
+    opacity: var(--primary-label-opacity);
+    transition: opacity 0.5s ease-in-out;
+    /* display: var(--primary-label-display); */
+}
+.secondary-label {
+    opacity: var(--secondary-label-opacity);
+    transition: opacity 0.5s ease-in-out;
+    /* display: var(--primary-label-display); */
+}
+.tertiary-label {
+    opacity: var(--tertiary-label-opacity);
+    transition: opacity 0.5s ease-in-out;
+    /* display: var(--primary-label-display); */
+}
+
+</style>

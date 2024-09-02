@@ -143,7 +143,7 @@ export function addOverlays(L: any, map: any, overlays: Overlay[], currentOverla
     return map;
 }
 
-export function addBuildings(L: any, map: any, buildings: Building_Partial[], currentBuilding: Building | null,  dummy: boolean, updateHoverText: (active: boolean, text: string) => void): any {
+export function addBuildings(L: any, map: any, buildings: Building_Partial[], currentBuilding: Building | null,  dummy: boolean, updateHoverText: (active: boolean, text: string) => void, onEachFeature: (feature: any, layer: any) => void): any {
 
     const DUMMY_BUILDING_OPACITY = 0.5;
 
@@ -169,6 +169,11 @@ export function addBuildings(L: any, map: any, buildings: Building_Partial[], cu
                     "properties": {
                         "always_display": building.always_display,
                         "name": building.display_name,
+                        "canonical": building.canonical,
+                        "UUID": building.UUID,
+                        "map_label_1": building.map_label_1,
+                        "map_label_2": building.map_label_2,
+                        "map_label_3": building.map_label_3,
                     }
                 }
                 
@@ -200,6 +205,11 @@ export function addBuildings(L: any, map: any, buildings: Building_Partial[], cu
             layer.on("mouseout", function(e: Event) {
                 updateHoverText(false, "")
             });
+
+            // Optional callback
+            if (onEachFeature != undefined)
+                onEachFeature(feature, layer);
+
         }
     }).addTo(map);
 
