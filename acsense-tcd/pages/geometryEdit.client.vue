@@ -115,6 +115,7 @@ export default {
             buildings: [],
             spaces: [],
             overlays: [],
+            spaceTypes: [],
         }
     },
     computed: {
@@ -146,7 +147,7 @@ export default {
             this.building = this.buildings[0];
             this.spaces = await getSpaces(this.supabase);
             this.overlays = await getOverlays(this.supabase);
-            let spaceTypes = await getSpaceTypes(this.supabase);
+            this.spaceTypes = await getSpaceTypes(this.supabase);
 
             this.InitMap();
             
@@ -197,7 +198,7 @@ export default {
             addBuildings(L, map, this.buildings, null, true, (active, space) => {console.log(space)}, this.updateBuilding);
             addLabelsToMap(L, map, this.buildings, null);
             addOverlays(L, map, this.overlays);
-            addSpaces(L, map, this.spaces, spaceTypes, null, true, (active, space) => {console.log(space)});
+            addSpaces(L, map, this.spaces, this.spaceTypes, null, true, (active, space) => {console.log(space)});
 
             this.map = map;
 
@@ -205,29 +206,42 @@ export default {
 
         updateBuilding(feature, layer){
 
-            let update = (feature, layer=null) => {
+            let update = (target) => {
+
+                // Convert the leaflet LatLngs to a list of coordinates, also for leaflet
+                // GeoJSON is a strange standard and I should never have adopted it
+                let coords = [];
+                let LatLngs = target.getLatLngs()[0];
+
+                LatLngs.forEach((latlng) => {
+                    coords.push([latlng.lng, latlng.lat]);
+                });
+
                 this.building = {
-                    canonical: feature.properties.canonical, 
-                    display_name: feature.properties.name, 
-                    UUID: feature.properties.UUID, 
-                    always_display: feature.properties.always_display, 
-                    geometry: { coordinates: feature.geometry.coordinates },
-                    map_label_1: feature.properties.map_label_1,
-                    map_label_2: feature.properties.map_label_2,
-                    map_label_3: feature.properties.map_label_3
+                    canonical:              target.feature.properties.canonical, 
+                    display_name:           target.feature.properties.name, 
+                    UUID:                   target.feature.properties.UUID, 
+                    always_display:         target.feature.properties.always_display, 
+                    geometry: { 
+                        coordinates: [coords] 
+                    },
+                    map_label_1:            target.feature.properties.map_label_1,
+                    map_label_2:            target.feature.properties.map_label_2,
+                    map_label_3:            target.feature.properties.map_label_3
                 };
             }
 
             // On click, update the building
             layer.on('click', (e) => {
-                update(e.target.feature);
+                update(e.target);
             });
 
             // On edit, update the building
             layer.on('pm:edit', (e) => {
-                // update(e.target.feature);
+                // e.target.feature.
+                update(e.target);
                 // console.log(e)
-                console.log(e.target.getLatLngs())
+                // console.log(e.target.getLatLngs())
             });
 
         }
