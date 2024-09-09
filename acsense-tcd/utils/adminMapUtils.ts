@@ -7,14 +7,16 @@ export interface Building_Partial {
     geometry: {coordinates:[[[number, number]]]}
     map_label_1: string,
     map_label_2: string,
-    map_label_3: string
+    map_label_3: string,
+    published: boolean
 }
 export interface Space_Partial {
     canonical: string, 
     location: [number, number], 
     type: string, 
     icon_override: string, 
-    name: string
+    name: string,
+    published: boolean
 }
 
 /**
@@ -28,7 +30,7 @@ export async function getBuildingList(supabase: any): Promise<Building_Partial[]
     // Fetch the building list from the database
     let { data: buildings, error } = await supabase
         .from('buildings')
-        .select('canonical, display_name, UUID, always_display, geometry, map_label_1, map_label_2, map_label_3')
+        .select('canonical, display_name, UUID, always_display, geometry, map_label_1, map_label_2, map_label_3, published')
     if (error) {
         console.error(error)
         alert(error.message)
@@ -54,7 +56,7 @@ export async function getSpaces(supabase: any): Promise<Space_Partial[]> {
     // Fetch the spaces list from the database, for dummy display
     let { data: spaces, error } = await supabase
         .from('spaces')
-        .select('canonical, location, type, icon_override, name')
+        .select('canonical, location, type, icon_override, name, published')
     if (error) {
         console.error(error)
         alert(error.message)
@@ -158,7 +160,7 @@ export function addBuildings(L: any, map: any, buildings: Building_Partial[], cu
             // Check if the building is always displayed
             // And that the coordinates are not empty
             // If it is, add it to the map
-            if ((building.always_display || dummy) && building.geometry.coordinates.length > 0){
+            if (((building.always_display && building.published) || dummy) && building.geometry.coordinates.length > 0){
                 // Convert building to a valid GeoJSON object
                 let building_geojson = {
                     "type": "Feature",
@@ -174,6 +176,7 @@ export function addBuildings(L: any, map: any, buildings: Building_Partial[], cu
                         "map_label_1": building.map_label_1,
                         "map_label_2": building.map_label_2,
                         "map_label_3": building.map_label_3,
+                        "published": building.published
                     }
                 }
                 
@@ -189,7 +192,7 @@ export function addBuildings(L: any, map: any, buildings: Building_Partial[], cu
     var buildings_geojson_array = L.geoJSON(building_geojsons, {
         style: function(feature: any) {
             return {
-                fillColor: '#0087A2',
+                fillColor: feature.properties.published? '#0087A2' : '#FFFF00',
                 weight: 1,
                 opacity: 1,
                 color: '#021689',
