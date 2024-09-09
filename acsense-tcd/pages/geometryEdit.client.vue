@@ -29,7 +29,7 @@ import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import 'leaflet.fullscreen';
 import 'leaflet.fullscreen/Control.FullScreen.css';
 
-import { getBuildingList, addBuildings, addLabelsToMap, getOverlays, addOverlays, getSpaces, getSpaceTypes, addSpaces, addZoomHandling } from '~/utils/adminMapUtils'
+import { getBuildingList, addBuildings, addLabelsToMap, getOverlays, addOverlays, getSpaces, getSpaceTypes, addSpaces, addZoomHandling, getGeometricCenter } from '~/utils/adminMapUtils'
 
 L.PM.setOptIn(false);
 
@@ -39,72 +39,6 @@ L.PM.setOptIn(false);
                         [53.34631744552114, -6.255028994837502],
                         [53.34163690316516, -6.258745992827823]
                     ];
-
-const buildings = [
-    {
-        canonical: "string1", 
-        display_name: "string1", 
-        UUID: "string", 
-        always_display: true, 
-        geometry: {
-            "coordinates": [
-                [
-                    [
-                        -6.258532757442253,
-                        53.34403918942865
-                    ],
-                    [
-                        -6.258522544984657,
-                        53.34415532567437
-                    ],
-                    [
-                        -6.2583114572687455,
-                        53.34414873151707
-                    ],
-                    [
-                        -6.2583216697263415,
-                        53.34403259527135
-                    ]
-                ]
-            ]
-        },
-        map_label_1: "string",
-        map_label_2: "string",
-        map_label_3: "string"
-    },
-    {
-        canonical: "string2", 
-        display_name: "string2", 
-        UUID: "string", 
-        always_display: true, 
-        geometry: {
-            "coordinates": [
-                [
-                    [
-                        -6.259532757442253,
-                        53.34403918942865
-                    ],
-                    [
-                        -6.259522544984657,
-                        53.34415532567437
-                    ],
-                    [
-                        -6.2593114572687455,
-                        53.34414873151707
-                    ],
-                    [
-                        -6.2593216697263415,
-                        53.34403259527135
-                    ]
-                ]
-            ]
-        },
-        map_label_1: "string",
-        map_label_2: "string",
-        map_label_3: "string"
-    },
-]
-
 
 export default {
     data() {
@@ -150,7 +84,42 @@ export default {
             this.spaceTypes = await getSpaceTypes(this.supabase);
 
             this.InitMap();
+
+            this.centerViewOnBuilding();
             
+        },
+
+        centerViewOnBuilding(){
+            // First, check if there's a building parameter in the URL
+            // if there isn't, we don't need to check any further
+            let url = window.location.href;
+            const urlParams = new URL(url).searchParams;
+            if (!url.includes("building")) return;
+
+            // Else, find the highlight parameter
+            const highlight = urlParams.get('building');
+
+            console.log("Highlight: " + highlight);
+            
+            // if (highlight == feature.properties.canonical){
+
+            // Loop through the buildings and check if the url contains the canonical name
+            // Run buildings first, because if a building and a space share a canonical name, the building will be prioritised
+            // Zooming to the building will also zoom to the space, so it's not a problem
+            this.buildings.forEach(building => {
+                if (highlight == building.canonical){
+                    
+                    // Dismiss the modals if they're open
+                    // this.$emit('dismissModals');
+
+                    // Get the center of the building to aim for
+                    let center = getGeometricCenter(building.geometry.coordinates);
+
+                    // Fly to the building at the correct zoom level
+                    this.map.flyTo(center, 18);
+                    
+                }
+            });
         },
 
         InitMap(){
@@ -169,7 +138,7 @@ export default {
             let map = L.map('map', {
                 zoomSnap: 0.25,
                 zoomDelta: 0.25,
-                maxZoom: 20,
+                maxZoom: 21,
                 renderer: L.canvas({padding: 1}),
                 fullscreenControl: true,
                 fullscreenControlOptions: {

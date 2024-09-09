@@ -366,29 +366,6 @@
                     <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="building.geometry">
                         <!-- Inputs -->
                         <div style="grid-area: 'input';" class="me-2">    
-                            <!-- Lat and long inputs -->
-                            <!-- <div class="mb-3">
-                                <label for="coordinates">Building Shape</label>
-                                <textarea 
-                                class="form-control" 
-                                id="coordinates" 
-                                rows="4" 
-                                :value="JSON.stringify(building.geometry.coordinates)">
-                                </textarea>
-                                <button 
-                                type="button" 
-                                class="btn btn-sm btn-primary mx-1 mt-1" 
-                                @click="console.print('Geometry Update')">
-                                    Geometry Editor
-                                </button>
-                                <button 
-                                title="Warning: Confirm new geometry renders as expected in preview before saving"
-                                type="button" 
-                                class="btn btn-sm btn-warning mx-1 mt-1" 
-                                @click="console.print('Geometry Update')">
-                                    Update geometry
-                                </button>
-                            </div> -->
                             <!-- Views -->
                             <div>
                                 <span class="d-block">Center map</span>
@@ -433,6 +410,31 @@
                                 <label class="form-check-label" for="always_display">
                                     Always Display
                                 </label>
+                            </div>
+                            <!-- Lat and long inputs -->
+                            <div class="mb-3">
+                                <label for="coordinates">Building Shape</label>
+                                <textarea 
+                                :disabled="!checkPermission('geometry')"
+                                class="form-control" 
+                                id="coordinates" 
+                                rows="4" 
+                                :value="JSON.stringify(building.geometry.coordinates)">
+                                </textarea>
+                                <p class="fst-italic mb-0 my-1">To update building shape, copy and paste coordinates from geometryEdit into the above box</p>
+                                <a  
+                                class="btn btn-sm btn-secondary mx-1 mt-1" 
+                                :href="'/geometryEdit?building='+building.canonical" target="_blank">
+                                    geometryEdit
+                                </a>
+                                <button 
+                                :disabled="!checkPermission('geometry')"
+                                title="Warning: Confirm new geometry renders as expected in preview before saving"
+                                type="button" 
+                                class="btn btn-sm btn-warning mx-1 mt-1" 
+                                @click="updateBuildingGeometry()">
+                                    Update geometry
+                                </button>
                             </div>
                         </div>
                         <!-- Map -->
@@ -710,6 +712,15 @@ const campusBounds = [
 
                 // Else, check if the user has the permission to perform an action
                 return userHasPermission(this.user, this.permissionsKey, permission);
+            },
+
+            updateBuildingGeometry(){
+                // Get the value of the geometry textarea
+                let newGeometry = JSON.parse(document.getElementById("coordinates").value);
+                // Update the building object with the new geometry
+                this.building.geometry.coordinates = newGeometry;
+                // Update the map with the new building
+                this.loadBuildingToMap();
             },
 
             async loadBuildingToMap(){
