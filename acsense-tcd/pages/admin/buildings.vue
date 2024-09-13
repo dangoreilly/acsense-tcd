@@ -5,9 +5,12 @@
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for building selection -->
-            <AdminBuildingSelector 
-            @activeBuildingChanged="getBuilding($event)"
-            :supabase_client="supabase"/>
+            <AdminEntitySelector 
+            @activeEntityChanged="getBuilding($event)"
+            entityType="building"
+            :permissions="user"
+            :supabase_client="supabase"
+            :updateCount="building_list_refresh_token"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
@@ -16,8 +19,19 @@
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
                         Building Management | 
-                        <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">
-                            <NuxtLink 
+                        <!-- Input for canonical, only if the user is the superadmin -->
+                        <div v-if="checkPermission('canonical')" class="ms-2">
+                            <!-- The field should only be editable if the building is unpublished -->
+                            <input type="text" 
+                            id="canonical"
+                            :class="building.published ? 'bg-yellow-100' : 'bg-white'"
+                            class="form-control fs-5 border font-monospace border-success" 
+                            v-model="building.canonical"
+                            title="Change the page URL. This can only be done while the building is unpublished"
+                            :disabled="building.published">
+                        </div>
+                        <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4" v-else>
+                            <NuxtLink
                             :to="'/info/' + building.canonical"
                             class="link-dark text-decoration-none">
                                 {{ building.canonical }}
@@ -552,41 +566,41 @@
 <script setup>
     
 //Script setup needed for UseHead
-import '~/assets/css/leaflet.css'
+// import '~/assets/css/leaflet.css'
 
-useHead({
+// useHead({
 
-    link: [
-        {
-            rel:"stylesheet",
-            href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-        },
-    ],
-    script: [
-        {
-            src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-            integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-            crossorigin: "",
-        },
-        {
-            src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-            body: true,
-        },
-        // {
-        //     src: '/javascript/mapInit.js',
-        //     body: true,
-        // },
-        // {
-        //     src: 'https://unpkg.com/@supabase/supabase-js@2',
-        // },
-        {
-            src: '/javascript/adminMapFunctions.js',
-        },
-        {
-            src: '/javascript/mapFunctions.js',
-        },
-    ]
-});
+//     link: [
+//         {
+//             rel:"stylesheet",
+//             href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
+//         },
+//     ],
+//     script: [
+//         {
+//             src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+//             integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+//             crossorigin: "",
+//         },
+//         {
+//             src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
+//             body: true,
+//         },
+//         // {
+//         //     src: '/javascript/mapInit.js',
+//         //     body: true,
+//         // },
+//         // {
+//         //     src: 'https://unpkg.com/@supabase/supabase-js@2',
+//         // },
+//         {
+//             src: '/javascript/adminMapFunctions.js',
+//         },
+//         {
+//             src: '/javascript/mapFunctions.js',
+//         },
+//     ]
+// });
 
 
 // const { supabase, session } = await adminSupabaseInit();
@@ -636,6 +650,7 @@ const campusBounds = [
                 user: {},
                 permissionsKey: {},
                 permissionsKey_gallery: {},
+                building_list_refresh_token: 0,
 
                 // Map stuff
                 buildings_list: [],
@@ -913,6 +928,9 @@ const campusBounds = [
                 this.building.published = JSON.parse(JSON.stringify(this.building_clean.published));
                 alert(this.building.display_name + " has been " + (this.building.published ? "published" : "unpublished"));
 
+                // Refresh the building list
+                this.building_list_refresh_token += 1;
+
             },
 
             // This function is called when the user clicks the "Save" button
@@ -920,6 +938,14 @@ const campusBounds = [
             async updateBuilding() {
                 // Deep copy the building object, as things get messy otherwise
                 let update_vehicle = JSON.parse(JSON.stringify(this.building));
+
+                // Check if the canonical name has been changed
+                // Confirm with a dialog box if it has
+                if (this.building.canonical != this.building_clean.canonical){
+                    if (!window.confirm("Changing the canonical name will break all links to this building. Are you sure you want to do this?")){
+                        return;
+                    }
+                }
 
                 // If the primary image has been changed, upload the new image and update the url
                 try {
@@ -956,7 +982,8 @@ const campusBounds = [
                     console.log(data)
                 }
 
-
+                // Refresh the building list
+                this.building_list_refresh_token += 1;
             },
 
             handlePrimaryImageSelect(evt) { 
