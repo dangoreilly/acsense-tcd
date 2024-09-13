@@ -2,6 +2,10 @@
   "name": "acsense-tcd",
   "version": "0.4.0",
   "private": true,
+  "engines": {
+    "node": "^20.17.0",
+    "npm": "^10.8.2"
+  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -25,7 +29,6 @@
     "playwright-core": "^1.45.3",
     "sass": "1.77.6",
     "sass-loader": "^16.0.0",
-    "snaplet": "^0.73.0",
     "supabase": "^1.178.2",
     "vitest": "^1.6.0"
   },
