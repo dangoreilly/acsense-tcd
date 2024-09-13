@@ -75,7 +75,6 @@ export const space_template: Space_Template = {
         53.34395445092419,
         -6.255415678024292
     ],
-    "building": null,
     "outlets": false,
     "icon_override": "",
     "seating": false,
