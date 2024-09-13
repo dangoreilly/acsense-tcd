@@ -378,7 +378,6 @@ export const space_inside: Space = {
     "icon_override": "",
     "seating": true,
     "UUID": "49cdcd7f-6b4d-4a11-abd0-2d41d2bbfbfb",
-    "building_uuid": "e5172612-24ac-43ad-a01c-503bbc7edaf0",
     "food_drink_allowed_note": "Food and Drink Note",
     "microwave_note": "Microwave Note\\n",
     "kettle_note": "Kettle Note\\n",
@@ -436,7 +435,6 @@ export const space_inside: Space = {
     ],
     "clickthrough": false,
     "published": true,
-    "updated_by": null
 }
 
 export const space_outside: Space = {
@@ -458,7 +456,6 @@ export const space_outside: Space = {
     "icon_override": "",
     "seating": true,
     "UUID": "b416eab6-5fb2-4d44-9683-24c7500a18ec",
-    "building_uuid": null,
     "food_drink_allowed_note": "\"\"",
     "microwave_note": "\"\"",
     "kettle_note": "\"\"",
@@ -516,5 +513,44 @@ export const space_outside: Space = {
     ],
     "clickthrough": false,
     "published": true,
-    "updated_by": null
 }
+
+import type { Audit_Log } from '~/assets/types/supabase_types';
+
+export const logs: Audit_Log[] = [
+    {
+        "id": 1,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "UPDATE",
+        "subject": "buildings:example-building-1",
+        "data": {
+        "old": {
+            "aka": "Ex. B1 test"
+        },
+        "new": {
+            "aka": "Ex. B1 test d"
+        },
+        "list": [
+            "aka"
+        ],
+        "error": null
+        }
+    },
+    {
+        "id": 2,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "INSERT",
+        "subject": "buildings:example-building-2",
+        "data": building
+    },
+    {
+        "id": 3,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "DELETE",
+        "subject": "example-building-1",
+        "data": null
+    }
+]

@@ -30,9 +30,27 @@
         </div>
         <div class="form-text" style="font-size: 0.75em;">buildingID cannot be updated</div>
     </div>
-    </template>
+</template>
+
+<script setup> 
+    useHead({
+            title: 'Acsense Admin',
+            meta: [
+                {
+                    name: 'description',
+                    content: 'Acsense Admin page'
+                }
+            ],
+            // link: [
+            //     {
+            //         rel: 'stylesheet',
+            //         href: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css'
+            //     }
+            // ]
+        })
+</script>
     
-    <script>
+<script>
     // import {createClient} from '@supabase/supabase-js';
     
     
@@ -99,7 +117,7 @@
                     throw error
                 }
                 else {
-                    this.buildings = this.sortArrayOfObjectsByKey(buildings, "canonical");;
+                    this.buildings = sortArrayOfObjectsByKey(buildings, "canonical");;
                     this.activeBuilding = this.buildings[0];
                     this.$emit('activeBuildingChanged', this.activeBuilding.canonical);
                 }
@@ -141,22 +159,6 @@
             }
         }
     };
-    
-    useHead({
-        title: 'Acsense Admin',
-        meta: [
-            {
-                name: 'description',
-                content: 'Acsense Admin page'
-            }
-        ],
-        // link: [
-        //     {
-        //         rel: 'stylesheet',
-        //         href: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css'
-        //     }
-        // ]
-    })
     
     </script>
     

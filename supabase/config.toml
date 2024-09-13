@@ -8,7 +8,7 @@ enabled = true
 port = 54321
 # Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
 # endpoints. `public` is always included.
-schemas = ["public", "graphql_public"]
+schemas = ["public", "storage", "graphql_public"]
 # Extra schemas to add to the search_path of every request. `public` is always included.
 extra_search_path = ["public", "extensions"]
 # The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
@@ -76,8 +76,8 @@ enabled = true
 # in emails.
 # This needs to be changed for developing inside codespaces
 # Github Actions can't get the env variable to run the CI
-site_url = "http://localhost:3000"
-#site_url = "env(SUPABASE_SITE_URL)"
+#site_url = "http://localhost:3000"
+site_url = "env(SUPABASE_SITE_URL)"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = ["http://localhost:3000", "env(SUPABASE_SITE_URL)"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).

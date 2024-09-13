@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
             }
             else {
                 // Add to the logs table
-                createLogEntry(supabase, permissions.user_id, "INSERT", "space_styles", data);
+                createLogEntry(supabase, permissions, "INSERT", "space_styles", data);
                 
             }
             // If the insert was successful, return the inserted data

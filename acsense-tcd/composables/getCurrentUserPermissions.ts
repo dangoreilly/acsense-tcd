@@ -31,7 +31,9 @@ export default async function() : Promise<UserProfile> {
     if (superadmin_fetch_error) {
         console.error("Error getting superadmin status: ", superadmin_fetch_error)
         // console.error(superadmin_fetch_error)
-        alert(superadmin_fetch_error.message)
+        // If this composable was called from the browser, we can alert the user
+        if (typeof window !== 'undefined')
+            alert(superadmin_fetch_error.message)
         throw superadmin_fetch_error
     }
     else {
@@ -53,7 +55,9 @@ export default async function() : Promise<UserProfile> {
     if (user_permissions_error) {
         console.error("Error getting user permissions:")
         console.error(user_permissions_error)
-        alert(user_permissions_error.message)
+        // If this composable was called from the browser, we can alert the user
+        if (typeof window !== 'undefined')
+            alert(user_permissions_error.message)
         throw user_permissions_error
     }
     else {
