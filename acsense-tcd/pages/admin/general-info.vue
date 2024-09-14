@@ -73,8 +73,8 @@
                 <div class="row mt-3">
                     <!-- input -->
                     <div class="col">
-                        <div class="row mb-3" v-for="spaceType in space_types">
-                            <div class="col">
+                        <div class="row mb-3" v-for="spaceType, index in space_types">
+                            <div class="col-8">
                                 <div class="row mb-2">
                                     <input type="color" :id="'colour-space-' + spaceType.id" class="form-control form-control-color" v-model="spaceType.colour">
                                     <label :for="'colour-space-' + spaceType.id" class="col-lg-10 col-form-label">{{ spaceType.category }}</label>
@@ -85,15 +85,15 @@
                                 </div>
                             </div>
                             <!-- Icon Display -->
-                            <!-- <div class="col">
+                            <div class="col-4">
                                 <div class="mt-3 position-relative">
                                     <img 
                                     :src="spaceType.icon" 
                                     style="width: 100%;">
-                                    <input id="IconOverrideInput" type="file" class="form-control" 
-                                    @change="handleCustomIconSelect(e, spaceType.id)">
+                                    <input :id="'IconOverrideInput-'+index" :data-index="index" type="file" class="form-control" 
+                                    @change="handleCustomIconSelect"> <!-- v-model="spaceType.icon" -->
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                     <!-- Preview -->
@@ -354,72 +354,45 @@ export default {
             this.space_types_clean = JSON.parse(JSON.stringify(data));
         },
 
-        handleCustomIconSelect(evt, id){
+        handleCustomIconSelect(evt){
             // Get the file from the input
             // Set the iconOverride to the file to preview
             const file = evt.target.files[0];
-            // Find the space type with the matching id
-            for (let i = 0; i < this.space_types.length; i++) {
-                if (this.space_types[i].id === id) {
-                    this.space_types[i].icon = URL.createObjectURL(file);
-                    break;
-                }
-            }
 
+            // Get the index of the space type
+            const index = evt.target.getAttribute("data-index");
+            this.space_types[index].icon = URL.createObjectURL(file);
+             
         },
 
-        // async uploadNewCustomIcon(){
-        //         // Get the file object from the primary image upload input
-        //         // Upsert to the storage bucket as the canonical name
-        //         // TODO: Check if the file already exists under a different extension, and if so, delete it
+        async uploadNewCustomIcon(index){
+            // Get the file object from the primary image upload input
+            // Upsert to the storage bucket as the canonical name
+            // TODO: Check if the file already exists under a different extension, and if so, delete it
 
-        //         // Get the file
-        //         let file = document.getElementById("IconOverrideInput").files[0];
-        //         // Get the file extension
-        //         let extension = file.name.split('.').pop();
+            // Get the file
+            let file = document.getElementById(`IconOverrideInput-${index}`).files[0];
+            // Get the file extension
+            let extension = file.name.split('.').pop();
+            // Make a canonical name for the space type
+            let spaceType_canonical = this.space_types[index].category.toLowerCase().replace(/ /g, "_");
+            // Build the new url for the file
+            let newUrl = this.supabase.storageUrl + "/object/public/icons/" + spaceType_canonical + "." + extension;
+            // Upsert the image
+            const {data, error} =  upsertImage(this.supabase, 'icons', `${spaceType_canonical}.${extension}`, file)
+            
+            if (error) {
+                console.error(error)
+                alert(error.message)
+                throw error
+            }
 
-        //         make 
-                
-        //         // Build the new url for the file
-        //         let newUrl = this.supabase.storageUrl + "/object/public/icons/" + this.space.canonical + "." + extension;
+            // Clear the icon input
+            document.getElementById(`IconOverrideInput-${index}`).value = "";
 
-        //         // Upload the file to the storage bucket
-        //         const { data, error:upload_error } = await this.supabase.storage
-        //         .from('icons')
-        //         .upload(`custom/${this.space.canonical}.${extension}`, file)
+            return newUrl;
 
-        //         if (upload_error) {
-        //             // if the file already exists, it's not an error
-        //             // We just need to update the existing file
-        //             if (upload_error.statusCode == "409"){
-        //                 console.warn(upload_error)
-        //                 // Update the file
-        //                 const { data, error:update_error } = await this.supabase.storage
-        //                 .from('icons')
-        //                     .update(`custom/${this.space.canonical}.${extension}`, file, {
-        //                         upsert: true
-        //                     })
-
-        //                 if (update_error) {
-        //                     console.error(update_error)
-        //                     alert(update_error.message)
-        //                     return ""
-        //                 }
-        //             }
-        //             else
-        //             {
-        //                 console.error(upload_error)
-        //                 alert(upload_error.message)
-        //                 return ""
-        //             }
-        //         }
-                
-        //         // Clear the icon input
-        //         document.getElementById("IconOverrideInput").value = "";
-
-        //         return newUrl;
-
-        //     },
+        },
 
         cancelChanges(){
             // Reset the welcome text
@@ -447,6 +420,12 @@ export default {
 
             // Update the space types
             for (let i = 0; i < this.space_types.length; i++) {
+
+                // If the icon has been updated, upload the new icon
+                if (this.space_types[i].icon !== this.space_types_clean[i].icon) {
+                    this.space_types[i].icon = await this.uploadNewCustomIcon(i);
+                }
+
                 let {data, error:style_update_error} = await updateTable(access_token, 'space_styles',
                     this.space_types[i],
                     {col:'id', eq:this.space_types[i].id},
