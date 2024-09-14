@@ -59,7 +59,7 @@
                 </label>
                 <!-- <textarea class="form-control" id="oldValue" :value="selectedLog.data?.old" readonly></textarea> -->
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body" style="overflow-y: auto;">
                         <span class="card-text">
                             <p v-for="key in Object.keys(selectedLog.data?.old as Object)">
                                 {{ key }}: <br> 
