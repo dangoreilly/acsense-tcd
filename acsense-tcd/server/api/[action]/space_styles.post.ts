@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import getUserPermissionsByToken from '~/utils/getUserPermissionsByToken'
 import { getChanges, checkUserHasPermission, comparePayloadToDatabase } from '~/utils/getChanges'
+import { createLogEntry } from '~/utils/createLogEntry'
 
 export default defineEventHandler(async (event) => {
     // Log the current time
@@ -81,6 +82,27 @@ export default defineEventHandler(async (event) => {
             }
             // If the update was successful, return the updated data
             return updatedData;
+
+            break;
+        case 'DELETE':
+            // Remove a space style from the table
+            const { data: deletedData, error: delete_error } = await supabase
+            .from("space_styles")
+            .delete()
+            .eq(target.col, target.eq)
+
+            if (delete_error) {
+                throw createError({
+                    statusCode: 500,
+                    statusMessage: delete_error.message
+                })
+            }
+            else {
+                // Add to the logs table
+                createLogEntry(supabase, permissions, "DELETE", "space_styles", deletedData);
+            }
+            // If the delete was successful, return the deleted data
+            return deletedData;
 
             break;
         default:
