@@ -46,139 +46,102 @@
         </div>
     </div>
 </template>
-    
-<script>
 
-    // import {createClient} from '@supabase/supabase-js';
-    
-    
-    export default {
-        props: {
-            activeTab: {
-                type: String,
-                required: true,
-            },
-            supabase_client: {
-                type: Object,
-                required: true,
-            },
-            // session: {
-            //     type: Object,
-            //     required: true,
-            // }
-            
+<script setup lang="ts">
+
+    // Define the props
+    const {activeTab: page, supabase_client} = defineProps({
+        activeTab: {
+            type: String,
+            required: true,
         },
-        data() {
-            return {
-                version: useRuntimeConfig().public.version,
-                tabs: [
-                    {
-                        name: 'Analytics',
-                        key: 'analytics',
-                        icon: 'bi bi-graph-up',
-                    },
-                    {
-                        name: 'Buildings',
-                        key: 'buildings',
-                        icon: 'bi bi-building-gear',
-                    },
-                    {
-                        name: 'Student Spaces',
-                        key: 'spaces',
-                        icon: 'bi bi-cup-hot',
-                    },
+        supabase_client: {
+            type: Object,
+            required: true,
+        },
+    })
     
-                    // {
-                    //     name: 'Floorplans',
-                    //     key: 'floorplans',
-                    //     icon: 'bi bi-columns',
-                    // },
-                    // {
-                    //     name: 'Map',
-                    //     key: 'map',
-                    //     icon: 'bi bi-map',
-                    // },
-                    // {
-                    //     name: 'Branding',
-                    //     key: 'branding',
-                    //     icon: 'bi bi-brush',
-                    // },
-                    {
-                        name: 'Contributors',
-                        key: 'contributors',
-                        icon: 'bi bi-people',
-                    },
-                ],
-                adminTabs: [
-                    {
-                        name: 'General Info',
-                        key: 'general-info',
-                        icon: 'bi bi-info-circle',
-                    },
-                    {
-                        name: 'Audit Logs',
-                        key: 'logs',
-                        icon: 'bi bi-card-checklist',
-                    },
-                ],
-                currentUser: null,
-            }
+    // Set up the refs
+    const activeTab = ref(page);
+    const version = ref(useRuntimeConfig().public.version);
+
+    // Get the current user and their permissions
+    const currentUser = ref(await getCurrentUserPermissions());
+
+    // Set up the tabs
+    const tabs = ref([
+        {
+            name: 'Analytics',
+            key: 'analytics',
+            icon: 'bi bi-graph-up',
         },
-        created() {
-            // Get the user ID for reporting
-            this.getCurrentUser();
-            // The user profile will also tell us whether to reveal the admin-only pages
-
+        {
+            name: 'Buildings',
+            key: 'buildings',
+            icon: 'bi bi-building-gear',
         },
-        mounted() {
-            // Check the user permissions and set the tabs accordingly
-            this.filterMenuItems();
+        {
+            name: 'Student Spaces',
+            key: 'spaces',
+            icon: 'bi bi-cup-hot',
         },
-        methods: {
-            async logout() {
-                console.log("User logging out")
-                const {error} =  await this.supabase_client.auth.signOut()
-                if (error) {
-                    console.log(error)
-                }
-                navigateTo('./login')
-            },
-    
-            async getCurrentUser() {
 
-                // // Wait for the session to be set
-                // while (!this.session.user) {
-                //     await new Promise(r => setTimeout(r, 100));
-                // }
-                // this.currentUser = this.session.user;
+        // {
+        //     name: 'Floorplans',
+        //     key: 'floorplans',
+        //     icon: 'bi bi-columns',
+        // },
+        // {
+        //     name: 'Map',
+        //     key: 'map',
+        //     icon: 'bi bi-map',
+        // },
+        // {
+        //     name: 'Branding',
+        //     key: 'branding',
+        //     icon: 'bi bi-brush',
+        // },
+        {
+            name: 'Contributors',
+            key: 'contributors',
+            icon: 'bi bi-people',
+        },
+    ]);
 
-                // Get the current user and their permissions
-                const _currentUser = await getCurrentUserPermissions();
-                // Copy the user object to avoid reactivity issues
-                this.currentUser = JSON.parse(JSON.stringify(_currentUser));
-                
-            },
+    let adminTabs = [
+        {
+            name: 'General Info',
+            key: 'general-info',
+            icon: 'bi bi-info-circle',
+        },
+        {
+            name: 'Audit Logs',
+            key: 'logs',
+            icon: 'bi bi-card-checklist',
+        },
+    ];
 
-            async filterMenuItems(){
-                // If the current user is not an admin, add the "admin" tabs
-                // Function is named "filter" because this was carried out backwards for a time
+    // if the user is an admin, show the admin tabs
+    if (currentUser.value.is_admin) {
+        tabs.value = tabs.value.concat(adminTabs);
+    }
 
-                // Pause to let the user load
-                while (!this.currentUser) {
-                    await new Promise(r => setTimeout(r, 100));
-                }
+    async function logout() {
+        console.log("User logging out")
+        // Clear the cookie
+        const jwt = useCookie("supabase.auth.token")
+        jwt.value = null;
+        // Invalidate the session with supabase
+        const {error} =  await supabase_client.auth.signOut()
 
-                // if the user is an admin, show the admin tabs
-                if (this.currentUser.is_admin) {
-                    this.tabs = this.tabs.concat(this.adminTabs);
-                }
-            }
+        if (error) {
+            console.log(error)
         }
-    };
-    
-    
-</script>
+        navigateTo('./login')
+    }
 
+</script>
+   
 
 <style>
     i {
