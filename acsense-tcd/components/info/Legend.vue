@@ -1,6 +1,6 @@
 <template>
 <div 
-    class="modal fade show" 
+    :class="previewMode ? '' : 'modal fade show'" 
     id="infoModal"
     tabindex="-1" 
     @click.self="closeModal()"
@@ -28,8 +28,8 @@
                     <p>There are {{ spaceIcons.length }} categories of student space:</p>
                     
                     <div class="row">
-                        <template v-for="icon in spaceIcons">
-                            <div class="col-6">
+                        <template v-for="icon, index in spaceIcons">
+                            <div :class="badgeWidth(index)">
                                 <div
                                     class="px-auto d-block">
                                     <img 
@@ -208,6 +208,11 @@ export default {
             type: String,
             required: false,
         },
+        previewMode: {
+            type: Boolean,
+            required: false,
+            default: false
+        }
     },
     watch: {
         displayModal: function (newVal, oldVal) {
@@ -220,6 +225,10 @@ export default {
     },
     methods: {
         closeModal() {
+            // If we're in preview mode, do nothing
+            if (this.previewMode) {
+                return
+            }
             // Get the modal element and set it's display to none
             let infoModal = document.getElementById('infoModal')
             let body = document.body
@@ -242,6 +251,15 @@ export default {
                 infoModal.style.display = "block";
             }
             // body.style.overflowY = "hidden";
+        },
+        badgeWidth(index){
+            // For the icons for the student spaces
+            // We want to make sure that if there are an odd number, the last one is full width
+            if (index === this.spaceIcons.length - 1 && this.spaceIcons.length % 2 !== 0){
+                return "col-12"
+            } else {
+                return "col-6"
+            }
         }
     }
   }
