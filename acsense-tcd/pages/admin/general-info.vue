@@ -73,7 +73,7 @@
                 <div class="row mt-3">
                     <!-- input -->
                     <div class="col">
-                        <div class="row mb-3" v-for="spaceType, index in space_types">
+                        <div class="row border-bottom border-2 mb-2 pb-2" v-for="spaceType, index in space_types">
                             <div class="col-8">
                                 <div class="row mb-1">
                                     <div class="input-group mx-0 px-0">
@@ -103,8 +103,14 @@
                                     v-model="spaceType.descriptor"></textarea>
                                 </div>
                                 <div class="row">
-                                    <input :id="'IconOverrideInput-'+index" :data-index="index" type="file" class="form-control" 
-                                    @change="handleCustomIconSelect">
+                                    <div class="input-group mx-0 px-0">
+                                        <input :id="'IconOverrideInput-'+index" :data-index="index" type="file" class="form-control" 
+                                        @change="handleCustomIconSelect">
+                                        <button class="btn" type="button" id="inputGroupFileAddon04"
+                                        :class="(space_types[index].icon == space_types_clean[index].icon) ? 'btn-outline-secondary' : 'btn-warning'"
+                                        @click="resetIcon(index)">
+                                        Reset</button>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Icon Display -->
@@ -301,7 +307,9 @@
                             </div>
                         </div>
                         <!-- Map preview -->
-                        <div class="row"></div>
+                        <div class="row border rounded-3">
+                            <SpaceTypeIconPreview :spaceTypes="space_types" :supabase_client="supabase"/>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -403,6 +411,13 @@ export default {
 
                 console.log(this.space_counts)
             }
+        },
+
+        resetIcon(index){
+            // Reset the icon to the original icon
+            this.space_types[index].icon = this.space_types_clean[index].icon;
+            // Clear the input
+            document.getElementById(`IconOverrideInput-${index}`).value = "";
         },
 
         tooltipSpacesList(index) {

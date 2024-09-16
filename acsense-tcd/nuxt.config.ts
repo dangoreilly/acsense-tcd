@@ -17,6 +17,7 @@ export default defineNuxtConfig({
       ],
     components: [
         { path: '~/components/admin'},
+        { path: '~/components/admin/maps'},
         { path: '~/components/info'},
         '~/components'
     ],
