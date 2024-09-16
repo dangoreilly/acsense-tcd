@@ -4,34 +4,44 @@
     :activeTab="activePage"
     :supabase_client="supabase_client"/>
     <div class="activityArea">
-        <slot ></slot>  
+        <ClientOnly>
+            <slot ></slot>  
+        </ClientOnly>
     </div>
 </main>    
 </template>
 
-<script>
+<script setup lang="ts">
 
-export default {
-    // The active page is passed in as a prop
-    props: {
-        activePage: String,
-        supabase_client: Object,
-    },
+    // Define the props
+    const {activePage: page, supabase_client: sb} = defineProps({
+        activePage: {
+            type: String,
+            required: true
+        },
+        supabase_client: {
+            type: Object,
+            required: true
+        }
+    })
 
-    // watch: {
-    //     activePage: function (val) {
-    //         useHead({
-    //             title: 'Acsense Admin - ' + val,
-    //             meta: [
-    //                 {
-    //                     name: 'description',
-    //                     content: 'Acsense Admin page'
-    //                 }
-    //             ],
-    //         })
-    //     }
-    // },
-}
+    // Set up the refs
+    const activePage = ref(page);
+    const supabase_client = ref(sb);
+
+    // let pageTitle = 'Acsense Admin - ' + activePage.value;
+
+    // Set the title and meta tags
+    useHead({
+        title: 'Acsense Admin - ' + activePage.value.charAt(0).toUpperCase() + activePage.value.slice(1),
+        meta: [
+            {
+                name: 'description',
+                content: 'Acsense Admin page'
+            }
+        ],
+    })
+
 </script>
 
 <style>

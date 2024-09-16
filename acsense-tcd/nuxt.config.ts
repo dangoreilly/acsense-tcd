@@ -5,7 +5,8 @@ export default defineNuxtConfig({
     routeRules: {
         // '/info/*': {ssr: true},
         // '/': {static: true},
-        // '/admin/*': {ssr: true},
+        '/admin/login': {appMiddleware: undefined},
+        '/admin/*': {appMiddleware: "auth"},
         '/admin': {redirect:'/admin/analytics'},
     },
     css: [ "~/assets/css/style.scss"],
@@ -16,6 +17,7 @@ export default defineNuxtConfig({
       ],
     components: [
         { path: '~/components/admin'},
+        { path: '~/components/admin/maps'},
         { path: '~/components/info'},
         '~/components'
     ],

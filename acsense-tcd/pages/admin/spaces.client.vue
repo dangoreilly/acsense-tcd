@@ -1112,6 +1112,10 @@ const campusBounds = [
                 if(this.space_list.length == 0) return false;
                 if(this.overlays.length == 0) return false;
                 if(document.getElementById("space-placement-map") == null) return false;
+                // Check that we're on the client side
+                if (!window) return false;
+                console.log("Map data loaded, window is defined")
+                console.log(window)
 
                 return true
                 
@@ -1503,11 +1507,6 @@ const campusBounds = [
             logChange() {},
         },
     }
-
-    definePageMeta({
-        middleware: 'auth'
-    })
-
 
 </script>
 

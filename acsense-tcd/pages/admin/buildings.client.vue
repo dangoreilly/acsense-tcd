@@ -1274,11 +1274,6 @@ const campusBounds = [
         },
     }
 
-    definePageMeta({
-        middleware: 'auth'
-    })
-
-
 </script>
 
 <style>
