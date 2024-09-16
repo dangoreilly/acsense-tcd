@@ -69,7 +69,9 @@ export default {
             // Set the cookie with the session token
             // document.cookie = `supabase.auth.token=${data.session.access_token}`
             const jwt = useCookie("supabase.auth.token")
-            jwt = data.session.access_token;
+            jwt.value = data.session.access_token;
+            const refresh = useCookie("supabase.auth.refresh")
+            refresh.value = data.session.refresh_token;
             // Navigate to the admin landing page
             return navigateTo('/admin/analytics'); 
         }

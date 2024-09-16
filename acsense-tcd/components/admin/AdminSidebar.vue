@@ -49,6 +49,8 @@
 
 <script setup lang="ts">
 
+    import type { Database } from 'assets/types/supabase_types.gen';
+
     // Define the props
     const {activeTab: page, supabase_client} = defineProps({
         activeTab: {
@@ -66,7 +68,7 @@
     const version = ref(useRuntimeConfig().public.version);
 
     // Get the current user and their permissions
-    const currentUser = ref(await getCurrentUserPermissions());
+    const currentUser = ref(await getCurrentUserPermissions(supabase_client as Database));
 
     // Set up the tabs
     const tabs = ref([
