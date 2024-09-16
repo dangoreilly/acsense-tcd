@@ -75,13 +75,36 @@
                     <div class="col">
                         <div class="row mb-3" v-for="spaceType, index in space_types">
                             <div class="col-8">
-                                <div class="row mb-2">
-                                    <input type="color" :id="'colour-space-' + spaceType.id" class="form-control form-control-color" v-model="spaceType.colour">
-                                    <label :for="'colour-space-' + spaceType.id" class="col-lg-10 col-form-label">{{ spaceType.category }}</label>
+                                <div class="row mb-1">
+                                    <div class="input-group mx-0 px-0">
+                                        <input type="color" class="form-control form-control-color" style="flex: 0 1 auto; width: 3rem;"
+                                        :id="'colour-space-' + spaceType.id"  
+                                        v-model="spaceType.colour">
+                                        <!-- <label :for="'colour-space-' + spaceType.id" class="col-lg-10 col-form-label">{{ spaceType.category }}</label> -->
+                                        <input type="text" class="form-control flex-grow-1" 
+                                        :id="'space-' + spaceType.id" 
+                                        v-model="spaceType.category">
+                                        <span  v-if="space_counts.length > 0"
+                                        :title="tooltipSpacesList(index)"
+                                        class="input-group-text"
+                                        
+                                        >{{ space_counts[index].count }}</span>
+
+                                        <button type="button" class="btn btn-danger" 
+                                        @click="deleteSpaceType(index)" 
+                                        :disabled="space_counts[index]"
+                                        title="Category can not be deleted while there are still associated spaces">
+                                        Delete</button>
+                                    </div>
+                                </div>
+                                <div class="row mb-1">
+                                    <textarea class="form-control" :id="'space-' + spaceType.id" rows="4"
+                                    placeholder="Space Type description"  
+                                    v-model="spaceType.descriptor"></textarea>
                                 </div>
                                 <div class="row">
-                                    <textarea class="form-control" :id="'space-' + spaceType.id" rows="4"  
-                                    v-model="spaceType.descriptor"></textarea>
+                                    <input :id="'IconOverrideInput-'+index" :data-index="index" type="file" class="form-control" 
+                                    @change="handleCustomIconSelect">
                                 </div>
                             </div>
                             <!-- Icon Display -->
@@ -90,185 +113,186 @@
                                     <img 
                                     :src="spaceType.icon" 
                                     style="width: 100%;">
-                                    <input :id="'IconOverrideInput-'+index" :data-index="index" type="file" class="form-control" 
-                                    @change="handleCustomIconSelect"> <!-- v-model="spaceType.icon" -->
+                                     <!-- v-model="spaceType.icon" -->
                                 </div>
                             </div>
                         </div>
                     </div>
                     <!-- Preview -->
                     <div class="col">
-                        <div class="modal position-static d-block" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header" style="width: 100%;">
-                                        <h5 class="modal-title d-flex">Student Space Icons</h5>
-                                        <button type="button" class="btn-close d-flex" aria-label="Close"></button>
-                                    </div>
+                        <div class="row">
+                            <div class="modal position-static d-block" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="width: 100%;">
+                                            <h5 class="modal-title d-flex">Student Space Icons</h5>
+                                            <button type="button" class="btn-close d-flex" aria-label="Close"></button>
+                                        </div>
 
-                                    <div class="modal-body" style="align-self: baseline; max-height: 70vh; overflow-y: auto;">
-                                        <!-- Show the icons in a 2 columns, with the category name underneath -->
-                                        <h4>Space Types</h4>
-                                        <p>There are {{ space_types.length }} categories of student space:</p>
-                                        
-                                        <div class="row">
-                                            <template v-for="spaceType in space_types">
-                                                <div class="col-6">
-                                                    <div
-                                                        class="px-auto d-block">
-                                                        <img 
-                                                        :src="spaceType.icon" 
-                                                        class="mx-auto d-block border-bottom border-2 border-gray-500 pb-2 mb-2"
-                                                        style="width: 6rem; height: auto;"/>
-                                                        <p class="text-center">{{ spaceType.category }}</p>
+                                        <div class="modal-body" style="align-self: baseline; max-height: 70vh; overflow-y: auto;">
+                                            <!-- Show the icons in a 2 columns, with the category name underneath -->
+                                            <h4>Space Types</h4>
+                                            <p>There are {{ space_types.length }} categories of student space:</p>
+                                            
+                                            <div class="row">
+                                                <template v-for="spaceType in space_types">
+                                                    <div class="col-6">
+                                                        <div
+                                                            class="px-auto d-block">
+                                                            <img 
+                                                            :src="spaceType.icon" 
+                                                            class="mx-auto d-block border-bottom border-2 border-gray-500 pb-2 mb-2"
+                                                            style="width: 6rem; height: auto;"/>
+                                                            <p class="text-center">{{ spaceType.category }}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </template>
-                                        </div>
-
-                                        <div class="row px-4" v-for="spaceType in space_types">
-                                            <div v-if="spaceType.descriptor?.length>0">
-                                                <p class="position-relative">
-                                                    <span class="position-absolute top-50 start-0 translate-middle p-2 border border-dark rounded-circle" :style="{'background-color': spaceType.colour}"> </span>
-                                                    <span class="ps-3"><strong>{{ spaceType.category }}</strong></span>
-                                                </p>
-                                                <p>{{ spaceType.descriptor }}</p>
+                                                </template>
                                             </div>
-                                        </div>
 
-                                        <!-- List all the facilities icons, in FALSE then TRUE state, and then what they represent -->
-                                        <h4>Facilities</h4>
-                                        <p>The symbols beside the student space show what facilities are provided in them. Green shows the facility is available, Red with a strike-through shows the facility is unavailable</p>
-                                        <div class="mx-4">
-                                            <div class="row bottom-bottom border-2 border-gray-500 my-1" style="display: grid; grid-template-columns: 4rem 4rem auto;">
-                                                <!-- Seating -->
-                                                <!-- FALSE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
-                                                title="No Seating Available">
-                                                    <img class="svg-icon" src="/images/icons/chair-solid.svg">
-                                                    <!-- Strikethrough for RG blindness -->
-                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                            <div class="row px-4" v-for="spaceType in space_types">
+                                                <div v-if="spaceType.descriptor?.length>0">
+                                                    <p class="position-relative">
+                                                        <span class="position-absolute top-50 start-0 translate-middle p-2 border border-dark rounded-circle" :style="{'background-color': spaceType.colour}"> </span>
+                                                        <span class="ps-3"><strong>{{ spaceType.category }}</strong></span>
+                                                    </p>
+                                                    <p>{{ spaceType.descriptor }}</p>
                                                 </div>
-                                                <!-- TRUE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
-                                                title="Seating Available">
-                                                    <img class="svg-icon" src="/images/icons/chair-solid.svg">
-                                                </div>
-                                                <!-- Facility -->
-                                                <div>
-                                                    <span>Seating Available</span>
-                                                </div>
-
                                             </div>
-                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
-                                                <!-- Electrical Sockets -->
-                                                <!-- FALSE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
-                                                title="No Plug Sockets">
-                                                    <img class="svg-icon" src="/images/icons/plug-solid.svg">
-                                                    <!-- Strikethrough for RG blindness -->
-                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
-                                                </div>
-                                                <!-- TRUE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
-                                                title="Plug Sockets">
-                                                    <img class="svg-icon" src="/images/icons/plug-solid.svg">
-                                                </div>
-                                                <div>
+
+                                            <!-- List all the facilities icons, in FALSE then TRUE state, and then what they represent -->
+                                            <h4>Facilities</h4>
+                                            <p>The symbols beside the student space show what facilities are provided in them. Green shows the facility is available, Red with a strike-through shows the facility is unavailable</p>
+                                            <div class="mx-4">
+                                                <div class="row bottom-bottom border-2 border-gray-500 my-1" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                    <!-- Seating -->
+                                                    <!-- FALSE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                    title="No Seating Available">
+                                                        <img class="svg-icon" src="/images/icons/chair-solid.svg">
+                                                        <!-- Strikethrough for RG blindness -->
+                                                        <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                    </div>
+                                                    <!-- TRUE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                    title="Seating Available">
+                                                        <img class="svg-icon" src="/images/icons/chair-solid.svg">
+                                                    </div>
                                                     <!-- Facility -->
-                                                    <span>Plug Sockets available</span>
-                                                </div>
+                                                    <div>
+                                                        <span>Seating Available</span>
+                                                    </div>
 
-                                            </div>
-                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
-                                                <!-- Food and Drink allowed -->
-                                                <!-- FALSE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
-                                                title="No Food or Drink Allowed">
-                                                    <img class="svg-icon" src="/images/icons/utensils-solid.svg">
-                                                    <!-- Strikethrough for RG blindness -->
-                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
                                                 </div>
-                                                <!-- TRUE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
-                                                title="Food and Drink Allowed">
-                                                    <img class="svg-icon" src="/images/icons/utensils-solid.svg">
-                                                </div>
-                                                <div>
-                                                    <!-- Facility -->
-                                                    <span>Food and Drink allowed</span>
-                                                </div>
+                                                <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                    <!-- Electrical Sockets -->
+                                                    <!-- FALSE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                    title="No Plug Sockets">
+                                                        <img class="svg-icon" src="/images/icons/plug-solid.svg">
+                                                        <!-- Strikethrough for RG blindness -->
+                                                        <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                    </div>
+                                                    <!-- TRUE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                    title="Plug Sockets">
+                                                        <img class="svg-icon" src="/images/icons/plug-solid.svg">
+                                                    </div>
+                                                    <div>
+                                                        <!-- Facility -->
+                                                        <span>Plug Sockets available</span>
+                                                    </div>
 
-                                            </div>
-                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
-                                                <!-- Kettle provided -->
-                                                <!-- FALSE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
-                                                title="No Kettle Available">
-                                                    <img class="svg-icon" src="/images/icons/kettle.svg">
-                                                    <!-- Strikethrough for RG blindness -->
-                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
                                                 </div>
-                                                <!-- TRUE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
-                                                title="Kettle Available">
-                                                    <img class="svg-icon" src="/images/icons/kettle.svg">
-                                                </div>
-                                                <div>
-                                                    <!-- Facility -->
-                                                    <span>Kettle provided</span>
-                                                </div>
+                                                <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                    <!-- Food and Drink allowed -->
+                                                    <!-- FALSE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                    title="No Food or Drink Allowed">
+                                                        <img class="svg-icon" src="/images/icons/utensils-solid.svg">
+                                                        <!-- Strikethrough for RG blindness -->
+                                                        <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                    </div>
+                                                    <!-- TRUE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                    title="Food and Drink Allowed">
+                                                        <img class="svg-icon" src="/images/icons/utensils-solid.svg">
+                                                    </div>
+                                                    <div>
+                                                        <!-- Facility -->
+                                                        <span>Food and Drink allowed</span>
+                                                    </div>
 
-                                            </div>
-                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
-                                                <!-- Microwave provided -->
-                                                <!-- FALSE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
-                                                title="No Microwave Available">
-                                                    <img class="svg-icon" src="/images/icons/microwave.svg">
-                                                    <!-- Strikethrough for RG blindness -->
-                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
                                                 </div>
-                                                <!-- TRUE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
-                                                title="Microwave Available">
-                                                    <img class="svg-icon" src="/images/icons/microwave.svg">
-                                                </div>
-                                                <div>
-                                                    <!-- Facility -->
-                                                    <span>Microwave provided</span>
-                                                </div>
+                                                <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                    <!-- Kettle provided -->
+                                                    <!-- FALSE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                    title="No Kettle Available">
+                                                        <img class="svg-icon" src="/images/icons/kettle.svg">
+                                                        <!-- Strikethrough for RG blindness -->
+                                                        <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                    </div>
+                                                    <!-- TRUE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                    title="Kettle Available">
+                                                        <img class="svg-icon" src="/images/icons/kettle.svg">
+                                                    </div>
+                                                    <div>
+                                                        <!-- Facility -->
+                                                        <span>Kettle provided</span>
+                                                    </div>
 
-                                            </div>
-                                            <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
-                                                <!-- Wheelchair Accessible -->
-                                                <!-- FALSE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
-                                                title="No Wheelchair Access">
-                                                    <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
-                                                    <!-- Strikethrough for RG blindness -->
-                                                    <img class="svg-icon-sash" src="/images/icons/sash.svg">
-                                                </div> 
-                                                <!-- TRUE -->
-                                                <div
-                                                class="badge rounded-pill mx-1 facility-icon text-bg-success"
-                                                title="Wheelchair Access">
-                                                    <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
                                                 </div>
-                                                <div>
-                                                    <!-- Facility -->
-                                                    <span>Wheelchair Accessibility</span>
+                                                <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                    <!-- Microwave provided -->
+                                                    <!-- FALSE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                    title="No Microwave Available">
+                                                        <img class="svg-icon" src="/images/icons/microwave.svg">
+                                                        <!-- Strikethrough for RG blindness -->
+                                                        <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                    </div>
+                                                    <!-- TRUE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                    title="Microwave Available">
+                                                        <img class="svg-icon" src="/images/icons/microwave.svg">
+                                                    </div>
+                                                    <div>
+                                                        <!-- Facility -->
+                                                        <span>Microwave provided</span>
+                                                    </div>
+
+                                                </div>
+                                                <div class="row bottom-bottom border-2 border-gray-500 my-2" style="display: grid; grid-template-columns: 4rem 4rem auto;">
+                                                    <!-- Wheelchair Accessible -->
+                                                    <!-- FALSE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-danger" 
+                                                    title="No Wheelchair Access">
+                                                        <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
+                                                        <!-- Strikethrough for RG blindness -->
+                                                        <img class="svg-icon-sash" src="/images/icons/sash.svg">
+                                                    </div> 
+                                                    <!-- TRUE -->
+                                                    <div
+                                                    class="badge rounded-pill mx-1 facility-icon text-bg-success"
+                                                    title="Wheelchair Access">
+                                                        <img class="svg-icon" src="/images/icons/wheelchair-solid.svg">
+                                                    </div>
+                                                    <div>
+                                                        <!-- Facility -->
+                                                        <span>Wheelchair Accessibility</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -276,6 +300,8 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Map preview -->
+                        <div class="row"></div>
                     </div>
                 </div>
             </div>
@@ -298,6 +324,7 @@ export default {
             supabase: null,
             space_types: [],
             space_types_clean: [],
+            space_counts: [],
         }
     },
     computed: {
@@ -352,6 +379,59 @@ export default {
             this.space_types = JSON.parse(JSON.stringify(data));
             // Duplicate the object to keep a clean copy
             this.space_types_clean = JSON.parse(JSON.stringify(data));
+
+            // Count the number of spaces of each type
+            this.countSpaces()
+        },
+
+        async countSpaces() {
+            // Get the count of each space type
+            // Store the counts in the space_counts array
+            // This will be used to display the number of spaces of each type
+            for (let i = 0; i < this.space_types.length; i++) {
+                const { data, error } = await this.supabase
+                    .from('spaces')
+                    .select('canonical')
+                    .eq('type', this.space_types[i].category)
+
+                if (error) {
+                    console.error(error)
+                    return
+                }
+
+                this.space_counts.push(JSON.parse(JSON.stringify({count: data.length, list: data})))
+
+                console.log(this.space_counts)
+            }
+        },
+
+        tooltipSpacesList(index) {
+            // For the space type at index, return comma+newline seperated list 
+            // of the first 5 spaces of that type, followed by ellipsis if there are more
+            let list = this.space_counts[index].list;
+            let count = this.space_counts[index].count;
+            if (count === 0) {
+                return "No spaces of this type"
+            }
+
+            let tooltip = "";
+            // If there are 5 or fewer spaces, list them all
+            if (count <= 5) {
+                for (let i = 0; i < Math.min(4, count-1); i++) {
+                    tooltip += list[i].canonical + ",\n";
+                }
+                // Add the last item without a comma
+                tooltip += list[count-1].canonical
+                return tooltip;
+            }
+            // Else, list the first 5, then add ellipsis
+            for (let i = 0; i < 5; i++) {
+                tooltip += list[i].canonical + ",\n";
+            }
+            tooltip += list[i].canonical + ",\n...";
+            
+            return tooltip;
+
         },
 
         handleCustomIconSelect(evt){
@@ -399,6 +479,15 @@ export default {
             this.welcome.mainContent = this.welcome_clean.mainContent
             // Reset the space types
             this.space_types = JSON.parse(JSON.stringify(this.space_types_clean));
+            // Re-count the spaces
+            countSpaces()
+        },
+
+        deleteSpaceType(index){
+            // Remove the space type at index
+            this.space_types.splice(index, 1);
+            // Remove the space count at index
+            this.space_counts.splice(index, 1);
         },
         
         async updateContent() {
