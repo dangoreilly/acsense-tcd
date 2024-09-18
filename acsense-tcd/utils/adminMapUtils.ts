@@ -134,18 +134,26 @@ export function getImageForSpaceType(space: Space | Space_Partial, space_types: 
     return '/images/red-dot.png';
 }
 
-export function addOverlays(L: any, map: any, overlays: Overlay[], currentOverlay: Overlay | null, dummy: boolean): any {
+export function addOverlays(L: any, map: any, overlays: Overlay[], currentOverlay: Overlay | null, dummy: boolean, darkmode: boolean = false): any {
     // Go through each overlay and add it to the map
     overlays.forEach(overlay => {
         // Skip the current overlay
         if (overlay.id == currentOverlay?.id) return;
-        L.imageOverlay(overlay.url, overlay.bounds).addTo(map);
+
+        // Figure out if the dark or light mode should be used
+        let url = overlay.url;
+        // If darkmode is enabled and the dark overlay exists, use it
+        if (darkmode && overlay.url_dark != null && overlay.url_dark.length > 0){
+            url = overlay.url_dark;
+        }
+
+        L.imageOverlay(url, overlay.bounds).addTo(map);
     });
 
     return map;
 }
 
-export function addBuildings(L: any, map: any, buildings: Building_Partial[], currentBuilding: Building | null,  dummy: boolean, updateHoverText: (active: boolean, text: string) => void, onEachFeature: (feature: any, layer: any) => void): any {
+export function addBuildings(L: any, map: any, buildings: Building_Partial[], currentBuilding: Building | null,  dummy: boolean, updateHoverText: (active: boolean, text: string) => void, onEachFeature: (feature: any, layer: any) => void, darkmode: boolean = false): any {
 
     const DUMMY_BUILDING_OPACITY = 0.5;
 
@@ -191,13 +199,16 @@ export function addBuildings(L: any, map: any, buildings: Building_Partial[], cu
 
     var buildings_geojson_array = L.geoJSON(building_geojsons, {
         style: function(feature: any) {
-            return {
-                fillColor: feature.properties.published? '#0087A2' : '#FFFF00',
+            return { 
+                fillColor: 
+                    feature.properties.published
+                    ? (darkmode ? '#5f5a95' : '#0087A2')
+                    : '#FFFF00',
                 weight: 1,
                 opacity: 1,
-                color: '#021689',
+                color: dummy ? '#021689' : '#FCE891',
                 dashArray: '0',
-                fillOpacity: DUMMY_BUILDING_OPACITY,
+                fillOpacity: dummy ? DUMMY_BUILDING_OPACITY : 1,
                 noClip:true,
             };
         },
