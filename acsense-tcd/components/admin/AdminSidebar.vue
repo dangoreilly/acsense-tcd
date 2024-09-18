@@ -93,16 +93,11 @@
         //     key: 'floorplans',
         //     icon: 'bi bi-columns',
         // },
-        // {
-        //     name: 'Map',
-        //     key: 'map',
-        //     icon: 'bi bi-map',
-        // },
-        // {
-        //     name: 'Branding',
-        //     key: 'branding',
-        //     icon: 'bi bi-brush',
-        // },
+        {
+            name: 'Overlays',
+            key: 'overlays',
+            icon: 'bi bi-map',
+        },
         {
             name: 'Contributors',
             key: 'contributors',
@@ -141,6 +136,29 @@
         }
         navigateTo('./login')
     }
+
+    // Get the current page name using the prop ActiveTab
+    function getCurrentPage() {
+        // Loop through the tabs and find the one that matches the activeTab
+        for (let tab of tabs.value) {
+            if (tab.key == activeTab.value) {
+                return tab.name;
+            }
+        }
+
+        // If the tab is not found, return the activeTab
+        return activeTab.value;
+    }
+    // Set the title and meta tags
+    useHead({
+        title: 'Acsense Admin - ' + getCurrentPage(),
+        meta: [
+            {
+                name: 'description',
+                content: 'Acsense Admin page'
+            }
+        ],
+    })
 
 </script>
    

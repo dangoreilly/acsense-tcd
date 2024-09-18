@@ -31,16 +31,16 @@
 
     // let pageTitle = 'Acsense Admin - ' + activePage.value;
 
-    // Set the title and meta tags
-    useHead({
-        title: 'Acsense Admin - ' + activePage.value.charAt(0).toUpperCase() + activePage.value.slice(1),
-        meta: [
-            {
-                name: 'description',
-                content: 'Acsense Admin page'
-            }
-        ],
-    })
+    // // Set the title and meta tags
+    // useHead({
+    //     title: 'Acsense Admin - ' + activePage.value.charAt(0).toUpperCase() + activePage.value.slice(1),
+    //     meta: [
+    //         {
+    //             name: 'description',
+    //             content: 'Acsense Admin page'
+    //         }
+    //     ],
+    // })
 
 </script>
 
