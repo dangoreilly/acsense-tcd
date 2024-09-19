@@ -44,7 +44,12 @@
                 </div>
 
                 <div class="mt-3"  v-for="overlay, index in overlays">
-                    <AdminOverlayEdit :overlay="overlay" :overlay_clean="overlays_clean[index]"/>
+                    <AdminOverlayEdit 
+                    :overlay_array="overlays" 
+                    :overlay="overlay" 
+                    :overlay_clean="overlays_clean[index]"
+                    @overlay-edit-cancel="overlays[index] = JSON.parse(JSON.stringify(overlays_clean[index]))"
+                    @bounds-save="updateOverlayBounds"/>
                 </div>
             </div>
         </main>
@@ -115,6 +120,16 @@ export default {
             // Clear the input
             // @ts-ignore
             document.getElementById(`${type}-${index}`).value = "";
+        },
+
+        updateOverlayBounds(id: number, bounds: any){
+            // Update the bounds of the overlay with the given id
+            for (let i = 0; i < this.overlays.length; i++){
+                if (this.overlays[i].id == id){
+                    this.overlays[i].bounds = bounds;
+                    break;
+                }
+            }
         },
 
         handleOverlaySelect(evt: Event){
