@@ -281,13 +281,13 @@ export default {
             let dragBounds = null;
 
             // First, add a rectangle that traces the overlay
-            let rectangle = L.rectangle(bounds, {color: "#de1d0b", weight: 1, fillOpacity: 0, interactive: false}).addTo(map);
+            let rectangle = L.rectangle(bounds, {color: "#de1d0b", weight: 1, fillOpacity: 0, interactive: true}).addTo(map);
 
             // Add the resize handles in the top left and bottom right corners, and in the center
             let marker_topLeft = L.circleMarker(bounds[0], {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
             let marker_bottomRight = L.circleMarker(bounds[1], {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
             let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
-            let marker_center = L.circleMarker([center[0] + dragOffset[0], center[1] + dragOffset[1]], {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
+            // let marker_center = L.circleMarker([center[0] + dragOffset[0], center[1] + dragOffset[1]], {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
 
             // Toggle dragging on click
             marker_topLeft.on('click', (e: Event) => {
@@ -298,24 +298,28 @@ export default {
                 dragging = !dragging;
                 dragMarker = marker_bottomRight;
             });
-            marker_center.on('click', (e: Event) => {
+            rectangle.on('click', (e: Event) => {
                 // Don't confuse the two modes
                 if (draffingAnchor){
                     return;
                 }
                 dragging = !dragging;
-                dragMarker = marker_center;
+                dragMarker = rectangle;
+                // Calculate the drag offset
+                let latlng = (e as any).latlng;
+                let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+                dragOffset = [latlng.lat - center[0], latlng.lng - center[1]];
             });
 
             // Right click on the centre anchor to move the anchor relative to the overlay,
             // This allows for more convenient positioning of the overlay
-            marker_center.on('contextmenu', (e: Event) => {
-                // Don't confuse the two modes
-                if (dragging){
-                    return;
-                }
-                draffingAnchor = !draffingAnchor;
-            });
+            // marker_center.on('contextmenu', (e: Event) => {
+            //     // Don't confuse the two modes
+            //     if (dragging){
+            //         return;
+            //     }
+            //     draffingAnchor = !draffingAnchor;
+            // });
 
             // Move the marker on mousemove
             map.on('mousemove', (e: Event) => {
@@ -333,7 +337,7 @@ export default {
                     else if (dragMarker === marker_bottomRight){
                         newBounds[1] = [lat, lng];
                     }
-                    else if (dragMarker === marker_center){
+                    else if (dragMarker === rectangle){
                         // We need to move based on the anchor position rather than the true centre
                         let center = [
                             ((bounds[0][0] + bounds[1][0]) / 2) + dragOffset[0],
@@ -354,22 +358,22 @@ export default {
                         ((newBounds[0][0] + newBounds[1][0]) / 2) + dragOffset[0],
                         ((newBounds[0][1] + newBounds[1][1]) / 2) + dragOffset[1]
                     ];
-                    marker_center.setLatLng(anchor);
+                    // marker_center.setLatLng(anchor);
 
                     this.checkBoundsHaveChanged()
 
                     console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
                 }
 
-                else if (draffingAnchor){
-                    let latlng = (e as any).latlng;
-                    // First get the true center of the overlay
-                    let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
-                    // Then calculate the offset
-                    dragOffset = [latlng.lat - center[0], latlng.lng - center[1]];
-                    // Update the marker
-                    marker_center.setLatLng([latlng.lat, latlng.lng]);
-                }
+                // else if (draffingAnchor){
+                //     let latlng = (e as any).latlng;
+                //     // First get the true center of the overlay
+                //     let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+                //     // Then calculate the offset
+                //     dragOffset = [latlng.lat - center[0], latlng.lng - center[1]];
+                //     // Update the marker
+                //     marker_center.setLatLng([latlng.lat, latlng.lng]);
+                // }
             });
 
 

@@ -47,10 +47,11 @@
                 <!-- Operation notes -->
                     <div class="card">
                         <div class="card-body">
-                            <span class="card-text d-block">To update the size or position of the overlays on the map, click on the red circles. Click once to begin moving the marker, and again to stop</span>
-                            <span class="card-text d-block">To move the centre anchor, right click on the red marker in the center. Click once to begin moving the marker, and again to stop</span>
-                            <span class="card-text d-block">Moving the anchor has no effect on how the overlay is drawn, it is only to make your life easier while using this interface</span>
-                            <span class="card-text d-block">For best results, always use SVG format overlays</span>
+                            <span class="card-text d-block">To update the size of the overlays on the map, click on the red circles. Click once to begin resizing, and again to stop</span>
+                            <span class="card-text d-block">To move the centre anchor, click anywhere within the red rectangle. Click once to begin moving the overlay, and again to stop</span>
+                            <span class="card-text d-block">If using an SVG format image, the red rectangle will not relate to the actual dimensions of the overlay</span>
+                            <span class="card-text d-block">For best results, always use SVG format overlays, as these will remain sharp on any screen and will not distort through resizing</span>
+                            <span class="card-text d-block">To see changes reflected on the full preview map above, you need to click the "Save Bounds" button</span>
                         </div>
                     </div>
                 </div>
