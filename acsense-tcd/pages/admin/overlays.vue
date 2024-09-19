@@ -43,6 +43,18 @@
                     </div>
                 </div>
 
+                <div class="row border-b mt-2">
+                <!-- Operation notes -->
+                    <div class="card">
+                        <div class="card-body">
+                            <span class="card-text d-block">To update the size or position of the overlays on the map, click on the red circles. Click once to begin moving the marker, and again to stop</span>
+                            <span class="card-text d-block">To move the centre anchor, right click on the red marker in the center. Click once to begin moving the marker, and again to stop</span>
+                            <span class="card-text d-block">Moving the anchor has no effect on how the overlay is drawn, it is only to make your life easier while using this interface</span>
+                            <span class="card-text d-block">For best results, always use SVG format overlays</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-3"  v-for="overlay, index in overlays">
                     <AdminOverlayEdit 
                     :overlay_array="overlays" 

@@ -267,25 +267,27 @@ export default {
         },
 
         addOverlayResizeHandles(){
-            let bounds = JSON.parse(JSON.stringify(this.overlay.bounds)) as [[number, number], [number, number]];
+            // let bounds = JSON.parse(JSON.stringify(this.overlay.bounds)) as [[number, number], [number, number]];
+            let bounds = this.latLngToBoundsArray(this.overlay_object.getBounds());
             let overlay = this.overlay_object;
             let map = this.map;
 
+            // To add the draggability to the markers
+            // Leaflet does not suppose draggability in the way we want, so we have to do it ourselves
+            let dragging = false;
+            let dragMarker:any = null;
+            let draffingAnchor = false;
+            let dragOffset = [0, 0];
+            let dragBounds = null;
+
             // First, add a rectangle that traces the overlay
-            let rectangle = L.rectangle(bounds, {color: "#de1d0b", weight: 1, fillOpacity: 0, }).addTo(map);
+            let rectangle = L.rectangle(bounds, {color: "#de1d0b", weight: 1, fillOpacity: 0, interactive: false}).addTo(map);
 
             // Add the resize handles in the top left and bottom right corners, and in the center
             let marker_topLeft = L.circleMarker(bounds[0], {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
             let marker_bottomRight = L.circleMarker(bounds[1], {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
             let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
-            let marker_center = L.circleMarker(center, {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
-
-            // Add the draggability to the markers
-            // Leaflet does not suppose draggability in the way we want, so we have to do it ourselves
-            let dragging = false;
-            let dragMarker:any = null;
-            let dragOffset = [0, 0];
-            let dragBounds = null;
+            let marker_center = L.circleMarker([center[0] + dragOffset[0], center[1] + dragOffset[1]], {radius: 5, color: "#de1d0b", fillOpacity: 0.1}).addTo(map);
 
             // Toggle dragging on click
             marker_topLeft.on('click', (e: Event) => {
@@ -297,8 +299,22 @@ export default {
                 dragMarker = marker_bottomRight;
             });
             marker_center.on('click', (e: Event) => {
+                // Don't confuse the two modes
+                if (draffingAnchor){
+                    return;
+                }
                 dragging = !dragging;
                 dragMarker = marker_center;
+            });
+
+            // Right click on the centre anchor to move the anchor relative to the overlay,
+            // This allows for more convenient positioning of the overlay
+            marker_center.on('contextmenu', (e: Event) => {
+                // Don't confuse the two modes
+                if (dragging){
+                    return;
+                }
+                draffingAnchor = !draffingAnchor;
             });
 
             // Move the marker on mousemove
@@ -307,6 +323,7 @@ export default {
                     let latlng = (e as any).latlng;
                     let lat = latlng.lat;
                     let lng = latlng.lng;
+                    let bounds = this.latLngToBoundsArray(this.overlay_object.getBounds());
 
                     // Calculate the new bounds
                     let newBounds = JSON.parse(JSON.stringify(bounds)) as [[number, number], [number, number]];
@@ -317,7 +334,11 @@ export default {
                         newBounds[1] = [lat, lng];
                     }
                     else if (dragMarker === marker_center){
-                        let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+                        // We need to move based on the anchor position rather than the true centre
+                        let center = [
+                            ((bounds[0][0] + bounds[1][0]) / 2) + dragOffset[0],
+                            ((bounds[0][1] + bounds[1][1]) / 2) + dragOffset[1]
+                        ];
                         let lat_diff = lat - center[0];
                         let lng_diff = lng - center[1];
                         newBounds[0] = [bounds[0][0] + lat_diff, bounds[0][1] + lng_diff];
@@ -329,11 +350,25 @@ export default {
                     rectangle.setBounds(newBounds);
                     marker_topLeft.setLatLng(newBounds[0]);
                     marker_bottomRight.setLatLng(newBounds[1]);
-                    marker_center.setLatLng([(newBounds[0][0] + newBounds[1][0]) / 2, (newBounds[0][1] + newBounds[1][1]) / 2]);
+                    let anchor = [
+                        ((newBounds[0][0] + newBounds[1][0]) / 2) + dragOffset[0],
+                        ((newBounds[0][1] + newBounds[1][1]) / 2) + dragOffset[1]
+                    ];
+                    marker_center.setLatLng(anchor);
 
                     this.checkBoundsHaveChanged()
 
                     console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
+                }
+
+                else if (draffingAnchor){
+                    let latlng = (e as any).latlng;
+                    // First get the true center of the overlay
+                    let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+                    // Then calculate the offset
+                    dragOffset = [latlng.lat - center[0], latlng.lng - center[1]];
+                    // Update the marker
+                    marker_center.setLatLng([latlng.lat, latlng.lng]);
                 }
             });
 
