@@ -338,7 +338,7 @@ export function updateLabels(currentZoom: number, zoomMin: number, zoomMax: numb
 }
 
 // Add the labels to the map over the buildings
-export function addLabelsToMap(L: any, map: any, buildings_list: Building_Partial[], currentBuilding: Building | null): void {
+export function addLabelsToMap(L: any, map: any, buildings_list: Building_Partial[], currentBuilding: Building | null, labels: boolean = false): void {
 
     // Init variables
     let building = {} as Building_Partial;
@@ -379,6 +379,10 @@ export function addLabelsToMap(L: any, map: any, buildings_list: Building_Partia
         //     // addToolTipToBuilding(layer, tertiaryLabelContent);
         // }
 
+    }
+
+    if (labels){
+        addZoomHandling(map);
     }
 
 }

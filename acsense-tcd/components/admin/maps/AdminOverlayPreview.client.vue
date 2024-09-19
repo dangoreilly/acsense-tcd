@@ -120,6 +120,7 @@ export default {
 
             addOverlays(L, this.map, this.overlays, null, false, isDarkMode);
             addBuildings(L, this.map, this.buildingList, null, false, (active, text) => {return}, (feature, layer) => {return}, isDarkMode);
+            addLabelsToMap(L, this.map, this.buildingList, null, true);
             // @ts-ignore
             addSpaces(L, this.map, this.spaceList, this.spaceTypes, null, false, (active, text) => {return});
 
