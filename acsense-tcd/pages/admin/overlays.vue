@@ -149,7 +149,7 @@ export default {
         updateOverlayBounds(index: number, bounds: any){
             // Update the bounds of the overlay 
             this.overlays[index].bounds = bounds;
-            console.log("Bounds updated on overlay with id: " + this.overlays[index])
+            console.log("Bounds updated on overlay with id: " + this.overlays[index].id)
         },
 
         handleOverlaySelect(evt: Event){
