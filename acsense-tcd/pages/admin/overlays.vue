@@ -48,21 +48,32 @@
                     <div class="card">
                         <div class="card-body">
                             <span class="card-text d-block">To update the size of the overlays on the map, click on the red circles. Click once to begin resizing, and again to stop</span>
-                            <span class="card-text d-block">To move the centre anchor, click anywhere within the red rectangle. Click once to begin moving the overlay, and again to stop</span>
+                            <span class="card-text d-block">To move the overlay, click anywhere within the red rectangle. Click once to begin moving the overlay, and again to stop</span>
                             <span class="card-text d-block">If using an SVG format image, the red rectangle will not relate to the actual dimensions of the overlay</span>
                             <span class="card-text d-block">For best results, always use SVG format overlays, as these will remain sharp on any screen and will not distort through resizing</span>
-                            <span class="card-text d-block">To see changes reflected on the full preview map above, you need to click the "Save Bounds" button</span>
+                            <!-- <span class="card-text d-block">To see changes reflected on the full preview map above, you need to click the "Save Bounds" button</span> -->
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-3"  v-for="overlay, index in overlays">
+                    <!-- We can calculate if an overlay is existing or new -->
+                    <!-- Based on if it has an id field -->
                     <AdminOverlayEdit 
                     :overlay_array="overlays" 
                     :overlay="overlay" 
                     :overlay_clean="overlays_clean[index]"
-                    @overlay-edit-cancel="overlays[index] = JSON.parse(JSON.stringify(overlays_clean[index]))"
+                    :newOverlay="overlay.id == undefined"
+                    :index="index"
+                    @overlay-edit-cancel="cancelChanges(index)"
                     @bounds-save="updateOverlayBounds"/>
+                </div>
+                <div class="container my-3">
+                    <div class="row">
+                        <div class="col-12">
+                            <button class="btn btn-outline-primary w-100" @click="addNewOverlay()">Add New Overlay</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -86,7 +97,7 @@ export default {
             overlays: [] as Overlay[],
             overlays_clean: [] as Overlay[],
             new_overlay: {
-                url: '',
+                url: useRuntimeConfig().public.supabaseUrl + '/storage/v1/object/public/overlays/alignment/alignment_marks.svg',
                 url_dark: '',
                 high_detail: false,
                 bounds: campusBounds,
@@ -135,14 +146,10 @@ export default {
             document.getElementById(`${type}-${index}`).value = "";
         },
 
-        updateOverlayBounds(id: number, bounds: any){
-            // Update the bounds of the overlay with the given id
-            for (let i = 0; i < this.overlays.length; i++){
-                if (this.overlays[i].id == id){
-                    this.overlays[i].bounds = bounds;
-                    break;
-                }
-            }
+        updateOverlayBounds(index: number, bounds: any){
+            // Update the bounds of the overlay 
+            this.overlays[index].bounds = bounds;
+            console.log("Bounds updated on overlay with id: " + this.overlays[index])
         },
 
         handleOverlaySelect(evt: Event){
@@ -195,9 +202,19 @@ export default {
 
         },
 
-        cancelChanges(){
-            // Reset the space types
-            this.overlays = JSON.parse(JSON.stringify(this.overlays_clean));
+        cancelChanges(index: number){
+
+            // Check if this was a new overlay
+            // If it was, remove it from the list
+            if (this.overlays[index].id == undefined) {
+                this.overlays.splice(index, 1);
+                this.overlays_clean.splice(index, 1);
+                return;
+            }
+            else{
+                // Reset the overlay
+                this.overlays[index] = JSON.parse(JSON.stringify(this.overlays_clean[index]))
+            }
 
         },
 
@@ -255,50 +272,9 @@ export default {
 
         async addNewOverlay(){
 
-            // Upload the new 
-            // this.new_space.icon = await this.uploadNewCustomIcon("new");
-
-            // // Add the new space type to the database
-            // const access_token = await getSessionAccessToken(this.supabase);
-            // const {data, error} = await insertToTable(access_token, 'space_styles', 
-            //     {
-            //         category: this.new_space.category,
-            //         descriptor: this.new_space.descriptor,
-            //         icon: this.new_space.icon,
-            //         colour: this.new_space.colour,
-            //     }
-            // )
-            
-            // if (error) {
-            //     console.error(error)
-            //     alert(error.message)
-            //     throw error
-            // }
-
-            // // Get the new space fresh from the DB and add it to the space_types array
-            // const { data:new_space, error:new_space_error } = await this.supabase
-            //     .from('space_styles')
-            //     .select('*')
-            //     .eq('category', this.new_space.category)
-            //     .single()
-
-            // if (new_space_error) {
-            //     console.error(new_space_error)
-            //     alert(new_space_error.message)
-            //     throw new_space_error
-            // }
-
-            // this.space_types.push(JSON.parse(JSON.stringify(new_space)));
-            // this.space_types_clean.push(JSON.parse(JSON.stringify(new_space)));
-
-            // // Refresh the count
-            // this.countSpaces();
-
-            // // Clear the new space type input
-            // this.new_space.category = '';
-            // this.new_space.descriptor = '';
-            // this.new_space.icon = '';
-            // this.new_space.colour = '#000000';
+            // Add a new overlay to the list with the alignment marks
+            this.overlays.push(JSON.parse(JSON.stringify(this.new_overlay)));
+            this.overlays_clean.push(JSON.parse(JSON.stringify(this.new_overlay)));
 
         },
         

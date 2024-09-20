@@ -75,15 +75,35 @@
                         <input type="number" class="form-control" v-model="overlay.bounds[1][1]">
                     </div>
                 </div>
-                <div class="row">
+                <!-- <div class="row">
                     <button class="btn btn-primary m-2" type="button" 
                     :disabled="!boundsHaveChanged"
                     @click="$emit('bounds-save', overlay.id, latLngToBoundsArray(overlay_object.getBounds()))">
                         Save Bounds</button>
-                </div>
+                </div> -->
             </div>
             <!-- Etc -->
-            <div class="btn-group mt-2" role="group">
+            <!-- Buttons for if this is a new overlay -->
+             <div class="btn-group mt-2" v-if="newOverlay" role="group">
+                <button 
+                type="button" 
+                class="btn" 
+                :class="contentHasChanged ? 'btn-success' : 'btn-outline-secondary'"
+                @click="uploadNewContent()"
+                :disabled="!contentHasChanged">
+                    Upload new overlay
+                </button>
+
+                <button 
+                type="button" 
+                class="btn btn-warning"
+                @click="cancelChanges()">
+                    Cancel
+                </button>
+            </div>
+
+            <!-- Buttons for if this is an existing overlay being modified -->
+            <div class="btn-group mt-2" v-else role="group">
                 <button 
                 type="button" 
                 class="btn" 
@@ -150,6 +170,14 @@ export default {
             type: Object as () => Overlay,
             required: true,
         },
+        index: {
+            type: Number,
+            required: true,
+        },
+        newOverlay: {
+            type: Boolean,
+            default: false,
+        }
     },
     data(){
         return {
@@ -159,6 +187,7 @@ export default {
             divID: "overlay-edit-map",
             boundsHaveChanged: false,
             preview_opacity: 0.5,
+            preserved_view: null as any,
         }
     },
     watch: {
@@ -181,7 +210,7 @@ export default {
     },
     created(){
         // Update the divID
-        this.divID = "overlay-edit-map-" + this.overlay.id;
+        this.divID = "overlay-edit-map-" + this.index;
     },
     mounted(){
         this.refreshMap();
@@ -205,6 +234,10 @@ export default {
 
             // Check if there is already a map object, remove if there is
             try {
+                this.preserved_view = {
+                    center: this.map.getCenter(),
+                    zoom: this.map.getZoom(),
+                }
                 // @ts-ignore
                 this.map.remove();
             }
@@ -222,7 +255,15 @@ export default {
                 fullscreenControlOptions: {
                     position: 'topleft'
                 },
-            }).fitBounds(this.overlay.bounds);
+            })
+            
+            // Check if there's a preserved view
+            if (this.preserved_view){
+                map.setView(this.preserved_view.center, this.preserved_view.zoom);
+            }
+            else {
+                map.fitBounds(this.overlay.bounds);
+            }
 
 
             L.tileLayer(`https://{s}.basemaps.cartocdn.com/${this.mode == "ref" ? "light" : this.mode}_nolabels/{z}/{x}/{y}.png`, { //rastertiles/voyager_nolabels
@@ -293,10 +334,20 @@ export default {
             marker_topLeft.on('click', (e: Event) => {
                 dragging = !dragging;
                 dragMarker = marker_topLeft;
+                
+                // If dragging has ended, save the new bounds
+                if (!dragging){
+                    this.$emit('bounds-save', this.index, this.latLngToBoundsArray(this.overlay_object.getBounds()))
+                }
             });
             marker_bottomRight.on('click', (e: Event) => {
                 dragging = !dragging;
                 dragMarker = marker_bottomRight;
+                
+                // If dragging has ended, save the new bounds
+                if (!dragging){
+                    this.$emit('bounds-save', this.index, this.latLngToBoundsArray(this.overlay_object.getBounds()))
+                }
             });
             rectangle.on('click', (e: Event) => {
                 // Don't confuse the two modes
@@ -307,8 +358,15 @@ export default {
                 dragMarker = rectangle;
                 // Calculate the drag offset
                 let latlng = (e as any).latlng;
+                let bounds = this.latLngToBoundsArray(this.overlay_object.getBounds());
                 let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
                 dragOffset = [latlng.lat - center[0], latlng.lng - center[1]];
+
+                // If dragging has ended, save the new bounds
+                if (!dragging){
+                    this.$emit('bounds-save', this.index, this.latLngToBoundsArray(this.overlay_object.getBounds()))
+                    console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
+                }
             });
 
             // Right click on the centre anchor to move the anchor relative to the overlay,
@@ -362,7 +420,7 @@ export default {
 
                     this.checkBoundsHaveChanged()
 
-                    console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
+                    // console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
                 }
 
                 // else if (draffingAnchor){
@@ -427,7 +485,14 @@ export default {
             // Update the content
         },
 
+        uploadNewContent(){
+            // Upload the new content
+        },
+
         cancelChanges(){
+
+            // Recenter the map on the overlay
+            this.map.fitBounds(this.overlay.bounds);
             // Cancel the changes
             this.$emit('overlay-edit-cancel');
         },
