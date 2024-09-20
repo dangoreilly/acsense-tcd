@@ -66,7 +66,9 @@
                     :newOverlay="overlay.id == undefined"
                     :index="index"
                     @overlay-edit-cancel="cancelChanges(index)"
-                    @bounds-save="updateOverlayBounds"/>
+                    @bounds-save="updateOverlayBounds"
+                    @overlay-url-edit="updateOverlayUrl"
+                    @overlay-url-reset="resetOverlay"/>
                 </div>
                 <div class="container my-3">
                     <div class="row">
@@ -152,19 +154,16 @@ export default {
             console.log("Bounds updated on overlay with id: " + this.overlays[index].id)
         },
 
-        handleOverlaySelect(evt: Event){
-            // Get the file from the input
-            // Set the iconOverride to the file to preview
-            // const file = evt.target.files[0];
+        updateOverlayUrl(index: number, type: string, url: string){
+            // Update the url of the overlay
+            if (type == 'light'){
+                this.overlays[index].url = url;
+                console.log("Light overlay url updated")
+                console.log(url)
+            }
 
-            // // Get the index of the space type
-            // const index = evt.target.getAttribute("data-index");
-
-            // if (index == "new")
-            //     this.new_space.icon = URL.createObjectURL(file);
-            // else
-            //     this.space_types[index].icon = URL.createObjectURL(file);
-             
+            else
+                this.overlays[index].url_dark = url;
         },
 
         async uploadNewCustomIcon(index: number){

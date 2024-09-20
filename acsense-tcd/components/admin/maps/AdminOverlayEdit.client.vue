@@ -11,7 +11,7 @@
                 <button class="btn" type="button"
                 :class="(overlay.url == overlay_clean.url) ? 'btn-outline-secondary' : 'btn-warning'"
                 :disabled="overlay.url == overlay_clean.url"
-                @click="resetLightOverlay()">
+                @click="$emit('overlay-url-reset', 'light', index);">
                 Reset</button>
             </div>
             <!-- Darkmode -->
@@ -22,7 +22,7 @@
                 <button class="btn" type="button"
                 :class="(overlay.url_dark == overlay_clean.url_dark) ? 'btn-outline-secondary' : 'btn-warning'"
                 :disabled="overlay.url_dark == overlay_clean.url_dark"
-                @click="resetDarkOverlay()">
+                @click="$emit('overlay-url-reset', 'dark', index);">
                 Reset</button>
             </div>
             <!-- Selection -->
@@ -369,16 +369,6 @@ export default {
                 }
             });
 
-            // Right click on the centre anchor to move the anchor relative to the overlay,
-            // This allows for more convenient positioning of the overlay
-            // marker_center.on('contextmenu', (e: Event) => {
-            //     // Don't confuse the two modes
-            //     if (dragging){
-            //         return;
-            //     }
-            //     draffingAnchor = !draffingAnchor;
-            // });
-
             // Move the marker on mousemove
             map.on('mousemove', (e: Event) => {
                 if (dragging){
@@ -412,26 +402,11 @@ export default {
                     rectangle.setBounds(newBounds);
                     marker_topLeft.setLatLng(newBounds[0]);
                     marker_bottomRight.setLatLng(newBounds[1]);
-                    let anchor = [
-                        ((newBounds[0][0] + newBounds[1][0]) / 2) + dragOffset[0],
-                        ((newBounds[0][1] + newBounds[1][1]) / 2) + dragOffset[1]
-                    ];
-                    // marker_center.setLatLng(anchor);
 
                     this.checkBoundsHaveChanged()
 
                     // console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
                 }
-
-                // else if (draffingAnchor){
-                //     let latlng = (e as any).latlng;
-                //     // First get the true center of the overlay
-                //     let center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
-                //     // Then calculate the offset
-                //     dragOffset = [latlng.lat - center[0], latlng.lng - center[1]];
-                //     // Update the marker
-                //     marker_center.setLatLng([latlng.lat, latlng.lng]);
-                // }
             });
 
 
@@ -442,43 +417,33 @@ export default {
         checkBoundsHaveChanged(){
             // Check if the bounds have changed
             this.boundsHaveChanged = JSON.stringify(this.overlay.bounds) != JSON.stringify(this.latLngToBoundsArray(this.overlay_object.getBounds()))
-
-            // console.log({
-            //     northwest: {
-            //         overlay: this.overlay.bounds[0], 
-            //         overlay_object: this.latLngToBoundsArray(this.overlay_object.getBounds())[0]
-            //     }, 
-            //     southeast: {
-            //         overlay: this.overlay.bounds[1], 
-            //         overlay_object: this.latLngToBoundsArray(this.overlay_object.getBounds())[1]
-            //     }
-            // });
-
-            // console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
-            // console.log(`Overlay bounds: `);
-            // console.log(JSON.stringify(this.overlay.bounds));
-            // console.log(`Overlay object bounds: `);
-            // console.log(JSON.stringify(this.latLngToBoundsArray(this.overlay_object.getBounds())));
         },
 
         latLngToBoundsArray(latlngBounds: L.LatLngBounds){
             return [[latlngBounds._northEast.lat, latlngBounds._northEast.lng],[latlngBounds._southWest.lat, latlngBounds._southWest.lng]];
         },
 
-        handleLightOverlaySelect(e: Event){
-            // Handle the selection of a new overlay
+        handleLightOverlaySelect(evt: Event){
+            // Get the file from the input
+            const target = evt.target as HTMLInputElement;
+            if (target && target.files) {
+                const file = target.files[0];
+                // Update the overlay
+                let url = URL.createObjectURL(file);
+                this.$emit('overlay-url-edit', this.index, "light", url);
+                console.log(`Light overlay changed to ${url}`);
+            }
         },
 
-        handleDarkOverlaySelect(e: Event){
-            // Handle the selection of a new overlay
-        },
-
-        resetLightOverlay(){
-            // Reset the overlay to the original
-        },
-
-        resetDarkOverlay(){
-            // Reset the overlay to the original
+        handleDarkOverlaySelect(evt: Event){
+            // Get the file from the input
+            const target = evt.target as HTMLInputElement;
+            if (target && target.files) {
+                const file = target.files[0];
+                // Update the overlay
+                let url = URL.createObjectURL(file);
+                this.$emit('overlay-url-edit', this.index, "dark", url);
+            }
         },
 
         updateContent(){
