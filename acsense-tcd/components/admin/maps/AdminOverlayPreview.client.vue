@@ -160,3 +160,97 @@ export default {
     }
 }
 </script>
+
+<style>
+    /* @import url("~/assets/css/leaflet.css"); */
+
+    :root{
+        /* --primary-label-opacity: 1;
+        --secondary-label-opacity: 0;
+        --tertiary-label-opacity: 0; */
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    #map { height: 100dvh; }
+
+    .map-label { 
+        color: #000;
+        /* Text outline for improved readability */
+        -webkit-text-stroke: 0.2px #ccc;
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .map-label {
+            color: #fff;
+            /* Text outline for improved readability */
+            -webkit-text-stroke: 1px black;
+        }
+    }
+
+    .primary-label {
+        opacity: var(--primary-label-opacity);
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+    .secondary-label {
+        opacity: var(--secondary-label-opacity);
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+    .tertiary-label {
+        opacity: var(--tertiary-label-opacity);
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+    .flyover-label {
+        opacity: calc(var(--secondary-label-opacity) + var(--primary-label-opacity));
+        transition: opacity 0.5s ease-in-out;
+        /* display: var(--primary-label-display); */
+    }
+
+    .sense-icon {
+        /* opacity: var(--sense-icon-opacity); */
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .svg-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        vertical-align: middle;
+        fill: currentColor;
+        width: 1.5rem;
+    }
+    .svg-icon-sash {
+        position: absolute;
+        top: 31%;
+        left: -30%;
+        opacity: 0.8;
+        /* transform: translate(-50%, -50%); */
+        rotate: 45deg;
+        vertical-align: middle;
+        fill: currentColor;
+        width: 2.4rem;
+    }
+
+    .facility-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        position: relative;
+        /* padding: 0.25rem; */
+    }
+
+    .space-modal-badge-container {
+        display: grid;
+        /* width: 100%; */
+        /* padding-top: 2rem; */
+        grid-template-columns:  auto auto auto auto auto auto;
+        grid-template-rows: auto auto;
+        grid-template-areas: 
+            "seating sockets food kettle microwave wheelchair"
+            "btn btn btn btn btn btn";
+    }
+
+</style>
