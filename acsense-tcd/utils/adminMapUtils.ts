@@ -138,7 +138,7 @@ export function addOverlays(L: any, map: any, overlays: Overlay[], currentOverla
     // Go through each overlay and add it to the map
     overlays.forEach(overlay => {
         // Skip the current overlay
-        if (overlay.id == currentOverlay?.id) return;
+        if (currentOverlay != null && overlay.id == currentOverlay?.id) return;
 
         // Figure out if the dark or light mode should be used
         let url = overlay.url;
