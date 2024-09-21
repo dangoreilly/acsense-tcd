@@ -120,6 +120,16 @@ export default function (table:string) : PermissionsKey | null {
                 id: "service",
                 created_at: "service",
             } as PermissionsKey
+
+        case "flyovers":
+            return {
+                label: "map.flyovers",
+                location: "map.flyovers",
+                target: "map.flyovers",
+
+                id: "service",
+                created_at: "service",
+            } as PermissionsKey
         default:
             return null
     }

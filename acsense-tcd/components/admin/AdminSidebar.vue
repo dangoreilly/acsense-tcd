@@ -123,14 +123,17 @@
             icon: 'bi bi-map',
             permission: 'url'
         },
+        {
+            name: 'Flyovers',
+            key: 'flyovers',
+            icon: 'bi bi-arrow-up-left-circle',
+            permission: 'label'
+        },
     ]
-
-    // Define the permissions key
-    const permissionsKey = 'admin';
 
     // Add the special permissions tabs to the tabs
     for (let tab of specialPermissionsTabs) {
-        if (userHasPermission(currentUser.value, getPermissionsKey(tab.key) as PermissionsKey, tab.permission)) {
+        if (userHasPermission(currentUser.value, getPermissionsKey(tab.key) as PermissionsKey, tab.permission) || currentUser.value.is_admin) {
             tabs.value.push(tab);
         }
     }
