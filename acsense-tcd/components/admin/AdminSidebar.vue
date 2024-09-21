@@ -50,6 +50,8 @@
 <script setup lang="ts">
 
     import type { Database } from 'assets/types/supabase_types.gen';
+    import getPermissionsKey, { type PermissionsKey } from "~/assets/permissionsKey"
+    import { userHasPermission } from '~/utils/getChanges';
 
     // Define the props
     const {activeTab: page, supabase_client} = defineProps({
@@ -94,11 +96,6 @@
         //     icon: 'bi bi-columns',
         // },
         {
-            name: 'Overlays',
-            key: 'overlays',
-            icon: 'bi bi-map',
-        },
-        {
             name: 'Contributors',
             key: 'contributors',
             icon: 'bi bi-people',
@@ -117,6 +114,27 @@
             icon: 'bi bi-card-checklist',
         },
     ];
+
+    // These tabs only show up if the user has the specific permissions
+    let specialPermissionsTabs = [
+        {
+            name: 'Overlays',
+            key: 'overlays',
+            icon: 'bi bi-map',
+            permission: 'url'
+        },
+    ]
+
+    // Define the permissions key
+    const permissionsKey = 'admin';
+
+    // Add the special permissions tabs to the tabs
+    for (let tab of specialPermissionsTabs) {
+        if (userHasPermission(currentUser.value, getPermissionsKey(tab.key) as PermissionsKey, tab.permission)) {
+            tabs.value.push(tab);
+        }
+    }
+
 
     // if the user is an admin, show the admin tabs
     if (currentUser.value.is_admin) {

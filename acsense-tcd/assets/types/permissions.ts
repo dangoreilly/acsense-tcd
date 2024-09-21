@@ -24,6 +24,10 @@ export type UserProfile_Template = {
     is_admin: boolean,
     buildings: BuildingsPermissions,
     spaces: SpacesPermissions,
+    map: {
+        overlays: boolean,
+        jumps: boolean,
+    },
 }
 
 export type UserProfile = UserProfile_Template & {

@@ -65,8 +65,11 @@
                     :overlay_clean="overlays_clean[index]"
                     :newOverlay="overlay.id == undefined"
                     :index="index"
-                    @overlay-edit-cancel="cancelChanges(index)"
                     @bounds-save="updateOverlayBounds"
+                    @overlay-delete="deleteOverlay(index)"
+                    @overlay-update="updateContent(index)"
+                    @overlay-create="pushNewContent(index)"
+                    @overlay-edit-cancel="cancelChanges(index)"
                     @overlay-url-edit="updateOverlayUrl"
                     @overlay-url-reset="resetOverlay"/>
                 </div>
@@ -166,38 +169,34 @@ export default {
                 this.overlays[index].url_dark = url;
         },
 
-        async uploadNewCustomIcon(index: number){
-            // Get the file object from the primary image upload input
-            // Upsert to the storage bucket as the canonical name
-            // TODO: Check if the file already exists under a different extension, and if so, delete it
+        async uploadNewOverlay(index: number, type: string){
 
-            // // Get the file
-            // let file = document.getElementById(`IconOverrideInput-${index}`).files[0];
-            // // Get the file extension
-            // let extension = file.name.split('.').pop();
+            // Get the file
+            // @ts-ignore
+            let file = document.getElementById(`${type}-${index}`).files[0];
+            // Get the file extension
+            let extension = file.name.split('.').pop();
             
-            // // Make a canonical name for the space type
-            // let spaceType_canonical = "";
-            // if (index == "new")
-            //     spaceType_canonical = this.new_space.category.toLowerCase().replace(/ /g, "_");
-            // else
-            //     spaceType_canonical = this.space_types[index].category.toLowerCase().replace(/ /g, "_");
-
-            // // Build the new url for the file
-            // let newUrl = this.supabase.storageUrl + "/object/public/icons/" + spaceType_canonical + "." + extension;
-            // // Upsert the image
-            // const {data, error} =  upsertImage(this.supabase, 'icons', `${spaceType_canonical}.${extension}`, file)
+            // Make a canonical name for the space type
+            let canonical = "";
+            // Set the canonical name by the id
+            canonical = `${type}-${this.overlays[index].id}`;
+            // Build the new url for the file
+            let newUrl = this.supabase.storageUrl + "/object/public/overlays/" + canonical + "." + extension;
+            // Upsert the image
+            const {data, error} = await upsertImage(this.supabase, 'overlays', `${canonical}.${extension}`, file)
             
-            // if (error) {
-            //     console.error(error)
-            //     alert(error.message)
-            //     throw error
-            // }
+            if (error) {
+                console.error(error)
+                alert(error.message)
+                throw error
+            }
 
-            // // Clear the icon input
-            // document.getElementById(`IconOverrideInput-${index}`).value = "";
+            // Clear the icon input
+            // @ts-ignore
+            document.getElementById(`${type}-${index}`).value = "";
 
-            // return newUrl;
+            return newUrl;
 
         },
 
@@ -218,55 +217,55 @@ export default {
         },
 
         async deleteOverlay(index: number){
-            // let category = this.space_types[index].category;
-            // // Confirm the deletion
-            // if (!confirm("Are you sure you want to delete type '" + category + "'?")) {
-            //     return;
-            // }
+            // Confirm the deletion
+            if (!confirm("Are you sure you want to delete this overlay?")) {
+                return;
+            }
 
             // let url = this.space_types[index].icon;
+            let overlay_id = JSON.stringify(this.overlays[index].id);
 
-            // // Remove the database entry
-            // const access_token = await getSessionAccessToken(this.supabase);
-            // const {data: img, error:db_delete_error} = await removeFromTable(
-            //     access_token, 
-            //     "space_styles", 
-            //     { 
-            //         col: 'category', 
-            //         eq: category,
-            //     }
-            // )
+            // Remove the database entry
+            const access_token = await getSessionAccessToken(this.supabase);
+            const {data: img, error:db_delete_error} = await removeFromTable(
+                access_token, 
+                "overlays", 
+                { 
+                    col: 'id', 
+                    eq: overlay_id
+                }
+            )
             
 
-            // if (db_delete_error) {
-            //     console.error(db_delete_error)
-            //     alert(db_delete_error.message)
-            //     throw db_delete_error
-            // }
+            if (db_delete_error) {
+                console.error(db_delete_error)
+                alert(db_delete_error.message)
+                throw db_delete_error
+            }
 
-            // // Get the path by subtracting the supabase url from the image url
-            // let path = url.replace(this.supabase.storageUrl + "/object/public/icons/", "");
-            
-            // // Delete the image from the storage bucket
-            // const { data:storage_response, error:storage_error } = await this.supabase.storage
-            // .from('icons')
-            // .remove([path])
+            // Get the path by subtracting the supabase url from the image url
+            let path_light = this.overlays[index].url.replace(this.supabase.storageUrl + "/object/public/overlays/", "");
+            let path_dark = this.overlays[index].url_dark?.replace(this.supabase.storageUrl + "/object/public/overlays/", "");
 
-            // if (storage_error) {
-            //     console.error(storage_error)
-            //     alert(storage_error.message)
-            //     throw storage_error
-            // }
-            // console.log("storage_response")
-            // console.log(storage_response)
+            // Delete the image from the storage bucket
+            const { data:storage_response, error:storage_error } = await this.supabase.storage
+            .from('overlays')
+            .remove([path_light, path_dark])
+
+            if (storage_error) {
+                console.error(storage_error)
+                alert(storage_error.message)
+                throw storage_error
+            }
+            console.log("storage_response")
+            console.log(storage_response)
 
 
-            // // Remove the space type at index
-            // this.space_types.splice(index, 1);
-            // // Remove the space count at index
-            // this.space_counts.splice(index, 1);
+            // Remove the overlay at index
+            this.overlays.splice(index, 1);
+            this.overlays_clean.splice(index, 1);
 
-            // alert("'"+category+"' deleted successfully")
+            alert("Overlay deleted successfully")
         },
 
         async addNewOverlay(){
@@ -277,31 +276,68 @@ export default {
 
         },
         
-        async updateContent() {
+        async updateContent(index: number){
 
             const access_token = await getSessionAccessToken(this.supabase)
             
             // Update the overlays
             // for (let i = 0; i < this.overlays.length; i++) {
 
-            //     // If the icon has been updated, upload the new icon
-            //     if (this.overlays[i].icon !== this.overlays_clean[i].icon) {
-            //         this.overlays[i].icon = await this.uploadNewOverlay(i);
-            //     }
+            // If the overlay has been updated, upload the new overlay
+            if (this.overlays[index].url !== this.overlays_clean[index].url) {
+                this.overlays[index].url = await this.uploadNewOverlay(index, 'light');
+            }
+            if (this.overlays[index].url_dark !== this.overlays_clean[index].url_dark) {
+                this.overlays[index].url_dark = await this.uploadNewOverlay(index, 'dark');
+            }
 
-            //     let {data, error} = await updateTable(access_token, 'overlays',
-            //         this.overlays[i],
-            //         {col:'id', eq:this.overlays[i].id},
-            //     )
+            let {data, error} = await updateTable(access_token, 'overlays',
+                this.overlays[index],
+                {
+                    col:'id', 
+                    eq: JSON.stringify(this.overlays[index].id)
+                },
+            )
 
-            //     if (error) {
-            //         console.error(error)
-            //         alert(error.message)
-            //         throw error
-            //     }
-            // }
+            if (error) {
+                console.error(error)
+                alert(error.message)
+                throw error
+            }
+
+            // Update the clean overlay
+            this.overlays_clean[index] = JSON.parse(JSON.stringify(this.overlays[index]));
 
         },
+
+        async pushNewContent(index: number) {
+
+            // Add the new overlay to the database
+            const access_token = await getSessionAccessToken(this.supabase);
+            let {data, error} = await insertToTable(access_token, 'overlays', this.overlays[index])
+
+            if (error) {
+                console.error(error)
+                alert(error.message)
+                throw error
+            }
+
+            console.log(data)
+            // Update the id of the overlay
+            this.overlays[index].id = data[0].id;
+
+            // Upload the new default overlay
+            this.overlays[index].url = await this.uploadNewOverlay(index, 'light');
+            // If a dark version is included, upload the new overlay
+            if (this.overlays[index].url_dark !== this.overlays_clean[index].url_dark) {
+                this.overlays[index].url_dark = await this.uploadNewOverlay(index, 'dark');
+            }
+
+
+            // Update the clean overlay
+            this.overlays_clean[index] = JSON.parse(JSON.stringify(this.overlays[index]));
+
+        }
     },
 }
 </script>

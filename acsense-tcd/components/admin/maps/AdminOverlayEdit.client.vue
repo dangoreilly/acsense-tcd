@@ -6,7 +6,7 @@
             <!-- Lightmode -->
             <label class="form-label" for="light-overlay">Lightmode Overlay (Default)</label>
             <div class="input-group mx-0 px-0 mb-2">
-                <input :id="'light-'+overlay.id" type="file" class="form-control" 
+                <input :id="'light-'+index" type="file" class="form-control" 
                 @change="handleLightOverlaySelect">
                 <button class="btn" type="button"
                 :class="(overlay.url == overlay_clean.url) ? 'btn-outline-secondary' : 'btn-warning'"
@@ -14,10 +14,12 @@
                 @click="$emit('overlay-url-reset', 'light', index);">
                 Reset</button>
             </div>
+            <!-- Add a download link for the current overlay, if it exists -->
+            <a class="text-muted" :href="overlay_clean.url" target="none">Current Overlay</a>
             <!-- Darkmode -->
             <label class="form-label" for="light-overlay">Darkmode Overlay (Optional)</label>
             <div class="input-group mx-0 px-0 mb-2">
-                <input :id="'dark-'+overlay.id" type="file" class="form-control" 
+                <input :id="'dark-'+index" type="file" class="form-control" 
                 @change="handleDarkOverlaySelect">
                 <button class="btn" type="button"
                 :class="(overlay.url_dark == overlay_clean.url_dark) ? 'btn-outline-secondary' : 'btn-warning'"
@@ -25,6 +27,8 @@
                 @click="$emit('overlay-url-reset', 'dark', index);">
                 Reset</button>
             </div>
+            <!-- Add a download link for the current overlay, if it exists -->
+            <a class="text-muted" v-if="overlay_clean.url_dark" :href="overlay_clean.url_dark" target="none">Current Overlay</a>
             <!-- Selection -->
              <div class="row">
                 <div class="col">
@@ -89,7 +93,7 @@
                 type="button" 
                 class="btn" 
                 :class="contentHasChanged ? 'btn-success' : 'btn-outline-secondary'"
-                @click="uploadNewContent()"
+                @click="$emit('overlay-create')"
                 :disabled="!contentHasChanged">
                     Upload new overlay
                 </button>
@@ -108,7 +112,7 @@
                 type="button" 
                 class="btn" 
                 :class="contentHasChanged ? 'btn-success' : 'btn-outline-secondary'"
-                @click="updateContent()"
+                @click="$emit('overlay-update')"
                 :disabled="!contentHasChanged">
                     Save Changes
                 </button>
@@ -125,7 +129,7 @@
                 <button 
                 type="button" 
                 class="btn btn-danger"
-                @click="deleteOverlay()">
+                @click="$emit('overlay-delete');">
                     Delete
                 </button>
             </div>
@@ -220,6 +224,11 @@ export default {
             let url_match = JSON.stringify(this.overlay.url) == JSON.stringify(this.overlay_clean.url);
             let dark_match = JSON.stringify(this.overlay.url_dark) == JSON.stringify(this.overlay_clean.url_dark);
             let bounds_match = JSON.stringify(this.overlay.bounds) == JSON.stringify(this.overlay_clean.bounds);
+
+            // For new overlays, we only care if it has a default overlay
+            if (this.newOverlay){
+                return !(url_match);
+            }
             return !(url_match && dark_match && bounds_match);
         },
     },
@@ -408,10 +417,6 @@ export default {
                     // console.log(`Bounds have changed: ${this.boundsHaveChanged}`);
                 }
             });
-
-
-
-            
         },
 
         checkBoundsHaveChanged(){
@@ -446,14 +451,6 @@ export default {
             }
         },
 
-        updateContent(){
-            // Update the content
-        },
-
-        uploadNewContent(){
-            // Upload the new content
-        },
-
         cancelChanges(){
 
             // Recenter the map on the overlay
@@ -461,11 +458,6 @@ export default {
             // Cancel the changes
             this.$emit('overlay-edit-cancel');
         },
-
-        deleteOverlay(){
-            // Delete the overlay
-        }
-        
     }
 }
 </script>
