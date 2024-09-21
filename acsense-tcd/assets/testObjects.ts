@@ -62,6 +62,10 @@ export const user_all: UserProfile = {
         },
         facilities: true
     },
+    map: {
+        overlays: true,
+        jumps: true,
+    }
   }
   
 export const user_buildingsOnly: UserProfile = { 
@@ -69,62 +73,66 @@ export const user_buildingsOnly: UserProfile = {
       is_admin: false,
       user_id: "0",
       buildings: {
-          general: {
-              name: true,
-              aka: true,
-              desc: true,
-          },
-          primary_image: {
-              image: true,
-              alt: true
-          },
-          tabs: {
-              physical: true,
-              wayfinding: true,
-              sensory: true
-          },
-          gallery: {
-              images: true,
-              captions: true,
-              alt: true
-          },
-          times: true,
-          tips: true,
-          further: true,
-          map: {
-              labels: true,
-              location: true
-          }
-      },
-      spaces: {
-          general: {
-              name: false,
-              aka: false,
-              desc: false,
-          },
-          primary_image: {
-              image: false,
-              alt: false
-          },
-          tabs: {
-              physical: false,
-              wayfinding: false,
-              sensory: false
-            },
-          gallery: {
-              images: false,
-              captions: false,
-              alt: false
-            },
-          times: false,
-          tips: false,
-          further: false,
-          map: {
-              labels: false,
-              location: false
-          },
-          facilities: false
+        general: {
+            name: true,
+            aka: true,
+            desc: true,
         },
+        primary_image: {
+            image: true,
+            alt: true
+        },
+        tabs: {
+            physical: true,
+            wayfinding: true,
+            sensory: true
+        },
+        gallery: {
+            images: true,
+            captions: true,
+            alt: true
+        },
+        times: true,
+        tips: true,
+        further: true,
+        map: {
+            labels: true,
+            location: true
+        }
+    },
+    spaces: {
+        general: {
+            name: false,
+            aka: false,
+            desc: false,
+        },
+        primary_image: {
+            image: false,
+            alt: false
+        },
+        tabs: {
+            physical: false,
+            wayfinding: false,
+            sensory: false
+        },
+        gallery: {
+            images: false,
+            captions: false,
+            alt: false
+        },
+        times: false,
+        tips: false,
+        further: false,
+        map: {
+            labels: false,
+            location: false
+        },
+        facilities: false
+    },
+    map: {
+        overlays: false,
+        jumps: false,
+    }
   }
     
 export const user_admin: UserProfile = { 
@@ -188,6 +196,10 @@ export const user_admin: UserProfile = {
         },
         facilities: false
     },
+    map: {
+        overlays: true,
+        jumps: true,
+    }
   }
   
 export const user_none: UserProfile = { 
@@ -251,7 +263,11 @@ export const user_none: UserProfile = {
         },
         facilities: false
     },
-  }
+    map: {
+        overlays: false,
+        jumps: false,
+    }
+}
   
 export const user_superadmin: UserProfile = { 
     email: "superadmin@acsense.ie",
@@ -315,7 +331,11 @@ export const user_superadmin: UserProfile = {
         facilities: false
 
     },
-  }
+    map: {
+        overlays: false,
+        jumps: false,
+    },
+}
   
 import type { Building } from '~/assets/types/supabase_types';
 
@@ -554,3 +574,15 @@ export const logs: Audit_Log[] = [
         "data": null
     }
 ]
+
+
+import type { Overlay } from '~/assets/types/supabase_types';
+
+export const overlay: Overlay = {
+    "url": "/images/overlay.png",
+    "url_dark": "/images/overlay-dark.png",
+    "bounds": [[6.24714287637749,53.3458915634745],[6.26168888731324,53.3416423399052]],
+    "high_detail": false,
+    "id": 1,
+    "created_at": "2021-09-01T12:00:00.000Z",
+}
