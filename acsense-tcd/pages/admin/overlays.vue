@@ -255,8 +255,8 @@ export default {
                 alert(storage_error.message)
                 throw storage_error
             }
-            console.log("storage_response")
-            console.log(storage_response)
+            // console.log("storage_response")
+            // console.log(storage_response)
 
 
             // Remove the overlay at index
