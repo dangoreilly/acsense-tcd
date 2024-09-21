@@ -334,6 +334,7 @@ export type Database = {
           created_at: string | null
           email: string
           is_admin: boolean
+          map: Json | null
           spaces: Json | null
           user_id: string
         }
@@ -342,6 +343,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           is_admin?: boolean
+          map?: Json | null
           spaces?: Json | null
           user_id?: string
         }
@@ -350,6 +352,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           is_admin?: boolean
+          map?: Json | null
           spaces?: Json | null
           user_id?: string
         }
@@ -506,6 +509,7 @@ export type Database = {
         Row: {
           aka: string | null
           building: string | null
+          building_uuid: string | null
           canonical: string
           clickthrough: boolean | null
           description: string
@@ -540,6 +544,7 @@ export type Database = {
           tips: string[]
           type: string
           updated_at: string
+          updated_by: string | null
           UUID: string
           wayfinding: string
           wayfinding_display: boolean
@@ -550,6 +555,7 @@ export type Database = {
         Insert: {
           aka?: string | null
           building?: string | null
+          building_uuid?: string | null
           canonical: string
           clickthrough?: boolean | null
           description?: string
@@ -584,6 +590,7 @@ export type Database = {
           tips?: string[]
           type: string
           updated_at?: string
+          updated_by?: string | null
           UUID?: string
           wayfinding?: string
           wayfinding_display?: boolean
@@ -594,6 +601,7 @@ export type Database = {
         Update: {
           aka?: string | null
           building?: string | null
+          building_uuid?: string | null
           canonical?: string
           clickthrough?: boolean | null
           description?: string
@@ -628,6 +636,7 @@ export type Database = {
           tips?: string[]
           type?: string
           updated_at?: string
+          updated_by?: string | null
           UUID?: string
           wayfinding?: string
           wayfinding_display?: boolean
@@ -644,11 +653,25 @@ export type Database = {
             referencedColumns: ["canonical"]
           },
           {
+            foreignKeyName: "spaces_building_uuid_fkey"
+            columns: ["building_uuid"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["UUID"]
+          },
+          {
             foreignKeyName: "spaces_type_fkey"
             columns: ["type"]
             isOneToOne: false
             referencedRelation: "space_styles"
             referencedColumns: ["category"]
+          },
+          {
+            foreignKeyName: "spaces_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
           },
         ]
       }

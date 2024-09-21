@@ -29,10 +29,14 @@ export default async function(access_token: string, table: string, payload: any)
         })
 
         _data = data
+        
+        return { data: _data, error: _error }
     }
     catch (error) {
         console.error("Error inserting to table: ", error)
         _error = error
+        
+        return { data: _data, error: _error }
     }
 
     return { data: _data, error: _error }

@@ -36,6 +36,12 @@ export default defineEventHandler(async (event) => {
                 // Because this is messy
             }
 
+            // If this is the overlays table, check the user has permission to insert
+            if (table == 'overlays' && checkUserHasPermission(permissions, "overlays", {old:{}, new:{}, list:["url"], error: null} )) {
+                // The way these permissions are handled will likely change in the future
+                // Because this is messy
+            }
+
             // Otherwise, check the user is an admin
             else if (!permissions.is_admin) {
                 throw createError({
@@ -48,6 +54,7 @@ export default defineEventHandler(async (event) => {
             const { data: insertedData, error: insert_error } = await supabase
             .from(table)
             .insert(data)
+            .select()
             
 
             if (insert_error) {
@@ -141,6 +148,12 @@ export default defineEventHandler(async (event) => {
 
             // If this is the gallery table, check the user has permission to delete
             if (table == 'building_gallery_images' && checkUserHasPermission(permissions, "building_gallery_images", {old:{}, new:{}, list:["url"], error: null} )) {
+                // The way these permissions are handled will likely change in the future
+                // Because this is messy
+            }
+
+            // If this is the overlays table, check the user has permission to insert
+            if (table == 'overlays' && checkUserHasPermission(permissions, "overlays", {old:{}, new:{}, list:["url"], error: null} )) {
                 // The way these permissions are handled will likely change in the future
                 // Because this is messy
             }
