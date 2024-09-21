@@ -436,7 +436,6 @@ export default {
                 // Update the overlay
                 let url = URL.createObjectURL(file);
                 this.$emit('overlay-url-edit', this.index, "light", url);
-                console.log(`Light overlay changed to ${url}`);
             }
         },
 

@@ -19,6 +19,8 @@ export default async function(supabase: any, bucket: string, url: string, file: 
             if (update_error) {
                 return {data:update_data, error:update_error}
             }
+
+            return {data:update_data, error:update_error}
         }
         else
         {

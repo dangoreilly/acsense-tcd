@@ -161,8 +161,6 @@ export default {
             // Update the url of the overlay
             if (type == 'light'){
                 this.overlays[index].url = url;
-                console.log("Light overlay url updated")
-                console.log(url)
             }
 
             else
