@@ -313,8 +313,14 @@ export default {
         async pushNewContent(index: number) {
 
             // Add the new overlay to the database
+            // Only upload the bounds for now, in case the image upload fails
             const access_token = await getSessionAccessToken(this.supabase);
-            let {data, error} = await insertToTable(access_token, 'overlays', this.overlays[index])
+            let {data, error} = await insertToTable(access_token, 'overlays', {
+                url: "",
+                url_dark: "",
+                high_detail: false,
+                bounds: this.overlays[index].bounds
+            })
 
             if (error) {
                 console.error(error)
@@ -331,6 +337,21 @@ export default {
             // If a dark version is included, upload the new overlay
             if (this.overlays[index].url_dark !== this.overlays_clean[index].url_dark) {
                 this.overlays[index].url_dark = await this.uploadNewOverlay(index, 'dark');
+            }
+
+            // Now that we have the correct urls, update the overlay in the database
+            let {data:image_add_data, error:image_add_error} = await updateTable(access_token, 'overlays',
+                this.overlays[index],
+                {
+                    col:'id', 
+                    eq: JSON.stringify(this.overlays[index].id)
+                },
+            )
+
+            if (image_add_error) {
+                console.error(image_add_error)
+                alert(image_add_error.message)
+                throw image_add_error
             }
 
 
