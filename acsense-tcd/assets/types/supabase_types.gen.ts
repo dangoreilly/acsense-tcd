@@ -334,6 +334,7 @@ export type Database = {
           created_at: string | null
           email: string
           is_admin: boolean
+          map: Json | null
           spaces: Json | null
           user_id: string
         }
@@ -342,6 +343,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           is_admin?: boolean
+          map?: Json | null
           spaces?: Json | null
           user_id?: string
         }
@@ -350,6 +352,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           is_admin?: boolean
+          map?: Json | null
           spaces?: Json | null
           user_id?: string
         }
