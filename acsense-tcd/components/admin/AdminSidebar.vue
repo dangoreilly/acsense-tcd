@@ -10,10 +10,7 @@
             fill="currentColor" >
                 <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L4.047 3.339 8 7.293l3.954-3.954L9.049.435zm3.61 3.611L8.708 8l3.954 3.954 2.904-2.905c.58-.58.58-1.519 0-2.098l-2.904-2.905zm-.706 8.614L8 8.708l-3.954 3.954 2.905 2.904c.58.58 1.519.58 2.098 0l2.905-2.904zm-8.614-.706L7.292 8 3.339 4.046.435 6.951c-.58.58-.58 1.519 0 2.098l2.904 2.905z"/>
             </svg> -->
-            <span class="fs-4 admin-sidebar-span">Admin Panel</span>
-        </a>
-        <a href="https://github.com/dangoreilly/acsense-tcd/commits/main/" class="link-body-emphasis text-decoration-none">
-            <span class="fs-6 admin-sidebar-span">v{{ version }}</span>
+          <span class="fs-4 admin-sidebar-span">Admin Panel</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -46,140 +43,138 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-
-    import type { Database } from 'assets/types/supabase_types.gen';
-    import getPermissionsKey, { type PermissionsKey } from "~/assets/permissionsKey"
-    import { userHasPermission } from '~/utils/getChanges';
-
-    // Define the props
-    const {activeTab: page, supabase_client} = defineProps({
-        activeTab: {
-            type: String,
-            required: true,
-        },
-        supabase_client: {
-            type: Object,
-            required: true,
-        },
-    })
     
-    // Set up the refs
-    const activeTab = ref(page);
-    const version = ref(useRuntimeConfig().public.version);
+<script>
 
-    // Get the current user and their permissions
-    const currentUser = ref(await getCurrentUserPermissions(supabase_client as Database));
-
-    // Set up the tabs
-    const tabs = ref([
-        {
-            name: 'Analytics',
-            key: 'analytics',
-            icon: 'bi bi-graph-up',
+    // import {createClient} from '@supabase/supabase-js';
+    
+    
+    export default {
+        props: {
+            activeTab: {
+                type: String,
+                required: true,
+            },
+            supabase_client: {
+                type: Object,
+                required: true,
+            },
+            // session: {
+            //     type: Object,
+            //     required: true,
+            // }
+            
         },
-        {
-            name: 'Buildings',
-            key: 'buildings',
-            icon: 'bi bi-building-gear',
+        data() {
+            return {
+                tabs: [
+                    {
+                        name: 'Analytics',
+                        key: 'analytics',
+                        icon: 'bi bi-graph-up',
+                    },
+                    {
+                        name: 'Buildings',
+                        key: 'buildings',
+                        icon: 'bi bi-building-gear',
+                    },
+                    {
+                        name: 'Student Spaces',
+                        key: 'spaces',
+                        icon: 'bi bi-cup-hot',
+                    },
+    
+                    // {
+                    //     name: 'Floorplans',
+                    //     key: 'floorplans',
+                    //     icon: 'bi bi-columns',
+                    // },
+                    // {
+                    //     name: 'Map',
+                    //     key: 'map',
+                    //     icon: 'bi bi-map',
+                    // },
+                    // {
+                    //     name: 'Branding',
+                    //     key: 'branding',
+                    //     icon: 'bi bi-brush',
+                    // },
+                    {
+                        name: 'Contributors',
+                        key: 'contributors',
+                        icon: 'bi bi-people',
+                    },
+                ],
+                adminTabs: [
+                    {
+                        name: 'General Info',
+                        key: 'general-info',
+                        icon: 'bi bi-info-circle',
+                    },
+                    {
+                        name: 'Audit Logs',
+                        key: 'logs',
+                        icon: 'bi bi-card-checklist',
+                    },
+                ],
+                currentUser: null,
+            }
         },
-        {
-            name: 'Student Spaces',
-            key: 'spaces',
-            icon: 'bi bi-cup-hot',
+        created() {
+            // Get the user ID for reporting
+            this.getCurrentUser();
+            // The user profile will also tell us whether to reveal the admin-only pages
+
         },
-
-        // {
-        //     name: 'Floorplans',
-        //     key: 'floorplans',
-        //     icon: 'bi bi-columns',
-        // },
-        {
-            name: 'Contributors',
-            key: 'contributors',
-            icon: 'bi bi-people',
+        mounted() {
+            // Check the user permissions and set the tabs accordingly
+            this.filterMenuItems();
         },
-    ]);
+        methods: {
+            async logout() {
+                console.log("User logging out")
+                const {error} =  await this.supabase_client.auth.signOut()
+                if (error) {
+                    console.log(error)
+                }
+                navigateTo('./login')
+            },
+    
+            async getCurrentUser() {
 
-    let adminTabs = [
-        {
-            name: 'General Info',
-            key: 'general-info',
-            icon: 'bi bi-info-circle',
-        },
-        {
-            name: 'Audit Logs',
-            key: 'logs',
-            icon: 'bi bi-card-checklist',
-        },
-    ];
+                // // Wait for the session to be set
+                // while (!this.session.user) {
+                //     await new Promise(r => setTimeout(r, 100));
+                // }
+                // this.currentUser = this.session.user;
 
-    // These tabs only show up if the user has the specific permissions
-    let specialPermissionsTabs = [
-        {
-            name: 'Overlays',
-            key: 'overlays',
-            icon: 'bi bi-map',
-            permission: 'url'
-        },
-    ]
+                // Get the current user and their permissions
+                const _currentUser = await getCurrentUserPermissions();
+                // Copy the user object to avoid reactivity issues
+                this.currentUser = JSON.parse(JSON.stringify(_currentUser));
+                
+            },
 
-    // Define the permissions key
-    const permissionsKey = 'admin';
+            async filterMenuItems(){
+                // If the current user is not an admin, add the "admin" tabs
+                // Function is named "filter" because this was carried out backwards for a time
 
-    // Add the special permissions tabs to the tabs
-    for (let tab of specialPermissionsTabs) {
-        if (userHasPermission(currentUser.value, getPermissionsKey(tab.key) as PermissionsKey, tab.permission)) {
-            tabs.value.push(tab);
-        }
-    }
+                // Pause to let the user load
+                while (!this.currentUser) {
+                    await new Promise(r => setTimeout(r, 100));
+                }
 
-
-    // if the user is an admin, show the admin tabs
-    if (currentUser.value.is_admin) {
-        tabs.value = tabs.value.concat(adminTabs);
-    }
-
-    async function logout() {
-        console.log("User logging out")
-        // Clear the cookie
-        const jwt = useCookie("supabase.auth.token")
-        jwt.value = null;
-        // Invalidate the session with supabase
-        const {error} =  await supabase_client.auth.signOut()
-
-        if (error) {
-            console.log(error)
-        }
-        navigateTo('./login')
-    }
-
-    // Get the current page name using the prop ActiveTab
-    function getCurrentPage() {
-        // Loop through the tabs and find the one that matches the activeTab
-        for (let tab of tabs.value) {
-            if (tab.key == activeTab.value) {
-                return tab.name;
+                // if the user is an admin, show the admin tabs
+                if (this.currentUser.is_admin) {
+                    this.tabs = this.tabs.concat(this.adminTabs);
+                }
             }
         }
-
-        // If the tab is not found, return the activeTab
-        return activeTab.value;
-    }
-    // Set the title and meta tags
-    useHead({
-        title: 'Acsense Admin - ' + getCurrentPage(),
-        meta: [
-            {
-                name: 'description',
-                content: 'Acsense Admin page'
-            }
-        ],
-    })
-
+    };
+    
+    
 </script>
-   
+
 
 <style>
     i {

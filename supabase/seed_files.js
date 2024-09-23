@@ -45,21 +45,6 @@ let overlays = [
     "trinity_halls.svg"
 ]
 
-// Gallery images
-let gallery = [
-    "ex-landscape-1.PNG",
-    "ex-landscape-2.PNG",
-    "ex-landscape-3.PNG",
-    "ex-portrait-1.PNG",
-    "ex-portrait-2.PNG",
-    "ex-portrait-3.PNG",
-]
-
-// Primary images
-let primary_images = [
-    "ex-primary-landscape.jpg",
-    "ex-primary-portrait.jpg",
-]
 
 async function uploadFiles(files, bucket){
 
@@ -73,7 +58,7 @@ async function uploadFiles(files, bucket){
         let ext = files[i].split('.').pop();
         let file_type;
 
-        switch (ext.toLowerCase()) {
+        switch (ext) {
             case "svg":
                 file_type = "image/svg+xml";
                 break;
@@ -85,9 +70,7 @@ async function uploadFiles(files, bucket){
                 file_type = "image/jpeg";
                 break;
             default:
-                // file_type = "";
-                console.error("["+(i+1)+"/"+n+"] Error uploading file: ", bucket+"/"+files[i]);
-                continue;
+                file_type = "image/png+jpg";
         }
 
         // Encoding needs to be specified for SVG files. Unsure why this is necessary.
@@ -159,8 +142,6 @@ async function seed_files() {
     await uploadFiles(floorplans, "floorplans");
     await uploadFiles(icons, "icons");
     await uploadFiles(overlays, "overlays");
-    await uploadFiles(gallery, "gallery-images");
-    await uploadFiles(primary_images, "primary-images");
     
 }
 

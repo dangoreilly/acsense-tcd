@@ -400,37 +400,14 @@
             </div>
             <!-- Map Misc -->
             <!-- TODO: Add permissions related to flyovers, overlays -->
-            <div class="card" style="grid-column-end: span 2">
+            <!-- <div class="card">
                 <div class="card-header">
                     Map Misc
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                v-model="modifiedPermissions.map.overlays"
-                                :disabled="disabled || modifiedPermissions.is_admin">
-                                <label class="form-check-label"
-                                :class="{'text-warning' : modifiedPermissions.map.overlays != user.map.overlays}"> 
-                                    Add/Remove/Modify the static image Overlays on the main map 
-                                </label> 
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                v-model="modifiedPermissions.map.jumps"
-                                :disabled="disabled || modifiedPermissions.is_admin">
-                                <label class="form-check-label"
-                                :class="{'text-warning' : modifiedPermissions.map.jumps != user.map.jumps}"> 
-                                    Add/Remove/Modify the flyover arrows on the main map 
-                                </label> 
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
-            </div>
+            </div> -->
         </div>
         <div class="card mt-3 border-0" v-if="permissionsChanged">
             <div class="card-body py-0 px-0">

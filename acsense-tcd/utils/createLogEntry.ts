@@ -1,7 +1,3 @@
-import type { ChangesObject } from "~/utils/getChanges";
-import type { Building, Space, Building_Gallery_Image, Space_Type } from "~/assets/types/supabase_types";
-import type { UserProfile } from "~/assets/types/permissions";
-
 /**
  * Creates a log entry and inserts it into the 'logs' table in Supabase.
  * 
@@ -11,17 +7,16 @@ import type { UserProfile } from "~/assets/types/permissions";
  * @param subject - The subject of the log entry.
  * @param data - Additional data for the log entry.
  */
-export async function createLogEntry(supabase: any, user: UserProfile, action: string, subject: string, data: ChangesObject | null | Building | Space | Building_Gallery_Image | Space_Type) {
+export async function createLogEntry(supabase: any, user: string, action: string, subject: string, data: any){
+  const logEntry: LogEntry = { user, action, subject, data };
 
-    const logEntry: LogEntry = { user: user.email, action, subject, data };
+  const { error } = await supabase
+    .from('logs')
+    .insert(logEntry);
 
-    const { error } = await supabase
-        .from('logs')
-        .insert(logEntry);
-
-    if (error) {
-        console.error('Error inserting log entry:', error);
-    }
+  if (error) {
+    console.error('Error inserting log entry:', error);
+  }
 }
 
 interface LogEntry {

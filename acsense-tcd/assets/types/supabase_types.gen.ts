@@ -37,7 +37,7 @@ export type Database = {
       building_gallery_images: {
         Row: {
           alt: string | null
-          building: string
+          building: string | null
           caption: string | null
           created_at: string | null
           id: number
@@ -45,7 +45,7 @@ export type Database = {
         }
         Insert: {
           alt?: string | null
-          building: string
+          building?: string | null
           caption?: string | null
           created_at?: string | null
           id?: number
@@ -53,7 +53,7 @@ export type Database = {
         }
         Update: {
           alt?: string | null
-          building?: string
+          building?: string | null
           caption?: string | null
           created_at?: string | null
           id?: number
@@ -334,7 +334,6 @@ export type Database = {
           created_at: string | null
           email: string
           is_admin: boolean
-          map: Json | null
           spaces: Json | null
           user_id: string
         }
@@ -343,7 +342,6 @@ export type Database = {
           created_at?: string | null
           email?: string
           is_admin?: boolean
-          map?: Json | null
           spaces?: Json | null
           user_id?: string
         }
@@ -352,7 +350,6 @@ export type Database = {
           created_at?: string | null
           email?: string
           is_admin?: boolean
-          map?: Json | null
           spaces?: Json | null
           user_id?: string
         }
@@ -417,7 +414,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "rooms_building_fkey"
+            foreignKeyName: "public_rooms_building_fkey"
             columns: ["building"]
             isOneToOne: false
             referencedRelation: "buildings"
@@ -646,6 +643,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "public_spaces_type_fkey"
+            columns: ["type"]
+            isOneToOne: false
+            referencedRelation: "space_styles"
+            referencedColumns: ["category"]
+          },
+          {
             foreignKeyName: "spaces_building_fkey"
             columns: ["building"]
             isOneToOne: false
@@ -658,13 +662,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "buildings"
             referencedColumns: ["UUID"]
-          },
-          {
-            foreignKeyName: "spaces_type_fkey"
-            columns: ["type"]
-            isOneToOne: false
-            referencedRelation: "space_styles"
-            referencedColumns: ["category"]
           },
           {
             foreignKeyName: "spaces_updated_by_fkey"
@@ -780,7 +777,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -794,7 +790,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -808,7 +803,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -830,7 +824,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -841,7 +834,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -852,7 +844,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [

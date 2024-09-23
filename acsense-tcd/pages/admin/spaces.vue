@@ -5,12 +5,9 @@
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for space selection -->
-            <AdminEntitySelector 
-            @activeEntityChanged="getStudentSpace($event)"
-            :updateCount="updateCount"
-            entityType="space"
-            :permissions="user"
-            :supabase_client="supabase"/>
+            <AdminStudentSpaceSelector 
+            @activeSpaceChanged="getStudentSpace($event)"
+            :updateCount="updateCount"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
@@ -18,25 +15,7 @@
                 <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
-                        Space Management | 
-                        <!-- Input for canonical, only if the user is the superadmin -->
-                        <div v-if="checkPermission('canonical')" class="ms-2">
-                            <!-- The field should only be editable if the building is unpublished -->
-                            <input type="text" 
-                            id="canonical"
-                            :class="space.published ? 'bg-yellow-100' : 'bg-white'"
-                            class="form-control fs-5 border font-monospace border-success" 
-                            v-model="space.canonical"
-                            title="Change the page URL. This can only be done while the building is unpublished"
-                            :disabled="space.published">
-                        </div>
-                        <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4" v-else>
-                            <NuxtLink
-                            :to="'/space/' + space.canonical"
-                            class="link-dark text-decoration-none">
-                                {{ space.canonical }}
-                            </NuxtLink>
-                        </span>
+                        Space Management | <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">{{ space.canonical }}</span>
                     </h1>
 
                     <!-- Publish switch -->
@@ -606,7 +585,7 @@
                         </div>
                         <!-- Display -->
                         <div class="col" v-if="space.tips && space.tips.length > 0">
-                            <AccessTips :tips="space.tips" entity="space"/>
+                            <AccessTips :tips="space.tips" />
                         </div>
                         <div class="col" v-else>
                             <!-- <p><em> &lt;&lt; Tip box will not display >> </em></p> -->
@@ -1112,10 +1091,6 @@ const campusBounds = [
                 if(this.space_list.length == 0) return false;
                 if(this.overlays.length == 0) return false;
                 if(document.getElementById("space-placement-map") == null) return false;
-                // Check that we're on the client side
-                if (!window) return false;
-                console.log("Map data loaded, window is defined")
-                console.log(window)
 
                 return true
                 
@@ -1134,7 +1109,7 @@ const campusBounds = [
                 else {
                     // Update the space object with the new data
                     // console.log("Buildings:")
-                    console.log(buildings);
+                    // console.log(buildings);
                     this.buildings = sortArrayOfObjectsByKey(buildings, "display_name");
                 }
             },
@@ -1507,6 +1482,11 @@ const campusBounds = [
             logChange() {},
         },
     }
+
+    definePageMeta({
+        middleware: 'auth'
+    })
+
 
 </script>
 

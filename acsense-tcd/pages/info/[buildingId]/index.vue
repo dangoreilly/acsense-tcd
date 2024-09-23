@@ -317,8 +317,7 @@ const { x, y } = useWindowScroll()
         wheelchair,
         wheelchair_note,
         icon:space_styles(url:icon),
-        icon_override,
-        published
+        icon_override
         `
 
 
@@ -331,7 +330,6 @@ const { x, y } = useWindowScroll()
             gallery_images:building_gallery_images!building_gallery_images_building_fkey(*)`
         )
         .eq('canonical', canonical)
-        .eq('spaces.published', true)
         .single()
         if (error) {
             console.error(error)

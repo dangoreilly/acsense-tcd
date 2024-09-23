@@ -183,4 +183,19 @@ onMounted(() => {
         
     });
 })
+
+// useHead({
+//     script: [
+//         {
+//             src: 'https://plausible.io/js/embed.host.js',
+//             async: true,
+//         },
+//     ],
+// })
+
+
+definePageMeta({
+  layout: false,
+  middleware: ['auth'],
+});
 </script>

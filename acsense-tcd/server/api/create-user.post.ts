@@ -85,9 +85,6 @@ export default defineEventHandler(async (event) => {
             // return { data:null, new_user_error }
             throw new_user_error
         }
-
-        // Log the event
-        await createLogEntry(supabase, permissions, 'User Created', data, null);
     }
 
     // Now whether the user existed or not, we can send them a password reset email
@@ -99,9 +96,6 @@ export default defineEventHandler(async (event) => {
             redirectTo: useRuntimeConfig().public.baseUrl + '/admin/password-reset',
         }
     })
-
-    // Log the event
-    await createLogEntry(supabase, permissions, 'Password Reset', data, null);
 
     // return_data = recovery_email_data;
     // return_error = recovery_email_error;

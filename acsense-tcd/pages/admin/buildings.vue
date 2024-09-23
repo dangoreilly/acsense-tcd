@@ -5,12 +5,9 @@
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for building selection -->
-            <AdminEntitySelector 
-            @activeEntityChanged="getBuilding($event)"
-            entityType="building"
-            :permissions="user"
-            :supabase_client="supabase"
-            :updateCount="building_list_refresh_token"/>
+            <AdminBuildingSelector 
+            @activeBuildingChanged="getBuilding($event)"
+            :supabase_client="supabase"/>
             <!-- Main section for editing -->
             <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
 
@@ -19,19 +16,8 @@
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
                         Building Management | 
-                        <!-- Input for canonical, only if the user is the superadmin -->
-                        <div v-if="checkPermission('canonical')" class="ms-2">
-                            <!-- The field should only be editable if the building is unpublished -->
-                            <input type="text" 
-                            id="canonical"
-                            :class="building.published ? 'bg-yellow-100' : 'bg-white'"
-                            class="form-control fs-5 border font-monospace border-success" 
-                            v-model="building.canonical"
-                            title="Change the page URL. This can only be done while the building is unpublished"
-                            :disabled="building.published">
-                        </div>
-                        <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4" v-else>
-                            <NuxtLink
+                        <span class=" p-1 ms-2 border font-monospace border-success bg-yellow-100 fs-4">
+                            <NuxtLink 
                             :to="'/info/' + building.canonical"
                             class="link-dark text-decoration-none">
                                 {{ building.canonical }}
@@ -341,7 +327,7 @@
                         </div>
                         <!-- Display -->
                         <div class="col" v-if="building.tips.length > 0">
-                            <AccessTips :tips="building.tips" entity="building"/>
+                            <AccessTips :tips="building.tips" />
                         </div>
                         <div class="col" v-else>
                             <!-- <p><em> &lt;&lt; Tip box will not display >> </em></p> -->
@@ -377,47 +363,23 @@
                     </div>
 
                     <!-- Map Preview-->
-                    <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="building.geometry">
+                    <div class="map-section border-top border-1 border-black pt-3 mt-3" v-if="building.geometry" style="display: none;">
+                        <!-- Space type and location -->
                         <!-- Inputs -->
                         <div style="grid-area: 'input';" class="me-2">    
-                            <!-- Views -->
-                            <div>
-                                <span class="d-block">Center map</span>
-                                <button 
-                                type="button" 
-                                class="btn btn-sm btn-outline-primary mx-1" 
-                                @click="centerViewOnCampus()">
-                                    Campus
-                                </button>
-
-                                <button 
-                                type="button" 
-                                class="btn btn-sm btn-outline-primary mx-1" 
-                                @click="centerViewOnBuilding()">
-                                    Building
-                                </button>
-                            </div>
-                            <!-- Labels -->
-                            <div class="mt-3">
-                                <label for="coordinates">Primary Label</label>
-                                <input  
-                                :disabled="!checkPermission('map_label_1')"
-                                @input="updateCurrentBuildingLabels()"
-                                type="text" class="form-control mb-2" v-model="building.map_label_1">
+                            <!-- Lat and long inputs -->
+                            <div class="mb-3">
+                                <label for="coordinates">Building Shape</label>
+                                <textarea 
+                                class="form-control" 
+                                id="coordinates" 
+                                rows="4" 
+                                v-model="building.further_info">
+                                </textarea>
                                 
-                                    <label for="coordinates">Secondary Label</label>
-                                <input  
-                                :disabled="!checkPermission('map_label_2')"
-                                @input="updateCurrentBuildingLabels()"
-                                type="text" class="form-control" v-model="building.map_label_2">
-                                
-                                    <!-- <label for="coordinates">Tertiary Label</label>
-                                <input  
-                                :disabled="!checkPermission('map_label_3')"
-                                    type="text" class="form-control" v-model="building.map_label_3"> -->
                             </div>
                             <!-- Display Settings -->
-                            <div class="form-check mb-3 mt-3" title="Select for satellite buildings that are not already included in an overlay">
+                            <div class="form-check mb-3">
                                 <input  
                                 :disabled="!checkPermission('always_display')"
                                 class="form-check-input" type="checkbox" v-model="building.always_display" id="always_display">
@@ -425,46 +387,10 @@
                                     Always Display
                                 </label>
                             </div>
-                            <!-- Lat and long inputs -->
-                            <div class="mb-3">
-                                <label for="coordinates">Building Shape</label>
-                                <textarea 
-                                :disabled="!checkPermission('geometry')"
-                                class="form-control" 
-                                id="coordinates" 
-                                rows="4" 
-                                :value="JSON.stringify(building.geometry.coordinates)">
-                                </textarea>
-                                <p class="fst-italic mb-0 my-1">To update building shape, copy and paste coordinates from geometryEdit into the above box</p>
-                                <a  
-                                class="btn btn-sm btn-secondary mx-1 mt-1" 
-                                :href="'/geometryEdit?building='+building.canonical" target="_blank">
-                                    geometryEdit
-                                </a>
-                                <button 
-                                :disabled="!checkPermission('geometry')"
-                                title="Warning: Confirm new geometry renders as expected in preview before saving"
-                                type="button" 
-                                class="btn btn-sm btn-warning mx-1 mt-1" 
-                                @click="updateBuildingGeometry()">
-                                    Update geometry
-                                </button>
-                            </div>
                         </div>
                         <!-- Map -->
-                        <div style="grid-area: 'input';">
-                            <span class="fw-bold">{{hover.active ? hover.space : "Hover over space or building to see what it is"}}</span>
-                            <div id="building-placement-map" style="height: 600px; padding-top: 30px; "></div>
-                        </div>
+                        <div  id="building-placement-map" style="height: 600px; padding-top: 30px; grid-area: 'input';"></div>
                     </div>
-                    <!-- <AdminBuildingGeometryEdit v-if="mapDataLoaded()"
-                    :building="building"
-                    :checkPermission="checkPermission"
-                    :buildings_list="buildings_list" 
-                    :space_types="space_types"
-                    :spaces_list="spaces_list"
-                    :overlays="overlays"
-                    ></AdminBuildingGeometryEdit> -->
                     <p></p>
                     <!-- Gallery -->
                     <div class="row">
@@ -566,41 +492,41 @@
 <script setup>
     
 //Script setup needed for UseHead
-// import '~/assets/css/leaflet.css'
+import '~/assets/css/leaflet.css'
 
-// useHead({
+useHead({
 
-//     link: [
-//         {
-//             rel:"stylesheet",
-//             href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-//         },
-//     ],
-//     script: [
-//         {
-//             src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-//             integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
-//             crossorigin: "",
-//         },
-//         {
-//             src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
-//             body: true,
-//         },
-//         // {
-//         //     src: '/javascript/mapInit.js',
-//         //     body: true,
-//         // },
-//         // {
-//         //     src: 'https://unpkg.com/@supabase/supabase-js@2',
-//         // },
-//         {
-//             src: '/javascript/adminMapFunctions.js',
-//         },
-//         {
-//             src: '/javascript/mapFunctions.js',
-//         },
-//     ]
-// });
+    link: [
+        {
+            rel:"stylesheet",
+            href:"https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
+        },
+    ],
+    script: [
+        {
+            src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+            integrity: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+            crossorigin: "",
+        },
+        {
+            src: 'https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js',
+            body: true,
+        },
+        // {
+        //     src: '/javascript/mapInit.js',
+        //     body: true,
+        // },
+        // {
+        //     src: 'https://unpkg.com/@supabase/supabase-js@2',
+        // },
+        {
+            src: '/javascript/adminMapFunctions.js',
+        },
+        {
+            src: '/javascript/mapFunctions.js',
+        },
+    ]
+});
 
 
 // const { supabase, session } = await adminSupabaseInit();
@@ -614,24 +540,6 @@
 <script>
 import {createClient} from '@supabase/supabase-js';
 import getPermissionsKey from "~/assets/permissionsKey"
-// @ts-ignore
-import * as L from "leaflet";
-import '~/assets/css/leaflet.css'
-// import "@geoman-io/leaflet-geoman-free";
-// import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
-import 'leaflet.fullscreen';
-import 'leaflet.fullscreen/Control.FullScreen.css';
-// L.PM.setOptIn(false);
-
-import { addBuildings, addLabelsToMap, addOverlays, addSpaces, addZoomHandling } from '~/utils/adminMapUtils'
-// import type { Building, Space, Space_Type, Overlay } from '~/assets/types/supabase_types'
-// import type { Building_Partial, Space_Partial } from "~/utils/adminMapUtils";
-
-
-const campusBounds = [
-                    [53.345568, -6.259428],
-                    [53.341853, -6.249477]
-                ];
 
     export default {
         data() {
@@ -650,19 +558,6 @@ const campusBounds = [
                 user: {},
                 permissionsKey: {},
                 permissionsKey_gallery: {},
-                building_list_refresh_token: 0,
-
-                // Map stuff
-                buildings_list: [],
-                space_types: [],
-                spaces_list: [],
-                overlays: [],
-                map: {},
-                hover: {
-                    active: false,
-                    space: ''
-                },
-                buildingLabels: {},
             }
         },
         created() {
@@ -685,8 +580,8 @@ const campusBounds = [
             this.permissionsKey = getPermissionsKey("buildings");
             this.permissionsKey_gallery = getPermissionsKey("building_gallery_images");
             
-            // Get the lists of buildings, overlays, and spaces to display on the map
-            this.getMapObjects();
+            
+            // this.mapInit();
             
         },
         computed: {
@@ -700,14 +595,6 @@ const campusBounds = [
             
         },
         methods: {
-
-            async getMapObjects(){
-                // Get the lists of buildings, overlays, and spaces to display on the map
-                this.buildings_list = await getBuildingList(this.supabase);
-                this.overlays = await getOverlays(this.supabase);
-                this.space_types = await getSpaceTypes(this.supabase);
-                this.spaces_list = await getSpaces(this.supabase);
-            },
             // Resolve the promise of the user object
             // So that we can check the permissions on it
             async getUser(){
@@ -729,168 +616,18 @@ const campusBounds = [
                 return userHasPermission(this.user, this.permissionsKey, permission);
             },
 
-            updateBuildingGeometry(){
-                // Get the value of the geometry textarea
-                let newGeometry = JSON.parse(document.getElementById("coordinates").value);
-                // Update the building object with the new geometry
-                this.building.geometry.coordinates = newGeometry;
-                // Update the map with the new building
-                this.loadBuildingToMap();
-            },
 
-            async loadBuildingToMap(){
-                // Wait for the page to be loaded
-                while (!this.mapDataLoaded()) {
+            // Create the map
+            async mapInit(){
+                // Initialise the map
+                // Wait for this function to have loaded
+                while (typeof buildingSelectMapInit !== "function") {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
-
-                // Regenerate and Set up the basics of the map
-                this.initMap();
-
-                // Add the editable building to the map
-                this.addCurrentBuildingToMap();
-                // Add the editable labels to the map
-                this.addCurrentBuildingLabelsToMap();
-
-                // Move the view to the building
-                this.centerViewOnBuilding();
-
-                
-                // Init a callback function to update hover text
-                let updateHoverText = (active, text) => {
-                    this.hover.active = active;
-                    this.hover.space = text;
-                }
-
-                // Add the overlays to the map
-                // this.map = 
-                addOverlays(L, this.map, this.overlays, null, false);
-
-                // Add the buildings to the map
-                // this.map = 
-                addBuildings(L, this.map, this.buildings_list, this.building, true, updateHoverText);
-                addLabelsToMap(L, this.map, this.buildings_list, this.building);
-
-                // Add the other spaces to the map
-                // this.map = 
-                addSpaces(L, this.map, this.spaces_list, this.space_types, null, true, updateHoverText);
-            },
-
-            addCurrentBuildingLabelsToMap(){
-                this.buildingLabels = makeLabels(L, this.map, this.building);
-            },
-
-            addCurrentBuildingToMap(){
-                // Add a new layer to the map for the building
-                let building_geojson = {
-                    "type": "Feature",
-                    "geometry": {
-                        "coordinates": this.building.geometry.coordinates,
-                        "type": "Polygon"
-                    }
-                }
-                let buildingLayer = L.geoJSON(building_geojson, {
-                    style: {
-                        color: '#E53397',
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.75,
-                        fillColor: "#E53397"
-                    },
-                    // onEachFeature: function(feature, layer) {
-                    //     layer.options.pmIgnore = false;
-                    //     L.PM.reInitLayer(layer);
-                    //     console.log(layer);
-                    // }
-                })
-                // buildingLayer.options.pmIgnore = false;
-                // L.PM.reInitLayer(buildingLayer);
-                
-                buildingLayer.addTo(this.map);
-
-                // this.currentBuildingLayer = buildingLayer;
-            },
-
-            initMap(){
-                // Check if there is already a map object, remove if there is
-                try {
-                    this.map.remove();
-                }
-                catch (error) {
-                    console.log("No map to remove");
-                }
-
-                // Initialise the map
-                let map = L.map('building-placement-map', {
-                    zoomSnap: 0.25,
-                    zoomDelta: 0.25,
-                    maxZoom: 20,
-                    renderer: L.canvas({padding: 1}),
-                    fullscreenControl: true,
-                    fullscreenControlOptions: {
-                        position: 'topleft'
-                    },
-                    // pmIgnore: false,
-                }).fitBounds(campusBounds);
-
-                // add Leaflet-Geoman controls with some options to the map  
-                // map.pm.addControls({  
-                //     position: 'topleft',  
-                //     drawControls: false,
-                //     cutPolygon: false,
-                //     removalMode: false,
-                // }); 
-
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //rastertiles/voyager_nolabels
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                    maxZoom:20
-                }).addTo(map);
-
-                // Cheap debug
-                // map.on('click', function(e) {
-                //     let cheapDebugObject = {
-                //         latlng: e.latlng,
-                //         bounds: map.getBounds(),
-                //         zoom: map.getZoom(),
-                //         center: map.getCenter()
-                //     }
-            
-                //     console.log(cheapDebugObject);
-                    
-                // });
-
-                // map.on("pm:enable", function(e) {
-                //     console.log("pm:enable", e);
-                // });
-
-                // Add zoom handling
-                addZoomHandling(map);
-
-                // // Add the current building to the map
-                // this.addCurrentBuildingToMap(map);
-
-                this.map = map;
-                // return map;
-
-            },
-
-            updateCurrentBuildingLabels(){
-                // Remove the current labels from the map
-                this.buildingLabels.primary_label?.remove();
-                this.buildingLabels.secondary_label?.remove();
-                this.buildingLabels.tertiary_label?.remove();
-                // Add the new labels to the map
-                this.addCurrentBuildingLabelsToMap();
-            },
-
-            centerViewOnCampus(){
-                // When called, update the map to be centred on the campus
-                this.map.fitBounds(campusBounds);
-            },
-
-            centerViewOnBuilding(){
-                // When called, update the map to be centred on the building
-                this.map.setView(getGeometricCenter(this.building.geometry.coordinates), 18);
+                // Once the function is loaded, we can call it
+                // This function will initialise the map and add the marker
+                // We provide a callback function to update the space's location when the marker is moved
+                buildingSelectMapInit(this.updateBuildingGeometry, this.supabase);
             },
 
             confirmChangePublishStatus(){
@@ -928,9 +665,6 @@ const campusBounds = [
                 this.building.published = JSON.parse(JSON.stringify(this.building_clean.published));
                 alert(this.building.display_name + " has been " + (this.building.published ? "published" : "unpublished"));
 
-                // Refresh the building list
-                this.building_list_refresh_token += 1;
-
             },
 
             // This function is called when the user clicks the "Save" button
@@ -938,14 +672,6 @@ const campusBounds = [
             async updateBuilding() {
                 // Deep copy the building object, as things get messy otherwise
                 let update_vehicle = JSON.parse(JSON.stringify(this.building));
-
-                // Check if the canonical name has been changed
-                // Confirm with a dialog box if it has
-                if (this.building.canonical != this.building_clean.canonical){
-                    if (!window.confirm("Changing the canonical name will break all links to this building. Are you sure you want to do this?")){
-                        return;
-                    }
-                }
 
                 // If the primary image has been changed, upload the new image and update the url
                 try {
@@ -982,8 +708,7 @@ const campusBounds = [
                     console.log(data)
                 }
 
-                // Refresh the building list
-                this.building_list_refresh_token += 1;
+
             },
 
             handlePrimaryImageSelect(evt) { 
@@ -1096,22 +821,17 @@ const campusBounds = [
                 this.gallery_clean.splice(index, 1);
                 
                 // Remove the database entry
-                const access_token = await getSessionAccessToken(this.supabase);
-                const {data: img, error:db_delete_error} = await removeFromTable(
-                    access_token, 
-                    "building_gallery_images", 
-                    { 
-                        col: 'url', 
-                        eq: url,
-                    }
-                )
-                
+                const { data:db_response, error:db_error } = await this.supabase
+                .from('building_gallery_images')
+                .delete()
+                .eq('url', url)
 
-                if (db_delete_error) {
-                    console.error(db_delete_error)
-                    alert(db_delete_error.message)
-                    throw db_delete_error
+                if (db_error) {
+                    console.error(db_error)
+                    alert(db_error.message)
+                    throw db_error
                 }
+                console.log(db_response)
 
                 // Get the path by subtracting the supabase url from the image url
                 let path = url.replace(this.supabase.storageUrl + "/object/public/gallery-images/", "");
@@ -1144,6 +864,49 @@ const campusBounds = [
 
             },
 
+            // This function compares the current state of the building against the state it was in when the page was loaded
+            // It returns a list of the fields that have been changed
+            getChanges() {},
+
+            // Attempts to create a new building with the given canonical name
+            async newBuilding(canonical) {
+                // Check if the building already exists
+                let { data: bld, error } = await this.supabase
+                    .from('buildings')
+                    .select('*')
+                    .eq('canonical', canonical)
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
+                }
+                else {
+                    // If the building already exists, return false
+                    if (bld.length > 0) {
+                        return false;
+                    }
+                    // If the building does not exist, create it
+                    else {
+                        let { data: bld, error } = await this.supabase
+                            .from('buildings')
+                            .insert([
+                                { canonical: canonical }
+                            ])
+                        if (error) {
+                            console.error(error)
+                            alert(error.message)
+                            throw error
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+                }
+            },
+
+            // This function adds a log entry to the database
+            logChange() {},
+
             // This function fetches the building from the database based on it's canonical name
             async getBuilding(canonical){
                 console.log("Fetching building: " + canonical);
@@ -1172,28 +935,10 @@ const campusBounds = [
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
                     
                     // Update the map to show the building
-                    // Wait for the space_types and buildings list to have loaded first
-                    while (!this.mapDataLoaded()) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                    // Now we have the space types and buildings, we can load the space to the map
-                    this.loadBuildingToMap();
+                    // this.loadBuildingToMap();
 
                 }
                 
-            },
-            mapDataLoaded(){
-
-                // Checks if the arrays for the map data have been populated
-                // Returns true if all are populated, false otherwise
-                if (this.space_types.length == 0) return false; 
-                if(this.buildings_list.length == 0) return false;
-                if(this.spaces_list.length == 0) return false;
-                if(this.overlays.length == 0) return false;
-                if(document.getElementById("building-placement-map") == null) return false;
-
-                return true
-
             },
 
             // this function fetches all the images for a given building
@@ -1274,9 +1019,22 @@ const campusBounds = [
         },
     }
 
+    definePageMeta({
+        middleware: 'auth'
+    })
+
+
 </script>
 
 <style>
+
+.map-section{
+    /* Define the grid to give enough room for the map */
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-areas: "input map";
+    grid-template-rows: auto;
+}
 
 .primary-image-preview{
     border-bottom-right-radius: 0.5rem;

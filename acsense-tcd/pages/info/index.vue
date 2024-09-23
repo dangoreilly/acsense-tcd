@@ -172,7 +172,6 @@ import {createClient} from '@supabase/supabase-js'
         let { data: buildings, error } = await supabase
             .from('buildings')
             .select('display_name, canonical, description, aka')
-            .eq("published", true)
         if (error) {
             console.log(error)
             throw error
@@ -195,7 +194,6 @@ import {createClient} from '@supabase/supabase-js'
             .from('spaces')
             // .select('*')
             .select('name, building, aka, microwave, kettle, seating, outlets, food_drink_allowed, wheelchair, type, description, canonical, aka')
-            .eq("published", true)
         if (error) {
             console.log(error)
             throw error
