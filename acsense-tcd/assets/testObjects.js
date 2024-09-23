@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.space_outside = exports.space_inside = exports.building = exports.user_superadmin = exports.user_none = exports.user_admin = exports.user_buildingsOnly = exports.user_all = void 0;
+exports.overlay = exports.logs = exports.space_outside = exports.space_inside = exports.building = exports.user_superadmin = exports.user_none = exports.user_admin = exports.user_buildingsOnly = exports.user_all = void 0;
 exports.user_all = {
     email: "user.all@acsense.ie",
     user_id: "0",
@@ -63,6 +63,10 @@ exports.user_all = {
         },
         facilities: true
     },
+    map: {
+        overlays: true,
+        jumps: true,
+    }
 };
 exports.user_buildingsOnly = {
     email: "user.buildingsOnly@acsense.ie",
@@ -125,6 +129,10 @@ exports.user_buildingsOnly = {
         },
         facilities: false
     },
+    map: {
+        overlays: false,
+        jumps: false,
+    }
 };
 exports.user_admin = {
     email: "admin@acsense.ie",
@@ -187,6 +195,10 @@ exports.user_admin = {
         },
         facilities: false
     },
+    map: {
+        overlays: true,
+        jumps: true,
+    }
 };
 exports.user_none = {
     email: "user.none@acsense.ie",
@@ -249,6 +261,10 @@ exports.user_none = {
         },
         facilities: false
     },
+    map: {
+        overlays: false,
+        jumps: false,
+    }
 };
 exports.user_superadmin = {
     email: "superadmin@acsense.ie",
@@ -311,6 +327,10 @@ exports.user_superadmin = {
         },
         facilities: false
     },
+    map: {
+        overlays: false,
+        jumps: false,
+    },
 };
 // Buildings
 exports.building = {
@@ -367,7 +387,6 @@ exports.space_inside = {
     "icon_override": "",
     "seating": true,
     "UUID": "49cdcd7f-6b4d-4a11-abd0-2d41d2bbfbfb",
-    "building_uuid": "e5172612-24ac-43ad-a01c-503bbc7edaf0",
     "food_drink_allowed_note": "Food and Drink Note",
     "microwave_note": "Microwave Note\\n",
     "kettle_note": "Kettle Note\\n",
@@ -425,7 +444,6 @@ exports.space_inside = {
     ],
     "clickthrough": false,
     "published": true,
-    "updated_by": null
 };
 exports.space_outside = {
     "name": "Example Space 2",
@@ -446,7 +464,6 @@ exports.space_outside = {
     "icon_override": "",
     "seating": true,
     "UUID": "b416eab6-5fb2-4d44-9683-24c7500a18ec",
-    "building_uuid": null,
     "food_drink_allowed_note": "\"\"",
     "microwave_note": "\"\"",
     "kettle_note": "\"\"",
@@ -504,5 +521,49 @@ exports.space_outside = {
     ],
     "clickthrough": false,
     "published": true,
-    "updated_by": null
+};
+exports.logs = [
+    {
+        "id": 1,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "UPDATE",
+        "subject": "buildings:example-building-1",
+        "data": {
+            "old": {
+                "aka": "Ex. B1 test"
+            },
+            "new": {
+                "aka": "Ex. B1 test d"
+            },
+            "list": [
+                "aka"
+            ],
+            "error": null
+        }
+    },
+    {
+        "id": 2,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "INSERT",
+        "subject": "buildings:example-building-2",
+        "data": exports.building
+    },
+    {
+        "id": 3,
+        "created_at": "2024-08-08 21:14:55.290316+00",
+        "user": "40f8687f-88bc-4dd6-b43e-4f18b8cc086d",
+        "action": "DELETE",
+        "subject": "example-building-1",
+        "data": null
+    }
+];
+exports.overlay = {
+    "url": "/images/overlay.png",
+    "url_dark": "/images/overlay-dark.png",
+    "bounds": [[6.24714287637749, 53.3458915634745], [6.26168888731324, 53.3416423399052]],
+    "high_detail": false,
+    "id": 1,
+    "created_at": "2021-09-01T12:00:00.000Z",
 };

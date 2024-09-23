@@ -36,6 +36,12 @@ export default defineEventHandler(async (event) => {
                 // Because this is messy
             }
 
+            // If this is the overlays table, check the user has permission to insert
+            if (table == 'overlays' && checkUserHasPermission(permissions, "overlays", {old:{}, new:{}, list:["url"], error: null} )) {
+                // The way these permissions are handled will likely change in the future
+                // Because this is messy
+            }
+
             // Otherwise, check the user is an admin
             else if (!permissions.is_admin) {
                 throw createError({
@@ -48,6 +54,7 @@ export default defineEventHandler(async (event) => {
             const { data: insertedData, error: insert_error } = await supabase
             .from(table)
             .insert(data)
+            .select()
             
 
             if (insert_error) {
@@ -58,7 +65,7 @@ export default defineEventHandler(async (event) => {
             }
             else {
                 // Add to the logs table
-                createLogEntry(supabase, permissions.user_id, "INSERT", table, data);
+                createLogEntry(supabase, permissions, "INSERT", table, data);
                 
             }
             // If the insert was successful, return the inserted data
@@ -100,11 +107,8 @@ export default defineEventHandler(async (event) => {
                 // Add to the logs table
                 let subject = table+":"+target.eq;
 
-                // If the table is the users table, then the subject is the user's email
+                // If the table is spaces or buildings, get the canonical name, to be more human-readable
                 switch (table) {
-                    case 'users':
-                        subject = data.email;
-                        break;
                     case 'spaces':
                         // Get the canonical name of the space
                         const { data: spaceData, error: spaceError } = await supabase
@@ -114,7 +118,7 @@ export default defineEventHandler(async (event) => {
 
                         // If there's an error, just use the space ID
                         if (!spaceError) {
-                            subject = spaceData[0].canonical;
+                            subject = "spaces:"+spaceData[0].canonical;
                         }
 
                         break;
@@ -127,13 +131,13 @@ export default defineEventHandler(async (event) => {
 
                         // If there's an error, just use the space ID
                         if (!buildingError) {
-                            subject = buildingData[0].canonical;
+                            subject = "buildings:"+buildingData[0].canonical;
                         }
                         break;
                 }
 
 
-                createLogEntry(supabase, permissions.user_id, "UPDATE", subject, changes);
+                createLogEntry(supabase, permissions, "UPDATE", subject, changes);
             }
             // If the update was successful, return the updated data
             return updatedData;
@@ -144,6 +148,12 @@ export default defineEventHandler(async (event) => {
 
             // If this is the gallery table, check the user has permission to delete
             if (table == 'building_gallery_images' && checkUserHasPermission(permissions, "building_gallery_images", {old:{}, new:{}, list:["url"], error: null} )) {
+                // The way these permissions are handled will likely change in the future
+                // Because this is messy
+            }
+
+            // If this is the overlays table, check the user has permission to insert
+            if (table == 'overlays' && checkUserHasPermission(permissions, "overlays", {old:{}, new:{}, list:["url"], error: null} )) {
                 // The way these permissions are handled will likely change in the future
                 // Because this is messy
             }
@@ -170,7 +180,7 @@ export default defineEventHandler(async (event) => {
             }
             else {
                 // Add to the logs table
-                createLogEntry(supabase, permissions.user_id, "UPDATE", table+":"+target.eq, {});
+                createLogEntry(supabase, permissions, "DELETE", table+":"+target.eq, null);
             }
             // If the delete was successful, return the deleted data
             return deletedData;

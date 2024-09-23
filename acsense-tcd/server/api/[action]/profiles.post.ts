@@ -96,6 +96,10 @@ export default defineEventHandler(async (event) => {
                     statusMessage: update_error.message
                 })
             }
+
+            // Log the changes to the user profile
+            createLogEntry(supabase, permissions, "UPDATE", target.email, changes);
+
             // If the update was successful, return the updated data
             return updatedData;
 

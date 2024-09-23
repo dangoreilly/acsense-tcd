@@ -1,30 +1,36 @@
 import { createClient } from '@supabase/supabase-js'
+import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr'
 
-export default defineNuxtRouteMiddleware( async (to, from) => {
-
+export default defineNuxtRouteMiddleware(async (to, from) => {
     console.log("User navigating to " + to.path + " from " + from.path);
     const runtimeConfig = useRuntimeConfig()
+    // Skip on client-side navigation
+    if (import.meta.client) return
+    console.log("Auth middleware running...")
 
     const supabaseUrl = runtimeConfig.public.supabaseUrl;
-    const supabaseKey = runtimeConfig.public.supabaseKey;
-    // cosnole.log({supabaseUrl, supabaseKey})
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabaseServiceKey = runtimeConfig.supabaseServiceKey;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log("Auth middleware running...")
-    const { data, error } = await supabase.auth.getSession()
+    // Get the jwt token from the cookies
+    // const cookies = parseCookieHeader(to.req.headers.cookie)
+    const jwt = useCookie('supabase.auth.token')
+    // console.log("JWT token: " + JSON.stringify(jwt.value));
 
-    // console.log("Session Data")
-    // console.log(data);
-    // console.error("Error: " + error);
-  
-    if (!data.session) {
-      // Redirect to login or restricted access page
-        console.log("User is not logged in, redirecting to login page");
-      return navigateTo('/admin/login'); // Change this to your login page route
+    // Check the permissions of the user based on the JWT token
+    const { data: currentUser, error: jwt_error } = await supabase.auth.getUser(jwt.value);
+
+    // console.log(JSON.stringify(currentUser));
+    // const { data, error } = await supabase.auth.getSession()
+
+    if (!currentUser.user) {
+        if (to.path !== '/admin/login') {
+            console.log("User is not logged in, redirecting to login page");
+            return navigateTo('/admin/login'); // Change this to your login page route
+        } else {
+            console.log("User is already on the login page");
+        }
+    } else {
+        console.log("User is logged in: " + currentUser.user.email);
     }
-
-    console.log("User is logged in: " + data.session.user.email);
-
-    // return navigateTo(to.path);
-
-  });
+});
