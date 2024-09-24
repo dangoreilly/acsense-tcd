@@ -324,7 +324,7 @@ export default {
             for (let i = 0; i < 5; i++) {
                 tooltip += list[i].canonical + ",\n";
             }
-            tooltip += list[i].canonical + ",\n...";
+            tooltip += ",\n...";
             
             return tooltip;
 

@@ -12,10 +12,10 @@
             :permissions="user"
             :supabase_client="supabase"/>
             <!-- Main section for editing -->
-            <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
+            <div class="pt-0 px-4 w-100" style="overflow-y: auto;">
 
                 <!-- Header -->
-                <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
+                <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between sticky-top bg-light">
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
                         Space Management | 

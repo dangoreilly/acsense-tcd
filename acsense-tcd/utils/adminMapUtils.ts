@@ -282,6 +282,8 @@ export function addZoomHandling(map: any): any {
     // let updateLabels = this.updateLabels;
     // let zoomMax = this.LABEL_PRIMARY_RANGE_UPPER;
     // let zoomMin = this.LABEL_PRIMARY_RANGE_LOWER;
+    // Add the CSS
+    addZoomHandlingCSS();
 
     map.on('zoomend', function() {
         // console.log('zoomend');
@@ -294,6 +296,39 @@ export function addZoomHandling(map: any): any {
 
     return map;
 
+}
+
+function addZoomHandlingCSS(){
+
+    // Check if the parent document has CSS classes for the labels
+    // If not, add them
+    
+    let styleSheet = document.styleSheets[0];
+
+    styleSheet.insertRule(`.primary-label {
+            opacity: var(--primary-label-opacity);
+            transition: opacity 0.5s ease-in-out;
+        }`, styleSheet.cssRules.length);
+
+    styleSheet.insertRule(`.secondary-label {
+            opacity: var(--secondary-label-opacity);
+            transition: opacity 0.5s ease-in-out;
+        }`, styleSheet.cssRules.length);
+
+    styleSheet.insertRule(`.tertiary-label {
+        opacity: var(--tertiary-label-opacity);
+        transition: opacity 0.5s ease-in-out;
+        }`, styleSheet.cssRules.length);
+
+    styleSheet.insertRule(`.flyover-label {
+            opacity: var(--flyover-label-opacity);
+            transition: opacity 0.5s ease-in-out;
+        }`, styleSheet.cssRules.length);
+
+    styleSheet.insertRule(`.sense-icon {
+            opacity: var(--sense-icon-opacity);
+            transition: opacity 0.5s ease-in-out;
+        }`, styleSheet.cssRules.length);
 }
 
 // Update the map labels based on the current zoom level
