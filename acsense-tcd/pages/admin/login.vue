@@ -66,6 +66,13 @@ export default {
         if (data.session) {
             // Redirect to admin page
             console.log("user is logged in")
+            // Set the cookie with the session token
+            // document.cookie = `supabase.auth.token=${data.session.access_token}`
+            const jwt = useCookie("supabase.auth.token")
+            jwt.value = data.session.access_token;
+            const refresh = useCookie("supabase.auth.refresh")
+            refresh.value = data.session.refresh_token;
+            // Navigate to the admin landing page
             return navigateTo('/admin/analytics'); 
         }
         console.log("user is not logged in")

@@ -109,6 +109,17 @@ export default function (table:string) : PermissionsKey | null {
                 buildings: "is_admin",
                 spaces: "is_admin",
             } as PermissionsKey
+
+        case "overlays":
+            return {
+                url: "map.overlays",
+                url_dark: "map.overlays",
+                bounds: "map.overlays",
+                high_detail: "map.overlays",
+
+                id: "service",
+                created_at: "service",
+            } as PermissionsKey
         default:
             return null
     }

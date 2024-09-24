@@ -19,13 +19,20 @@ import { Interface } from "readline/promises"
 // import type { user_profile } from "./supabase_types";
 // import type { Json } from "./supabase_types.gen";
 
-export type UserProfile = {
+export type UserProfile_Template = {
     email: string,
-    user_id: string,
     is_admin: boolean,
-    is_super_admin?: boolean,
     buildings: BuildingsPermissions,
     spaces: SpacesPermissions,
+    map: {
+        overlays: boolean,
+        jumps: boolean,
+    },
+}
+
+export type UserProfile = UserProfile_Template & {
+    user_id: string,
+    is_super_admin?: boolean,
 }
 
 export interface PermissionsObject {
