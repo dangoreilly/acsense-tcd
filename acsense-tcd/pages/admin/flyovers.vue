@@ -37,23 +37,32 @@
                 </div>
                 <!-- Main Matter -->
                 <div class="row border-b">
-                <!-- Full preview map -->
-                    <div class="container w-75">
-                        <AdminOverlayPreview :overlays="overlays" :supabase_client="supabase"/>
-                    </div>
-                </div>
-
-                <div class="row border-b mt-2">
-                <!-- Operation notes -->
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="card-text d-block">To update the size of the overlays on the map, click on the red circles. Click once to begin resizing, and again to stop</span>
-                            <span class="card-text d-block">To move the overlay, click anywhere within the red rectangle. Click once to begin moving the overlay, and again to stop</span>
-                            <span class="card-text d-block">If using an SVG format image, the red rectangle will not relate to the actual dimensions of the overlay</span>
-                            <span class="card-text d-block">For best results, always use SVG format overlays, as these will remain sharp on any screen and will not distort through resizing</span>
-                            <!-- <span class="card-text d-block">To see changes reflected on the full preview map above, you need to click the "Save Bounds" button</span> -->
+                    <div class="col-6">
+                        <div class="container w-75">
+                            <div class="card">
+                                <div class="card-body">
+                                    <span class="card-text d-block">To update the size of the overlays on the map, click on the red circles. Click once to begin resizing, and again to stop</span>
+                                    <span class="card-text d-block">To move the overlay, click anywhere within the red rectangle. Click once to begin moving the overlay, and again to stop</span>
+                                    <span class="card-text d-block">If using an SVG format image, the red rectangle will not relate to the actual dimensions of the overlay</span>
+                                    <span class="card-text d-block">For best results, always use SVG format overlays, as these will remain sharp on any screen and will not distort through resizing</span>
+                                    <!-- <span class="card-text d-block">To see changes reflected on the full preview map above, you need to click the "Save Bounds" button</span> -->
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <!-- Full preview map -->
+                    <div class="col-4">
+                        <div class="container w-100">
+                            <!-- <AdminFlyoverPreview :flyovers="flyovers" :supabase_client="supabase"/> -->
+                            
+                        <AdminOverlayPreview :overlays="overlays" :supabase_client="supabase"/>
+                        </div>
+                    </div>
+                    <div class="col-2"></div>
+                <!-- <div class="container w-75">
+                    <AdminOverlayPreview :overlays="overlays" :supabase_client="supabase"/>
+                </div> -->
+                    
                 </div>
 
                 <div class="mt-3"  v-for="overlay, index in overlays">
