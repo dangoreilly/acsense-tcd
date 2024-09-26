@@ -8,10 +8,11 @@ import * as L from "leaflet";
 import '~/assets/css/leaflet.css'
 import 'leaflet.fullscreen';
 import 'leaflet.fullscreen/Control.FullScreen.css';
-import type { Overlay, Space, Space_Type, Building } from "~/assets/types/supabase_types";
+import type { Overlay, Space, Space_Type, Building, Flyover } from "~/assets/types/supabase_types";
 import type { Building_Partial, Space_Partial } from '~/utils/adminMapUtils'
 
-import { getBuildingList, addBuildings, getOverlays, addOverlays, getSpaces, addSpaces, getSpaceTypes } from '~/utils/adminMapUtils'
+import { getBuildingList, addBuildings, getFlyovers, addOverlays, getSpaces, addSpaces, getSpaceTypes } from '~/utils/adminMapUtils'
+
 
 const campusBounds = [
                     [53.345568, -6.259428],
@@ -35,6 +36,7 @@ export default {
             buildingList: [] as Building_Partial[],
             spaceList: [] as Space_Partial[],
             spaceTypes: [] as Space_Type[],
+            flyovers: [] as Flyover[],
             mode: "light",
         }
     },
@@ -62,6 +64,9 @@ export default {
         });
         getSpaceTypes(this.supabase_client).then((spaceTypes) => {
             this.spaceTypes = spaceTypes;
+        });
+        getFlyovers(this.supabase_client).then((flyovers) => {
+            this.flyovers = flyovers;
         });
     },
     mounted(){
@@ -123,6 +128,7 @@ export default {
             addLabelsToMap(L, this.map, this.buildingList, null, true);
             // @ts-ignore
             addSpaces(L, this.map, this.spaceList, this.spaceTypes, null, false, (active, text) => {return});
+            addFlyovers(L, this.map, this.flyovers, null, false);
 
             // Add buttons for controlling light/dark mode
             this.makeVisualModeToggle().addTo(this.map);
