@@ -431,7 +431,7 @@ export function makeLabels(L: any, map: any, building: Building | Building_Parti
 }
 
 // Add a building tooltip to the map at the location of a polygon
-export function addToolTipToBuilding(L: any, map: any, building_coordinates: [[number[]]], content: string): any{
+export function addToolTipToBuilding(L: any, map: any, building_coordinates: [[number, number][]], content: string): any{
 
     // Create a tooltip object with the given content and class
     let label = L.tooltip( {direction: "top", offset:[0,-20], opacity:1, permanent: true})
@@ -446,7 +446,7 @@ export function addToolTipToBuilding(L: any, map: any, building_coordinates: [[n
 }
 
 // Calculate the geometric center of a polygon
-export function getGeometricCenter(_coordinates: [[number[]]]): [number, number] {
+export function getGeometricCenter(_coordinates: [[number, number][]]): [number, number] {
 
     // Because geoJSON is a weird standard
     let coordinates = _coordinates[0];
