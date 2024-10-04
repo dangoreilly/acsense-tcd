@@ -522,7 +522,7 @@ export function addFlyovers(L: any, map: any, flyovers: Flyover[], currentFlyove
             [flyover.location[0] - width, flyover.location[1] - height],
             [flyover.location[0] + width, flyover.location[1] + height]
         ], {
-            interactive: true,
+            interactive: !dummy,
             zIndex: 1000
         })
         
@@ -531,7 +531,6 @@ export function addFlyovers(L: any, map: any, flyovers: Flyover[], currentFlyove
             jumpArrow.on('click', () => {
                 map.flyToBounds(flyover.target);
             });
-        }
 
         // Add a label to the jump arrow
         let content = "<p align='center'  class='flyover-label  map-label'>" + flyover.label + " </p>"
@@ -543,6 +542,8 @@ export function addFlyovers(L: any, map: any, flyovers: Flyover[], currentFlyove
             .addTo(map)
             .openTooltip();
         
+        }
+
         jumpArrow.addTo(map);
         
     });
