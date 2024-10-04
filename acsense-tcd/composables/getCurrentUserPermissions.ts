@@ -27,7 +27,7 @@ export default async function(supabase_client?: Database) : Promise<UserProfile>
             // alert("No session found")
             // throw new Error("No session found")
             // Redirect to the login page
-            navigateTo("/login")
+            navigateTo("/admin/login")
         }
 
         // Get the current session access token

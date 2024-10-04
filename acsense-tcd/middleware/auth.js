@@ -22,16 +22,19 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     // console.log(JSON.stringify(currentUser));
     // const { data, error } = await supabase.auth.getSession()
+    
+    // For obvious reasons, we don't want a login loop with the login page
+    // But also, due to the way the password reset flow works, we need to allow users
+    // without the session cookie to go directly to the password reset page, which will calculate clientside if the user exists
+    if (to.path == '/admin/login' || to.path == '/admin/password-reset') return;
 
+    // If the user isn't trying to reset their password or login,
     if (!currentUser.user) {
-        // For obvious reasons, we don't want a login loop with the login page
-        // But also, due to the way the password reset flow works, we need to allow users
-        // without the session cookie to go directly to the password reset page, which will calculate clientside if the user exists
-        if (to.path !== '/admin/login' || to.path !== 'admin/password-reset') {
+        // if (to.path !== '/admin/login' || to.path !== 'admin/password-reset') {
             console.log("User is not logged in, redirecting to login page");
             return navigateTo('/admin/login');
-        } else {
-        }
+        // } else {
+        // }
     } else {
         console.log("User is logged in: " + currentUser.user.email);
     }
