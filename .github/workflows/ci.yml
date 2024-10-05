@@ -42,7 +42,7 @@ jobs:
         run: cd acsense-tcd
 
       - name: Install dependencies
-        run: npm install
+        run: cd acsense-tcd && npm install
 
       - name: Run Vitest
-        run: npm run test
+        run: cd acsense-tcd && npm run test
