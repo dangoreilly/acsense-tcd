@@ -153,7 +153,13 @@ export default defineEventHandler(async (event) => {
             }
 
             // If this is the overlays table, check the user has permission to insert
-            if (table == 'overlays' && checkUserHasPermission(permissions, "overlays", {old:{}, new:{}, list:["url"], error: null} )) {
+            else if (table == 'overlays' && checkUserHasPermission(permissions, "overlays", {old:{}, new:{}, list:["url"], error: null} )) {
+                // The way these permissions are handled will likely change in the future
+                // Because this is messy
+            }
+            
+            // If this is the overlays table, check the user has permission to insert
+            else if (table == 'flyovers' && checkUserHasPermission(permissions, "flyovers", {old:{}, new:{}, list:["label"], error: null} )) {
                 // The way these permissions are handled will likely change in the future
                 // Because this is messy
             }
