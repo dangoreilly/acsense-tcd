@@ -37,55 +37,52 @@
                 </div>
                 <!-- Main Matter -->
                 <div class="row border-b">
-                    <div class="col-6">
+                    <div class="col d-flex align-items-center">
                         <div class="container w-75">
                             <div class="card">
                                 <div class="card-body">
-                                    <span class="card-text d-block">To update the size of the overlays on the map, click on the red circles. Click once to begin resizing, and again to stop</span>
-                                    <span class="card-text d-block">To move the overlay, click anywhere within the red rectangle. Click once to begin moving the overlay, and again to stop</span>
-                                    <span class="card-text d-block">If using an SVG format image, the red rectangle will not relate to the actual dimensions of the overlay</span>
-                                    <span class="card-text d-block">For best results, always use SVG format overlays, as these will remain sharp on any screen and will not distort through resizing</span>
+                                    <span class="card-text d-block">To set up a jump point / flyover, you need to position the arrow and the target</span>
+                                    <span class="card-text d-block">The arrow direction is set automatically</span>
+                                    <span class="card-text d-block">When setting a target, you should shape the rectangle as the intended view on mobile. A target that's set up to look good on mobile will generally look good or at least okay on desktop, whereas a target that is set up to look good on desktop will generally look terrible on mobile</span>
+                                    <span class="card-text d-block mt-3">Basically; set up the target rectangle to be in Portrait orientation</span>
                                     <!-- <span class="card-text d-block">To see changes reflected on the full preview map above, you need to click the "Save Bounds" button</span> -->
                                 </div>
                             </div>
                         </div>
                     </div>
                     <!-- Full preview map -->
-                    <div class="col-4">
-                        <div class="container w-100">
-                            <!-- <AdminFlyoverPreview :flyovers="flyovers" :supabase_client="supabase"/> -->
+                    <div class="col">
+                        <div class="me-auto" style="aspect-ratio: 9/16; width:45dvh;">
+                            <AdminFlyoverPreview :flyovers="flyovers" :supabase_client="supabase"/>
                             
-                        <AdminOverlayPreview :overlays="overlays" :supabase_client="supabase"/>
+                        <!-- <AdminOverlayPreview :overlays="overlays" :supabase_client="supabase"/> -->
                         </div>
                     </div>
-                    <div class="col-2"></div>
-                <!-- <div class="container w-75">
-                    <AdminOverlayPreview :overlays="overlays" :supabase_client="supabase"/>
-                </div> -->
                     
                 </div>
 
-                <div class="mt-3"  v-for="overlay, index in overlays">
-                    <!-- We can calculate if an overlay is existing or new -->
+                <div class="mt-3"  v-for="flyover, index in flyovers">
+                    <!-- We can calculate if an flyover is existing or new -->
                     <!-- Based on if it has an id field -->
-                    <AdminOverlayEdit 
-                    :overlay_array="overlays" 
-                    :overlay="overlay" 
-                    :overlay_clean="overlays_clean[index]"
-                    :newOverlay="overlay.id == undefined"
+                    <AdminFlyoverEdit 
+                    :flyover_array="flyovers" 
+                    :flyover="flyover" 
+                    :flyover_clean="flyovers_clean[index]"
+                    :staticMapElements="staticMapElements"
+                    :newFlyover="flyover.id == undefined"
                     :index="index"
-                    @bounds-save="updateOverlayBounds"
-                    @overlay-delete="deleteOverlay(index)"
-                    @overlay-update="updateContent(index)"
-                    @overlay-create="pushNewContent(index)"
-                    @overlay-edit-cancel="cancelChanges(index)"
-                    @overlay-url-edit="updateOverlayUrl"
-                    @overlay-url-reset="resetOverlay"/>
+                    @target-update="updateFlyoverTarget"
+                    @location-update="updateFlyoverLocation"
+                    @label-update="updateFlyoverLabel"
+                    @flyover-delete="deleteFlyover(index)"
+                    @flyover-update="updateContent(index)"
+                    @flyover-create="pushNewContent(index)"
+                    @flyover-edit-cancel="cancelChanges(index)"/>
                 </div>
                 <div class="container my-3">
                     <div class="row">
                         <div class="col-12">
-                            <button class="btn btn-outline-primary w-100" @click="addNewOverlay()">Add New Overlay</button>
+                            <button class="btn btn-outline-primary w-100" @click="addNewFlyover()">Add New Flyover</button>
                         </div>
                     </div>
                 </div>
@@ -95,26 +92,31 @@
 </template>
 
 <script lang=ts>
-import type { Overlay, Space, Space_Type, Building } from "~/assets/types/supabase_types";
+import type { Overlay, Space, Space_Type, Building, Flyover } from "~/assets/types/supabase_types";
 import {createClient} from '@supabase/supabase-js';
-import { getBuildingList, addBuildings, getOverlays, addOverlays, getSpaces, addSpaces } from '~/utils/adminMapUtils'
+import { getFlyovers, getGeometricCenter, type Building_Partial, type Space_Partial } from '~/utils/adminMapUtils'
 
 const campusBounds = [
                     [53.345568, -6.259428],
                     [53.341853, -6.249477]
-                ];
+                ] as [[number, number], [number, number]];
 
 export default {
     data() {
         return {
             supabase: Object as any,
-            overlays: [] as Overlay[],
-            overlays_clean: [] as Overlay[],
-            new_overlay: {
-                url: useRuntimeConfig().public.supabaseUrl + '/storage/v1/object/public/overlays/alignment/alignment_marks.svg',
-                url_dark: '',
-                high_detail: false,
-                bounds: campusBounds,
+            flyovers: [] as Flyover[],
+            flyovers_clean: [] as Flyover[],
+            new_flyover: {
+                label: 'New Flyover',
+                location: getGeometricCenter([[campusBounds[0], campusBounds[1]]]),
+                target: campusBounds,
+            },
+            staticMapElements: {
+                buildings: [] as Building_Partial[],
+                spaces: [] as Space_Partial[],
+                space_types: [] as Space_Type[],
+                overlays: [] as Overlay[],
             }
         }
     },
@@ -136,110 +138,77 @@ export default {
         this.supabase = createClient(supabaseUrl, supabaseKey)
     },
     mounted() {
-        // Get the overlays
-        this.getOverlays();
+        // Get the static map elements
+        this.getStaticMapElements()
+        .then(() => {
+            // Get the flyovers
+            this.getFlyovers();
+
+            // We want to wait for all the static map elements to load before we load the flyovers
+            // Because the flyovers load causes the repaint, and we want all the elements to be there
+
+        });
     },
     methods: {
-        async getOverlays() {
-            // Get the overlays from the database
+        async getFlyovers() {
+            // Get the flyovers from the database
+            const flyovers = await getFlyovers(this.supabase);
+
+            // Set the flyovers
+            this.flyovers = flyovers;
+            this.flyovers_clean = JSON.parse(JSON.stringify(flyovers));
+        },
+
+        async getStaticMapElements() {
+            // Get the static map elements
+            // Get the buildings
+            const buildings = await getBuildingList(this.supabase);
+            this.staticMapElements.buildings = buildings;
+
+            // Get the spaces
+            const spaces = await getSpaces(this.supabase);
+            this.staticMapElements.spaces = spaces;
+
+            // Get the space types
+            const space_types = await getSpaceTypes(this.supabase);
+            this.staticMapElements.space_types = space_types;
+
+            // Get the overlays
             const overlays = await getOverlays(this.supabase);
-
-            // Set the overlays
-            this.overlays = overlays;
-            this.overlays_clean = JSON.parse(JSON.stringify(overlays));
+            this.staticMapElements.overlays = overlays;
         },
 
-        resetOverlay(type: string, index: number){
-            // Reset the overlay to the original value
-            if (type == 'light')
-                this.overlays[index].url = this.overlays_clean[index].url;
-            else
-                this.overlays[index].url_dark = this.overlays_clean[index].url_dark;
-            // Clear the input
-            // @ts-ignore
-            document.getElementById(`${type}-${index}`).value = "";
+        resetFlyovers(index: number){
+            // Reset the flyovers to the original value
+            this.flyovers[index] = JSON.parse(JSON.stringify(this.flyovers_clean[index]));
         },
 
-        updateOverlayBounds(index: number, bounds: any){
-            // Update the bounds of the overlay 
-            this.overlays[index].bounds = bounds;
-            console.log("Bounds updated on overlay with id: " + this.overlays[index].id)
-        },
+        async deleteFlyover(index: number){
 
-        updateOverlayUrl(index: number, type: string, url: string){
-            // Update the url of the overlay
-            if (type == 'light'){
-                this.overlays[index].url = url;
-            }
-
-            else
-                this.overlays[index].url_dark = url;
-        },
-
-        async uploadNewOverlay(index: number, type: string){
-
-            // Get the file
-            // @ts-ignore
-            let file = document.getElementById(`${type}-${index}`).files[0];
-            // Get the file extension
-            let extension = file.name.split('.').pop();
-            
-            // Make a canonical name for the space type
-            let canonical = "";
-            // Set the canonical name by the id
-            canonical = `${type}-${this.overlays[index].id}`;
-            // Build the new url for the file
-            let newUrl = this.supabase.storageUrl + "/object/public/overlays/" + canonical + "." + extension;
-            // Upsert the image
-            const {data, error} = await upsertImage(this.supabase, 'overlays', `${canonical}.${extension}`, file)
-            
-            if (error) {
-                console.error(error)
-                alert(error.message)
-                throw error
-            }
-
-            // Clear the icon input
-            // @ts-ignore
-            document.getElementById(`${type}-${index}`).value = "";
-
-            return newUrl;
-
-        },
-
-        cancelChanges(index: number){
-
-            // Check if this was a new overlay
-            // If it was, remove it from the list
-            if (this.overlays[index].id == undefined) {
-                this.overlays.splice(index, 1);
-                this.overlays_clean.splice(index, 1);
+            // Check if this is a new flyover, a new flyover won't have an ID
+            if (this.flyovers[index].id == undefined) {
+                // Remove the flyover at index
+                this.flyovers.splice(index, 1);
+                this.flyovers_clean.splice(index, 1);
                 return;
             }
-            else{
-                // Reset the overlay
-                this.overlays[index] = JSON.parse(JSON.stringify(this.overlays_clean[index]))
-            }
-
-        },
-
-        async deleteOverlay(index: number){
+            // If it's not a new flyover, we need to delete it from the database
             // Confirm the deletion
-            if (!confirm("Are you sure you want to delete this overlay?")) {
+            if (!confirm("Are you sure you want to delete this flyover?")) {
                 return;
             }
 
             // let url = this.space_types[index].icon;
-            let overlay_id = JSON.stringify(this.overlays[index].id);
+            let flyover_id = JSON.stringify(this.flyovers[index].id);
 
             // Remove the database entry
             const access_token = await getSessionAccessToken(this.supabase);
             const {data: img, error:db_delete_error} = await removeFromTable(
                 access_token, 
-                "overlays", 
+                "flyovers", 
                 { 
                     col: 'id', 
-                    eq: overlay_id
+                    eq: flyover_id
                 }
             )
             
@@ -250,59 +219,46 @@ export default {
                 throw db_delete_error
             }
 
-            // Get the path by subtracting the supabase url from the image url
-            let path_light = this.overlays[index].url.replace(this.supabase.storageUrl + "/object/public/overlays/", "");
-            let path_dark = this.overlays[index].url_dark?.replace(this.supabase.storageUrl + "/object/public/overlays/", "");
+            // Remove the flyover at index
+            this.flyovers.splice(index, 1);
+            this.flyovers_clean.splice(index, 1);
 
-            // Delete the image from the storage bucket
-            const { data:storage_response, error:storage_error } = await this.supabase.storage
-            .from('overlays')
-            .remove([path_light, path_dark])
-
-            if (storage_error) {
-                console.error(storage_error)
-                alert(storage_error.message)
-                throw storage_error
-            }
-            // console.log("storage_response")
-            // console.log(storage_response)
-
-
-            // Remove the overlay at index
-            this.overlays.splice(index, 1);
-            this.overlays_clean.splice(index, 1);
-
-            alert("Overlay deleted successfully")
+            alert("Flyover deleted successfully")
         },
 
-        async addNewOverlay(){
+        async addNewFlyover(){
 
-            // Add a new overlay to the list with the alignment marks
-            this.overlays.push(JSON.parse(JSON.stringify(this.new_overlay)));
-            this.overlays_clean.push(JSON.parse(JSON.stringify(this.new_overlay)));
+            // Add a new flyover to the list with the default values
+            this.flyovers.push(JSON.parse(JSON.stringify(this.new_flyover)));
+            this.flyovers_clean.push(JSON.parse(JSON.stringify(this.new_flyover)));
 
+        },
+
+        // updateFlyoverArray(index: number, flyover: Flyover){
+        //     console.log("Updating flyover array")
+        //     console.log(flyover)
+        //     this.flyovers[index] = JSON.parse(JSON.stringify(flyover));
+        // },
+
+        updateFlyoverTarget(index: number, newBounds: [[number, number],[number, number]]){
+            this.flyovers[index].target = newBounds
+        },
+        updateFlyoverLocation(index: number, newLocation: [number, number]){
+            this.flyovers[index].location = newLocation
+        },
+        updateFlyoverLabel(index: number, input: Event){
+            let newLabel = (input.target as HTMLInputElement).value
+            this.flyovers[index].label = newLabel
         },
         
         async updateContent(index: number){
 
             const access_token = await getSessionAccessToken(this.supabase)
-            
-            // Update the overlays
-            // for (let i = 0; i < this.overlays.length; i++) {
-
-            // If the overlay has been updated, upload the new overlay
-            if (this.overlays[index].url !== this.overlays_clean[index].url) {
-                this.overlays[index].url = await this.uploadNewOverlay(index, 'light');
-            }
-            if (this.overlays[index].url_dark !== this.overlays_clean[index].url_dark) {
-                this.overlays[index].url_dark = await this.uploadNewOverlay(index, 'dark');
-            }
-
-            let {data, error} = await updateTable(access_token, 'overlays',
-                this.overlays[index],
+            let {data, error} = await updateTable(access_token, 'flyovers',
+                this.flyovers[index],
                 {
                     col:'id', 
-                    eq: JSON.stringify(this.overlays[index].id)
+                    eq: JSON.stringify(this.flyovers[index].id)
                 },
             )
 
@@ -312,22 +268,17 @@ export default {
                 throw error
             }
 
-            // Update the clean overlay
-            this.overlays_clean[index] = JSON.parse(JSON.stringify(this.overlays[index]));
+            // Update the clean flyover
+            this.flyovers_clean[index] = JSON.parse(JSON.stringify(this.flyovers[index]));
 
         },
 
         async pushNewContent(index: number) {
 
-            // Add the new overlay to the database
+            // Add the new flyover to the database
             // Only upload the bounds for now, in case the image upload fails
             const access_token = await getSessionAccessToken(this.supabase);
-            let {data, error} = await insertToTable(access_token, 'overlays', {
-                url: "",
-                url_dark: "",
-                high_detail: false,
-                bounds: this.overlays[index].bounds
-            })
+            let {data, error} = await insertToTable(access_token, 'flyovers', this.flyovers[index]);
 
             if (error) {
                 console.error(error)
@@ -336,36 +287,27 @@ export default {
             }
 
             console.log(data)
-            // Update the id of the overlay
-            this.overlays[index].id = data[0].id;
+            // Update the id of the flyover
+            
+            // Update the clean flyover
+            this.flyovers_clean[index] = JSON.parse(JSON.stringify(this.flyovers[index]));
 
-            // Upload the new default overlay
-            this.overlays[index].url = await this.uploadNewOverlay(index, 'light');
-            // If a dark version is included, upload the new overlay
-            if (this.overlays[index].url_dark !== this.overlays_clean[index].url_dark) {
-                this.overlays[index].url_dark = await this.uploadNewOverlay(index, 'dark');
+        },
+
+        cancelChanges(index: number){
+            // Check if this was a new flyover
+            // If it was, remove it from the list
+            if (this.flyovers[index].id == undefined) {
+                this.flyovers.splice(index, 1);
+                this.flyovers_clean.splice(index, 1);
+                return;
+            }
+            else{
+                // Reset the overlay
+                this.flyovers[index] = JSON.parse(JSON.stringify(this.flyovers_clean[index]))
             }
 
-            // Now that we have the correct urls, update the overlay in the database
-            let {data:image_add_data, error:image_add_error} = await updateTable(access_token, 'overlays',
-                this.overlays[index],
-                {
-                    col:'id', 
-                    eq: JSON.stringify(this.overlays[index].id)
-                },
-            )
-
-            if (image_add_error) {
-                console.error(image_add_error)
-                alert(image_add_error.message)
-                throw image_add_error
-            }
-
-
-            // Update the clean overlay
-            this.overlays_clean[index] = JSON.parse(JSON.stringify(this.overlays[index]));
-
-        }
+        },
     },
 }
 </script>

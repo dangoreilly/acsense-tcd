@@ -12,6 +12,7 @@ import type { Overlay, Space, Space_Type, Building, Flyover } from "~/assets/typ
 import type { Building_Partial, Space_Partial } from '~/utils/adminMapUtils'
 
 import { getBuildingList, addBuildings, getFlyovers, addOverlays, getSpaces, addSpaces, getSpaceTypes } from '~/utils/adminMapUtils'
+import type Flyovers from "~/pages/admin/flyovers.vue";
 
 
 const campusBounds = [
@@ -41,7 +42,7 @@ export default {
         }
     },
     watch: {
-        overlays: {
+        flyovers: {
             handler: function(){
                 this.refreshMap();
             },
@@ -171,9 +172,9 @@ export default {
     /* @import url("~/assets/css/leaflet.css"); */
 
     :root{
-        /* --primary-label-opacity: 1;
+        --primary-label-opacity: 1;
         --secondary-label-opacity: 0;
-        --tertiary-label-opacity: 0; */
+        --tertiary-label-opacity: 0;
         transition: opacity 0.5s ease-in-out;
     }
 
