@@ -109,7 +109,7 @@ export default {
             flyovers_clean: [] as Flyover[],
             new_flyover: {
                 label: 'New Flyover',
-                location: getGeometricCenter([[campusBounds[0], campusBounds[1]]]),
+                location: [campusBounds[0][0], campusBounds[0][1]] as [number, number],
                 target: campusBounds,
             },
             staticMapElements: {
