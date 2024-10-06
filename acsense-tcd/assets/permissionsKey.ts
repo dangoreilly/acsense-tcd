@@ -67,7 +67,6 @@ export default function (table:string) : PermissionsKey | null {
                 outlets:                    "spaces.facilities",
                 icon_override:              "spaces.map.labels",
                 seating:					"spaces.facilities",
-                building_uuid:				"spaces.map.location",
                 food_drink_allowed_note:	"spaces.facilities",
                 microwave_note:             "spaces.facilities",
                 kettle_note:                "spaces.facilities",
@@ -96,8 +95,7 @@ export default function (table:string) : PermissionsKey | null {
                 published: 					"is_admin",
 
                 updated_at: "service",
-                UUID: "service",
-                updated_by: "service" 
+                UUID: "service", 
             } as PermissionsKey
 
         case "profiles":
