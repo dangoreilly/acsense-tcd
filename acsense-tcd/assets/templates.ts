@@ -59,6 +59,10 @@ export const user_template: UserProfile_Template = {
         },
         facilities: false
     },
+    map: {
+        overlays: false,
+        jumps: false
+    },
   }
 
   import type { Building, Building_Template, Space, Space_Template } from "~/assets/types/supabase_types"
