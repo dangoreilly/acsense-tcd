@@ -48,15 +48,15 @@
                 </div>
             </div>
             <!-- Etc -->
-            <!-- Buttons for if this is a new overlay -->
+            <!-- Buttons for if this is a new flyover -->
              <div class="btn-group mt-2" v-if="newFlyover" role="group">
                 <button 
                 type="button" 
                 class="btn" 
                 :class="contentHasChanged ? 'btn-success' : 'btn-outline-secondary'"
-                @click="$emit('overlay-create')"
+                @click="$emit('flyover-create')"
                 :disabled="!contentHasChanged">
-                    Upload new overlay
+                    Upload new flyover
                 </button>
 
                 <button 
@@ -73,7 +73,7 @@
                 type="button" 
                 class="btn" 
                 :class="contentHasChanged ? 'btn-success' : 'btn-outline-secondary'"
-                @click="$emit('overlay-update')"
+                @click="$emit('flyover-update')"
                 :disabled="!contentHasChanged">
                     Save Changes
                 </button>
@@ -90,7 +90,7 @@
                 <button 
                 type="button" 
                 class="btn btn-danger"
-                @click="$emit('overlay-delete');">
+                @click="$emit('flyover-delete');">
                     Delete
                 </button>
             </div>
