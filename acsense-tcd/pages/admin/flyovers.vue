@@ -268,6 +268,9 @@ export default {
                 throw error
             }
 
+            // Notify the user
+            alert("Flyover updated successfully")
+
             // Update the clean flyover
             this.flyovers_clean[index] = JSON.parse(JSON.stringify(this.flyovers[index]));
 
@@ -286,8 +289,9 @@ export default {
                 throw error
             }
 
-            console.log(data)
+            // console.log(data)
             // Update the id of the flyover
+            this.flyovers[index].id = data[0].id;
             
             // Update the clean flyover
             this.flyovers_clean[index] = JSON.parse(JSON.stringify(this.flyovers[index]));

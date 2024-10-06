@@ -108,6 +108,7 @@ export default function (table:string) : PermissionsKey | null {
                 is_super_admin: "service",
                 buildings: "is_admin",
                 spaces: "is_admin",
+                map: "is_admin",
             } as PermissionsKey
 
         case "overlays":
@@ -123,9 +124,9 @@ export default function (table:string) : PermissionsKey | null {
 
         case "flyovers":
             return {
-                label: "map.flyovers",
-                location: "map.flyovers",
-                target: "map.flyovers",
+                label: "map.jumps",
+                location: "map.jumps",
+                target: "map.jumps",
 
                 id: "service",
                 created_at: "service",
