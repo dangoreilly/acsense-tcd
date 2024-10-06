@@ -42,7 +42,7 @@
                     <!-- Strikethrough for RG blindness -->
                     <img v-if="!space.food_drink_allowed" class="facility-component-svg-icon-sash" src="/images/icons/sash.svg">
                 </div>
-                <div class="facility-note"><span>{{ getNote("food_and_drink_allowed") }}</span></div>
+                <div class="facility-note"><span>{{ getNote("food_drink_allowed") }}</span></div>
             </div>
             <!-- Kettle provided -->
             <div style="grid-area: kettle;"	class="facility-icon-container">
@@ -101,7 +101,7 @@ export default {
             kettle: ["No Kettle Available", "Kettle Available"], 
             seating: ["No Seating Available", "Seating Available"], 
             outlets: ["No Plug Sockets", "Plug Sockets"], 
-            food_and_drink_allowed: ["No Food or Drink Allowed", "Food and Drink Allowed"], 
+            food_drink_allowed: ["No Food or Drink Allowed", "Food and Drink Allowed"], 
             wheelchair: ["No Wheelchair Access", "Wheelchair Access"]
         },
     }
@@ -146,15 +146,15 @@ export default {
 
         }
 
-        if (facility == "food_and_drink_allowed"){
+        if (facility == "food_drink_allowed"){
             // If the note is empty, return the default text
-            if (this.space.food_and_drink_allowed_note == null || this.space.food_and_drink_allowed_note == "" || this.space.food_and_drink_allowed_note == "\"\""){
-                if (this.space.food_and_drink_allowed) return this.defaults.food_and_drink_allowed[1];
-                else return this.defaults.food_and_drink_allowed[0];
+            if (this.space.food_drink_allowed_note == null || this.space.food_drink_allowed_note == "" || this.space.food_drink_allowed_note == "\"\""){
+                if (this.space.food_drink_allowed) return this.defaults.food_drink_allowed[1];
+                else return this.defaults.food_drink_allowed[0];
             }
             // Otherwise, return the note
             else {
-                return this.space.food_and_drink_allowed_note;
+                return this.space.food_drink_allowed_note;
             }
 
         }
@@ -174,7 +174,7 @@ export default {
 
         if (facility == "microwave"){
             // If the note is empty, return the default text
-            if (this.space.microwave == null || this.space.microwave == "" || this.space.microwave_note == "\"\""){
+            if (this.space.microwave_note == null || this.space.microwave_note == "" || this.space.microwave_note == "\"\""){
                 if (this.space.microwave) return this.defaults.microwave[1];
                 else return this.defaults.microwave[0];
             }

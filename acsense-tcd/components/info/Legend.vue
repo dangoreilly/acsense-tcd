@@ -1,6 +1,6 @@
 <template>
 <div 
-    class="modal fade show" 
+    :class="previewMode ? '' : 'modal fade show'" 
     id="infoModal"
     tabindex="-1" 
     @click.self="closeModal()"
@@ -28,8 +28,8 @@
                     <p>There are {{ spaceIcons.length }} categories of student space:</p>
                     
                     <div class="row">
-                        <template v-for="icon in spaceIcons">
-                            <div class="col-6">
+                        <template v-for="icon, index in spaceIcons">
+                            <div :class="badgeWidth(index)">
                                 <div
                                     class="px-auto d-block">
                                     <img 
@@ -40,6 +40,16 @@
                                 </div>
                             </div>
                         </template>
+                    </div>
+
+                    <div class="row px-4" v-for="spaceType in spaceIcons">
+                        <div v-if="spaceType.descriptor?.length>0">
+                            <p class="position-relative">
+                                <span class="position-absolute top-50 start-0 translate-middle p-2 border border-dark rounded-circle" :style="{'background-color': spaceType.colour}"> </span>
+                                <span class="ps-3"><strong>{{ spaceType.category }}</strong></span>
+                            </p>
+                            <p>{{ spaceType.descriptor }}</p>
+                        </div>
                     </div>
                     <!-- List all the facilities icons, in FALSE then TRUE state, and then what they represent -->
                     <h4>Facilities</h4>
@@ -198,6 +208,11 @@ export default {
             type: String,
             required: false,
         },
+        previewMode: {
+            type: Boolean,
+            required: false,
+            default: false
+        }
     },
     watch: {
         displayModal: function (newVal, oldVal) {
@@ -210,6 +225,10 @@ export default {
     },
     methods: {
         closeModal() {
+            // If we're in preview mode, do nothing
+            if (this.previewMode) {
+                return
+            }
             // Get the modal element and set it's display to none
             let infoModal = document.getElementById('infoModal')
             let body = document.body
@@ -232,6 +251,15 @@ export default {
                 infoModal.style.display = "block";
             }
             // body.style.overflowY = "hidden";
+        },
+        badgeWidth(index){
+            // For the icons for the student spaces
+            // We want to make sure that if there are an odd number, the last one is full width
+            if (index === this.spaceIcons.length - 1 && this.spaceIcons.length % 2 !== 0){
+                return "col-12"
+            } else {
+                return "col-6"
+            }
         }
     }
   }

@@ -2,7 +2,7 @@
     <NuxtLayout name="info-layout">
         <div 
         v-if="space"
-        class="space-info">
+        class="space-info pb-5">
     
             <div class="info-page-title" style="grid-area: title;">
                 <h1>{{space.name}}</h1>
@@ -11,11 +11,11 @@
                     <em>{{space.type}}</em> 
                     <span v-if="space.building != null"> 
                         &#8212; 
-                        <a :href="'/info/' + space.building"> {{ space.building_display_name }}</a>
+                        <a :href="'/info/' + space.building.canonical"> {{ space.building.display_name }}</a>
                     </span>
                 </p>
                 <!-- Pill link to highlight the building on the map -->
-                <a class="btn badge rounded-pill text-bg-warning text-decoration-none"
+                <a class="btn badge rounded-pill text-bg-warning text-decoration-none mb-1"
                 :href="'/?highlight='+space.canonical">
                 Highlight on map</a>
             </div>
@@ -47,13 +47,13 @@
             <!-- If there's no infobox, but there are openingtimes, take up the infobox space -->
             <!-- Otherwise, take it's own space -->
             <div 
-            :style="!infoBoxDisplays ? 'grid-area: tips;' : 'grid-area: tabs;'"
+            style="grid-area: tips;"
             class="my-3">
                 <AccessTips :tips="space.tips" :entity="'space'"/>
             </div>
     
             <!-- Infobox -->
-            <div style="grid-area: tabs;" v-if="infoBoxDisplays">
+            <div style="grid-area: tabs;">
                 <Infobox
                 :contentArray="infoBoxContent"
                 :activeInfoTab="activeInfoBoxTab"
@@ -119,7 +119,7 @@
         margin: 0 min(3rem, 3vw) 0 min(3rem, 3vw);
     }
     .time-card {
-        margin-top: 1rem;
+        margin-top: 2rem;
     }
     
         .infotabs {
@@ -185,8 +185,9 @@ import {createClient} from '@supabase/supabase-js';
         // Since we are using the canonical name, we should only get one result
         let { data: space, error } = await supabase
             .from('spaces')
-            .select('*')
+            .select('*, building(display_name, canonical)')
             .eq('canonical', canonical)
+            .single()
         if (error) {
             console.error(error)
             alert(error.message)
@@ -194,120 +195,12 @@ import {createClient} from '@supabase/supabase-js';
         }
         else {
 
-            // If there are no results, navigate to the search page
-            if (space.length == 0){
-                this.$router.push('/info/?search=' + canonical);
-            }
-            
-            // Update the space object with the new data
-            let _space = space[0];
-
-            // Get the display name for the building, if this space has one
-            if (_space.building != null){
-                _space.building_display_name = await getBuildingDisplayName(supabase, _space.building);
-            }
-
-            return _space;
+            return space;
 
         }
         
     }
-
-    async function getBuildingDisplayName(supabase, building){
-        // Fetch the building from the database
-        // Since we are using the canonical name, we should only get one result
-        let { data: building_name, error } = await supabase
-            .from('buildings')
-            .select('display_name')
-            .eq('canonical', building)
-        if (error) {
-            console.error(error)
-            alert(error.message)
-            throw error
-        }
-        else {
-            // Update the space object with the new data
-            // this.space.building_display_name = building_name[0].display_name;
-            return building_name[0].display_name;
-        }
-    }
-
-
-    async function getSpaceTypes(supabase){
-        // Fetch the space types from the database
-        let { data: space_types, error } = await supabase
-            .from('space_styles')
-            .select('*')
-        if (error) {
-            console.error(error)
-            alert(error.message)
-            throw error
-        }
-        else {
-            // Update the space object with the new data
-            // console.log("Space types:")
-            // console.log(space_types);
-            // this.space_types = space_types;
-            return space_types;
-        }
-    }
-
-    function getImageForSpaceType(type, space_types){
-        // Cycle through space types
-        // When the category field matches the input, return the image
-        // If there are no matches, return the placeholder image
-        for (let i = 0; i < space_types.length; i++) {
-            if (space_types[i].category == type){
-                return space_types[i].icon;
-            }
-        }    
-
-        // TODO: Get a more sensible default image
-        return '/images/TCDSenseMapLogo.png';
-    }
-
-
-    // Get the supabase client for fetching the rest of our data
-    const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-    const supabaseKey = useRuntimeConfig().public.supabaseKey;
-    const sb_client = createClient(supabaseUrl, supabaseKey)
-
-    // Load the list of space types from the database
-    const space_types = getSpaceTypes(sb_client);
-
-    // Load and render the space from the database
-    const route = useRoute()
-    const { data: space, error } = await useAsyncData('space', () => getStudentSpace(sb_client, route.params.spaceID))
-    // const space = getStudentSpace(sb_client, route.params.spaceID);
-
-    // console.log(space.value)
-
-    // function setInfoBoxContent(space){
-    //     return [
-    //         {
-    //             title: "Sensory Experience",
-    //             content: space.sense_exp || "No information available",
-    //             display: space.sense_exp_display,
-    //             video: space.sense_exp_video,
-    //             video_embed: (space.sense_exp_video != null && space.sense_exp_video.length > 0),
-    //         },
-    //         {
-    //             title: "Wayfinding",
-    //             content: space.wayfinding || "No information available",
-    //             display: space.wayfinding_display,
-    //             video: space.wayfinding_video,
-    //             video_embed: (space.wayfinding_video != null && space.wayfinding_video.length > 0),
-    //         },
-    //         {
-    //             title: "Physical Access",
-    //             content: space.phys_access || "No information available",
-    //             display: space.phys_access_display,
-    //             video: space.phys_access_video,
-    //             video_embed: (space.phys_access_video != null && space.phys_access_video.length > 0),
-    //         },
-    //     ];
-    // }
-
+    
     function infoBoxDisplayCheck(infoBoxContent) {
         // Returns true if any of the infobox tabs are set to display
         for (let i = 0; i < infoBoxContent.length; i++) {
@@ -319,27 +212,62 @@ import {createClient} from '@supabase/supabase-js';
         return false;
     }
 
-    const infoBoxContent = ref(setInfoBoxContent(space.value));
-    // console.log(infoBoxContent);
-    const infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
-    const timeBoxDisplays = ref(
-        space.value.opening_times != null && 
-        (space.value.opening_times.sat.open || space.value.opening_times.holidays.open || space.value.opening_times.weekday.open)
-        // false
+
+    // Get the supabase client for fetching the rest of our data
+    const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+    const supabaseKey = useRuntimeConfig().public.supabaseKey;
+    const sb_client = createClient(supabaseUrl, supabaseKey)
+
+    // Load and render the space from the database
+    
+    const route = useRoute();
+    const canonical = route.params.spaceID;
+    const preview = route.query.preview;
+
+    let space = ref(null);
+    let _space = await getStudentSpace(sb_client, canonical)
+    // Only set the building if it's set to published, otherwise keep it null
+
+    if (_space && _space.published) {
+        space = ref(_space);
+    }
+
+    // Using ref and useState() at the same time like this definitely poor practice
+    // But the documentation is unclear and I'm not bothered experimenting right now
+    const space_check = useState("space");
+    space_check.value = space;
+
+    let infoBoxContent = null;
+    let infoBoxDisplays = null;
+    let timeBoxDisplays = null;
+
+    if (space.value) {
+        infoBoxContent = ref(setInfoBoxContent(space.value));
+        infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
+        timeBoxDisplays = ref(
+            space.value.opening_times != null && 
+            (space.value.opening_times.sat.open || space.value.opening_times.holidays.open || space.value.opening_times.weekday.open)
+            // false
         );
+    }
+
 
     // Set the SEO and page title
 
+    let pageTitle = space.value ? space.value.name : "Space Not Found" + ' - TCD Sense';
+    let pageDescription = space.value ? space.value.description : "This space does not exist";
+    let keyword = space.value ? space.value.name : "";
+
     useHead({
-        title: space.value.name + ' - TCD Sense',
+        title: pageTitle + ' - TCD Sense',
         meta: [
             {
                 name: 'description',
-                content: space.value.description,
+                content: pageDescription,
             },
             {
                 name: 'keywords',
-                content: space.value.name + ', Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
+                content: keyword + ', Trinity College Dublin, Accessibility, Map, Interactive, Wheelchair, Mobility, Vision, Hearing, Sensory, Disability, Inclusive, Inclusivity, Accessible, Building, Room, Floorplans',
             },
             {
                 name: 'viewport',
@@ -361,6 +289,15 @@ import {createClient} from '@supabase/supabase-js';
             // linkToRooms: '/info/' + this.$route.params.buildingId + '/rooms',
             // linkToInternalMap: '/info/' + this.$route.params.buildingId + '/floorplan',
             }
+        },
+        created() {
+            // Check if the building exists
+            let space = useState("space");
+            // If it doesn't, redirect to the search page
+            if (!space.value) {
+                this.$router.push('/info/?search=' + this.$route.params.spaceID);
+            }
+            
         },
     }
 

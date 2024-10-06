@@ -1,6 +1,8 @@
 <!-- Admin page for displaying analytics from Plausible -->
 <template>
-    <NuxtLayout name="admin-layout" :activePage="'analytics'" :supabase_client="supabase">
+    <NuxtLayout name="admin-layout" 
+    :activePage="'analytics'" 
+    :supabase_client="supabase">
         <main style="height:100vh; overflow-y: auto">
             <div class="container">
                 <h1>Analytics</h1>
@@ -34,12 +36,13 @@
 </template>
 
 <script setup>
-import {createClient} from '@supabase/supabase-js';
 import Chart from 'chart.js/auto';
 
-const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-const supabaseKey = useRuntimeConfig().public.supabaseKey;
-const supabase = createClient(supabaseUrl, supabaseKey)
+// const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+// const supabaseKey = useRuntimeConfig().public.supabaseKey;
+// const supabase = createClient(supabaseUrl, supabaseKey)
+
+const supabase = adminSupabaseInit();
 
 async function getAnalytics() {
     // Pull the timeseries data from the get/analytics endpoint
@@ -180,19 +183,4 @@ onMounted(() => {
         
     });
 })
-
-// useHead({
-//     script: [
-//         {
-//             src: 'https://plausible.io/js/embed.host.js',
-//             async: true,
-//         },
-//     ],
-// })
-
-
-definePageMeta({
-  layout: false,
-  middleware: ['auth'],
-});
 </script>

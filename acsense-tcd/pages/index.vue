@@ -1,12 +1,12 @@
 <template>
-<div>
+<div :data-bs-theme="isDarkMode ? 'dark' : 'light'">
     <OverworldMap
     :flyOvers="flyovers"
     :overlays="overlays"
     :buildings="buildings"
     :studentSpaces="studentSpaces"
     :spaceStyles="spaceStyles"
-    :dummy_studentSpaces="dummy_studentSpaces"
+    :isDarkMode="isDarkMode"
     @openBuildingModal="openBuildingModal"
     @openSpaceModal="openSpaceModal"
     @openLegendModal="legendModalOpen = true"
@@ -78,7 +78,8 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title" id="welcomeModalLabel">Welcome</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen=false; legendModalOpen=true"></button>
+                    <button 
+                    type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="welcomeModalOpen=false; legendModalOpen=true"></button>
                 </div>
 
                 <div class="modal-body">
@@ -170,8 +171,6 @@ import { createClient } from '@supabase/supabase-js';
     let spaceStyles = ref([]);
     let welcome = ref({});
 
-    let dummy_studentSpaces = ref([]);
-
 
     // Flyovers
     const { data: flyovers_data, error: flyover_error} = await supabase
@@ -192,6 +191,7 @@ import { createClient } from '@supabase/supabase-js';
     const { data: buildings_data, error: building_error} = await supabase
         .from('buildings')
         .select('canonical, display_name, always_display, aka, description, map_label_1, map_label_2, map_label_3, geometry')
+        .eq("published", true)
 
     if (building_error) {
         console.log('An error occured while fetching buildings:');
@@ -205,6 +205,7 @@ import { createClient } from '@supabase/supabase-js';
     const { data: studentSpaces_data, error: studentSpace_error} = await supabase
         .from('spaces')
         .select('*')
+        .eq("published", true)
 
     if (studentSpace_error) {
         console.log('An error occured while fetching student spaces:');
@@ -212,19 +213,6 @@ import { createClient } from '@supabase/supabase-js';
     }
     else {
         studentSpaces = ref(studentSpaces_data);
-    }
-
-    // Dummy Student Spaces
-    const { data: dummy_studentSpaces_data, error: dummy_studentSpace_error} = await supabase
-        .from('space_dummy')
-        .select('*')
-
-    if (studentSpace_error) {
-        console.log('An error occured while fetching dummy student spaces:');
-        console.log(studentSpace_error);
-    }
-    else {
-        dummy_studentSpaces = ref(dummy_studentSpaces_data);
     }
 
     // Overlays
@@ -298,12 +286,14 @@ export default {
                 mainContent: '',
                 footer: '',
             },
+            isDarkMode: false,
         }
     },
     mounted() {
         // console.log(this.$refs.welcome);
         // Check if the user has indicated they want to skip the welcome modal
         this.checkSkipWelcome();
+        this.checkDarkMode();
     },
     watch: {
         skipWelcome: function(){
@@ -371,10 +361,14 @@ export default {
 
                 console.log(skipWelcomeCookie);
             }
-            
+        },
 
+        checkDarkMode(){
+
+            // if (window == undefined) return false;
+            // console.log("Checking dark mode")
+            this.isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
-
     }
 };
 </script>
@@ -390,6 +384,21 @@ export default {
         }
 
         #map { height: 100dvh; }
+
+        .map-label { 
+            color: #000;
+            /* Text outline for improved readability */
+            -webkit-text-stroke: 0.2px #ccc;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .map-label {
+                color: #fff;
+                /* Text outline for improved readability */
+                -webkit-text-stroke: 1px black;
+            }
+        }
 
         .primary-label {
             opacity: var(--primary-label-opacity);

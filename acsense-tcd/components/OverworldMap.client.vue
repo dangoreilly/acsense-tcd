@@ -30,10 +30,10 @@ export default {
             default: () => {}
         },
 
-        dummy_studentSpaces: {
-            type: Array,
-            default: () => []
-        },
+        isDarkMode: {
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {
@@ -75,7 +75,17 @@ export default {
                 [53.341853, -6.249477]
             ]);
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', { //dark_nolabels
+            // Check if the user is in darkmode or lightmode, and set the map style accordingly
+            let tile_source;
+
+            if (this.isDarkMode){
+                tile_source = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
+            }
+            else {
+                tile_source = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png';
+            }
+
+            L.tileLayer(tile_source, { //rastertiles/voyager_nolabels
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 maxZoom:20
             }).addTo(map);
@@ -177,9 +187,17 @@ export default {
         // Add the overlays to the map eg main campus
         addOverlays() {
             // Go through each overlay and add it to the map
-            // console.log('overlays', this.overlays)
+
+            let darkmode = this.isDarkMode;
             this.overlays.forEach(overlay => {
-                this.overlays_objects.push( L.imageOverlay(overlay.url, overlay.bounds).addTo(this.map) );
+                // If the user is in darkmode, add the dark version of the overlay, if it exists
+                if (darkmode && overlay.url_dark != null){
+                    this.overlays_objects.push( L.imageOverlay(overlay.url_dark, overlay.bounds).addTo(this.map) );
+                }
+                // Otherwise, just add the default (lightmode) overlay
+                else {
+                    this.overlays_objects.push( L.imageOverlay(overlay.url, overlay.bounds).addTo(this.map) );
+                }
             });
         },
 
@@ -372,14 +390,14 @@ export default {
 
                 if (building.map_label_1 != null){
                     // Generate the content
-                    primaryLabelContent = "<p align='center' class='primary-label'>" + building.map_label_1 + " </p>";
+                    primaryLabelContent = "<p align='center' class='primary-label map-label'>" + building.map_label_1 + " </p>";
                     // Add it to the map
                     this.addToolTipToBuilding(building.geometry.coordinates, primaryLabelContent, map);
                     // layer.bindTooltip(primaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).addTo(map);
                 }
                 if (building.map_label_2 != null){
                     // Generate the content
-                    secondaryLabelContent = "<p align='center'  class='secondary-label'>" + building.map_label_2 + " </p>";
+                    secondaryLabelContent = "<p align='center'  class='secondary-label map-label'>" + building.map_label_2 + " </p>";
                     // Add it to the map
                     this.addToolTipToBuilding(building.geometry.coordinates, secondaryLabelContent, map);
                     // layer.bindTooltip(secondaryLabelContent, {direction: "top", offset:[0,-20], opacity:1, permanent: true}).openTooltip();
@@ -471,7 +489,7 @@ export default {
             }
 
             return {
-                fillColor: '#0087A2',
+                fillColor: this.isDarkMode ? '#5f5a95' : '#0087A2',
                 weight: 1,
                 opacity: 0,
                 color: '#FCE891',
@@ -511,7 +529,7 @@ export default {
 
                 // Figure out what the icon will be by matching the area type to the area type in the area_types array
                 // TODO: Replace with composable for finding the icon that includes icon_override
-                let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
+                let icon_url = area.icon_override || area_types.find(area_type => area_type.category == area.type).icon;
                 let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
 
                 // Create the icon object
@@ -525,12 +543,15 @@ export default {
                 // If the url contains the canonical name of the area, overwrite the icon with the highlighted version
                 const urlParams = new URL(window.location.href).searchParams;
                 const highlight = urlParams.get('highlight');
+                const filterSearchResults = urlParams.getAll('filterSearchResults');
                 
-                if (highlight == area.canonical){
+                // Check if the highlight is the canonical name of the area
+                // Or if the filterSearchResults contains the canonical name of the area
+                if (highlight == area.canonical || filterSearchResults.includes(area.canonical)){
                     myIcon = L.icon({
                         iconUrl: icon_url, 
                         iconSize: [50, 50], 
-                        className: "sense-icon",
+                        className: "sense-icon sense-icon-highlighted",
                         shadowUrl: '/images/red-dot.png',
                         shadowSize: [60, 60],
                         // shadowAnchor: [22, 94]
@@ -538,59 +559,35 @@ export default {
                 }
 
                 // Create the marker object
-                let marker = L.marker(area.location, {icon: myIcon, alt: area.name});
-
+                let marker;
                 let emitOpenModal = this.emitOpenModal;
-
-                // Add a click event to the marker, that opens the modal
-                marker.on('click', function (e){
-                    // When the marker is clicked, emit the event to open the modal to display the area info
-
-                    emitOpenModal("space", area);
-                    // openAreaModal(area);
-                });
-
-                // Localise the emitSpaceHover and emitSpaceUnhover functions, to avoid hassle with the 'this' keyword
-                let emitSpaceHover = this.emitSpaceHover;
-                let emitSpaceUnhover = this.emitSpaceUnhover;
-
-                // Add a mouseover event to the marker, that emits the spaceHover event
-                marker.on('mouseover', function (e){
-                    emitSpaceHover(area.type + ": " + area.name);
-                });
-                // Add a mouseout event to the marker, that emits the spaceUnhover event
-                marker.on('mouseout', function (e){
-                    emitSpaceUnhover();
-                });
-
-
-
-                if (styled_label in areas_sorted){
-                    areas_sorted[styled_label].push(marker);
+                
+                if (area.clickthrough){
+                    // If it's a dummy space, don't make it interactive
+                    marker = L.marker(area.location, {icon: myIcon, alt: area.name, interactive: false});
                 }
-            });
+                else {
+                    // Otherwise, it needs to be interactive so there's a click event
+                    marker = L.marker(area.location, {icon: myIcon, alt: area.name});
+                    // Add a click event to the marker, that opens the modal
+                    marker.on('click', function (e){
+                        // When the marker is clicked, emit the event to open the modal to display the area info
+                        emitOpenModal("space", area);
+                    });
 
-            // Repeat for the dummy spaces, but without any interaction
-            this.dummy_studentSpaces.forEach(area => {
+                    // Localise the emitSpaceHover and emitSpaceUnhover functions, to avoid hassle with the 'this' keyword
+                    let emitSpaceHover = this.emitSpaceHover;
+                    let emitSpaceUnhover = this.emitSpaceUnhover;
 
-                // Figure out what the icon will be by matching the area type to the area type in the area_types array
-                let icon_url = area_types.find(area_type => area_type.category == area.type).icon;
-                let styled_label = area_types.find(area_type => area_type.category == area.type).styled_label;
-
-                // Create the icon object
-                // The className is used to make the icon fade in and out when the zoom changes
-                let myIcon = L.icon({
-                    iconUrl: icon_url, 
-                    iconSize: [50, 50], 
-                    className: "sense-icon",
-                });
-
-                // Create the marker object, pushing the click through to the building behind
-                let marker = L.marker(area.location, {
-                    icon: myIcon, 
-                    alt: area.name,
-                    interactive: false,
-                });
+                    // Add a mouseover event to the marker, that emits the spaceHover event
+                    marker.on('mouseover', function (e){
+                        emitSpaceHover(area.type + ": " + area.name);
+                    });
+                    // Add a mouseout event to the marker, that emits the spaceUnhover event
+                    marker.on('mouseout', function (e){
+                        emitSpaceUnhover();
+                    });
+                }
 
                 if (styled_label in areas_sorted){
                     areas_sorted[styled_label].push(marker);
@@ -621,9 +618,12 @@ export default {
             // this.addPopupsToStudentSpaces(areas_sorted);
         },
 
-        // Allows for icons to be placed on the map without a corresponding student space
-        // For decorative purposes
-        addDummyStudentSpaces(){},
+        // TODO: Add popups to student spaces
+        addPopupsToStudentSpaces(areas){
+            // Loop through the student spaces and add a popup to each one
+            for (let i = 0; i < this.spaceStyles.length; i++){
+            }
+        },
 
         // Emit the various openModal events
         emitOpenModal(type, building_or_space){
@@ -663,48 +663,50 @@ export default {
         // Add anciallary buttons to the UI
         addControlButtons(){
 
-        let info = L.control({position:"bottomleft"});
-        let search = L.control({position:"bottomright"});
+            let info = L.control({position:"bottomleft"});
+            let search = L.control({position:"bottomright"});
+            // Set the button colour based on the dark mode
+            let buttonColour = this.isDarkMode ? "btn-light" : "btn-dark";
 
-        // Localise the the openModal function, to avoid hassle with the 'this' keyword
-        let openLegendModal = this.emitOpenModal;
-
-
-        //Info Box and Main Campus Button
-        info.onAdd = function () {
-
-            this.button = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-            this.button.value = "Legend";
-            this.button.innerHTML = '<button type="button" class="btn btn-dark border border-dark" style="margin-top:0">Legend</button>';
-            // this.button.innerHTML += '<button type="button" id="mainCampusButton" disabled class="btn btn-outline-primary btn-sm" onclick="flyHome()" style="display: none; margin-top:0; margin-left:0.5rem;">Main Campus</button>';
-            this.button.style = "padding:0;"
-
-            this.button.onclick = function(){
-                openLegendModal("legend", null);
-            }
-
-            return this.button;
-        };
-
-        // Add a click event to the info button, that opens the legend modal
-        // info.on('click', function (e){
-        //     openLegendModal;
-        // });
-
-        //Link to Search
-        search.onAdd = function () {
-
-            this.button = L.DomUtil.create('div', 'search'); // create a div with a class "info"
-            this.button.value = "Search";
-            this.button.innerHTML = '<a role="button" href="/info" class="btn btn-dark " style="margin-top:0; ">Search</button>';
-            this.button.style = "padding:0;"
-
-            return this.button;
-        };
+            // Localise the the openModal function, to avoid hassle with the 'this' keyword
+            let openLegendModal = this.emitOpenModal;
 
 
-        info.addTo(this.map);
-        search.addTo(this.map);
+            //Info Box and Main Campus Button
+            info.onAdd = function () {
+
+                this.button = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+                this.button.value = "Legend";
+                this.button.innerHTML = '<button type="button" class="btn ' + buttonColour + ' border border-dark" style="margin-top:0">Legend</button>';
+                // this.button.innerHTML += '<button type="button" id="mainCampusButton" disabled class="btn btn-outline-primary btn-sm" onclick="flyHome()" style="display: none; margin-top:0; margin-left:0.5rem;">Main Campus</button>';
+                this.button.style = "padding:0;"
+
+                this.button.onclick = function(){
+                    openLegendModal("legend", null);
+                }
+
+                return this.button;
+            };
+
+            // Add a click event to the info button, that opens the legend modal
+            // info.on('click', function (e){
+            //     openLegendModal;
+            // });
+
+            //Link to Search
+            search.onAdd = function () {
+
+                this.button = L.DomUtil.create('div', 'search'); // create a div with a class "info"
+                this.button.value = "Search";
+                this.button.innerHTML = '<a role="button" href="/info" class="btn ' + buttonColour + '" style="margin-top:0; ">Search</button>';
+                this.button.style = "padding:0;"
+
+                return this.button;
+            };
+
+
+            info.addTo(this.map);
+            search.addTo(this.map);
         },
 
         // Add the overworld fast travel jump arrows to the map
@@ -747,7 +749,7 @@ export default {
                 });
 
                 // Add a label to the jump arrow
-                let content = "<p align='center'  class='flyover-label'>" + flyOver.label + " </p>"
+                let content = "<p align='center'  class='flyover-label  map-label'>" + flyOver.label + " </p>"
                 let label = L.tooltip( {direction: "bottom", offset:[0,0], opacity:1, permanent: true})
                     .setContent(content);
 
@@ -853,6 +855,37 @@ export default {
 #map {
     height: 100dvh; /* dvh is important for some reason. Leaflet really doesn't like vh */
 }
+
+/* Style the attribute pane for dark mode */
+@media screen and (prefers-color-scheme: dark) {
+    .leaflet-control-attribution {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        color: white;
+    }
+    
+}
+
+.leaflet-marker-shadow {
+    /* Animated flashing */
+    animation: pulse 1.5s infinite;    
+}
+
+.leaflet-marker-shadow:hover {
+    /* Stop the flashing on hover */
+    animation: none;
+}
+
+@keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+  }
 
 /* Styles for rotating a jump arrow */
 

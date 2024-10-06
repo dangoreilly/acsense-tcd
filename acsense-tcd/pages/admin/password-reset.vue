@@ -9,9 +9,27 @@
                     <form @submit.prevent="resetPassword">
 
                         <div class="form-group">
-                            <input v-model="username" type="text" class="form-control my-3" placeholder="Email" required>
-                            <input v-model="password" type="password" class="form-control my-1" placeholder="New Password" required>
-                            <input v-model="password_confirm" type="password" class="form-control my-1" placeholder="Re-Type your new password" required>
+
+                            <label>Email Address</label>
+                            <input :value="user.email" type="text" class="form-control mb-3" placeholder="Email" readonly>
+
+                            <label>New Password</label>
+                            <input 
+                            v-model="password" 
+                            type="password" 
+                            class="form-control mb-1" 
+                            :class="{'is-invalid': password.length < 7}"
+                            placeholder="New Password" 
+                            required>
+
+                            <label>Confirm New Password</label>
+                            <input 
+                            v-model="password_confirm" 
+                            type="password" 
+                            class="form-control mb-1"
+                            :class="{'is-invalid': password != password_confirm}" 
+                            placeholder="Re-Type your new password" 
+                            required>
                         </div>
 
                         <button 
@@ -28,108 +46,138 @@
 </div>
 </template>
 
-<script setup>
 
-// definePageMeta({
-//   middleware: ['auth'],
-// });
-
-</script>
-
-<script>
+<script lang="ts">
 
 import { createClient } from '@supabase/supabase-js'
+import type { UserProfile } from '~/assets/types/permissions'
 
 
 
 export default {
-  data() {
-    return {
-      username: '',
-      password: '',
-      password_confirm: '',
-      social_override: true,
-      supabase: {},
-      accessToken: '',
-    }
-  },
-  created() {
-        // For debugging purposes, you can bypass the social login by adding ?bypass=true to the URL.
-        // This will allow for a quick login without having to use Google or Microsoft.
-        // this.checkSocialOverride(); // Uncomment this line to hide the social login bypass
-        // to login, unless the URL contains ?bypass=true.
-        // const runtimeConfig = useRuntimeConfig()
-        // const supabaseUrl = runtimeConfig.public.supabaseUrl;
-        // const supabaseKey = runtimeConfig.public.supabaseKey;
-        // console.log(supabaseUrl);
-        // console.log(supabaseKey);
-        this.checkIfLoggedIn()
+    data() {
+        return {
+            password: '' as string,
+            password_confirm: '' as string,
+            social_override: true,
+            supabase: {} as any,
+            user: {} as UserProfile,
+        }
+    },
+    mounted() {
 
-  },
-  methods: {
+        this.initSupabase()
 
-    async checkIfLoggedIn() {
-        
-        // Create the client
-        // It will also be used for resetting the password.
-        this.supabase = await createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
-        
-        // Check if there's an active session.
-        const { data, error } = await this.supabase.auth.getSession()
-  
-        console.log(data)
-
-        // if (checkForAccessToken()) {
-        //     // User is resetting password from mail
-        //     // Prefill email field from url params
-        //     this.username = url.searchParams.get("email");
-
+        // Log the user in using the access token in the URL
+        // if (!this.checkForAccessToken()) {
+        //     // If there is no access token, see if this is a logged in user trying to reset their password
+        //     if (!this.checkIfLoggedIn()) {
+        //         // If the user is not logged in, redirect them to the login page
+        //         navigateTo('/admin/login')
+        //     }
         // }
-
-        if (data.session) {
-            this.username = data.session.user.email 
-        }
+        // else {
+        //     // If there is an access token, use it to log in
+        //     this.loginWithOtp()
+        // }
     },
+    methods: {
 
-    checkForAccessToken() {
-        // Check if there's an access token in the URL
-        // If there is, set the access token and return true
-        // If there isn't, return false
-
-        // Get the access token from the URL
-        let url = new URL(window.location.href);
-        let accessToken = url.searchParams.get("access_token");
-        if (accessToken) {
-            // Set the access token
-            this.accessToken = accessToken;
-            return true;
-        }
-        else {
-            return false;
-        }
-    },
-
-    async resetPassword() {
-        const { data, error } = await this.supabase.auth.updateUser({password: this.password})
-
-        if (error) {
-
-            alert(error.message)
-            console.log(error)
-
-        } else {
-
-            // console.log("user logged in as " + data.user.email)
-            navigateTo('/admin/login')
+        async initSupabase() {
+            // Create the client
+            this.supabase = await createClient(this.$config.public.supabaseUrl, this.$config.public.supabaseKey);
+            // Get the user
+            this.user = await getCurrentUserPermissions()
+            // console.log(this.user)
+        },
+        // async loginWithOtp() {
+        //     // Wait for the supabase client to init
+        //     while (!this.supabase) {
+        //         await new Promise(resolve => setTimeout(resolve, 100))
+        //     }
             
-        }
-    },
+        //     const { data, error } = await this.supabase.auth.verifyOtp({ token_hash: accessToken, type: 'email'})
 
-    validPassword() {
-        // We don't care much about security, 
-        return this.password.length > 7 && this.password == this.password_confirm
-    },
-  }
+        //     if (error) {
+        //         console.log(error)
+        //         alert(error.message)
+        //     }
+        //     else {
+        //         console.log(data)
+        //         // this.getLoggedInUser()
+        //     }
+        //     // Once logged in, get the user
+        //     let currentUser = await getCurrentUserPermissions()
+        //     console.log(currentUser)
+        //     this.email = currentUser.email
+        // },
+
+        // async checkIfLoggedIn() {
+            
+        //     // Wait for the supabase client to init
+        //     while (!this.supabase) {
+        //         await new Promise(resolve => setTimeout(resolve, 100))
+        //     }
+            
+        //     // Check if there's an active session.
+        //     const { data, error } = await this.supabase.auth.getSession()
+    
+        //     console.log(data)
+
+        //     // if (checkForAccessToken()) {
+        //     //     // User is resetting password from mail
+        //     //     // Prefill email field from url params
+        //     //     this.username = url.searchParams.get("email");
+
+        //     // }
+
+        //     if (data.session) {
+        //         this.username = data.session.user.email 
+        //         return true
+        //     }
+        //     return false
+        // },
+
+        // checkForAccessToken() {
+        //     // Check if there's an access token in the URL
+        //     // If there is, set the access token and return true
+        //     // If there isn't, return false
+
+        //     // Get the access token from the URL
+        //     let url = new URL(window.location.href);
+        //     let accessToken = url.searchParams.get("token_hash");
+        //     // let email = url.searchParams.get("email");
+        //     if (accessToken) {
+        //         // Set the access token
+        //         this.accessToken = accessToken;
+        //         return true;
+        //     }
+        //     else {
+        //         return false;
+        //     }
+        // },
+
+        async resetPassword() {
+            const { data, error } = await this.supabase.auth.updateUser({password: this.password})
+
+            if (error) {
+
+                alert(error.message)
+                console.log(error)
+
+            } else {
+
+                // console.log("user logged in as " + data.user.email)
+                navigateTo('/admin/login')
+                
+            }
+        },
+
+        validPassword() {
+            // We don't care much about security, 
+            return this.password.length > 7 && this.password == this.password_confirm
+        },
+    }
 }
 
 </script>
