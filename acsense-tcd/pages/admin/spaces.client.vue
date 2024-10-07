@@ -131,7 +131,7 @@
                         <div class="col d-flex flex-column">
                             <label for="spaceType" class="form-label">Building</label>
                             <select 
-                            :disabled="!checkPermission('building_uuid')"
+                            :disabled="!checkPermission('building')"
                             class="form-select" 
                             id="spaceType" 
                             @change="updateSpaceIcon()"

@@ -210,7 +210,7 @@ import {createClient} from '@supabase/supabase-js'
         
     }
 
-    async function getSpaceIcons(spaces_list) {
+    async function getSpaceIcons() {
 
         let { data: icons, error } = await supabase
             .from('space_styles')
@@ -220,36 +220,56 @@ import {createClient} from '@supabase/supabase-js'
             throw error
         }
         else {
-
-            for (let i = 0; i < spaces_list.length; i++) {
-                // Get the icon for the space type
-                let icon = icons.find(s => s.category == spaces_list[i].type);
-                // console.log(icon);
-                // Assign the icon to the space
-                spaces_list[i].icon = icon.icon;
-                spaces_list[i].colour = icon.colour;
-            }
-
-            // This will double as a flag for the load being finished
-            return spaces_list;
+            return icons;
         }
     }
 
-    let buildings_list_temp = await getListOfBuildings();
-    // console.log("Buildings fetched")
-    let spaces_list_temp = await getListOfSpaces();
-    spaces_list_temp = await getSpaceIcons(spaces_list_temp);
-    // console.log("Spaces fetched")
+    function assignSpaceIcons(spaces_list, icons) {
+        for (let i = 0; i < spaces_list.length; i++) {
+            // Get the icon for the space type
+            let icon = icons.find(s => s.category == spaces_list[i].type);
+            // console.log(icon);
+            
+            // Assign the icon override to the space, if one exists
+            spaces_list[i].icon = spaces_list[i].icon_override 
+            // Otherwise, assign the default icon
+            spaces_list[i].icon ||= icon.icon;
+            // Colour cannot be customised, it depends on the space style
+            spaces_list[i].colour = icon.colour;
+        }
+        return spaces_list;
+    }
+
+    let buildings_list_temp = [];
+    let spaces_list_temp = [];
+    let spaceIcons = [];
 
     const spaces = useState("spaces_list");
-    spaces.value = spaces_list_temp;
-    // console.log("Spaces stored")
-    // console.log(space.value)
-
     const buildings = useState("buildings_list");
-    buildings.value = buildings_list_temp;
-    // console.log("Buildings stored")
-    // console.log(buildings_list.value)
+
+    await Promise.allSettled([getListOfBuildings(), getListOfSpaces(), getSpaceIcons()])
+    .then((values) => {
+        buildings.value = values[0].value;
+        spaces_list_temp = values[1].value;
+        spaceIcons = values[2].value;
+        spaces.value = assignSpaceIcons(spaces_list_temp, spaceIcons);
+    })
+    // buildings_list_temp = await getListOfBuildings();
+    // // console.log("Buildings fetched")
+    // spaces_list_temp = await getListOfSpaces();
+    // spaceIcons = await getSpaceIcons();
+    // spaces_list_temp = assignSpaceIcons(spaces_list_temp, spaceIcons);
+    // console.log("Spaces fetched")
+
+    // const spaces = useState("spaces_list");
+    // spaces.value = spaces_list_temp;
+    // // console.log("Spaces stored")
+    // // console.log(space.value)
+
+    // const buildings = useState("buildings_list");
+    // buildings.value = buildings_list_temp;
+    // // console.log("Buildings stored")
+    // // console.log(buildings_list.value)
 
 </script>
 

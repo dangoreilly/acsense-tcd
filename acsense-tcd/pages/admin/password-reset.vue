@@ -18,7 +18,7 @@
                             v-model="password" 
                             type="password" 
                             class="form-control mb-1" 
-                            :class="{'is-invalid': password.length > 7}"
+                            :class="{'is-invalid': password.length < 7}"
                             placeholder="New Password" 
                             required>
 

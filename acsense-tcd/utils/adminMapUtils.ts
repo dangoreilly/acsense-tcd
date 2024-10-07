@@ -1,4 +1,4 @@
-import type { Overlay, Space, Space_Type, Building } from "~/assets/types/supabase_types";
+import type { Overlay, Space, Space_Type, Building, Flyover } from "~/assets/types/supabase_types";
 export interface Building_Partial {
     canonical: string, 
     display_name: string, 
@@ -466,7 +466,7 @@ export function makeLabels(L: any, map: any, building: Building | Building_Parti
 }
 
 // Add a building tooltip to the map at the location of a polygon
-export function addToolTipToBuilding(L: any, map: any, building_coordinates: [[number[]]], content: string): any{
+export function addToolTipToBuilding(L: any, map: any, building_coordinates: [[number, number][]], content: string): any{
 
     // Create a tooltip object with the given content and class
     let label = L.tooltip( {direction: "top", offset:[0,-20], opacity:1, permanent: true})
@@ -481,7 +481,7 @@ export function addToolTipToBuilding(L: any, map: any, building_coordinates: [[n
 }
 
 // Calculate the geometric center of a polygon
-export function getGeometricCenter(_coordinates: [[number[]]]): [number, number] {
+export function getGeometricCenter(_coordinates: [[number, number][]]): [number, number] {
 
     // Because geoJSON is a weird standard
     let coordinates = _coordinates[0];
@@ -507,4 +507,81 @@ export function getGeometricCenter(_coordinates: [[number[]]]): [number, number]
     // console.log([lat, lng])
 
     return [lat, lng];
+}
+
+export async function getFlyovers(supabase: any): Promise<Flyover[]> {
+    // Fetch the overlays from the database
+    const { data, error} = await supabase
+    .from('flyovers')
+    .select('*')
+
+    if (error) {
+        console.log('An error occured while fetching flyovers:');
+        console.log(error);
+        throw error
+    }
+    else {
+        return data;
+    }
+}
+
+export function addFlyovers(L: any, map: any, flyovers: Flyover[], currentFlyover: Flyover | null, dummy: boolean): any {
+    // Go through each flyover and add it to the map
+    flyovers.forEach(flyover => {
+        // Skip the current flyover
+        if (currentFlyover != null && flyover.id == currentFlyover?.id) return;
+
+        // Size of the image on the map, in degrees
+        let width = 0.0002
+        let height = 0.0003
+
+        // console.log('flyover', flyover);
+
+        // Calculate the center point of flyover.target
+        let targetCenter = {
+            lat: (flyover.target[0][0] + flyover.target[1][0]) / 2,
+            lng: (flyover.target[0][1] + flyover.target[1][1]) / 2
+        };
+
+        // Calculate the angle between targetCenter and flyover.location
+        let angle = Math.atan2(flyover.location[1] - targetCenter.lng, flyover.location[0] - targetCenter.lat) * (180 / Math.PI);
+        // Round to the nearest 30 degrees
+        angle = Math.round(angle / 30) * 30;
+        // If the angle is negative, add 360 to make it positive
+        if (angle < 0) angle += 360;
+
+        // console.log('angle', angle);
+
+        // Add an image overlay to the map with the image corresponding to the angle
+        let jumpArrow = L.imageOverlay(`/images/Chevrons/Chevron-${angle}.svg`, [
+            [flyover.location[0] - width, flyover.location[1] - height],
+            [flyover.location[0] + width, flyover.location[1] + height]
+        ], {
+            interactive: !dummy,
+            zIndex: 1000
+        })
+        
+        if (!dummy){
+            // Add a click event to the jump arrow, that flys to the target
+            jumpArrow.on('click', () => {
+                map.flyToBounds(flyover.target);
+            });
+
+        // Add a label to the jump arrow
+        let content = "<p align='center'  class='flyover-label  map-label'>" + flyover.label + " </p>"
+        let label = L.tooltip( {direction: "bottom", offset:[0,0], opacity:1, permanent: true})
+            .setContent(content);
+
+        // Add it to the map at the given layer location
+        label.setLatLng([flyover.location[0], flyover.location[1]])
+            .addTo(map)
+            .openTooltip();
+        
+        }
+
+        jumpArrow.addTo(map);
+        
+    });
+
+    return map;
 }

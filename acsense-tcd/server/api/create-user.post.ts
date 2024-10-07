@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import getUserPermissionsByToken from '~/utils/getUserPermissionsByToken'
 import { getChanges, checkUserHasPermission, comparePayloadToDatabase } from '~/utils/getChanges'
+import { createLogEntry } from '~/utils/createLogEntry'
 import { user_none } from '~/assets/testObjects';
 
 export default defineEventHandler(async (event) => {

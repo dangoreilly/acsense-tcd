@@ -1,5 +1,5 @@
 <template>
-    <div id="overlay-preview-map" style="height: 70dvh; padding-top: 30px;"></div>
+    <div id="flyover-preview-map" style="height: 100%; padding-top: 30px;"></div>
 </template>
 
 <script lang="ts">
@@ -12,6 +12,7 @@ import type { Overlay, Space, Space_Type, Building, Flyover } from "~/assets/typ
 import type { Building_Partial, Space_Partial } from '~/utils/adminMapUtils'
 
 import { getBuildingList, addBuildings, getFlyovers, addOverlays, getSpaces, addSpaces, getSpaceTypes } from '~/utils/adminMapUtils'
+import type Flyovers from "~/pages/admin/flyovers.vue";
 
 
 const campusBounds = [
@@ -21,8 +22,8 @@ const campusBounds = [
 
 export default {
     props: {
-        overlays: {
-            type: Array as () => Overlay[],
+        flyovers: {
+            type: Array as () => Flyover[],
             required: true,
         },
         supabase_client: {
@@ -36,12 +37,12 @@ export default {
             buildingList: [] as Building_Partial[],
             spaceList: [] as Space_Partial[],
             spaceTypes: [] as Space_Type[],
-            flyovers: [] as Flyover[],
+            overlays: [] as Overlay[],
             mode: "light",
         }
     },
     watch: {
-        overlays: {
+        flyovers: {
             handler: function(){
                 this.refreshMap();
             },
@@ -65,8 +66,8 @@ export default {
         getSpaceTypes(this.supabase_client).then((spaceTypes) => {
             this.spaceTypes = spaceTypes;
         });
-        getFlyovers(this.supabase_client).then((flyovers) => {
-            this.flyovers = flyovers;
+        getOverlays(this.supabase_client).then((overlays) => {
+            this.overlays = overlays;
         });
     },
     mounted(){
@@ -83,7 +84,7 @@ export default {
         async initMap(){
 
             // Wait for the div to exist
-            while (!document.getElementById('overlay-preview-map')) {
+            while (!document.getElementById('flyover-preview-map')) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
 
@@ -97,7 +98,7 @@ export default {
             }
 
             // Initialise the map
-            let map = L.map('overlay-preview-map', {
+            let map = L.map('flyover-preview-map', {
                 zoomSnap: 0.25,
                 zoomDelta: 0.25,
                 maxZoom: 20,
@@ -131,7 +132,7 @@ export default {
             addFlyovers(L, this.map, this.flyovers, null, false);
 
             // Add buttons for controlling light/dark mode
-            this.makeVisualModeToggle().addTo(this.map);
+            // this.makeVisualModeToggle().addTo(this.map);
         },
 
         makeVisualModeToggle(){
@@ -171,9 +172,9 @@ export default {
     /* @import url("~/assets/css/leaflet.css"); */
 
     :root{
-        /* --primary-label-opacity: 1;
+        --primary-label-opacity: 1;
         --secondary-label-opacity: 0;
-        --tertiary-label-opacity: 0; */
+        --tertiary-label-opacity: 0;
         transition: opacity 0.5s ease-in-out;
     }
 

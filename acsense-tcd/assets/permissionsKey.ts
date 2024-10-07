@@ -67,7 +67,6 @@ export default function (table:string) : PermissionsKey | null {
                 outlets:                    "spaces.facilities",
                 icon_override:              "spaces.map.labels",
                 seating:					"spaces.facilities",
-                building_uuid:				"spaces.map.location",
                 food_drink_allowed_note:	"spaces.facilities",
                 microwave_note:             "spaces.facilities",
                 kettle_note:                "spaces.facilities",
@@ -96,8 +95,7 @@ export default function (table:string) : PermissionsKey | null {
                 published: 					"is_admin",
 
                 updated_at: "service",
-                UUID: "service",
-                updated_by: "service" 
+                UUID: "service", 
             } as PermissionsKey
 
         case "profiles":
@@ -108,6 +106,7 @@ export default function (table:string) : PermissionsKey | null {
                 is_super_admin: "service",
                 buildings: "is_admin",
                 spaces: "is_admin",
+                map: "is_admin",
             } as PermissionsKey
 
         case "overlays":
@@ -116,6 +115,16 @@ export default function (table:string) : PermissionsKey | null {
                 url_dark: "map.overlays",
                 bounds: "map.overlays",
                 high_detail: "map.overlays",
+
+                id: "service",
+                created_at: "service",
+            } as PermissionsKey
+
+        case "flyovers":
+            return {
+                label: "map.jumps",
+                location: "map.jumps",
+                target: "map.jumps",
 
                 id: "service",
                 created_at: "service",
