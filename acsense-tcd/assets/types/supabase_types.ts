@@ -6,6 +6,7 @@ export type Space = Database['public']['Tables']['spaces']['Row'];
 export type Space_Template = Database['public']['Tables']['spaces']['Insert'];
 export type Building_Gallery_Image = Database['public']['Tables']['building_gallery_images']['Row'];
 export type Space_Type = Database['public']['Tables']['space_styles']['Row'];
+export type Floorplan = Database['public']['Tables']['floorplans']['Row'];
 
 type Log = Database['public']['Tables']['logs']['Row'];
 
