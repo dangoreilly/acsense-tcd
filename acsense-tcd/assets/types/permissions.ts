@@ -1,4 +1,3 @@
-import { Interface } from "readline/promises"
 
 // export interface Permission {
 //     key: string,
