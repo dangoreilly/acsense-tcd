@@ -66,20 +66,20 @@ ORDER BY RANDOM();
 -- Only seed example-building-1 and example-building-2 for these more in-depth features for now
 INSERT INTO public.floorplans (building, level, label, url)
 VALUES
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 3, 'Fourth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts04.svg'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 4, 'Fifth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts05.svg'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 5, 'Sixth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts06.svg'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 0, 'Lower Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts01.svg'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 1, 'Main Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/b5694bc5-90c0-440f-b95c-7c0672992211_MainConcourse.svg'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 2, 'Third Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts03.svg');
+    ('example-building-1', 3, 'Fourth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts04.svg'),
+    ('example-building-1', 4, 'Fifth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts05.svg'),
+    ('example-building-1', 5, 'Sixth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts06.svg'),
+    ('example-building-1', 0, 'Lower Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts01.svg'),
+    ('example-building-1', 1, 'Main Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/b5694bc5-90c0-440f-b95c-7c0672992211_MainConcourse.svg'),
+    ('example-building-1', 2, 'Third Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts03.svg');
 INSERT INTO public.floorplans (building, level, label, url)
 VALUES
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 3, 'Fourth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts04.svg'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 4, 'Fifth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts05.svg'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 5, 'Sixth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts06.svg'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 0, 'Lower Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts01.svg'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 1, 'Main Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/b5694bc5-90c0-440f-b95c-7c0672992211_MainConcourse.svg'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 2, 'Third Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts03.svg');
+    ('example-building-2', 3, 'Fourth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts04.svg'),
+    ('example-building-2', 4, 'Fifth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts05.svg'),
+    ('example-building-2', 5, 'Sixth Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts06.svg'),
+    ('example-building-2', 0, 'Lower Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts01.svg'),
+    ('example-building-2', 1, 'Main Concourse', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/b5694bc5-90c0-440f-b95c-7c0672992211_MainConcourse.svg'),
+    ('example-building-2', 2, 'Third Floor', 'http://127.0.0.1:54321/storage/v1/object/public/floorplans/Arts03.svg');
 
 -- Seed Rooms in a random order so that we can test the ordering functionality
 INSERT INTO public.rooms (building, room_code, room_name, aka, capacity, hearing_loop, wheelchair, outlets, projector, whiteboard, lecturn, room_type)
@@ -108,23 +108,23 @@ ORDER BY RANDOM();
     -- example-building-1
 INSERT INTO public.nav_nodes (building, label, node_type, presence, location_up, location_down)
 VALUES
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 'Main Lift', 'lift', '{true, true, true, true, true, true}', '{262, 658}', '{0, 0}'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 'Cafe Lift', 'lift', '{true, true, false, false, false, false}', '{582, 856}', '{0, 0}'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 'Stairwell A', 'stairs', '{false, true, true, true, true, true}', '{425, 1774.5}', '{424, 1800.5}'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 'Stairwell B', 'stairs', '{false, true, true, true, true, true}', '{512, 1240}', '{452, 1238}'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 'Stairwell C', 'stairs', '{true, true, true, true, true, true}', '{510, 718}', '{454, 718}'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 'Stairwell D', 'stairs', '{false, false, true, true, true, true}', '{428, 148}', '{428, 171}'),
-    ('e5172612-24ac-43ad-a01c-503bbc7edaf0', 'Cafe Steps', 'stairs', '{true, true, false, false, false, false}', '{670, 806}', '{670, 806}');
+    ('example-building-1', 'Main Lift', 'lift', '{true, true, true, true, true, true}', '{262, 658}', '{0, 0}'),
+    ('example-building-1', 'Cafe Lift', 'lift', '{true, true, false, false, false, false}', '{582, 856}', '{0, 0}'),
+    ('example-building-1', 'Stairwell A', 'stairs', '{false, true, true, true, true, true}', '{425, 1774.5}', '{424, 1800.5}'),
+    ('example-building-1', 'Stairwell B', 'stairs', '{false, true, true, true, true, true}', '{512, 1240}', '{452, 1238}'),
+    ('example-building-1', 'Stairwell C', 'stairs', '{true, true, true, true, true, true}', '{510, 718}', '{454, 718}'),
+    ('example-building-1', 'Stairwell D', 'stairs', '{false, false, true, true, true, true}', '{428, 148}', '{428, 171}'),
+    ('example-building-1', 'Cafe Steps', 'stairs', '{true, true, false, false, false, false}', '{670, 806}', '{670, 806}');
     -- example-building-2
 INSERT INTO public.nav_nodes (building, label, node_type, presence, location_up, location_down)
 VALUES
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 'Main Lift', 'lift', '{true, true, true, true, true, true}', '{262, 658}', '{0, 0}'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 'Cafe Lift', 'lift', '{true, true, false, false, false, false}', '{582, 856}', '{0, 0}'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 'Stairwell A', 'stairs', '{false, true, true, true, true, true}', '{425, 1774.5}', '{424, 1800.5}'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 'Stairwell B', 'stairs', '{false, true, true, true, true, true}', '{512, 1240}', '{452, 1238}'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 'Stairwell C', 'stairs', '{true, true, true, true, true, true}', '{510, 718}', '{454, 718}'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 'Stairwell D', 'stairs', '{false, false, true, true, true, true}', '{428, 148}', '{428, 171}'),
-    ('028a15f7-af94-4c50-90b1-ebcf456e3eb4', 'Cafe Steps', 'stairs', '{true, true, false, false, false, false}', '{670, 806}', '{670, 806}');
+    ('example-building-2', 'Main Lift', 'lift', '{true, true, true, true, true, true}', '{262, 658}', '{0, 0}'),
+    ('example-building-2', 'Cafe Lift', 'lift', '{true, true, false, false, false, false}', '{582, 856}', '{0, 0}'),
+    ('example-building-2', 'Stairwell A', 'stairs', '{false, true, true, true, true, true}', '{425, 1774.5}', '{424, 1800.5}'),
+    ('example-building-2', 'Stairwell B', 'stairs', '{false, true, true, true, true, true}', '{512, 1240}', '{452, 1238}'),
+    ('example-building-2', 'Stairwell C', 'stairs', '{true, true, true, true, true, true}', '{510, 718}', '{454, 718}'),
+    ('example-building-2', 'Stairwell D', 'stairs', '{false, false, true, true, true, true}', '{428, 148}', '{428, 171}'),
+    ('example-building-2', 'Cafe Steps', 'stairs', '{true, true, false, false, false, false}', '{670, 806}', '{670, 806}');
 
 -- Seed space_styles
 INSERT INTO public.space_styles (category, icon, colour, descriptor)
