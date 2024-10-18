@@ -2,7 +2,7 @@
     "version": "0.4.0",
     "scripts": {
         "dev": "cd acsense-tcd && npx nuxt dev",
-        "sbstart": "supabase start && supabase db reset && node supabase/seed_users.js && node supabase/seed_files.js",
+        "sbstart": "supabase start && supabase db reset && tsx supabase/seed_tables.ts && tsx supabase/seed_users.js && tsx supabase/seed_files.js",
         "gentypes": "supabase gen types typescript --local > acsense-tcd/assets/types/supabase_types.gen.ts",
         "matchtestdata": "cd acsense-tcd && tsc assets/testObjects.ts"
     },
@@ -10,7 +10,7 @@
         "@supabase/supabase-js": "^2.44.3",
         "dotenv": "^16.4.5",
         "supabase": "^1.190.0",
-        "ts-node": "^10.9.2",
+        "tsx": "^4.19.1",
         "typescript": "^5.6.2"
     }
 }
