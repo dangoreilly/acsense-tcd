@@ -205,7 +205,7 @@ export type Database = {
             columns: ["building"]
             isOneToOne: false
             referencedRelation: "buildings"
-            referencedColumns: ["UUID"]
+            referencedColumns: ["canonical"]
           },
         ]
       }
@@ -297,7 +297,7 @@ export type Database = {
             columns: ["building"]
             isOneToOne: false
             referencedRelation: "buildings"
-            referencedColumns: ["UUID"]
+            referencedColumns: ["canonical"]
           },
         ]
       }
