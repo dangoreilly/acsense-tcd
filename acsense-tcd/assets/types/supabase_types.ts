@@ -6,7 +6,7 @@ export type Building_Gallery_Image =          Database['public']['Tables']['buil
 export type Building_Gallery_Image_Template = Database['public']['Tables']['building_gallery_images']['Insert'];
 export type Space_Type =          Database['public']['Tables']['space_styles']['Row'];
 export type Space_Type_Template = Database['public']['Tables']['space_styles']['Insert'];
-export type Floorplan =          Database['public']['Tables']['floorplans']['Row'];
+export type Floorplan =          Database['public']['Tables']['floorplans']['Row'] & {isEntry?: boolean};
 export type Floorplan_Template = Database['public']['Tables']['floorplans']['Insert'];
 export type Room =          Database['public']['Tables']['rooms']['Row'];
 export type Room_Template = Database['public']['Tables']['rooms']['Insert'];
@@ -25,7 +25,7 @@ export type Building_Partial = Omit<_Building, "created_at" | "aka" | "descripti
 
 type _Space = Database['public']['Tables']['spaces']['Row'];
 type _Space_Template = Database['public']['Tables']['spaces']['Insert'];
-export type Space = _Space & {opening_times: OpeningTimes, location_internal: Point, location: Point;}
+export type Space = _Space & {opening_times: OpeningTimes, location_internal: Point, location: Point, icon?: string;}
 export type Space_Template = _Space_Template & {opening_times: OpeningTimes, location_internal: Point, location: Point;}
 // Space partial for passing to map render methods
 export type Space_Partial = Omit<_Space, "building" | "description"  | "updated_at"  | "food_drink_allowed"  | "microwave"  | "kettle"  | "wheelchair"  | "outlets"  | "seating"  | "UUID"  | "food_drink_allowed_note" | "microwave_note" | "kettle_note" | "wheelchair_note" | "seating_note" | "outlets_note" | "primary_image_url" | "primary_image_alt" | "tips" | "primary_image_panorama" | "sense_exp" | "sense_exp_display" | "wayfinding" | "wayfinding_display" | "phys_access" | "phys_access_display" | "further_info" | "further_info_display" | "aka" | "phys_access_video" | "sense_exp_video" | "wayfinding_video" | "opening_times" | "floor" | "location_internal" | "clickthrough">
