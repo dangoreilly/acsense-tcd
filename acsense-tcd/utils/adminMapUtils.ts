@@ -1,36 +1,17 @@
-import type { Overlay, Space, Space_Type, Building, Flyover } from "~/assets/types/supabase_types";
-export interface Building_Partial {
-    canonical: string, 
-    display_name: string, 
-    UUID: string, 
-    always_display: boolean, 
-    geometry: {coordinates:[[[number, number]]]}
-    map_label_1: string,
-    map_label_2: string,
-    map_label_3: string,
-    published: boolean
-}
-export interface Space_Partial {
-    canonical: string, 
-    location: [number, number], 
-    type: string, 
-    icon_override: string, 
-    name: string,
-    published: boolean
-}
-
+import type { Overlay, Space, Space_Partial, Space_Type, Building, Building_Partial, Flyover } from "~/assets/types/supabase_types";
+import { Building_Partial_Fields, Space_Partial_Fields } from "~/assets/types/supabase_types";
 /**
  * Retrieves the list of buildings from the database.
  * 
  * @param supabase - The Supabase client object.
- * @returns A promise that resolves to an array of buildings.
+ * @returns A promise that resolves to an array of partial buildings.
  * @throws If there is an error fetching the building list.
  */
 export async function getBuildingList(supabase: any): Promise<Building_Partial[]> {
     // Fetch the building list from the database
     let { data: buildings, error } = await supabase
         .from('buildings')
-        .select('canonical, display_name, UUID, always_display, geometry, map_label_1, map_label_2, map_label_3, published')
+        .select(Building_Partial_Fields)
     if (error) {
         console.error(error)
         alert(error.message)
@@ -49,14 +30,14 @@ export async function getBuildingList(supabase: any): Promise<Building_Partial[]
  * 
  * @async
  * @param supabase - The Supabase client object.
- * @returns A promise that resolves to an array of spaces.
+ * @returns A promise that resolves to an array of partial spaces.
  * @throws If there is an error fetching the spaces list.
  */
 export async function getSpaces(supabase: any): Promise<Space_Partial[]> {
     // Fetch the spaces list from the database, for dummy display
     let { data: spaces, error } = await supabase
         .from('spaces')
-        .select('canonical, location, type, icon_override, name, published')
+        .select(Space_Partial_Fields)
     if (error) {
         console.error(error)
         alert(error.message)
