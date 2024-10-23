@@ -5,15 +5,18 @@
         <main class="d-flex flex-nowrap" style="height:100vh">
 
             <!-- Sidebar for building selection -->
-            <AdminBuildingSelector 
-            @activeBuildingChanged="getBuilding($event)"
-            :supabase_client="supabase"/> <!--   -->
-            <!-- TODO: Replace building selector functionality -->
+            
+            <AdminEntitySelector 
+            @activeEntityChanged="getBuilding($event)"
+            entityType="building"
+            :permissions="user"
+            :supabase_client="supabase"
+            :updateCount="0"/>
             <!-- Main section for editing -->
-            <div class="pt-1 px-4 w-100" style="overflow-y: auto;">
+            <div class="pt-0 px-4 w-100" style="overflow-y: auto;">
 
                 <!-- Header -->
-                <div class="border-bottom border-2 border-black mb-3 d-flex justify-content-between">
+                <div class="pt-1 border-bottom border-2 border-black mb-3 d-flex justify-content-between sticky-top bg-light">
                     <!-- Title -->
                     <h1 class="display-6 d-flex align-items-end">
                         Floorplan | 
@@ -69,10 +72,9 @@
                         
                     </div>
 
-                    <!-- TODO: Handle by setting map size to [0,0] or [1080,1920] -->
                     <!-- <div class="mb-3 ps-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                            <input class="form-check-input" type="checkbox" role="switch" :v-model="building.floorplans_published">
                             <label class="form-check-label" for="flexSwitchCheckDefault">Display floorplan for {{ building.display_name }}</label>
                         </div>
                     </div> -->
@@ -80,29 +82,32 @@
                     <!-- Floorplan size -->
                     <div class="row g-3 mb-2">
                         <!-- Button to remake the map -->
-                        <div class="col-md-2 d-flex">
+                        <!-- <div class="col-md-2 d-flex">
                             <button class="btn btn-outline-secondary flex-fill" @click="mapInit()">Re-generate Map</button>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="floorSelect" class="form-label">Entry Floor</label>
+                        </div> -->
+                        <div class="col">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" :v-model="building.floorplans_published">
+                                <label class="form-check-label" for="flexSwitchCheckDefault">Display floorplan for {{ building.display_name }}</label>
+                            </div>
+                            <!-- <label for="floorSelect" class="form-label">Entry Floor</label>
                             <select class="form-select" id="floorSelect" 
-                            @change="setEntryFloor($event.target.value)"
+                            @change="setEntryFloor($event.target.value as number)"
                             v-model="building.entry_floor">
-                            <!-- @change="moveToFloor(activeFloor)"> -->
                                 <option 
                                 v-for="(floor, index) in floors"
                                 :value="index">
                                     {{ floor.label }}
                                 </option>
-                            </select>
+                            </select> -->
                         </div>
                         <!-- Map dimensions -->
-                        <div class="col-md-3">
-                            <label for="width" class="form-label">Width</label>
+                        <div class="col">
+                            <label for="width" class="form-label">Height</label>
                             <input type="number" class="form-control" id="width" v-model="building.internal_map_size[0]">
                         </div>
-                        <div class="col-md-3">
-                            <label for="height" class="form-label">Height</label>
+                        <div class="col">
+                            <label for="height" class="form-label">Width</label>
                             <input type="number" class="form-control" id="height" v-model="building.internal_map_size[1]">
                         </div>
                     </div>
@@ -406,7 +411,7 @@
                             </div>
                             <!-- Active floors -->
                             <div>
-                                <div class="form-check form-check-inline" v-for="(floor, index) in floors">
+                                <div class="form-check form-check-inline" v-if="newNode.presence" v-for="(floor, index) in floors">
                                     <input 
                                     class="form-check-input" 
                                     type="checkbox"
@@ -443,20 +448,15 @@
                     </div>
 
 
-                    <!-- Map -->
-                    <div class="mb-3 position-relative">
+                    <!-- Display the map, if there is at least one floorplan to view-->
+                    <div class="mb-3 mt-5 position-relative" v-if="floors && floors.length > 0">
                         <!-- Leaflet instance -->
-                        <div id="internal-map" style="height: 0px; padding-top: 30px;">
-                        </div>
-                        <!-- Toast in the bottom left corner to display what the current space is -->
-                        <div class="toast-container p-3 start-50 translate-middle-x space-name-toast bottom-0"
-                        :style="space_name_toast_showing ? 'opacity: 1;' : 'opacity: 0;'">
-                            <div class="toast show">
-                                <div class="toast-body">
-                                    {{ space_being_hovered_on  }}
-                                </div>
-                            </div>
-                        </div>
+                        <FloorplanMap
+                        :floors="floors"
+                        :building="building"
+                        :spaces="spaces"
+                        :navigationNodes="navigationNodes"
+                        />
                     </div>
                     
 
@@ -466,54 +466,57 @@
     </NuxtLayout>
 </template>
 
-<script setup>
-    definePageMeta({
-        middleware: 'auth'
-    })
-</script>
-
-<script>
+<script lang="ts">
 import {createClient} from '@supabase/supabase-js';
-import L from 'leaflet';
+import type { Building_Partial, Space_Partial, Floorplan, Nav_Node, Space_Type, Floorplan_Template, Nav_Node_Template } from '~/assets/types/supabase_types';
+import { Building_Partial_Fields, Space_Partial_Fields } from "~/assets/types/supabase_types";
+import { getSpaceTypes, getImageForSpaceType } from '~/utils/adminMapUtils'
+import getPermissionsKey from "~/assets/permissionsKey"
 
     export default {
         data() {
             return {
-                building: {},
-                building_clean: {},
-                floors: [],
-                deleted_floors: [],
-                floors_clean: [],
-                floor_layers_object: {},
-                supabase: {},
+                building: {} as Building_Partial,
+                building_clean: {} as Building_Partial,
+                floors: [] as Floorplan[],
+                deleted_floors: [] as Floorplan[],
+                floors_clean: [] as Floorplan[],
+                floor_layers_object: {} as any,
+                supabase: {} as any,
                 newFloor: {
                     label: "",
                     url: "",
-                },
+                } as Floorplan_Template,
                 newNode: {
+                    building: "",
                     label: "",
                     node_type: "",
-                    presence: [],
+                    presence: [] as boolean[],
                     location_up: [0,0],
                     location_down: [0,0],
-                },
-                spaces: [],
-                spaces_clean: [],
-                map: {},
-                activeFloor: 0,
-                activeFloor_object: {},
-                space_being_hovered_on: "",
-                space_name_toast_showing: false,
+                } as Nav_Node_Template,
+                spaces: [] as Space_Partial[],
+                spaces_clean: [] as Space_Partial[],
 
-                navigationNodes: [],
-                navigationNodes_clean: [],
+                navigationNodes: [] as Nav_Node[],
+                navigationNodes_clean: [] as Nav_Node[],
+
+                user: {} as any,
             }
         },
         created() {
             // Initialise the supabase client
-            const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
-            const supabaseKey = useRuntimeConfig().public.supabaseKey;
-            this.supabase = createClient(supabaseUrl, supabaseKey)
+            // const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
+            // const supabaseKey = useRuntimeConfig().public.supabaseKey;
+            // this.supabase = createClient(supabaseUrl, supabaseKey)
+
+            
+            this.supabase = adminSupabaseInit();
+            getCurrentUserPermissions(this.supabase).then((user) => {
+                this.user = user;
+            });
+            // Get the permissionsKey for floorplans
+            // this.permissionsKey = getPermissionsKey("floorplans");
 
         },
         mounted() {
@@ -522,31 +525,27 @@ import L from 'leaflet';
         computed: {
             buildingHasBeenChanged(){
 
-                // I'm fully aware that this code is inefficient
-                // I don't care
-                let floorplans_changed = false;
-
                 // Check if the building details (map size, entry floor) have changed
                 if (this.checkBuildingChanges()) {
-                    floorplans_changed = true;
+                    return true;
                 }
                 
                 // Check if the floors have changed
                 if (this.checkFloorChanges()) {
-                    floorplans_changed = true;
+                    return true;
                 }
 
                 // Check if the spaces have changed
                 if (this.checkSpaceChanges()) {
-                    floorplans_changed = true;
+                    return true;
                 }
 
                 // Check if the navigation nodes have changed
                 if (this.checkNavNodeChanges()) {
-                    floorplans_changed = true;
+                    return true;
                 }
 
-                return floorplans_changed;
+                return false;
 
             },
             newFloorIsValid(){
@@ -560,22 +559,25 @@ import L from 'leaflet';
         },
         methods: {
 
-            printNewNavNodeValidity(){
-                // Test function
-                // Print the 3 components of the validity check
-                console.log("Label: " + (this.newNode.label != ""));
-                console.log(this.newNode.label)
-                console.log("Type: " + (this.newNode.node_type != ""));
-                console.log(this.newNode.node_type)
-                console.log("Presence: " + (this.newNode.presence.includes(true)));
-                console.log(this.newNode.presence)
-            },
+            // printNewNavNodeValidity(){
+            //     // Test function
+            //     // Print the 3 components of the validity check
+            //     console.log("Label: " + (this.newNode.label != ""));
+            //     console.log(this.newNode.label)
+            //     console.log("Type: " + (this.newNode.node_type != ""));
+            //     console.log(this.newNode.node_type)
+            //     console.log("Presence: " + (this.newNode.presence.includes(true)));
+            //     console.log(this.newNode.presence)
+            // },
 
-            checkNodeValid(node){
-                // Check the fields of the node
-                // Check that the label is not empty
-                // And that a node type has been selected
-                // And that at least two floors have been selected
+            checkNodeValid(node: Nav_Node | Nav_Node_Template){
+
+                // First, make sure there is a presence array
+                if (!node.presence) {
+                    return false;
+                }
+
+                // Then, check the number of floors selected
                 let floors_selected = 0;
                 node.presence.forEach(floor => {
                     if (floor) {
@@ -583,16 +585,8 @@ import L from 'leaflet';
                     }
                 });
 
+                // Then, check the label and node type, and that the floors selected is at least 2
                 return (node.label != "") && (node.node_type != "") && (floors_selected >= 2);
-            },
-
-            async loadTestData(){
-                // Simulate the arts building being selected
-                // Call the getFloors and getSpaces functions
-                this.getSpaces(this.building.UUID);
-                // Floors need to be awaited because we use the floor count to validate the navigation nodes
-                await this.getFloorplans(this.building.UUID);
-                this.getNavigationNodes(this.building.UUID);
             },
 
             async getSpaces(){
@@ -603,8 +597,8 @@ import L from 'leaflet';
 
                 const { data: spaces, error } = await this.supabase
                     .from('spaces')
-                    .select('name, UUID, floor, location_internal, type, icon_override')
-                    .eq('building_uuid', this.building.UUID)
+                    .select(Space_Partial_Fields)
+                    .eq('building', this.building.canonical)
 
                     if (error) {
                     console.error(error)
@@ -615,10 +609,10 @@ import L from 'leaflet';
 
                     // Calculate the icon for each space
                     
-                    let spaceStyles = await getSpaceStyles(this.supabase);
+                    let spaceStyles = await getSpaceTypes(this.supabase);
                     // console.log("spaceStyles", spaceStyles);
-                    spaces.forEach(space => {
-                        space.icon = getIconForSpace(space, spaceStyles);
+                    spaces.forEach((space:Space_Partial) => {
+                        space.icon = getImageForSpaceType(space, spaceStyles);
                     });
 
                     // console.log("spaces", spaces);
@@ -628,7 +622,7 @@ import L from 'leaflet';
                 }
             },
 
-            async getNavigationNodes(buildingUUID){
+            async getNavigationNodes(){
                 // Get the navigation nodes in this building
                 // Null the nodes array
                 this.navigationNodes = [];
@@ -636,7 +630,7 @@ import L from 'leaflet';
                 const { data: nodes, error } = await this.supabase
                     .from('nav_nodes')
                     .select('*')
-                    .eq('building', this.building.UUID)
+                    .eq('building', this.building.canonical)
 
                     if (error) {
                     console.error(error)
@@ -666,11 +660,11 @@ import L from 'leaflet';
                 this.newNode = {
                     label: "",
                     node_type: "",
-                    building: this.building.UUID,
+                    building: this.building.canonical,
                     presence: [],
                     location_up: [0,0],
                     location_down: [0,0],
-                }
+                } as Nav_Node_Template;
 
                 // Update the locations to be the center of the map
                 this.newNode.location_up = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
@@ -681,10 +675,15 @@ import L from 'leaflet';
 
             },
 
-            validateNavigationNode(node){
+            validateNavigationNode(node: Nav_Node | Nav_Node_Template){
                 // Takes in a lift or stair, checks it has the correct number of floors
                 // Trims the presence array to the correct number of floors if too many
                 // filles the presence array with 0s if too few
+
+                // If the presence array is not present, create it
+                if (!node.presence) {
+                    node.presence = [];
+                }
 
                 // Check the presence array is the correct length
                 if (node.presence.length != this.floors.length) {
@@ -705,22 +704,7 @@ import L from 'leaflet';
 
             },
 
-            moveToFloor(floorIndex){
-                // Move the map to the floor with the given index
-                // First, find the label of the floor as that is how
-                // they are stored in the layer control
-                let floorLabel = this.floors[floorIndex].label;
-                // Then, get the layer group from the floor_layers_object
-                let floorLayer = this.floor_layers_object[floorLabel];
-                // Then remove all layers from the map
-                this.map.eachLayer(function (layer) {
-                    layer.remove();
-                });
-                // Then add the layer group to the map
-                floorLayer.addTo(this.map);
-            },
-
-            swapFloors(A, B){
+            swapFloors(A: number, B: number){
                 // Takes in the index of two floors, swaps them in the array
                 let temp = this.floors[A];
                 this.floors[A] = this.floors[B];
@@ -728,7 +712,7 @@ import L from 'leaflet';
                 this.setFloorLevels();
             },
 
-            setEntryFloor(newEntryFloor, init=false){
+            setEntryFloor(newEntryFloor: number, init=false){
 
                 // Set the entry floor to the new value
                 this.building.entry_floor = newEntryFloor;
@@ -759,169 +743,71 @@ import L from 'leaflet';
                 });
                 
             },
-            // Create the map
-            mapInit(){
-                // Try run this.map.remove, print to the console if it fails
-                try {
-                    this.removeMap();
-                }
-                catch (error) {
-                    console.log(error);
-                }
 
-                // Make space for the map
-                let map_container = document.getElementById("internal-map");
-                    map_container.style.height = "600px";
+            async uploadFloorImage(floor: number){
 
-                // Make sure there are floors to add
-                // If there aren't, don't init the map
-                if (this.floors.length == 0) {
-                    alert("No map to display");
-                    return;
-                }
-
-
-                const BUFFER = 200
-
-                // Create the new map
-                let map_size = [[0,0], this.building.internal_map_size]
-                // Get the bounds by adding padding around the edges
-                // Without this padding, it's not always possible to zoom into the edges
-                let map_bounds = [[-BUFFER, -BUFFER],
-                    [this.building.internal_map_size[0] + BUFFER,
-                    this.building.internal_map_size[1] + BUFFER]
-                ]
-
-                let map_center = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2]
-
-                let map = L.map('internal-map', {
-                    crs: L.CRS.Simple,
-                    zoomSnap: 0.25,
-                    zoomDelta: 0.25,
-                    maxBounds: map_bounds,
-                    maxZoom: 20,
-                    minZoom: -1,
-                    renderer: L.canvas({padding: 1})
-                }).fitBounds(map_size);// map_center, 1);
-
-                // var info = L.control({position:"bottomleft"});
-
-                 // Cheap debug reporting
-                map.on('click', function(e) {
-                    let cheapDebugObject = {
-                        latlng: e.latlng,
-                        bounds: map.getBounds(),
-                        zoom: map.getZoom(),
-                        center: map.getCenter()
-                    }
-            
-                    console.log(cheapDebugObject);
-                    
-                });
-
-                this.map = map;
-
-                // Add floors to the map
-                this.addFloorsToMap(map_size);
-                // Add spaces to the map
-                this.addSpacesToMap();
-                // Add navigation nodes to the map
-                this.addNavNodesToMap();
+                let input_id;
+                let floor_label;
                 
-            },
-
-            addFloorsToMap(bounds){
-
-                // Init the floor layers object
-                // The floor layers array needs to be stored in the vue instance
-                // Otherwise it will be garbage collected and the layer functions can't be called later
-                this.floor_layers_object = {};
-
-                // Create a the floors
-                for (let i = 0; i < this.floors.length; i++) {
-                    const floor = this.floors[i];
-                    // Create a layer group for each floor
-                    // Add the floor to the layer group
-                    // Add the layer group to the map
-                    let floor_layer = L.layerGroup( [L.imageOverlay(floor.url, bounds)] )
-                    this.floor_layers_object[floor.label] = floor_layer;
-
-                    // If this is the entry floor, add it to the map
-                    if (floor.isEntry) {
-                        floor_layer.addTo(this.map);
-                    }
-
-                    // Add an event listener to the layer group
-                    // When the layer is added to the map, set the active floor to this floor
-                    floor_layer.on('add', () => {
-                        this.activeFloor = i;
-                        this.activeFloor_object = floor_layer;
-                        console.log("Active floor set to: " + this.activeFloor)
-                    });
+                if (floor === -1) {
+                    // This condition means a new floor is being added
+                    input_id = "newFloorSVGInput";
+                    floor_label = this.newFloor.label;
                 }
-
-                // Set the active floor to the entry floor
-                this.activeFloor = this.EntryFloor;
-
-                // Add the layer control to the map
-                let layers_control = L.control({position:"topright"});
-    
-                // TODO: Add a check for if mobile, and collapse the layer control
-                layers_control = L.control.layers(this.floor_layers_object, null, {collapsed: false});
+                else{
+                    // Otherwise, get the floor input based on the index
+                    input_id = "floorSVGInput_" + floor;
+                    floor_label = this.floors[floor].label;
+                }
+                // Get the file
+                let file_input = document.getElementById(input_id) as HTMLInputElement;
                 
-                layers_control.addTo(this.map);
-
-            },
-
-            async uploadFloorImage(file, floor_label){
-                // Get the file object from the primary image upload input
-                // Upsert to the storage bucket as the canonical name
-                // TODO: Check if the file already exists under a different extension, and if so, delete it
-
+                // Make TS happy by checking the file input is not null
+                if (!file_input || !file_input.files) {
+                    throw "File input not found";
+                }
+                // Extract the file
+                const file = file_input.files[0];
                 // Get the file name
-                let fileName = file.name;
+                let fileName = file_input.name;
                 // Get the file extension
                 let fileExtension = fileName.split('.').pop();
+
                 // Create a new file name
                 // Replace any spaces in the floor label with underscores
                 // Replace any special characters with nothing
                 floor_label = floor_label.replace(/[^a-zA-Z0-9]/g, '');
                 floor_label = floor_label.replace(" ", "_");
-                let newFileName = this.building.UUID + "_" + floor_label + "." + fileExtension;
+                let newFileName = this.building.canonical + "_" + floor_label + "." + fileExtension;
                 
                 // Build the new url for the file
                 let newUrl = this.supabase.storageUrl + "/object/public/floorplans/" + newFileName;
-
-                // Upload the file to the storage bucket
-                const { data, error:upload_error } = await this.supabase.storage
-                .from('floorplans')
-                .upload(newFileName, file, {
-                    upsert: true
-                })
-                if (upload_error) {
-                    console.error(upload_error)
-                    throw upload_error;
+                // Upsert the image
+                const {data, error} = await upsertImage(this.supabase, 'floorplans', `${this.building.canonical + "_" + floor_label}.${fileExtension}`, file)
+                
+                if (error) {
+                    console.error(error)
+                    alert(error.message)
+                    throw error
                 }
-    
 
                 return newUrl;
 
             },
 
             async addNewFloor(){
-
-    
-                // Get the file from the input
+                // Get the file from the input 
+                // @ts-ignore
                 let file = document.getElementById("newFloorSVGInput").files[0];
                 // Upload the file to the storage bucket
                 try {
                     // Set the url of the new floor
-                    this.newFloor.url = await this.uploadFloorImage(file, this.newFloor.label)
+                    this.newFloor.url = await this.uploadFloorImage(-1)
                     // Set the building UUID
-                    this.newFloor.building = this.building.UUID;
+                    this.newFloor.building = this.building.canonical;
                     
                     // Add the new floor to the floors array
-                    this.floors.push(this.newFloor);
+                    this.floors.push(this.newFloor as Floorplan);
                     // Check if this is the first floor added
                     // If it is, set this as the entry floor
                     if (this.floors.length == 1) {
@@ -932,8 +818,9 @@ import L from 'leaflet';
                     this.newFloor = {
                         label: "",
                         url: "",
-                    }
+                    } as Floorplan_Template
                     // Reset the new floor input
+                    // @ts-ignore
                     document.getElementById("newFloorSVGInput").value = "";
                 }
                 catch (error) {
@@ -944,7 +831,7 @@ import L from 'leaflet';
 
             },
 
-            deleteFloor(floorIndex){
+            deleteFloor(floorIndex: number){
 
                 // Add it to the deleted_floors array
                 // This will let us track later if it needs to be deleted from the database
@@ -955,313 +842,51 @@ import L from 'leaflet';
 
             },
 
-            addSpacesToMap(){
-
-                // Cycle through all the spaces
-                // Add a marker to the map for each space
-                // On the layer specified by the floor
-
-                for (let i = 0; i < this.spaces.length; i++) {
-                    
-                    // const space = this.spaces[i];
-
-                    // Create an icon for the space
-                    let icon = L.icon({
-                        iconUrl: this.spaces[i].icon,
-                        iconSize: [50, 50],
-                        iconAnchor: [25, 25],
-                        popupAnchor: [0, -25],
-                    });
-
-                    // Set the starting position for the marker
-                    // If the space has a location, use that, otherwise use the center of the floor
-                    let marker_position = [];
-
-                    // Check equivalence to [0,0] because the array is not being compared correctly
-                    let equivalence = (this.spaces[i].location_internal[0] == 0) && (this.spaces[i].location_internal[1] == 0);
-
-                    if (equivalence)
-                        marker_position = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
-                    else
-                        marker_position = this.spaces[i].location_internal;
-                    
-                    // Create a draggable marker for the space with the icon
-                    let marker = L.marker(marker_position, {
-                        icon: icon, 
-                        draggable: true,
-                        bubblingMouseEvents: false,
-                    });
-
-                    // Add an event listener to the marker, to update the space location when it is dragged
-                    marker.on('dragend', (e) => {
-                        // Get the new coordinates
-                        let new_coordinates = e.target.getLatLng();
-                        // Update the space location
-                        this.spaces[i].location_internal = [new_coordinates.lat, new_coordinates.lng];
-                    });
-
-                    // create a local function for updating the toast value
-                    let updateToast = (e) => {
-                        // Get the name of the space
-                        let space_name = this.spaces[i].name;
-                        // Set the toast value
-                        this.space_being_hovered_on = space_name;
-                        // Set the toast to show
-                        this.space_name_toast_showing = true;
-                    }
-                    // And a local function for setting the toast to not display
-                    let clearToast = () => {
-                        this.space_name_toast_showing = false;
-                    }
-
-                    // Add an event listener to update the toast when the mouse hovers over the marker
-                    marker.on('mouseover', (e) => {
-                        updateToast(e);
-                    });
-                    // And close it on mouseout
-                    marker.on('mouseout', (e) => {
-                        clearToast();
-                    });
-                    
-                    // Add the marker to the map
-                    // marker.addTo(this.map);
-
-                    // Get the name of the floor for this space (this is how they're stored in the layer control)
-                    let floor_label = this.floors[this.spaces[i].floor].label;
-
-                    // Add the marker to the layer for the floor
-                    marker.addTo(this.floor_layers_object[floor_label]);
-                }
-
-            },
-
-            addNavNodesToMap(){
-                // Cycle through all the navigation nodes
-                // Add a marker to the map for each node
-                // On the layer specified by the floor
-
-                // First, set up the icon for the nodes
-
-                // Stair up icon
-                let stair_up_icon = L.icon({
-                    iconUrl: "/images/icons/stair-up.svg",
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15],
-                });
-
-                // Stair down icon
-                let stair_down_icon = L.icon({
-                    iconUrl: "/images/icons/stair-down.svg",
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15],
-                });
-
-                // Lift icon
-                let lift_icon = L.icon({
-                    iconUrl: "/images/icons/lift.svg",
-                    iconSize: [50, 50],
-                    iconAnchor: [25, 25],
-                });
-                
-                // Create a marker for each node
-                for (let i = 0; i < this.navigationNodes.length; i++){
-
-                    // create a local function for updating the toast value
-                    let updateToast = (e) => {
-                        // Get the name of the space
-                        let node_name = this.navigationNodes[i].label;
-                        // Set the toast value
-                        this.space_being_hovered_on = node_name;
-                        // Set the toast to show
-                        this.space_name_toast_showing = true;
-                    }
-                    // And a local function for setting the toast to not display
-                    let clearToast = () => {
-                        this.space_name_toast_showing = false;
-                    }
-
-                    // Check what sort of node it is
-                    if (this.navigationNodes[i].node_type == "lift") {
-                        // If it's a lift, use the lift icon
-                        let marker = L.marker(this.navigationNodes[i].location_up, {
-                            icon: lift_icon, 
-                            draggable: true,
-                            bubblingMouseEvents: false,
-                        });
-
-                        // Add an event listener to the marker, to update the space location when it is dragged
-                        marker.on('dragend', (e) => {
-                            // Get the new coordinates
-                            let new_coordinates = e.target.getLatLng();
-                            // Update the space location
-                            this.navigationNodes[i].location_up = [new_coordinates.lat, new_coordinates.lng];
-                        });
-
-                        // Add an event listener to update the toast when the mouse hovers over the marker
-                        marker.on('mouseover', (e) => {
-                            updateToast(e);
-                        });
-                        // And close it on mouseout
-                        marker.on('mouseout', (e) => {
-                            clearToast();
-                        });
-
-                        // Add the lift marker to ever floor it's on
-                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
-                            if (this.navigationNodes[i].presence[j]) {
-                                // Get the name of the floor for this space (this is how they're stored in the layer control)
-                                let floor_label = this.floors[j].label;
-                                // Add the marker to the layer for the floor
-                                marker.addTo(this.floor_layers_object[floor_label]);
-                            }
-                        }
-
-
-                    }
-                    else if (this.navigationNodes[i].node_type == "stairs"){
-                        // If it's a stairs, create two markers, one for up and one for down
-                        // Stairs UP
-                        let marker_up = L.marker(this.navigationNodes[i].location_up, {
-                            icon: stair_up_icon, 
-                            draggable: true,
-                            bubblingMouseEvents: false,
-                        });
-                        
-                        // Add an event listener to the marker, to update the space location when it is dragged
-                        marker_up.on('dragend', (e) => {
-                            // Get the new coordinates
-                            let new_coordinates = e.target.getLatLng();
-                            // Update the space location
-                            this.navigationNodes[i].location_up = [new_coordinates.lat, new_coordinates.lng];
-                        });
-
-                        // Add an event listener to update the toast when the mouse hovers over the marker
-                        marker_up.on('mouseover', (e) => {
-                            updateToast(e);
-                        });
-                        // And close it on mouseout
-                        marker_up.on('mouseout', (e) => {
-                            clearToast();
-                        });
-
-                        // ====================================================================================================
-                        // Stairs DOWN
-                        let marker_down = L.marker(this.navigationNodes[i].location_down, {
-                            icon: stair_down_icon, 
-                            draggable: true,
-                            bubblingMouseEvents: false,
-                        });
-                        
-                        // Add an event listener to the marker, to update the space location when it is dragged
-                        marker_down.on('dragend', (e) => {
-                            // Get the new coordinates
-                            let new_coordinates = e.target.getLatLng();
-                            // Update the space location
-                            this.navigationNodes[i].location_down = [new_coordinates.lat, new_coordinates.lng];
-                        });
-
-                        // Add an event listener to update the toast when the mouse hovers over the marker
-                        marker_down.on('mouseover', (e) => {
-                            updateToast(e);
-                        });
-                        // And close it on mouseout
-                        marker_down.on('mouseout', (e) => {
-                            clearToast();
-                        });
-
-                        // ====================================================================================================
-                        // Adding stairs to map
-                        // UP stairs need to be added to every floor they're on, except the topmost floor they're on
-                        // DOWN stairs need to be added to every floor they're on, except the bottommost floor they're on
-
-                        // Calculate the topmost floor the stairs are on
-                        let topmost_floor = 0;
-                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
-                            if (this.navigationNodes[i].presence[j]) {
-                                topmost_floor = j;
-                            }
-                        }
-                        // Calculate the bottommost floor the stairs are on
-                        let bottommost_floor = this.navigationNodes[i].presence.length;
-                        for (let j = this.navigationNodes[i].presence.length; j >= 0; j--) {
-                            if (this.navigationNodes[i].presence[j]) {
-                                bottommost_floor = j;
-                            }
-                        }
-
-                        // UP stairs
-                        // Add the lift marker to ever floor it's on, except the topmost floor
-                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
-                            if (this.navigationNodes[i].presence[j] && j != topmost_floor) {
-                                // Get the name of the floor for this space (this is how they're stored in the layer control)
-                                let floor_label = this.floors[j].label;
-                                // Add the marker to the layer for the floor
-                                marker_up.addTo(this.floor_layers_object[floor_label]);
-                            }
-                        }
-
-                        // DOWN stairs
-                        // Add the lift marker to ever floor it's on, except the bottommost floor
-                        for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
-                            if (this.navigationNodes[i].presence[j] && j != bottommost_floor) {
-                                // Get the name of the floor for this space (this is how they're stored in the layer control)
-                                let floor_label = this.floors[j].label;
-                                // Add the marker to the layer for the floor
-                                marker_down.addTo(this.floor_layers_object[floor_label]);
-                            }
-                        }
-
-                    }
-                    else {
-                        // If it's neither, throw an error
-                        throw "Invalid node type: " + this.navigationNodes[i].node_type;
-                    }
-                }
-
-
-            },
-
             addNewNavNode(){
                 // Add the new node to the navigationNodes array
-                this.navigationNodes.push(this.newNode);
+                this.navigationNodes.push(this.newNode as Nav_Node);
                 // Set up the new node object
                 this.setUpNewNode();
             },
 
-            deleteNavNode(node){
+            deleteNavNode(node: Nav_Node){
                 this.navigationNodes.splice(this.navigationNodes.indexOf(node), 1)
             },
 
 
-            removeMap(){
-                // Delete with the leaflet method, if it exists
-                try {
-                    this.map.remove();
-                }
-                catch (error) {
-                    // console.log(error);
-                }
-                // Fallback delete
-                this.map = {};
+            // removeMap(){
+            //     // Delete with the leaflet method, if it exists
+            //     try {
+            //         // @ts-ignore
+            //         this.map.remove();
+            //     }
+            //     catch (error) {
+            //         // console.log(error);
+            //     }
+            //     // Fallback delete
+                
+            //     this.map = {};
 
-                // Find the map container, and empty it's innerHTML and classlist
-                try {
-                    let map_container = document.getElementById("internal-map");
-                    map_container.innerHTML = "";
-                    map_container.classList = [];
-                    map_container.style.height = "0px";
-                }
-                catch (error) {
-                    // console.log(error);
-                }
-            },
+            //     // Find the map container, and empty it's innerHTML and classlist
+            //     try {
+            //         let map_container = document.getElementById("internal-map");
+            //         map_container.innerHTML = "";
+            //         map_container.classList = [];
+            //         map_container.style.height = "0px";
+            //     }
+            //     catch (error) {
+            //         // console.log(error);
+            //     }
+            // },
 
-            coordinatesToString(coordinates){
+            coordinatesToString(coordinates: number[][] | number[]): string {
                 // Takes in an array of coordinates, returns a string
         
                 // Check if the coordinates are nested
                 if (Array.isArray(coordinates[0])) {
+                    
                     // If they are, return a string of the first set of coordinates
+                    // @ts-ignore
                     return "[[" + coordinates[0][0] + ", " + coordinates[0][1] + "], [" + coordinates[1][0] + ", " + coordinates[1][1] + "]]";
                 }
                 // If they're not, return a string of the coordinates
@@ -1280,7 +905,7 @@ import L from 'leaflet';
                     const { data:building_update_response, error:building_update_error } = await this.supabase
                         .from('buildings')
                         .update(this.building)
-                        .eq('UUID', this.building.UUID)
+                        .eq('canonical', this.building.canonical)
                         .select()
                     
                     // If there is an error, log it
@@ -1297,7 +922,7 @@ import L from 'leaflet';
                 }
 
                 // Check if the relevant floor details have changed
-                let floorEquivalence = (f, cf) => {
+                let floorEquivalence = (f: Floorplan, cf: Floorplan) => {
 
                     if (f.label != cf.label) {
                         // console.log("Label mismatch")
@@ -1333,16 +958,15 @@ import L from 'leaflet';
                         label: floor.label,
                         url: floor.url,
                         level: floor.level,
-                    }
+                    } as Floorplan_Template;
 
                     // Check if the floor has a new image
-                    // We can check for the floor option being null
-                    // Or for the floor url to have the prefix "blob:"
-                    if (floor.file != undefined || floor.url.startsWith("blob:")) {
+                    // We can check for the floor url to have the prefix "blob:"
+                    if (floor.url.startsWith("blob:")) {
                         // console.log("Uploading new floor")
                         // Upload the new floor image
                         // Set the url of the new floor
-                        floor_update_vehicle.url = await this.uploadFloorImage(floor.file, floor.label)
+                        floor_update_vehicle.url = await this.uploadFloorImage(i)
                         // console.log("New floor url: " + floor_update_vehicle.url)
                     }
 
@@ -1431,7 +1055,7 @@ import L from 'leaflet';
                         const { data:space_update_response, error:space_update_error } = await this.supabase
                             .from('spaces')
                             .update(space_update_vehicle)
-                            .eq('UUID', this.spaces[i].UUID)
+                            .eq('canonical', this.spaces[i].canonical)
                             .select()
                         // If there is an error, log it
                         if (space_update_error) {
@@ -1457,7 +1081,7 @@ import L from 'leaflet';
                     const { data:delete_response, error:navNode_delete_error } = await this.supabase
                         .from('nav_nodes')
                         .delete()
-                        .eq('building', this.building.UUID)
+                        .eq('building', this.building.canonical)
                     // If there is an error, log it
                     if (navNode_delete_error) {
                         console.error(navNode_delete_error)
@@ -1466,7 +1090,7 @@ import L from 'leaflet';
                     }
 
                     // Create a new array of nodes without UUIDs to insert
-                    let nodes_update_vehicle = []
+                    let nodes_update_vehicle = [] as Nav_Node[];
                     
                     this.navigationNodes.map(node => {
                         nodes_update_vehicle.push(JSON.parse(JSON.stringify({
@@ -1502,24 +1126,24 @@ import L from 'leaflet';
                 // Call the getBuilding function to refresh the building object and all the dependent objects
                 this.getBuilding(this.building.canonical);
                 // Remove the map, if it exists
-                this.removeMap();
+                // this.removeMap();
 
             },
             
-            handleFloorImageSelect(floor) { 
+            handleFloorImageSelect(floor: number) { 
                 // Get the file from the input specified by the floor number
                 // Set the image of the floor to the file to preview
 
                 // Get the file
                 let input_id = "floorSVGInput_" + floor;
-                let file_input = document.getElementById(input_id);
+                let file_input = document.getElementById(input_id) as HTMLInputElement;
+                // Make TS happy by checking the file input is not null
+                if (!file_input || !file_input.files) {
+                    throw "File input not found";
+                }
                 const file = file_input.files[0];
-                // Set the floor image to the file
+                // Set the floor image to the blob URL of the file
                 this.floors[floor].url = URL.createObjectURL(file);
-                // Attach the file to the floor object
-                this.floors[floor].file = file;
-                // Refresh the map
-                this.mapInit();
             },
 
             handleNewFloorImageSelect() { 
@@ -1527,7 +1151,11 @@ import L from 'leaflet';
                 // Set the image of the floor to the file to preview
 
                 // Get the file
-                let file_input = document.getElementById("newFloorSVGInput");
+                let file_input = document.getElementById("newFloorSVGInput") as HTMLInputElement;
+                // Make TS happy by checking the file input is not null
+                if (!file_input || !file_input.files) {
+                    throw "File input not found";
+                }
                 const file = file_input.files[0];
                 // Set the floor image to the file
                 this.newFloor.url = URL.createObjectURL(file);
@@ -1550,28 +1178,17 @@ import L from 'leaflet';
             logChange() {},
 
             // This function fetches the building from the database based on it's canonical name
-            async getBuilding(canonical){
-
-                // Remove the map, if it exists
-                this.removeMap();
+            async getBuilding(canonical: string){
                 
                 // For testing: Set canonical to "arts-building"
                 // canonical = "arts-building";
                 // console.log("Fetching floorplans for: " + canonical);
 
-                // Try run this.map.remove, print to the console if it fails
-                try {
-                    this.removeMap();
-                }
-                catch (error) {
-                    console.log("Attempted to clear map before loading new building, but there was no map to clear");
-                }
-
                 // Get the relevant building fields from the database
                 // Since we are using the canonical name, we should only get one result
                 let { data: bld, error } = await this.supabase
                     .from('buildings')
-                    .select('canonical, entry_floor, display_name, UUID, internal_map_size')
+                    .select(Building_Partial_Fields)
                     // .select('canonical, display_name, UUID')
                     .eq('canonical', canonical)
                 if (error) {
@@ -1587,16 +1204,16 @@ import L from 'leaflet';
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
                     
                     // Call the getFloors and getSpaces functions
-                    this.getSpaces(this.building.UUID);
+                    this.getSpaces(this.building.canonical);
                     // Floors need to be awaited because we use the floor count to validate the navigation nodes
-                    await this.getFloorplans(this.building.UUID);
-                    this.getNavigationNodes(this.building.UUID);
+                    await this.getFloorplans();
+                    this.getNavigationNodes();
 
                 }
                 
             },
 
-            async getFloorplans(building_uuid){
+            async getFloorplans(){
 
                 // Null the floors arrays
                 this.floors = [];
@@ -1608,7 +1225,7 @@ import L from 'leaflet';
                 let { data: flr, error } = await this.supabase
                     .from('floorplans')
                     .select('*')
-                    .eq('building', building_uuid)
+                    .eq('building', this.building.canonical)
                 if (error) {
                     console.error(error)
                     alert(error.message)
@@ -1657,7 +1274,7 @@ import L from 'leaflet';
             },
 
             // Check if the spaces have changed
-            checkSpaceChanges(i = null){
+            checkSpaceChanges(i: number | null = null){
 
                 // If i is null, check all the spaces
                 if (i == null) {
