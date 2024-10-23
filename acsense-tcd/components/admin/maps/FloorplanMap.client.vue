@@ -22,8 +22,6 @@ import '~/assets/css/leaflet.css'
 import 'leaflet.fullscreen';
 import 'leaflet.fullscreen/Control.FullScreen.css';
 import type { Building_Partial, Space_Partial, Floorplan, Nav_Node, Space_Type } from '~/assets/types/supabase_types';
-import { build } from "nuxt";
-import { building } from "~/assets/testObjects";
 
 export default {
     props: {
@@ -109,7 +107,7 @@ export default {
                 floorLayer.addTo(this.map);
             },
         // Create the map
-        async mapInit(){
+        async initMap(){
             // Delete with the leaflet method, if it exists
             try {
                 // @ts-ignore
