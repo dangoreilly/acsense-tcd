@@ -32,7 +32,7 @@ export default [
         "building": "example-building-1",
         "level": 1,
         "label": "Main Concourse",
-        "url": baseUrl+"/storage/v1/object/public/floorplans/b5694bc5-90c0-440f-b95c-7c0672992211_MainConcourse.svg"
+        "url": baseUrl+"/storage/v1/object/public/floorplans/Arts02.svg"
     },
     {
         "building": "example-building-1",
