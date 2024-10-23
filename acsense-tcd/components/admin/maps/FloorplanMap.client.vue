@@ -21,7 +21,7 @@ import * as L from "leaflet";
 import '~/assets/css/leaflet.css'
 import 'leaflet.fullscreen';
 import 'leaflet.fullscreen/Control.FullScreen.css';
-import type { Building, Space, Floorplan, Nav_Node, Space_Type, Floorplan_Template, Nav_Node_Template } from '~/assets/types/supabase_types';
+import type { Building_Partial, Space_Partial, Floorplan, Nav_Node, Space_Type } from '~/assets/types/supabase_types';
 import { build } from "nuxt";
 import { building } from "~/assets/testObjects";
 
@@ -32,7 +32,7 @@ export default {
             required: true,
         },
         spaces: {
-            type: Array as () => Space[],
+            type: Array as () => Space_Partial[],
             required: true,
         },
         navigationNodes: {
@@ -40,22 +40,59 @@ export default {
             required: true,
         },
         building: {
-            type: Object as () => Building,
+            type: Object as () => Building_Partial,
             required: true,
         }
     },
     data() {
         return {
             map: {} as any,
-            activeFloor: 0,
+            activeFloor: -1,
             activeFloor_object: {},
             space_being_hovered_on: "",
             space_name_toast_showing: false,
             floor_layers_object: {} as any,
         };
     },
-    methods: {
-        
+    watch: {
+        // If the building changes, re-init the map
+        building: {
+            handler: function(){
+                this.refreshMap();
+            },
+            deep: true
+        },
+        // If the navigation nodes change, re-init the map
+        navigationNodes: {
+            handler: function(){
+                this.refreshMap();
+            },
+            deep: true
+        },
+        // If the spaces change, re-init the map
+        spaces: {
+            handler: function(){
+                this.refreshMap();
+            },
+            deep: true
+        },
+        // If the floors change, re-init the map
+        floors: {
+            handler: function(){
+                // Make sure the active floor is still in range
+                if (this.activeFloor >= this.floors.length) {
+                    this.activeFloor = this.floors.length - 1;
+                }
+                this.refreshMap();
+            },
+            deep: true
+        },
+    },
+    methods: {        
+        async refreshMap(){
+            await this.initMap();
+        },
+
         moveToFloor(floorIndex: number){
                 // Move the map to the floor with the given index
                 // First, find the label of the floor as that is how
@@ -72,7 +109,7 @@ export default {
                 floorLayer.addTo(this.map);
             },
         // Create the map
-        mapInit(){
+        async mapInit(){
             // Delete with the leaflet method, if it exists
             try {
                 // @ts-ignore
@@ -91,7 +128,8 @@ export default {
             // Make sure there are floors to add
             // If there aren't, don't init the map
             if (this.floors.length == 0) {
-                alert("No map to display");
+                // alert("No map to display");
+                console.log("No map to display");
                 return;
             }
 
@@ -161,10 +199,6 @@ export default {
                 let floor_layer = L.layerGroup( [L.imageOverlay(floor.url, bounds)] )
                 this.floor_layers_object[floor.label] = floor_layer;
 
-                // If this is the entry floor, add it to the map
-                if (floor.isEntry) {
-                    floor_layer.addTo(this.map);
-                }
 
                 // Add an event listener to the layer group
                 // When the layer is added to the map, set the active floor to this floor
@@ -173,6 +207,20 @@ export default {
                     this.activeFloor_object = floor_layer;
                     console.log("Active floor set to: " + this.activeFloor)
                 });
+
+                // If this is the init load, add the entry floor
+                // Otherwise, add the active floor
+                if (this.activeFloor == -1) {
+                    if (floor.isEntry) {
+                        floor_layer.addTo(this.map);
+                    }
+                }
+                else {
+                    if (i == this.activeFloor) {
+                        floor_layer.addTo(this.map);
+                    }
+                }
+
             }
 
             // Set the active floor to the entry floor
