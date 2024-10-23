@@ -21,16 +21,16 @@ type _Building_Template = Omit<Database['public']['Tables']['buildings']['Insert
 export type Building = _Building & {opening_times: OpeningTimes, geometry: {coordinates:[Point[]]};}
 export type Building_Template = _Building_Template & {opening_times: OpeningTimes, geometry: {coordinates:[Point[]]};}
 // Building partial for passing to map render methods
-export type Building_Partial = Omit<Building, "created_at" | "aka" | "description" | "sense_exp" | "wayfinding" | "phys_access" | "tips" | "further_info" | "opening_times" | "sense_exp_display" | "phys_access_display" | "wayfinding_display" | "furtherinfo_display" | "primary_image_url" | "primary_image_alt" | "sense_exp_video" | "wayfinding_video" | "phys_access_video" | "rooms_published" | "updated_at">;
-export const Building_Partial_Fields = "always_display, canonical, display_name, entry_floor, internal_map_size, floorplans_published, geometry, UUID, map_label_1, map_label_2, map_label_3, published";
+export type Building_Partial = Omit<Building, "created_at" | "sense_exp" | "wayfinding" | "phys_access" | "tips" | "further_info" | "opening_times" | "sense_exp_display" | "phys_access_display" | "wayfinding_display" | "furtherinfo_display" | "primary_image_url" | "primary_image_alt" | "sense_exp_video" | "wayfinding_video" | "phys_access_video" | "rooms_published" | "updated_at">;
+export const Building_Partial_Fields = "always_display, canonical, display_name, entry_floor, internal_map_size, floorplans_published, geometry, UUID, map_label_1, map_label_2, map_label_3, published, aka, description";
 
 type _Space = Database['public']['Tables']['spaces']['Row'];
 type _Space_Template = Database['public']['Tables']['spaces']['Insert'];
 export type Space = _Space & {opening_times: OpeningTimes, location_internal: Point, location: Point, icon?: string;}
 export type Space_Template = _Space_Template & {opening_times: OpeningTimes, location_internal: Point, location: Point;}
 // Space partial for passing to map render methods
-export type Space_Partial = Omit<Space, "building" | "description"  | "updated_at"  | "food_drink_allowed"  | "microwave"  | "kettle"  | "wheelchair"  | "outlets"  | "seating"  | "UUID"  | "food_drink_allowed_note" | "microwave_note" | "kettle_note" | "wheelchair_note" | "seating_note" | "outlets_note" | "primary_image_url" | "primary_image_alt" | "tips" | "primary_image_panorama" | "sense_exp" | "sense_exp_display" | "wayfinding" | "wayfinding_display" | "phys_access" | "phys_access_display" | "further_info" | "further_info_display" | "aka" | "phys_access_video" | "sense_exp_video" | "wayfinding_video" | "opening_times" | "clickthrough">
-export const Space_Partial_Fields = "canonical, published, floor, icon_override, location, location_internal, name, type";
+export type Space_Partial = Omit<Space, "building" | "updated_at" | "UUID"  | "food_drink_allowed_note" | "microwave_note" | "kettle_note" | "wheelchair_note" | "seating_note" | "outlets_note" | "primary_image_url" | "primary_image_alt" | "tips" | "primary_image_panorama" | "sense_exp" | "sense_exp_display" | "wayfinding" | "wayfinding_display" | "phys_access" | "phys_access_display" | "further_info" | "further_info_display" | "aka" | "phys_access_video" | "sense_exp_video" | "wayfinding_video" | "opening_times">
+export const Space_Partial_Fields = "canonical, published, floor, icon_override, location, location_internal, name, type, description, food_drink_allowed, microwave, kettle, wheelchair, outlets, seating, clickthrough";
 
 // Overlays and Flyovers basically just need to accomodate tuples of points
 export type Overlay = Database['public']['Tables']['overlays']['Row'] & {
