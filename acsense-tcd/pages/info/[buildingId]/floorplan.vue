@@ -2,8 +2,8 @@
     <div>
         <InternalMap
         :building="building"
-        :floorplans="floorplans"
-        :studentSpaces="studentSpaces"
+        :floors="floorplans"
+        :spaces="studentSpaces"
         :spaceStyles="spaceStyles"
         :navigationNodes="navNodes"
         @openSpaceModal="openSpaceModal"
@@ -51,7 +51,7 @@
                     <div class="modal-content" >
     
                         <div class="modal-header" style="width: 100%;">
-                            <h5 class="modal-title d-flex" id="mapModalLabel">{{ lift.node.label }}</h5>
+                            <h5 class="modal-title d-flex" id="mapModalLabel">{{ lift.label }}</h5>
                             <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
                         </div>
     
@@ -91,7 +91,7 @@
                     </div>
     
                     <div class="modal-body">
-                        <p>{{welcome.mainContent}}</p>
+                        <p>{{welcome}}</p>
                     </div>
                     
                     <div class="modal-footer d-flex justify-content-between">
@@ -123,11 +123,13 @@
     </div>
 </template>
 
-<script setup>
-    
+<script setup lang="ts">
     import { createClient } from '@supabase/supabase-js';
+    import type { Building_Partial, Space, Floorplan, Nav_Node, Space_Type } from '~/assets/types/supabase_types';
+    import type { Lift } from '~/assets/types/otherTypes';
+    import { Building_Partial_Fields } from '~/assets/types/supabase_types';
 
-    function validateNavigationNode(node, numFloors){
+    function validateNavigationNode(node: Nav_Node, numFloors: number): Nav_Node {
         // Takes in a lift or stair, checks it has the correct number of floors
         // Trims the presence array to the correct number of floors if too many
         // filles the presence array with 0s if too few
@@ -142,7 +144,7 @@
             else {
                 let difference = numFloors - node.presence.length;
                 for (let i = 0; i < difference; i++) {
-                    node.presence.push(0);
+                    node.presence.push(false);
                 }
             }
         }
@@ -159,12 +161,12 @@
 
     // Gather all our data
 
-    let building = ref([]);
-    let floorplans = ref([]);
-    let studentSpaces = ref([]);
-    let navNodes = ref([]);
-    let spaceStyles = ref([]);
-    let welcome = ref({});
+    let building = ref({} as Building_Partial);
+    let floorplans = ref([] as Floorplan[]);
+    let studentSpaces = ref([] as Space[]);
+    let navNodes = ref([] as Nav_Node[]);
+    let spaceStyles = ref([] as Space_Type[]);
+    let welcome = ref("" as string);
 
     // Figure out what building we're in
     const route = useRoute();
@@ -173,7 +175,7 @@
     // Get our building data
     const { data: buildings_data, error: building_error} = await supabase
         .from('buildings')
-        .select('canonical, UUID, display_name, entry_floor, internal_map_size')
+        .select(Building_Partial_Fields)
         .eq('canonical', buildingId)
 
     if (building_error) {
@@ -201,7 +203,7 @@
     const { data: studentSpaces_data, error: studentSpace_error} = await supabase
         .from('spaces')
         .select('*')
-        .eq('building_uuid', building.value.UUID)
+        .eq('building', building.value.canonical)
 
     if (studentSpace_error) {
         console.log('An error occured while fetching student spaces:');
@@ -216,7 +218,7 @@
         studentSpaces = ref(studentSpaces_data);
     }
 
-    function setEntryFloor(floors, newEntryFloor){
+    function setEntryFloor(floors: Floorplan[], newEntryFloor: number): Floorplan[] {
         // Set all floors to entryFloor = false
         floors.forEach((floor, index) => {
             floor.isEntry = false;
@@ -232,7 +234,7 @@
     const { data: floors_data, error: floors_error} = await supabase
         .from('floorplans')
         .select('*')
-        .eq('building', building.value.UUID)
+        .eq('building', building.value.canonical)
 
     if (floors_error) {
         console.log('An error occured while fetching floorplans:');
@@ -252,7 +254,7 @@
     const { data: NavNodes_data, error: NavNodes_error} = await supabase
         .from('nav_nodes')
         .select('*')
-        .eq('building', building.value.UUID)
+        .eq('building', building.value.canonical)
 
     if (NavNodes_error) {
         console.log('An error occured while fetching lifts and stairs:');
@@ -261,7 +263,7 @@
     else {
         // Validate all the nodes
         for (let i = 0; i < NavNodes_data.length; i++) {
-            NavNodes_data[i] = validateNavigationNode(NavNodes_data[i], );
+            NavNodes_data[i] = validateNavigationNode(NavNodes_data[i], floorplans.value.length);
         }
         navNodes = ref(NavNodes_data);
     }
@@ -277,7 +279,7 @@
         console.log(welcome_error);
     }
     else {
-        welcome = ref(welcome_data[0].data);
+        welcome = ref(welcome_data[0].data.mainContent);
         // console.log(welcome_data[0].data);
     }
 
@@ -310,7 +312,7 @@
 
 </script>
 
-<script>
+<script lang="ts">
 // import { createClient } from '@supabase/supabase-js';
 
 import {openAreaModal} from '~/assets/modalFunctions.js';
@@ -331,10 +333,7 @@ export default {
                 mainContent: '',
                 footer: '',
             },
-            lift: {
-                node: {label: ''},
-                validFloors: []
-            },
+            lift: {} as Lift,
             liftModalOpen: false,
         }
     },
@@ -351,13 +350,13 @@ export default {
 
     methods: {
 
-        openSpaceModal(space){
+        openSpaceModal(space: Space){
             this.infoModal = openAreaModal(space);
 
             this.infoModalOpen = true;
         },
 
-        openLiftModal(lift){
+        openLiftModal(lift: Lift){
             this.lift = lift;
 
             this.liftModalOpen = true;
