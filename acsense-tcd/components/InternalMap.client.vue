@@ -1,43 +1,38 @@
 <template>
-    <div id="internal-map"></div>
+    <div id="internal-map" style="background-color: var(--bs-body-bg);"></div>
 </template>
 
-<script>
+<script lang="ts">
+// @ts-ignore
 import L from 'leaflet';
 // import "leaflet/dist/leaflet.css";
 import '~/assets/css/leaflet.css'
+import type { Building_Partial, Space, Floorplan, Nav_Node, Space_Type, Space_Partial } from '~/assets/types/supabase_types';
+import type { Lift } from '~/assets/types/otherTypes';
 
 export default {
     props: {
+        floors: {
+            type: Array as () => Floorplan[],
+            required: true,
+        },
+        spaces: {
+            type: Array as () => Space_Partial[],
+            required: true,
+        },
         navigationNodes: {
-            type: Array,
-            default: () => []
-        },
-        studentSpaces: {
-            type: Array,
-            default: () => []
-        },
-        spaceStyles: {
-            type: Object,
-            default: () => {}
-        },
-        floorplans: {
-            type: Array,
-            default: () => []
-        },
-        entryFloor: {
-            type: Number,
-            default: 0
+            type: Array as () => Nav_Node[],
+            required: true,
         },
         building: {
-            type: Object,
-            default: () => {}
-        },
+            type: Object as () => Building_Partial,
+            required: true,
+        }
     },
     data() {
         return {
-            map: null,
-            floor_layers_object: {},
+            map: null as L.Map | null,
+            floor_layers_object: {} as {[key: string]: L.LayerGroup},
             activeFloor: 0,
             
         }
@@ -61,7 +56,7 @@ export default {
             const BUFFER = 200
 
             // Create the new map
-            let map_size = [[0,0], this.building.internal_map_size]
+            let map_size = [[0,0], this.building.internal_map_size] as [[0, 0], [number, number]];
             // Get the bounds by adding padding around the edges
             // Without this padding, it's not always possible to zoom into the edges
             let map_bounds = [[-BUFFER, -BUFFER],
@@ -110,14 +105,14 @@ export default {
         },
 
         // Emit the various openModal events
-        emitOpenModal(space){
+        emitOpenModal(space: Space_Partial){
             // Method for emtting the openmodal event for the space modal
             this.$emit('openSpaceModal', space);
            
         },
 
         // Open lift modal
-        emitOpenLiftModal(node){
+        emitOpenLiftModal(node: Nav_Node){
 
             // localise for transport nonsense
             // Basically, we're going to set the go to floor function for each valid floor
@@ -131,7 +126,7 @@ export default {
                 if (node.presence[i]){
                     // Get the name and the index of the floorplan
                     validFloors.push({
-                        label: this.floorplans[i].label,
+                        label: this.floors[i].label,
                         gotoFloor: () => {gotoFloor(i); closeModal();},
                         isCurrentFloor: i == this.activeFloor
                     });
@@ -141,14 +136,14 @@ export default {
             // Method for emtting the openmodal event for the lift modal
             // Transmits the node and the floor move as a callback
             this.$emit('openLiftModal', {
-                node: node,
+                label: node.label,
                 validFloors: validFloors,
-            });
+            } as Lift);
         },
 
         // Emit that a space is being hovered over
-        emitSpaceHover(space){
-            this.$emit('spaceHover', space);
+        emitSpaceHover(space_name: string){
+            this.$emit('spaceHover', space_name);
             // console.log('spaceHover', space)
         },
         // Emit that a space is no longer being hovered over
@@ -156,7 +151,7 @@ export default {
             this.$emit('spaceUnhover');
         },
 
-        addFloorsToMap(bounds){
+        addFloorsToMap(bounds: [[0,0], [number, number]]){
 
             // Init the floor layers object
             // The floor layers array needs to be stored in the vue instance
@@ -164,8 +159,8 @@ export default {
             this.floor_layers_object = {};
 
             // Create a the floors
-            for (let i = 0; i < this.floorplans.length; i++) {
-                const floor = this.floorplans[i];
+            for (let i = 0; i < this.floors.length; i++) {
+                const floor = this.floors[i];
                 // Create a layer group for each floor
                 // Add the floor to the layer group
                 // Add the layer group to the map
@@ -173,7 +168,7 @@ export default {
                 this.floor_layers_object[floor.label] = floor_layer;
 
                 // If this is the entry floor, add it to the map
-                if (floor.isEntry) {
+                if (i == this.building.entry_floor) {
                     floor_layer.addTo(this.map);
                 }
 
@@ -181,7 +176,7 @@ export default {
                 // When the layer is added to the map, set the active floor to this floor
                 floor_layer.on('add', () => {
                     this.activeFloor = i;
-                    this.activeFloor_object = floor_layer;
+                    // this.activeFloor_object = floor_layer;
                     // console.log("Active floor set to: " + this.activeFloor)
                 });
             }
@@ -205,9 +200,9 @@ export default {
             // Add a marker to the map for each space
             // On the layer specified by the floor
 
-            for (let i = 0; i < this.studentSpaces.length; i++) {
+            for (let i = 0; i < this.spaces.length; i++) {
                 
-                const space = this.studentSpaces[i];
+                const space = this.spaces[i];
 
                 // Create an icon for the space
                 let icon = L.icon({
@@ -243,16 +238,16 @@ export default {
                 let emitSpaceUnhover = this.emitSpaceUnhover;
 
                 // Add an event listener to update the toast when the mouse hovers over the marker
-                marker.on('mouseover', (e) => {
+                marker.on('mouseover', (e: Event) => {
                     emitSpaceHover(space.name);
                 });
                 // And close it on mouseout
-                marker.on('mouseout', (e) => {
+                marker.on('mouseout', (e: Event) => {
                     emitSpaceUnhover();
                 });
 
                 // Add an event listener to the marker, to open the space modal when it is clicked
-                marker.on('click', (e) => {
+                marker.on('click', (e: Event) => {
                     emitOpenModal(space);
                 });
                 
@@ -260,7 +255,7 @@ export default {
                 // marker.addTo(this.map);
 
                 // Get the name of the floor for this space (this is how they're stored in the layer control)
-                let floor_label = this.floorplans[space.floor].label;
+                let floor_label = this.floors[space.floor].label;
 
                 // Add the marker to the layer for the floor
                 marker.addTo(this.floor_layers_object[floor_label]);
@@ -268,7 +263,7 @@ export default {
 
         },
 
-        nextValidFloor(direction, node){
+        nextValidFloor(direction: "up" | "down", node: Nav_Node){
             // This function takes a direction (up or down) and a node
             // It then returns the next valid floor in that direction
             // If there is no valid floor in that direction, it returns null
@@ -311,17 +306,17 @@ export default {
             }
         },
 
-        moveToFloor(floorIndex){
+        moveToFloor(floorIndex: number){
 
             console.log("Moving to floor: " + floorIndex);
             // Move the map to the floor with the given index
             // First, find the label of the floor as that is how
             // they are stored in the layer control
-            let floorLabel = this.floorplans[floorIndex].label;
+            let floorLabel = this.floors[floorIndex].label;
             // Then, get the layer group from the floor_layers_object
             let floorLayer = this.floor_layers_object[floorLabel];
             // Then remove all layers from the map
-            this.map.eachLayer(function (layer) {
+            this.map.eachLayer(function (layer: L.Layer) {
                 layer.remove();
             });
             // Then add the layer group to the map
@@ -365,7 +360,7 @@ export default {
                     // If it's a lift, use the lift icon
                     let marker = L.marker(this.navigationNodes[i].location_up, {
                         icon: lift_icon, 
-                        draggable: true,
+                        draggable: false,
                         bubblingMouseEvents: false,
                     });
 
@@ -373,14 +368,14 @@ export default {
                     for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
                         if (this.navigationNodes[i].presence[j]) {
                             // Get the name of the floor for this space (this is how they're stored in the layer control)
-                            let floor_label = this.floorplans[j].label;
+                            let floor_label = this.floors[j].label;
                             // Add the marker to the layer for the floor
                             marker.addTo(this.floor_layers_object[floor_label]);
                         }
                     }
 
                     // Add an event listener to the marker, to open the lift modal when it is clicked
-                    marker.on('click', (e) => {
+                    marker.on('click', (e: Event) => {
                         this.emitOpenLiftModal(this.navigationNodes[i]);
                     });
 
@@ -391,12 +386,12 @@ export default {
                     // Stairs UP
                     let marker_up = L.marker(this.navigationNodes[i].location_up, {
                         icon: stair_up_icon, 
-                        draggable: true,
+                        draggable: false,
                         bubblingMouseEvents: false,
                     });
 
                     // Add an event listener to the marker, to move to the next floor up when it is clicked
-                    marker_up.on('click', (e) => {
+                    marker_up.on('click', (e: Event) => {
                         // Get the next valid floor up
                         let next_floor = this.nextValidFloor("up", this.navigationNodes[i]);
                         // If there is a valid floor, move to it
@@ -410,12 +405,12 @@ export default {
                     // Stairs DOWN
                     let marker_down = L.marker(this.navigationNodes[i].location_down, {
                         icon: stair_down_icon, 
-                        draggable: true,
+                        draggable: false,
                         bubblingMouseEvents: false,
                     });
 
                     // Add an event listener to the marker, to move to the next floor down when it is clicked
-                    marker_down.on('click', (e) => {
+                    marker_down.on('click', (e: Event) => {
                         // Get the next valid floor down
                         let next_floor = this.nextValidFloor("down", this.navigationNodes[i]);
                         // If there is a valid floor, move to it
@@ -449,7 +444,7 @@ export default {
                     for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
                         if (this.navigationNodes[i].presence[j] && j != topmost_floor) {
                             // Get the name of the floor for this space (this is how they're stored in the layer control)
-                            let floor_label = this.floorplans[j].label;
+                            let floor_label = this.floors[j].label;
                             // Add the marker to the layer for the floor
                             marker_up.addTo(this.floor_layers_object[floor_label]);
                         }
@@ -460,7 +455,7 @@ export default {
                     for (let j = 0; j < this.navigationNodes[i].presence.length; j++) {
                         if (this.navigationNodes[i].presence[j] && j != bottommost_floor) {
                             // Get the name of the floor for this space (this is how they're stored in the layer control)
-                            let floor_label = this.floorplans[j].label;
+                            let floor_label = this.floors[j].label;
                             // Add the marker to the layer for the floor
                             marker_down.addTo(this.floor_layers_object[floor_label]);
                         }
