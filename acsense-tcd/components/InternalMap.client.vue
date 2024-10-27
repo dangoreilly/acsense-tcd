@@ -330,8 +330,7 @@ export default {
         },
 
         moveToFloor(floorIndex: number){
-
-            // console.log("Moving to floor: " + floorIndex);
+            
             // Move the map to the floor with the given index
             // First, find the label of the floor as that is how
             // they are stored in the layer control
