@@ -894,16 +894,24 @@ import getPermissionsKey from "~/assets/permissionsKey"
             // It will save the current state of the building, floorplans, navnodes and spaces to the database
             async updateBuilding() {
 
+                
+                // Get user access token
+                const access_token = await getSessionAccessToken(this.supabase);
+
                 // Check if the building details have changed
                 if (this.checkBuildingChanges()) {
-                    
-                    // Update the building in the database
-                    const { data:building_update_response, error:building_update_error } = await this.supabase
-                        .from('buildings')
-                        .update(this.building)
-                        .eq('canonical', this.building.canonical)
-                        .select()
-                    
+
+                    const {data:building_update_response, error:building_update_error} = await updateTable(access_token, "buildings", 
+                    {
+                        floorplans_published: this.building.floorplans_published,
+                        internal_map_size: this.building.internal_map_size,
+                        entry_floor: this.building.entry_floor,
+                    },
+                    {
+                        col: "canonical",
+                        eq: this.building.canonical
+                    });
+
                     // If there is an error, log it
                     if (building_update_error) {
                         console.error("Error updating building details: " + this.building.canonical)
@@ -988,13 +996,15 @@ import getPermissionsKey from "~/assets/permissionsKey"
                             alert(floor_insert_error.message)
                             throw floor_insert_error
                         }
+
+                        alert(floor.label + " added successfully")
                     }
                     // Check if the floor has changed
                     else if (!floorEquivalence(floor, clean_floor)) {
 
-                        console.log("Updating existing floor")
-                        // console.log(floor_update_vehicle)
-                        console.log("floor", JSON.parse(JSON.stringify(floor_update_vehicle)))
+                        // console.log("Updating existing floor")
+                        // // console.log(floor_update_vehicle)
+                        // console.log("floor", JSON.parse(JSON.stringify(floor_update_vehicle)))
                         // console.log("clean_floor", JSON.parse(JSON.stringify(clean_floor)))
 
                         // Update the floor in the database
@@ -1093,7 +1103,7 @@ import getPermissionsKey from "~/assets/permissionsKey"
                     }
 
                     // Create a new array of nodes without UUIDs to insert
-                    let nodes_update_vehicle = [] as Nav_Node[];
+                    let nodes_update_vehicle = [] as Nav_Node_Template[];
                     
                     this.navigationNodes.map(node => {
                         nodes_update_vehicle.push(JSON.parse(JSON.stringify({
