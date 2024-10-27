@@ -22,7 +22,8 @@
                     :class="{
                         'bg-blue-300': entity.canonical === activeEntity.canonical, 
                         'fst-italic': !entity.published, 
-                        'bg-yellow-100': !getPublishedStatus(entity) && entity.canonical !== activeEntity.canonical
+                        'bg-yellow-100': !getPublishedStatus(entity) && entity.canonical !== activeEntity.canonical,
+                        'text-muted pe-none': disabled
                         }"
                     style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
                     :title="entityType == 'space' ? (entity as Space_List_Item).name : (entity as Building_List_Item).display_name">
@@ -95,6 +96,10 @@ import type { Building_Template, Space_Template } from '~/assets/types/supabase_
             entityType: {
                 type: String,
                 required: true
+            },
+            disabled: {
+                type: Boolean,
+                default: false
             },
             published_field: {
                 type: String as () => "rooms_published" | "floorplans_published" | "published",
@@ -263,6 +268,11 @@ import type { Building_Template, Space_Template } from '~/assets/types/supabase_
             },
 
             changeEntity(entity: Space_List_Item | Building_List_Item) {
+                // If the list is disabled, ignore the click
+                if (this.disabled) {
+                    return;
+                }
+                // Set the active entity to the clicked entity
                 this.activeEntity = entity;
                 this.$emit('activeEntityChanged', this.activeEntity.canonical);
                 // console.log("Changing entity to " + this.activeEntity.canonical);
