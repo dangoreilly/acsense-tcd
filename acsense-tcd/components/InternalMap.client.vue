@@ -151,12 +151,35 @@ export default {
             this.$emit('spaceUnhover');
         },
 
+        getEntryFloor(){
+            // Check the URL params for a floor
+            // If there is a floor, return that floor
+            // Otherwise, return the entry floor
+            let urlParams = new URLSearchParams(window.location.search);
+            let floor = urlParams.get('floor');
+            // If the floor is in the URL...
+            if (floor) {
+                let floor_int = parseInt(floor);
+                // Make sure it's a valid floor
+                if (floor_int >= 0 && floor_int < this.floors.length) {
+                    return floor_int;
+                }
+            }
+
+            // By default, just return the entry floor
+            return this.building.entry_floor;
+        },
+
         addFloorsToMap(bounds: [[0,0], [number, number]]){
 
             // Init the floor layers object
             // The floor layers array needs to be stored in the vue instance
             // Otherwise it will be garbage collected and the layer functions can't be called later
             this.floor_layers_object = {};
+
+            // Define the entry floor
+            // This is the floor that the map will start on
+            let entryFloor = this.getEntryFloor();
 
             // Create a the floors
             for (let i = 0; i < this.floors.length; i++) {
@@ -168,7 +191,7 @@ export default {
                 this.floor_layers_object[floor.label] = floor_layer;
 
                 // If this is the entry floor, add it to the map
-                if (i == this.building.entry_floor) {
+                if (i == entryFloor) {
                     floor_layer.addTo(this.map);
                 }
 
@@ -182,7 +205,7 @@ export default {
             }
 
             // Set the active floor to the entry floor
-            this.activeFloor = this.building.entry_floor;
+            this.activeFloor = entryFloor;
 
             // Add the layer control to the map
             let layers_control = L.control({position:"topright"});
@@ -275,8 +298,8 @@ export default {
                     valid_floors.push(i);
                 }
             }
-            console.log("Valid floors: " + valid_floors)
-            console.log("Current floor: " + this.activeFloor)
+            // console.log("Valid floors: " + valid_floors)
+            // console.log("Current floor: " + this.activeFloor)
             // Get the index of the current floor
             let current_floor_index = valid_floors.indexOf(this.activeFloor);
 
@@ -301,14 +324,14 @@ export default {
                 }
             }
             else {
-                console.log("Invalid direction: " + direction);
+                console.error("Invalid direction: " + direction);
                 return null;
             }
         },
 
         moveToFloor(floorIndex: number){
 
-            console.log("Moving to floor: " + floorIndex);
+            // console.log("Moving to floor: " + floorIndex);
             // Move the map to the floor with the given index
             // First, find the label of the floor as that is how
             // they are stored in the layer control
@@ -321,6 +344,14 @@ export default {
             });
             // Then add the layer group to the map
             floorLayer.addTo(this.map);
+
+            // Update the URL param
+            // let urlParams = new URLSearchParams(window.location.search);
+            // urlParams.set('floor', floorIndex.toString());
+            // window.location.search = urlParams.toString()
+            let url = new URL(window.location.href)
+            url.searchParams.set('floor', floorIndex.toString())
+            history.pushState({}, '', url.href)
         },
 
         addNavNodesToMap(){
