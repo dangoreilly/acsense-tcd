@@ -9,9 +9,10 @@
             <AdminEntitySelector 
             @activeEntityChanged="getBuilding($event)"
             entityType="building"
+            :published_field="'floorplans_published'"
             :permissions="user"
             :supabase_client="supabase"
-            :updateCount="0"/>
+            :updateCount="update_count"/>
             <!-- Main section for editing -->
             <div class="pt-0 px-4 w-100" style="overflow-y: auto;">
 
@@ -502,6 +503,7 @@ import getPermissionsKey from "~/assets/permissionsKey"
                 navigationNodes_clean: [] as Nav_Node[],
 
                 user: {} as any,
+                update_count: 0,
             }
         },
         created() {
