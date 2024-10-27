@@ -21,7 +21,3 @@ Setting both the width and height to 0 will mean the floorplan link will not dis
 
 ***Warning:*** *If you adjust the map size you will need to update the positions of all the spaces
 and navigation nodes*
-
-Press the "Re-generate Map" button to manually refresh the render of the map in the bottom. 
-The map doesn't dynamically update when you change the floorplan data, so you need to manually refresh
-to see your changes take effect.
