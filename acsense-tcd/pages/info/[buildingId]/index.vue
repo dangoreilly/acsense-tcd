@@ -66,42 +66,39 @@
             </div>
         </div>
                 
-        <!-- <div class="link-button link-button-top" style="grid-area: rooms; align-self: center; justify-self: stretch;">
-            <NuxtLink :to="linkToRooms">
-                <button type="button" class="btn btn-primary btn-lg w-100 h-75">Room info</button>
-            </NuxtLink>
-        </div> -->
-            
-        <!-- <div class="link-button" style="grid-area: floorplan; align-self: center; justify-self: stretch;">
-            <NuxtLink :to="linkToInternalMap">
-                <button type="button" class="btn btn-primary btn-lg w-100">Internal Map</button>
-            </NuxtLink>
-        </div> -->
+        <div style="grid-area: buttons;" class="px-5 m-0">
+            <div v-if="building.rooms_published || building.floorplans_published" class="row">
+            <div class="link-button link-button-top col" style="grid-area: rooms; align-self: center; justify-self: stretch;">
+                <NuxtLink :to="linkToRooms">
+                    <button type="button" 
+                    class="btn btn-primary btn-lg w-100 h-75"
+                    :disabled="!building.rooms_published">Room info</button>
+                </NuxtLink>
+            </div>
+                
+            <div class="link-button col" style="grid-area: floorplan; align-self: center; justify-self: stretch;">
+                <NuxtLink :to="linkToInternalMap">
+                    <button type="button" 
+                    class="btn btn-primary btn-lg w-100"
+                    :disabled="!building.floorplans_published">Internal Map
+                    <!-- Chevron -->
+                    <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 18" fill="currentColor">
+                        <g>
+                            <polygon points="0 0 10 0 16 8 10 16 0 16 6 8 0 0"/>
+                        </g>
+                    </svg> -->
+                    </button>
+                </NuxtLink>
+            </div>
+            </div>
+       </div>
 
-        <div
-        class="mt-3"
+       <div
+        class="my-3"
         style="grid-area: additional-info;"
         v-if="building.furtherinfo_display">
             <AdditionalInfo 
             :info="building.further_info"/>
-        </div>
-
-        <div
-        class="mb-3 mx-3"
-        style="grid-area: buttons;"
-        v-if="building.has_floorplans && false">
-        <!-- Button permanently disabled until enough content is ready -->
-        <!-- Floorplans button -->
-            <NuxtLink :to="'/info/' + building.canonical + '/floorplan'">
-                <button type="button" class="btn btn-primary btn-lg w-100">Internal Map
-                    <!-- Chevron -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 18" fill="currentColor">
-                        <g>
-                            <polygon points="0 0 10 0 16 8 10 16 0 16 6 8 0 0"/>
-                        </g>
-                    </svg>
-                </button>
-            </NuxtLink>
         </div>
 
         <div style="grid-area: gallery;"
@@ -164,7 +161,8 @@
         "sense-areas sense-areas sense-areas sense-areas"
         "tabs tabs open-times open-times"
         "tips tips tips tips"
-        ". . . ." /* ". rooms floorplan ." */
+        /* ". . . ."  */
+        /* ". buttons buttons ." */
         "additional-info additional-info additional-info additional-info"
         "buttons buttons buttons buttons"
         "gallery gallery gallery gallery";
@@ -177,7 +175,8 @@
         "sense-areas sense-areas sense-areas sense-areas"
         "tabs tabs open-times open-times"
         "tips tips tips tips"
-        ". . . ." /* ". rooms floorplan ." */
+        /* ". . . ."  */
+        /* ". buttons buttons ." */
         "additional-info additional-info additional-info additional-info"
         "buttons buttons buttons buttons"
         "gallery gallery gallery gallery";
@@ -196,6 +195,10 @@
         "gallery gallery gallery gallery";
 }
 
+.buttons {
+    grid-template-columns: 1fr 1fr;
+}
+
 @media screen and (max-width: 992px){
     .building-info {
         padding: 1rem;
@@ -211,9 +214,15 @@
             "tips"
             /* "rooms" */
             /* "floorplan" */
+            /* "buttons" */
             "additional-info"
             "buttons"
             "gallery";
+    }
+    
+    .buttons {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
     }
     
     .mainPictureCard {
@@ -329,6 +338,8 @@ const { x, y } = useWindowScroll()
         wayfinding_video,
         phys_access_video,
         entry_floor,
+        floorplans_published,
+        rooms_published,
         published
         `
 
