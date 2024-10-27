@@ -10,6 +10,7 @@
             @activeEntityChanged="getBuilding($event)"
             entityType="building"
             :published_field="'floorplans_published'"
+            :disabled="buildingHasBeenChanged"
             :permissions="user"
             :supabase_client="supabase"
             :updateCount="update_count"/>
@@ -88,7 +89,7 @@
                         </div> -->
                         <div class="col">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" :v-model="building.floorplans_published">
+                                <input class="form-check-input" type="checkbox" role="switch" v-model="building.floorplans_published">
                                 <label class="form-check-label" for="flexSwitchCheckDefault">Display floorplan for {{ building.display_name }}</label>
                             </div>
                             <!-- <label for="floorSelect" class="form-label">Entry Floor</label>
@@ -559,6 +560,17 @@ import getPermissionsKey from "~/assets/permissionsKey"
 
             
         },
+        watch: {
+            // Watch for edits on the floorplan size
+            building: {
+                handler: function(){
+                    // Update the newNode object with the new default location
+                    this.newNode.location_up = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
+                    this.newNode.location_down = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
+                },
+                deep: true
+            },
+        },
         methods: {
 
             // printNewNavNodeValidity(){
@@ -664,13 +676,13 @@ import getPermissionsKey from "~/assets/permissionsKey"
                     node_type: "",
                     building: this.building.canonical,
                     presence: [],
-                    location_up: [0,0],
-                    location_down: [0,0],
+                    location_up: [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2],
+                    location_down: [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2],
                 } as Nav_Node_Template;
 
                 // Update the locations to be the center of the map
-                this.newNode.location_up = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
-                this.newNode.location_down = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
+                // this.newNode.location_up = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
+                // this.newNode.location_down = [this.building.internal_map_size[0]/2, this.building.internal_map_size[1]/2];
 
                 // Set the presence array to the correct length
                 this.newNode = this.validateNavigationNode(this.newNode);
@@ -701,6 +713,8 @@ import getPermissionsKey from "~/assets/permissionsKey"
                         }
                     }
                 }
+
+                console.log("Node validated: ", node);
 
                 return node;
 
@@ -816,6 +830,9 @@ import getPermissionsKey from "~/assets/permissionsKey"
                         this.setEntryFloor(0);
                     }
 
+                    // Remap the floor levels to automatically include this floor
+                    this.setFloorLevels();
+
                     // Reset the new floor object
                     this.newFloor = {
                         label: "",
@@ -854,32 +871,6 @@ import getPermissionsKey from "~/assets/permissionsKey"
             deleteNavNode(node: Nav_Node){
                 this.navigationNodes.splice(this.navigationNodes.indexOf(node), 1)
             },
-
-
-            // removeMap(){
-            //     // Delete with the leaflet method, if it exists
-            //     try {
-            //         // @ts-ignore
-            //         this.map.remove();
-            //     }
-            //     catch (error) {
-            //         // console.log(error);
-            //     }
-            //     // Fallback delete
-                
-            //     this.map = {};
-
-            //     // Find the map container, and empty it's innerHTML and classlist
-            //     try {
-            //         let map_container = document.getElementById("internal-map");
-            //         map_container.innerHTML = "";
-            //         map_container.classList = [];
-            //         map_container.style.height = "0px";
-            //     }
-            //     catch (error) {
-            //         // console.log(error);
-            //     }
-            // },
 
             coordinatesToString(coordinates: number[][] | number[]): string {
                 // Takes in an array of coordinates, returns a string
@@ -921,6 +912,12 @@ import getPermissionsKey from "~/assets/permissionsKey"
                     // Set the clean building to the current building
                     this.building_clean = JSON.parse(JSON.stringify(this.building));
 
+                    // Alert the user that the building has been updated
+                    alert(this.building.display_name + " updated successfully")
+
+                    // Increment the update count
+                    this.update_count++;
+
                 }
 
                 // Check if the relevant floor details have changed
@@ -960,6 +957,7 @@ import getPermissionsKey from "~/assets/permissionsKey"
                         label: floor.label,
                         url: floor.url,
                         level: floor.level,
+                        building: this.building.canonical,
                     } as Floorplan_Template;
 
                     // Check if the floor has a new image
@@ -1171,13 +1169,6 @@ import getPermissionsKey from "~/assets/permissionsKey"
                 this.getBuilding(this.building.canonical);
 
             },
-
-            // This function compares the current state of the building against the state it was in when the page was loaded
-            // It returns a list of the fields that have been changed
-            getChanges() {},
-
-            // This function adds a log entry to the database
-            logChange() {},
 
             // This function fetches the building from the database based on it's canonical name
             async getBuilding(canonical: string){
