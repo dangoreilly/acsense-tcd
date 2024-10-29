@@ -128,6 +128,7 @@
     import type { Building_Partial, Space, Floorplan, Nav_Node, Space_Type } from '~/assets/types/supabase_types';
     import type { Lift } from '~/assets/types/otherTypes';
     import { Building_Partial_Fields } from '~/assets/types/supabase_types';
+    import { getImageForSpaceType } from '~/utils/adminMapUtils';
 
     function validateNavigationNode(node: Nav_Node, numFloors: number): Nav_Node {
         // Takes in a lift or stair, checks it has the correct number of floors
@@ -212,7 +213,7 @@
     else {
 
         studentSpaces_data.forEach(space => {
-            space.icon = getIconForSpace(space, spaceStyles.value);
+            space.icon = getImageForSpaceType(space, spaceStyles.value);
         });
 
         studentSpaces = ref(studentSpaces_data);
