@@ -112,7 +112,8 @@ export function getImageForSpaceType(space: Space | Space_Partial, space_types: 
             return space_types[i].icon;
         }
     }    
-    return '/images/red-dot.png';
+    // Otherwise, return the placeholder image using the baseURL variable
+    return useRuntimeConfig().public.supabaseUrl + '/storage/v1/object/public/icons/default.png';
 }
 
 export function addOverlays(L: any, map: any, overlays: Overlay[], currentOverlay: Overlay | null, dummy: boolean, darkmode: boolean = false): any {
