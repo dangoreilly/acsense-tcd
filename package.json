@@ -2,10 +2,9 @@
     "version": "0.4.0",
     "scripts": {
         "dev": "cd acsense-tcd && npx nuxt dev",
-        "sbcycle": "supabase stop --no-backup && npm update supabase --save-dev && supabase link && supabase start && supabase db reset && tsx supabase/seed_tables.ts && tsx supabase/seed_users.js && tsx supabase/seed_files.js",
-        "sbstart": "supabase start && supabase db reset && tsx supabase/seed_tables.ts && tsx supabase/seed_users.js && tsx supabase/seed_files.js",
-        "gentypes": "supabase gen types typescript --local > acsense-tcd/assets/types/supabase_types.gen.ts",
-        "matchtestdata": "cd acsense-tcd && tsc assets/testObjects.ts"
+        "sbcycle": "supabase stop --no-backup && npm update supabase --save-dev && npm run sbstart",
+        "sbstart": "supabase start && supabase db reset && tsx supabase/seed_tables.ts && tsx supabase/seed_users.js && tsx supabase/seed_files.js && npm run gentypes",
+        "gentypes": "supabase gen types typescript --local > acsense-tcd/assets/types/supabase_types.gen.ts"
     },
     "devDependencies": {
         "@supabase/supabase-js": "^2.44.3",
