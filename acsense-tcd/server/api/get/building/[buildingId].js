@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-// import { getSpaceStyles } from '/composables/getSpaceStyles'
-// import { getIconForSpace } from '/composables/getIconForSpace'
+import { getImageForSpaceType, getSpaceTypes } from '~/utils/adminMapUtils';
 
 
 const supabaseUrl = useRuntimeConfig().public.supabaseUrl;
@@ -29,16 +28,6 @@ export default defineEventHandler(async (event) => {
     // Get any gallery images associated with the building
     let gallery_response_data = await getGalleryImagesForBuilding(buildingId);
     building.gallery_images = gallery_response_data;
-
-    // Check if there are any floorplans for the building
-    let has_floorplans = await checkForFloorplans(building.UUID);
-    building.has_floorplans = has_floorplans;
-
-    // Check the internal_map_size to see if the floorplans are to be displayed 
-    // A size of [0,0] means that the floorplans are not to be displayed
-    if (building.internal_map_size[0] == 0 && building.internal_map_size[1] == 0) {
-        building.has_floorplans = false;
-    }
 
     return building;
 
@@ -73,14 +62,14 @@ async function getSpacesForBuilding(buildingId) {
     // console.log(spaces);
     // Generate the stylised name for the space
 
-    let styles = await getSpaceStyles(supabase);
+    let styles = await getSpaceTypes(supabase);
     // let styles = {};
     // console.log(styles);
 
     spaces.forEach(space => {
         // space.stylised_name = getSpaceStyledTitle(styles, space);
         // console.log(space)
-        space.icon = getIconForSpace(space, styles);
+        space.icon = getImageForSpaceType(space, styles);
     });
 
     return spaces;
@@ -112,76 +101,4 @@ async function checkForFloorplans(buildingId) {
         throw error
     }
     return floorplans.length > 0;
-}
-
-// function getSpaceStyledTitle(styles, area){
-//     let key = {
-//         "Social Space": ["🟡","😄"],
-//         "Study Space": ["🔵","📚"], 
-//         "Respite Room": ["🟠","🧡"],
-//         "Quiet Space": ["🟣","🌺"],  
-//     }
-
-//     let _colour = "🟤";
-//     let _emoji = "🏠";
-
-//     try {
-//         _colour = key[area.type][0];
-//         _emoji = key[area.type][1];
-//     }
-//     catch {
-//         console.error("No style found for '" + area.type + "'");
-//     }
-
-//     // console.log(`${_colour} ${area.name} ${_emoji}`);
-
-//     return `${_colour} ${area.name} ${_emoji}`;
-
-// }
-
-// async function getSpaceStyles(){
-//     let { data: styles, error } = await supabase
-//         .from('site_settings')
-//         .select('*')
-//         .eq('key', 'space_styles')
-//     if (error) {
-//         console.log(error)
-//         throw error
-//     }
-//     return styles[0].data;
-// }
-
-function getIconForSpace(space, styles) {
-
-    // Check if the space has an icon override
-    if (space.icon_override != null && space.icon_override != "")
-        return space.icon_override;
-    else {
-        // Otherwise, try to get the icon from the space style
-        for (let i = 0; i < styles.length; i++) {
-            if (styles[i].category == space.type)
-                return styles[i].icon;
-        }
-
-        // If no icon is found, return the default icon
-        return "https://hadxekyuhdhfnfhsfrcx.supabase.co/storage/v1/object/public/icons/default.png"
-    }
-}
-
-async function getSpaceStyles() {
-    try {
-        // Get the space icons from the database
-        let { data: icons, error } = await supabase
-            .from('space_styles')
-            .select('*')
-        if (error) {
-            console.log(error)
-            return [];
-        } else {
-            return icons;
-        }
-    } catch (error) {
-        console.log(error);
-        return [];
-    }
 }
