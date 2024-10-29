@@ -8,6 +8,7 @@
             <AdminEntitySelector 
             @activeEntityChanged="getStudentSpace($event)"
             :updateCount="updateCount"
+            :disabled="spaceHasBeenChanged"
             entityType="space"
             :permissions="user"
             :supabase_client="supabase"/>

@@ -8,8 +8,7 @@ import * as L from "leaflet";
 import '~/assets/css/leaflet.css'
 import 'leaflet.fullscreen';
 import 'leaflet.fullscreen/Control.FullScreen.css';
-import type { Overlay, Space, Space_Type, Building, Flyover } from "~/assets/types/supabase_types";
-import type { Building_Partial, Space_Partial } from '~/utils/adminMapUtils'
+import type { Overlay, Space, Space_Partial, Space_Type, Building, Building_Partial, Flyover } from "~/assets/types/supabase_types";
 
 import { getBuildingList, addBuildings, getFlyovers, addOverlays, getSpaces, addSpaces, getSpaceTypes } from '~/utils/adminMapUtils'
 
@@ -57,6 +56,7 @@ export default {
     created(){
         // Fetch the non-overlay elements
         getBuildingList(this.supabase_client).then((buildings) => {
+            // @ts-ignore
             this.buildingList = buildings;
         });
         getSpaces(this.supabase_client).then((spaces) => {
@@ -124,9 +124,8 @@ export default {
             let isDarkMode = this.mode === "dark";
 
             addOverlays(L, this.map, this.overlays, null, false, isDarkMode);
-            addBuildings(L, this.map, this.buildingList, null, false, (active, text) => {return}, (feature, layer) => {return}, isDarkMode);
-            addLabelsToMap(L, this.map, this.buildingList, null, true);
-            // @ts-ignore
+            addBuildings(L, this.map, this.buildingList as Building_Partial[], null, false, (active, text) => {return}, (feature, layer) => {return}, isDarkMode);
+            addLabelsToMap(L, this.map, this.buildingList as Building_Partial[], null, true);
             addSpaces(L, this.map, this.spaceList, this.spaceTypes, null, false, (active, text) => {return});
             addFlyovers(L, this.map, this.flyovers, null, false);
 

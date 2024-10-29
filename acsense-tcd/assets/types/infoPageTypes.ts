@@ -4,7 +4,7 @@ export interface Photo {
     caption?: string;
 }
 
-export interface OpeningTimes {
+export type OpeningTimes = {
     weekday: {
         open: boolean,
         times: string[],

@@ -1,11 +1,11 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js'
 const fs = require('fs');
 
 require('dotenv').config();
 
 // Load SUPABASE_SERVICE_KEY from .env file
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL as string;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY as string;
 
 // Create Supabase client instance
 const supabase = createClient(supabaseUrl, supabaseKey, {
@@ -67,11 +67,11 @@ async function uploadFiles(files, bucket){
     let n = files.length;
     let err_count = 0;
 
-    for (i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
 
         // Get the file type by checking the file extension
         let ext = files[i].split('.').pop();
-        let file_type;
+        let file_type: string;
 
         switch (ext.toLowerCase()) {
             case "svg":
@@ -132,7 +132,7 @@ async function uploadFiles(files, bucket){
 
 }
 
-async function clearBucket(bucket) {
+async function clearBucket(bucket: string) {
     const { data, error } = await supabase
     .storage
     .emptyBucket(bucket);

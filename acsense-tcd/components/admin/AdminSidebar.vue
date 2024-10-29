@@ -100,11 +100,11 @@
             icon: 'bi bi-cup-hot',
         },
 
-        // {
-        //     name: 'Floorplans',
-        //     key: 'floorplans',
-        //     icon: 'bi bi-columns',
-        // },
+        {
+            name: 'Floorplans',
+            key: 'floorplans',
+            icon: 'bi bi-columns',
+        },
         {
             name: 'Contributors',
             key: 'contributors',
