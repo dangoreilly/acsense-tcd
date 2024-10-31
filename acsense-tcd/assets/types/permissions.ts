@@ -1,8 +1,10 @@
-export type table = "buildings" | "building_gallery_images" | "floorplans" | "nav_nodes" | "spaces" | "overlays" | "flyovers" | "logs";
+export type table = "buildings" | "building_gallery_images" | "floorplans" | "nav_nodes" | "spaces" | "overlays" | "flyovers" | "logs" | "profiles";
 
 import type { Database } from "~/assets/types/supabase_types.gen";
 
-export type UserProfile_Template = Database['public']['Tables']['profiles']['Row'] & {
+type _profile = Database['public']['Tables']['profiles']['Row']
+
+export type UserProfile_Template = Omit<_profile, "created_at" | "user_id"> & {
     buildings: BuildingsPermissions,
     spaces: SpacesPermissions,
     map: {
@@ -16,7 +18,7 @@ export type UserProfile = UserProfile_Template & {
     is_super_admin?: boolean,
 }
 
-export interface PermissionsObject {
+export type PermissionsObject = {
     general: {
         name: boolean,
         aka: boolean,
@@ -45,10 +47,10 @@ export interface PermissionsObject {
     }
 }
 
-export interface BuildingsPermissions extends PermissionsObject {
+export type BuildingsPermissions = PermissionsObject & {
     floorplans: boolean,
 }
 
-export interface SpacesPermissions extends PermissionsObject {
+export type SpacesPermissions = PermissionsObject & {
     facilities: boolean,
 }

@@ -31,7 +31,8 @@ export const user_all: UserProfile = {
         map: {
             labels: true,
             location: true
-        }
+        },
+        floorplans: true,
     },
     spaces: {
         general: {
@@ -98,7 +99,8 @@ export const user_buildingsOnly: UserProfile = {
         map: {
             labels: true,
             location: true
-        }
+        },
+        floorplans: true,
     },
     spaces: {
         general: {
@@ -165,7 +167,8 @@ export const user_admin: UserProfile = {
         map: {
             labels: true,
             location: true
-        }
+        },
+        floorplans: false,
     },
     spaces: {
         general: {
@@ -232,7 +235,8 @@ export const user_none: UserProfile = {
         map: {
             labels: false,
             location: false
-        }
+        },
+        floorplans: false,
     },
     spaces: {
         general: {
@@ -274,32 +278,33 @@ export const user_superadmin: UserProfile = {
     user_id: "0",
     is_admin: true,
     buildings: {
-    general: {
-      name: false,
-      aka: false,
-      desc: false,
-    },
-    primary_image: {
-      image: false,
-      alt: false
-    },
-    tabs: {
-      physical: false,
-      wayfinding: false,
-      sensory: false
-    },
-    gallery: {
-      images: false,
-      captions: false,
-      alt: false
-    },
-    times: false,
-    tips: false,
-    further: false,
-    map: {
-      labels: false,
-      location: false
-    }
+        general: {
+        name: false,
+        aka: false,
+        desc: false,
+        },
+        primary_image: {
+        image: false,
+        alt: false
+        },
+        tabs: {
+        physical: false,
+        wayfinding: false,
+        sensory: false
+        },
+        gallery: {
+        images: false,
+        captions: false,
+        alt: false
+        },
+        times: false,
+        tips: false,
+        further: false,
+        map: {
+        labels: false,
+        location: false
+        },
+        floorplans: false,
     },
     spaces: {
       general: {
@@ -576,7 +581,7 @@ export const logs: Audit_Log[] = [
 ]
 
 
-import type { Overlay } from '~/assets/types/supabase_types';
+import type { Overlay, Point } from '~/assets/types/supabase_types';
 
 export const overlay: Overlay = {
     "url": "/images/overlay.png",

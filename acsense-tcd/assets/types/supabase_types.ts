@@ -15,7 +15,7 @@ export type Nav_Node_Template = Database['public']['Tables']['nav_nodes']['Inser
 
 
 // More complex types that require further definition
-type Point = [number, number];
+export type Point = [number, number];
 
 type _Building = Database['public']['Tables']['buildings']['Row'];
 type _Building_Template = Omit<Database['public']['Tables']['buildings']['Insert'], "UUID">;
@@ -34,7 +34,7 @@ export type Space_Partial = Omit<Space, "building" | "updated_at" | "UUID"  | "f
 export const Space_Partial_Fields = "canonical, published, floor, icon_override, location, location_internal, name, type, description, food_drink_allowed, microwave, kettle, wheelchair, outlets, seating, clickthrough";
 
 // Overlays and Flyovers basically just need to accomodate tuples of points
-export type Overlay = Database['public']['Tables']['overlays']['Row'] & {
+export type Overlay = Omit<Database['public']['Tables']['overlays']['Row'], "bounds"> & {
     bounds: [Point, Point];  
 }
 export type Overlay_Template = Omit<Overlay, "id" | "created_at">;

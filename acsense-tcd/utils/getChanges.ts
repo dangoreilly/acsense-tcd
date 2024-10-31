@@ -1,4 +1,4 @@
-import type { UserProfile } from 'assets/types/permissions';
+import type { UserProfile, table } from 'assets/types/permissions';
 import getPermissionsKey from '~/assets/permissionsKey';
 import type { PermissionsKey } from '~/assets/permissionsKey';
 // import type { PermissionsKey } from '~/assets/permissionsKey';
@@ -86,7 +86,7 @@ export function getChanges(objectA: any, objectB: any): ChangesObject {
  * @param changes - An object containing the old and new values of the fields to be changed, along with a list of field names.
  * @returns A boolean indicating whether the user has permission to make the changes.
  */
-export function checkUserHasPermission(user: UserProfile, table: string, changes: ChangesObject): boolean {
+export function checkUserHasPermission(user: UserProfile, table: table, changes: ChangesObject): boolean {
     // Take in a user object and a list of changes
     // For each change, check if the user has permission to change that field
     // If they don't have permission to change any field, return false
@@ -132,7 +132,7 @@ export function userHasPermission(user: UserProfile, permissionsKey_table: Permi
     let requiredPermission = permissionsKey_table[field];
 
     // Check the user has the required permission
-    let userHasPermission = _.get(user, requiredPermission);
+    let userHasPermission = _.get(user, requiredPermission, false);
 
     // Return the boolean
     return userHasPermission;
