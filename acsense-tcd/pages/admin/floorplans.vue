@@ -488,6 +488,7 @@ import { Building_Partial_Fields, Space_Partial_Fields } from "~/assets/types/su
 import { getSpaceTypes, getImageForSpaceType } from '~/utils/adminMapUtils'
 import getPermissionsKey, { type PermissionsKey } from "~/assets/permissionsKey"
 import type { UserProfile } from '~/assets/types/permissions';
+import { update } from 'lodash';
 
 	export default {
 		data() {
@@ -1007,18 +1008,27 @@ import type { UserProfile } from '~/assets/types/permissions';
 						console.log("Uploading new floor")
 						console.log(floor_update_vehicle)
 						// Insert the new floor into the database
-						const { data:floor_insert_response, error:floor_insert_error } = await this.supabase
-							.from('floorplans')
-							.insert(floor_update_vehicle)
-						// If there is an error, log it
-						if (floor_insert_error) {
-							console.error("Error inserting new floor: " + floor.id)
-							console.error(floor_insert_error)
-							alert(floor_insert_error.message)
-							throw floor_insert_error
-						}
+						// const { data:floor_insert_response, error:floor_insert_error } = await this.supabase
+						// 	.from('floorplans')
+						// 	.insert(floor_update_vehicle)
+						// // If there is an error, log it
+						// if (floor_insert_error) {
+						// 	console.error("Error inserting new floor: " + floor.id)
+						// 	console.error(floor_insert_error)
+						// 	alert(floor_insert_error.message)
+						// 	throw floor_insert_error
+						// }
+						const {data:floor_update_response, error:floor_update_error} = await insertToTable(access_token, "floorplans", floor_update_vehicle);
 
+						if (floor_update_error) {
+							console.error("Error inserting new floor: " + floor.id)
+							console.error(floor_update_error)
+							alert(floor_update_error.message)
+							throw floor_update_error
+						}
+							
 						alert(floor.label + " added successfully")
+						
 					}
 					// Check if the floor has changed
 					else if (!floorEquivalence(floor, clean_floor)) {
@@ -1029,11 +1039,19 @@ import type { UserProfile } from '~/assets/types/permissions';
 						// console.log("clean_floor", JSON.parse(JSON.stringify(clean_floor)))
 
 						// Update the floor in the database
-						const { data:floor_update_response, error:floor_update_error } = await this.supabase
-							.from('floorplans')
-							.update(floor_update_vehicle)
-							.eq('id', floor.id)
-							.select()
+						// const { data:floor_update_response, error:floor_update_error } = await this.supabase
+						// 	.from('floorplans')
+						// 	.update(floor_update_vehicle)
+						// 	.eq('id', floor.id)
+						// 	.select()
+
+						const { data:floor_update_response, error:floor_update_error } = await updateTable(access_token, "floorplans", 
+						floor_update_vehicle, 
+						{
+							col: "id", 
+							eq: floor.id
+						});
+
 						// If there is an error, log it
 						if (floor_update_error) {
 							console.error("Error updating floor: " + floor.id)
@@ -1055,10 +1073,12 @@ import type { UserProfile } from '~/assets/types/permissions';
 						console.log(floor_update_vehicle)
 
 						// Delete the floor from the database
-						const { data:floor_delete_response, error:floor_delete_error } = await this.supabase
-							.from('floorplans')
-							.delete()
-							.eq('id', floor.id)
+						const { data:floor_delete_response, error:floor_delete_error } = await removeFromTable(access_token, "floorplans", 
+						{
+							col: "id", 
+							eq: floor.id
+						});
+
 						// If there is an error, log it
 						if (floor_delete_error) {
 							console.error("Error deleting floor: " + floor.id)
@@ -1086,11 +1106,16 @@ import type { UserProfile } from '~/assets/types/permissions';
 							location_internal: this.spaces[i].location_internal,
 						}
 						// Update the space in the database
-						const { data:space_update_response, error:space_update_error } = await this.supabase
-							.from('spaces')
-							.update(space_update_vehicle)
-							.eq('canonical', this.spaces[i].canonical)
-							.select()
+						const { data:space_update_response, error:space_update_error } = await updateTable(access_token, "spaces",
+						space_update_vehicle,
+						{
+							col: "canonical",
+							eq: this.spaces[i].canonical
+						});
+							// .from('spaces')
+							// .update(space_update_vehicle)
+							// .eq('canonical', this.spaces[i].canonical)
+							// .select()
 						// If there is an error, log it
 						if (space_update_error) {
 							console.warn("Error updating space: " + this.spaces[i].name)
