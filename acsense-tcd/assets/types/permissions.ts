@@ -1,26 +1,8 @@
+export type table = "buildings" | "building_gallery_images" | "floorplans" | "nav_nodes" | "spaces" | "overlays" | "flyovers" | "logs";
 
-// export interface Permission {
-//     key: string,
-//     label: string,
-//     value: boolean
-// }
+import type { Database } from "~/assets/types/supabase_types.gen";
 
-// export interface PermissionsArray {
-//     email: string,
-//     uuid: string,
-//     isAdmin: boolean,
-//     buildings: Permission[],
-//     spaces: Permission[],
-//     map_misc: Permission[],
-//     general: Permission[]
-// }
-
-// import type { user_profile } from "./supabase_types";
-// import type { Json } from "./supabase_types.gen";
-
-export type UserProfile_Template = {
-    email: string,
-    is_admin: boolean,
+export type UserProfile_Template = Database['public']['Tables']['profiles']['Row'] & {
     buildings: BuildingsPermissions,
     spaces: SpacesPermissions,
     map: {
@@ -64,6 +46,7 @@ export interface PermissionsObject {
 }
 
 export interface BuildingsPermissions extends PermissionsObject {
+    floorplans: boolean,
 }
 
 export interface SpacesPermissions extends PermissionsObject {
