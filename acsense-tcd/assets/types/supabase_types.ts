@@ -13,6 +13,7 @@ export type Room_Template = Database['public']['Tables']['rooms']['Insert'];
 export type Nav_Node =          Database['public']['Tables']['nav_nodes']['Row'];
 export type Nav_Node_Template = Database['public']['Tables']['nav_nodes']['Insert'];
 
+
 // More complex types that require further definition
 type Point = [number, number];
 
