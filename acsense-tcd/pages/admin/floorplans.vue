@@ -668,7 +668,7 @@ import { update } from 'lodash';
 				// Null the nodes array
 				this.navigationNodes = [];
 				this.navigationNodes_deleted = [];
-				let _nodes = [] as Nav_Node_Template[];
+				let _nodes = [] as Nav_Node[];
 				const { data: nodes, error } = await this.supabase
 					.from('nav_nodes')
 					.select('*')
@@ -680,12 +680,16 @@ import { update } from 'lodash';
 					throw error
 				}
 				else {
-					// console.log("nodes", nodes);   
+					   
 					// Validate all the nodes
-					
 					for (let i = 0; i < nodes.length; i++) {
-						_nodes[i] = this.validateNavigationNode(nodes[i]);
+						_nodes[i] = this.validateNavigationNode(nodes[i]) as Nav_Node;
 					}
+
+					// Sort the nodes by id to maintain consistent ordering
+					_nodes.sort((a, b) => {
+						return a.id - b.id;
+					});
 					
 					// Copy the nodes to the navigationNodes array
 					this.navigationNodes = JSON.parse(JSON.stringify(_nodes));
@@ -718,7 +722,7 @@ import { update } from 'lodash';
 
 			},
 
-			validateNavigationNode(node: Nav_Node | Nav_Node_Template): Nav_Node_Template {
+			validateNavigationNode(node: Nav_Node | Nav_Node_Template): Nav_Node_Template | Nav_Node {
 				// Takes in a lift or stair, checks it has the correct number of floors
 				// Trims the presence array to the correct number of floors if too many
 				// filles the presence array with 0s if too few
