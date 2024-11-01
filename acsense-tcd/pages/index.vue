@@ -10,6 +10,8 @@
     @openBuildingModal="openBuildingModal"
     @openSpaceModal="openSpaceModal"
     @openLegendModal="legendModalOpen = true"
+    @spaceHover="space_name_toast_showing = true; space_being_hovered_on = $event"
+    @spaceUnhover="space_name_toast_showing = false"
     @dismissModals="closeModal"/>
 
     <!-- Info Modal -->
@@ -95,6 +97,15 @@
                     <!-- <a role="button" href='https://www.tcd.ie/disability/services/tcdsense.php' class="btn btn-secondary" >About TCDSense</a> -->
                 </div>
             
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container p-3 start-50 translate-middle-x space-name-toast bottom-0"
+    :style="space_name_toast_showing ? 'opacity: 1;' : 'opacity: 0;'">
+        <div class="toast show">
+            <div class="toast-body">
+                {{ space_being_hovered_on  }}
             </div>
         </div>
     </div>
@@ -268,6 +279,8 @@ export default {
             legendModalOpen: false,
             infoModalOpen: false,
             skipWelcome: false,
+            space_name_toast_showing: false,
+            space_being_hovered_on: '',
             infoModal: {
                 title: '',
                 mainContent: '',
@@ -450,6 +463,11 @@ export default {
             grid-template-areas: 
                 "seating sockets food kettle microwave wheelchair"
                 "btn btn btn btn btn btn";
+        }
+
+        
+        .space-name-toast {
+            transition: all 0.2s ease-in-out;
         }
 
     </style>

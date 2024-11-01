@@ -28,7 +28,8 @@ export const user_template: UserProfile_Template = {
         map: {
             labels: false,
             location: false
-        }
+        },
+        floorplans: false,
     },
     spaces: {
         general: {

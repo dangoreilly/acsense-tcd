@@ -1,27 +1,10 @@
-import { Interface } from "readline/promises"
+export type table = "buildings" | "building_gallery_images" | "floorplans" | "nav_nodes" | "spaces" | "overlays" | "flyovers" | "logs" | "profiles";
 
-// export interface Permission {
-//     key: string,
-//     label: string,
-//     value: boolean
-// }
+import type { Database } from "~/assets/types/supabase_types.gen";
 
-// export interface PermissionsArray {
-//     email: string,
-//     uuid: string,
-//     isAdmin: boolean,
-//     buildings: Permission[],
-//     spaces: Permission[],
-//     map_misc: Permission[],
-//     general: Permission[]
-// }
+type _profile = Database['public']['Tables']['profiles']['Row']
 
-// import type { user_profile } from "./supabase_types";
-// import type { Json } from "./supabase_types.gen";
-
-export type UserProfile_Template = {
-    email: string,
-    is_admin: boolean,
+export type UserProfile_Template = Omit<_profile, "created_at" | "user_id"> & {
     buildings: BuildingsPermissions,
     spaces: SpacesPermissions,
     map: {
@@ -35,7 +18,7 @@ export type UserProfile = UserProfile_Template & {
     is_super_admin?: boolean,
 }
 
-export interface PermissionsObject {
+export type PermissionsObject = {
     general: {
         name: boolean,
         aka: boolean,
@@ -64,9 +47,10 @@ export interface PermissionsObject {
     }
 }
 
-export interface BuildingsPermissions extends PermissionsObject {
+export type BuildingsPermissions = PermissionsObject & {
+    floorplans: boolean,
 }
 
-export interface SpacesPermissions extends PermissionsObject {
+export type SpacesPermissions = PermissionsObject & {
     facilities: boolean,
 }

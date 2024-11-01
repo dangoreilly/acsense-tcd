@@ -1,39 +1,40 @@
-
+import { isLabeledStatement } from "typescript"
+import type { table } from "~/assets/types/permissions"
 // Definition of permissions needed to update each field in the database
-export default function (table:string) : PermissionsKey | null {
+export default function (table: table) : PermissionsKey {
     // Buildings table
     switch (table) {
         case "buildings":
             return {
-                canonical: "is_super_admin",
-                display_name: "buildings.general.name",
-                aka: "buildings.general.aka",
-                description: "buildings.general.desc",
-                map_label_1: "buildings.map.labels",
-                map_label_2: "buildings.map.labels",
-                map_label_3: "buildings.map.labels",
-                geometry: "buildings.map.location",
-                always_display: "buildings.map.location",
-                sense_exp: "buildings.tabs.sensory",
-                sense_exp_display: "buildings.tabs.sensory",
-                sense_exp_video: "buildings.tabs.sensory",
-                wayfinding: "buildings.tabs.wayfinding",
-                wayfinding_display: "buildings.tabs.wayfinding",
-                wayfinding_video: "buildings.tabs.wayfinding",
-                phys_access: "buildings.tabs.physical",
-                phys_access_display: "buildings.tabs.physical",
-                phys_access_video: "buildings.tabs.physical",
-                tips: "buildings.tips",
-                further_info: "buildings.further",
-                furtherinfo_display: "buildings.further",
-                opening_times: "buildings.times",
-                primary_image_url: "buildings.primary_image.image",
-                primary_image_alt: "buildings.primary_image.alt",
-                entry_floor: "is_admin",
-                internal_map_size: "is_admin",
-                published: "is_admin",
-                floorplans_published: "is_admin",
-                rooms_published: "is_admin",
+                canonical:				"is_super_admin",
+                display_name:			"buildings.general.name",
+                aka:					"buildings.general.aka",
+                description:			"buildings.general.desc",
+                map_label_1:			"buildings.map.labels",
+                map_label_2:			"buildings.map.labels",
+                map_label_3:			"buildings.map.labels",
+                geometry:				"buildings.map.location",
+                always_display:			"buildings.map.location",
+                sense_exp:				"buildings.tabs.sensory",
+                sense_exp_display:		"buildings.tabs.sensory",
+                sense_exp_video: 		"buildings.tabs.sensory",
+                wayfinding: 			"buildings.tabs.wayfinding",
+                wayfinding_display: 	"buildings.tabs.wayfinding",
+                wayfinding_video: 		"buildings.tabs.wayfinding",
+                phys_access: 			"buildings.tabs.physical",
+                phys_access_display: 	"buildings.tabs.physical",
+                phys_access_video: 		"buildings.tabs.physical",
+                tips: 					"buildings.tips",
+                further_info: 			"buildings.further",
+                furtherinfo_display: 	"buildings.further",
+                opening_times: 			"buildings.times",
+                primary_image_url: 		"buildings.primary_image.image",
+                primary_image_alt: 		"buildings.primary_image.alt",
+                entry_floor: 			"buildings.floorplans",
+                internal_map_size: 		"buildings.floorplans",
+                published: 				"is_admin",
+                floorplans_published: 	"is_admin",
+                rooms_published: 		"is_admin",
 
                 created_at: "service",
                 updated_at: "service",
@@ -89,8 +90,8 @@ export default function (table:string) : PermissionsKey | null {
                 primary_image_url: 			"spaces.primary_image.image",
                 primary_image_alt: 			"spaces.primary_image.alt",
                 primary_image_panorama:     "is_admin",
-                floor: 						"spaces.map.location",
-                location_internal: 			"spaces.map.location",
+                floor: 						"buildings.floorplans",
+                location_internal: 			"buildings.floorplans",
                 clickthrough: 				"spaces.map.location",
                 published: 					"is_admin",
 
@@ -129,8 +130,31 @@ export default function (table:string) : PermissionsKey | null {
                 id: "service",
                 created_at: "service",
             } as PermissionsKey
+        case "floorplans":
+            return {
+                url:            "buildings.floorplans",
+                building:       "buildings.floorplans",
+                floor:          "buildings.floorplans",
+                bounds:         "buildings.floorplans",
+                high_detail:    "buildings.floorplans",
+
+                id: "service",
+                created_at: "service",
+            } as PermissionsKey
+        case "nav_nodes":
+            return {
+                label:          "buildings.floorplans",
+                building:       "buildings.floorplans",
+                node_type:      "buildings.floorplans",
+                presence:       "buildings.floorplans",
+                location_up:    "buildings.floorplans",
+                location_down:  "buildings.floorplans",
+                
+                id: "service",
+                created_at: "service",
+            } as PermissionsKey
         default:
-            return null
+            throw new Error("Table not found")
     }
 }
 

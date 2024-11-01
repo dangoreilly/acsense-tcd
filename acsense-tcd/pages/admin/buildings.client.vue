@@ -8,6 +8,7 @@
             <AdminEntitySelector 
             @activeEntityChanged="getBuilding($event)"
             entityType="building"
+            :disabled="buildingHasBeenChanged"
             :permissions="user"
             :supabase_client="supabase"
             :updateCount="building_list_refresh_token"/>

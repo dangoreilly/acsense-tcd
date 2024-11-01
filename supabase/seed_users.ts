@@ -1,10 +1,10 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js'
 
 require('dotenv').config();
 
 // Load SUPABASE_SERVICE_KEY from .env file
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL as string;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY as string;
 
 // Create Supabase client instance
 const supabase = createClient(supabaseUrl, supabaseKey, {
@@ -14,11 +14,15 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     }
   });
 
-let { user_all, user_admin, user_none, user_buildingsOnly, user_superadmin } = require('../acsense-tcd/assets/testObjects.js');
-let { logs } = require('../acsense-tcd/assets/testObjects.js');
+import { user_all, user_admin, user_none, user_buildingsOnly, user_superadmin, logs } from '../acsense-tcd/assets/testObjects.ts';
+import type { UserProfile } from '../acsense-tcd/assets/types/permissions.ts';
+import { Audit_Log } from '../acsense-tcd/assets/types/supabase_types.ts';
+// let { logs } = require('../acsense-tcd/assets/testObjects.js');
 
 // Create the users
-async function createUsers(users) {
+async function createUsers(users: UserProfile[]) {
+
+    let i = 0;
     // Loop through the defined seed data above
     for (i = 0; i < users.length; i++) {
         // Create the user and auto-confirm
@@ -41,7 +45,8 @@ async function createUsers(users) {
     console.log(`[${i}/${users.length}] users created                         `);
 }
 
-async function createUserProfiles(users){
+async function createUserProfiles(users: UserProfile[]) {
+    let i = 0;
 
     for (i = 0; i < users.length; i++) {
 
@@ -67,7 +72,7 @@ function cleanUpTestProfiles(){
     // Return an array of appropriate profiles
     let users = [user_all, user_admin, user_none, user_buildingsOnly, user_superadmin];
 
-    for (i = 0; i < users.length; i++) {
+    for (let i = 0; i < users.length; i++) {
         // Remove the is_super_admin field as this is not stored in the profiles table
         if (users[i].hasOwnProperty('is_super_admin')) {
             delete users[i].is_super_admin;
@@ -87,7 +92,7 @@ function cleanupLogs(){
     // Return an array of appropriate logs
     let temp_logs = JSON.parse(JSON.stringify(logs));
 
-    for (i = 0; i < logs.length; i++) {
+    for (let i = 0; i < logs.length; i++) {
         if (logs[i].hasOwnProperty('id')) {
             delete temp_logs[i].id;
         }
@@ -102,11 +107,11 @@ function cleanupLogs(){
     return temp_logs;
 }
 
-async function assignLogsToUsers(users, logs){
+async function assignLogsToUsers(users: UserProfile[], logs: Audit_Log[]) {
 
     // Loop through the logs and assign them to random users
 
-    for (i = 0; i < logs.length; i++) {
+    for (let i = 0; i < logs.length; i++) {
         // Pick a random user
         let user = users[Math.floor(Math.random() * users.length)];
         logs[i].user = user.user_id;

@@ -6,7 +6,7 @@
  * @param target - The target condition for the update operation.
  * @returns A promise that resolves to an object containing the updated data and any error that occurred during the update.
  */
-export default async function(access_token: string, table: string, payload: any, target: {col: string, eq: string}): Promise<{data: any, error: any}> {
+export default async function(access_token: string, table: string, payload: any, target: {col: string, eq: any}): Promise<{data: any, error: any}> {
     
     let _data: any = null;
     let _error: any = null;

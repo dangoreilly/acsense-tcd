@@ -223,6 +223,15 @@
                             Modify building shape/location on map 
                         </label> 
                     </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                        v-model="modifiedPermissions.buildings.floorplans"
+                        :disabled="disabled || modifiedPermissions.is_admin">
+                        <label class="form-check-label"
+                        :class="{'text-warning' : modifiedPermissions.buildings.floorplans != user.buildings.floorplans}"> 
+                            Modify building's floorplans
+                        </label> 
+                    </div>
                 </div>
             </div>
 

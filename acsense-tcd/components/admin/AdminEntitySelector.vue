@@ -22,16 +22,19 @@
                     :class="{
                         'bg-blue-300': entity.canonical === activeEntity.canonical, 
                         'fst-italic': !entity.published, 
-                        'bg-yellow-100': !entity.published && entity.canonical !== activeEntity.canonical
+                        'bg-yellow-100': !getPublishedStatus(entity) && entity.canonical !== activeEntity.canonical,
+                        'text-muted pe-none': disabled
                         }"
                     style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
-                    :title="entity.name ? entity.name : entity.display_name">
-                        <span>{{entity.name ? entity.name : entity.display_name}}</span> <br>
+                    :title="entityType == 'space' ? (entity as Space_List_Item).name : (entity as Building_List_Item).display_name">
+                        <span>{{entityType == 'space' ? (entity as Space_List_Item).name : (entity as Building_List_Item).display_name}}</span> <br>
                         <span class="font-monospace" style="font-size: 0.8rem;">{{ entity.canonical }}</span>
                     </div>
                 </li>
             </ul>
-            <div>
+            <!-- We only want to display the new entity field on the primary list -->
+            <!-- If we're using a secondary published indicator, then we aren't on the primary list -->
+            <div v-if="published_field == 'published'">
                 <hr>
                 <div class="input-group" v-if="permissions.is_admin">
                     <input id="new-entity" type="text" class="form-control" 
@@ -54,10 +57,25 @@
     </div>
 </template>
     
-<script>
+<script lang="ts">
     import {createClient} from '@supabase/supabase-js';
     import Fuse from 'fuse.js';
     import { space_template, building_template } from '~/assets/templates';
+import type { Building_Template, Space_Template } from '~/assets/types/supabase_types';
+    
+    type Space_List_Item = {
+        name: string,
+        canonical: string,
+        published: boolean,
+    }
+
+    type Building_List_Item = {
+        display_name: string,
+        canonical: string,
+        published: boolean,
+        rooms_published: boolean,
+        floorplans_published: boolean,
+    }
 
     
     
@@ -71,8 +89,22 @@
                 type: Number,
                 required: false
             },
-            supabase_client: Object,
-            entityType: String,
+            supabase_client: {
+                type: Object,
+                required: true
+            },
+            entityType: {
+                type: String,
+                required: true
+            },
+            disabled: {
+                type: Boolean,
+                default: false
+            },
+            published_field: {
+                type: String as () => "rooms_published" | "floorplans_published" | "published",
+                default: 'published'
+            }
         },
         watch: {
             updateCount: function() {
@@ -82,9 +114,9 @@
         data() {
             return {
                 newEntityID: '',
-                activeEntity: {},
-                entities: [],
-                entities_clean: [],
+                activeEntity: {} as (Space_List_Item | Building_List_Item),
+                entities: [] as (Space_List_Item | Building_List_Item)[],
+                entities_clean: [] as (Space_List_Item | Building_List_Item)[],
                 searchTerm: '',
             }
         },
@@ -97,17 +129,31 @@
             }
         },
         methods: {
+            getPublishedStatus(entity: Space_List_Item | Building_List_Item) {
+                if (this.published_field == 'rooms_published') {
+                    // The published field would only be set for buildings
+                    // @ts-ignore
+                    return entity.rooms_published
+                }
+                if (this.published_field == 'floorplans_published') {
+                    // The published field would only be set for buildings
+                    // @ts-ignore
+                    return entity.floorplans_published
+                }
+                    return entity.published
+            },
+
             async NewEntity() {
                 // Attempt to create a new space/building with the entityID from the createNewEntity field
                 // If successful, open the new space/building for editing
                 // If unsuccessful, display an error message
                 // Get the template building or space
-                let newEntity = {}
+                let newEntity = {} as (Space_Template | Building_Template);
                 if (this.entityType == "building") {
                     newEntity = building_template
                 }
                 else if (this.entityType == "space") {
-                    newEntity = JSON.parse(JSON.stringify(space_template));
+                    newEntity = JSON.parse(JSON.stringify(space_template)) as Space_Template;
                     console.log(newEntity)
                     // For spaces, we need to also set a default type
                     // Get the list of space types, and set the first one as the default
@@ -179,7 +225,7 @@
                 else if (this.entityType == "building") {
                     let { data: buildings, error } = await this.supabase_client
                         .from('buildings')
-                        .select('display_name, canonical, published')
+                        .select('display_name, canonical, published, floorplans_published, rooms_published')
                     if (error) {
                         console.log(error)
                         throw error
@@ -198,7 +244,7 @@
                 this.entities_clean = JSON.parse(JSON.stringify(this.entities));
 
                 // Check if this is the first load
-                if (this.activeEntity == {}) {
+                if (JSON.stringify(this.activeEntity) == JSON.stringify({})) {
                     // Set the active entity to the first entity in the array
                     this.activeEntity = this.entities[0];
                     this.$emit('activeEntityChanged', this.activeEntity.canonical);
@@ -221,10 +267,15 @@
                 
             },
 
-            changeEntity(entity) {
+            changeEntity(entity: Space_List_Item | Building_List_Item) {
+                // If the list is disabled, ignore the click
+                if (this.disabled) {
+                    return;
+                }
+                // Set the active entity to the clicked entity
                 this.activeEntity = entity;
                 this.$emit('activeEntityChanged', this.activeEntity.canonical);
-                console.log("Changing entity to " + this.activeEntity.canonical);
+                // console.log("Changing entity to " + this.activeEntity.canonical);
             },
 
             // Functions for dealing with the search/filter
