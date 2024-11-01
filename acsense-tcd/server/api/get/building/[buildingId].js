@@ -89,16 +89,3 @@ async function getGalleryImagesForBuilding(buildingId) {
 
     return images;
 }
-
-async function checkForFloorplans(buildingId) {
-    // Check if there are any floorplans for the building
-    let { data: floorplans, error } = await supabase
-        .from('floorplans')
-        .select('*')
-        .eq('building', buildingId)
-    if (error) {
-        console.log(error)
-        throw error
-    }
-    return floorplans.length > 0;
-}
