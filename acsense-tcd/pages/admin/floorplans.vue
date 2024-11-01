@@ -482,13 +482,11 @@
 </template>
 
 <script lang="ts">
-import {createClient} from '@supabase/supabase-js';
 import type { Building_Partial, Space_Partial, Floorplan, Nav_Node, Space_Type, Floorplan_Template, Nav_Node_Template } from '~/assets/types/supabase_types';
 import { Building_Partial_Fields, Space_Partial_Fields } from "~/assets/types/supabase_types";
 import { getSpaceTypes, getImageForSpaceType } from '~/utils/adminMapUtils'
 import getPermissionsKey, { type PermissionsKey } from "~/assets/permissionsKey"
 import type { UserProfile } from '~/assets/types/permissions';
-import { update } from 'lodash';
 
 	export default {
 		data() {
