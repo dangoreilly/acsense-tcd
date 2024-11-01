@@ -517,6 +517,7 @@ import { update } from 'lodash';
 
 				navigationNodes: [] as Nav_Node[],
 				navigationNodes_clean: [] as Nav_Node[],
+				navigationNodes_deleted: [] as Nav_Node[],
 
 				user: {} as UserProfile,
 				permissionsKey: {} as PermissionsKey,
@@ -666,6 +667,7 @@ import { update } from 'lodash';
 				// Get the navigation nodes in this building
 				// Null the nodes array
 				this.navigationNodes = [];
+				this.navigationNodes_deleted = [];
 				let _nodes = [] as Nav_Node_Template[];
 				const { data: nodes, error } = await this.supabase
 					.from('nav_nodes')
@@ -894,7 +896,10 @@ import { update } from 'lodash';
 			},
 
 			deleteNavNode(node: Nav_Node){
+				// Remove the navigation node from the array
 				this.navigationNodes.splice(this.navigationNodes.indexOf(node), 1)
+				// Add the node to the deleted nodes array
+				this.navigationNodes_deleted.push(node);
 			},
 
 			coordinatesToString(coordinates: number[][] | number[]): string {
@@ -1008,16 +1013,6 @@ import { update } from 'lodash';
 						console.log("Uploading new floor")
 						console.log(floor_update_vehicle)
 						// Insert the new floor into the database
-						// const { data:floor_insert_response, error:floor_insert_error } = await this.supabase
-						// 	.from('floorplans')
-						// 	.insert(floor_update_vehicle)
-						// // If there is an error, log it
-						// if (floor_insert_error) {
-						// 	console.error("Error inserting new floor: " + floor.id)
-						// 	console.error(floor_insert_error)
-						// 	alert(floor_insert_error.message)
-						// 	throw floor_insert_error
-						// }
 						const {data:floor_update_response, error:floor_update_error} = await insertToTable(access_token, "floorplans", floor_update_vehicle);
 
 						if (floor_update_error) {
@@ -1033,18 +1028,7 @@ import { update } from 'lodash';
 					// Check if the floor has changed
 					else if (!floorEquivalence(floor, clean_floor)) {
 
-						// console.log("Updating existing floor")
-						// // console.log(floor_update_vehicle)
-						// console.log("floor", JSON.parse(JSON.stringify(floor_update_vehicle)))
-						// console.log("clean_floor", JSON.parse(JSON.stringify(clean_floor)))
-
 						// Update the floor in the database
-						// const { data:floor_update_response, error:floor_update_error } = await this.supabase
-						// 	.from('floorplans')
-						// 	.update(floor_update_vehicle)
-						// 	.eq('id', floor.id)
-						// 	.select()
-
 						const { data:floor_update_response, error:floor_update_error } = await updateTable(access_token, "floorplans", 
 						floor_update_vehicle, 
 						{
@@ -1089,7 +1073,6 @@ import { update } from 'lodash';
 
 					}
 
-					
 				}
 				// Set the clean floors to the current floors
 				this.floors_clean = JSON.parse(JSON.stringify(this.floors));
@@ -1135,51 +1118,73 @@ import { update } from 'lodash';
 
 				// Check if the navigation nodes have changed
 				if (this.checkNavNodeChanges()) {
-					// Update the navigation nodes in the database
-					// First, delete all the nodes for this building
-					const { data:delete_response, error:navNode_delete_error } = await this.supabase
-						.from('nav_nodes')
-						.delete()
-						.eq('building', this.building.canonical)
-					// If there is an error, log it
-					if (navNode_delete_error) {
-						console.error(navNode_delete_error)
-						alert(navNode_delete_error.message)
-						throw navNode_delete_error
+					// First, cycle through the deleted nodes
+					for (let i = 0; i < this.deleted_floors.length; i++) {
+						// Delete the floor from the database
+						const { data:floor_delete_response, error:floor_delete_error } = await removeFromTable(access_token, "floorplans", 
+						{
+							col: "id", 
+							eq: this.deleted_floors[i].id
+						});
+
+						// If there is an error, log it
+						if (floor_delete_error) {
+							console.error("Error deleting floor: " + this.deleted_floors[i].id)
+							console.error(floor_delete_error)
+							alert(floor_delete_error.message)
+							throw floor_delete_error
+						}
 					}
 
-					// Create a new array of nodes without UUIDs to insert
-					let nodes_update_vehicle = [] as Nav_Node_Template[];
-					
-					this.navigationNodes.map(node => {
-						nodes_update_vehicle.push(JSON.parse(JSON.stringify({
-							label: node.label,
-							node_type: node.node_type,
-							presence: node.presence,
-							location_up: node.location_up,
-							location_down: node.location_down,
-							building: node.building,
-						})));
-					});
+					// Function to compare a node to a clean node by id
+					let checkNodeChanged = (id: number): boolean => {
+						let node = this.navigationNodes.find(n => n.id == id) as Nav_Node;
+						let clean_node = this.navigationNodes_clean.find(n => n.id == id) as Nav_Node;
 
-					// console.log("nodes_update_vehicle", nodes_update_vehicle)
-
-					// Then, insert the new nodes
-					const { data:insert_response, error:navNode_insert_error } = await this.supabase
-						.from('nav_nodes')
-						.insert(nodes_update_vehicle)
-					// If there is an error, log it
-					if (navNode_insert_error) {
-						console.error(navNode_insert_error)
-						alert(navNode_insert_error.message)
-						throw navNode_insert_error
-					}
-					else {
-						alert("Navigation nodes updated successfully")
+						return JSON.stringify(node) != JSON.stringify(clean_node);
 					}
 
-					// Set the clean nodes to the current nodes
-					this.navigationNodes_clean = JSON.parse(JSON.stringify(this.navigationNodes));
+
+					// Cycle through the navigation nodes
+					for (let i = 0; i < this.navigationNodes.length; i++) {
+
+						// Check if the node has an ID, if it doesn't it's new
+						if (!this.navigationNodes[i].id) {
+							// Insert the new node into the database
+							const { data:node_insert_response, error:node_insert_error } = await insertToTable(access_token, "nav_nodes", 
+								this.navigationNodes[i]);
+
+							if (node_insert_error) {
+								console.error("Error inserting new node: " + this.navigationNodes[i].label)
+								console.error(node_insert_error)
+								alert(node_insert_error.message)
+								throw node_insert_error
+							}
+								
+							alert(this.navigationNodes[i].label + " added successfully")
+						}
+						// Check if the node has changed
+						else if(checkNodeChanged(this.navigationNodes[i].id)) {
+							// Update the node in the database
+							const { data:node_update_response, error:node_update_error } = await updateTable(access_token, "nav_nodes", 
+								this.navigationNodes[i],
+								{
+									col: "id",
+									eq: this.navigationNodes[i].id
+								});
+
+							// If there is an error, log it
+							if (node_update_error) {
+								console.error("Error updating node: " + this.navigationNodes[i].label)
+								console.error(node_update_error)
+								alert(node_update_error.message)
+								throw node_update_error
+							}
+							else {
+								alert(this.navigationNodes[i].label + " updated successfully")
+							}
+						}
+					}
 				}
 
 				// Call the getBuilding function to refresh the building object and all the dependent objects
@@ -1231,10 +1236,6 @@ import { update } from 'lodash';
 
 			// This function fetches the building from the database based on it's canonical name
 			async getBuilding(canonical: string){
-				
-				// For testing: Set canonical to "arts-building"
-				// canonical = "arts-building";
-				// console.log("Fetching floorplans for: " + canonical);
 
 				// Get the relevant building fields from the database
 				// Since we are using the canonical name, we should only get one result
