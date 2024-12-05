@@ -12,6 +12,11 @@
             aria-label="Searchbar" 
             v-model="searchTerm"
             style="font-size: 1.5rem;">
+            <!-- Link to room search page -->
+            <!-- <a href="/info/rooms" class="text-decoration-none">
+                <span class="mt-2">Search for teaching rooms instead</span>
+            </a> -->
+            
         </div>
         <!-- Filters -->
         <div class="mt-1 pt-1"> 
@@ -179,11 +184,48 @@ import {createClient} from '@supabase/supabase-js'
         }
         else {
             // Add them to the buildings list
-            // Add a show property to each building, so that it can later be controlled with the search function
             let build_list = JSON.parse(JSON.stringify(buildings));
-            return initList(build_list, true);
+            // Add a show property to each building, so that it can later be controlled with the search function
+            build_list = initList(build_list, true);
+            // Find the rooms for the buildings
+            build_list = await getRoomsForBuildings(build_list);
+            return build_list;
         }
         
+    }
+
+    async function getRoomsForBuildings(buildings_list){
+        // Query supabase for all buildings that have their rooms published, and the rooms thereof
+        // Attach the returned rooms to the building objects by their UUID
+
+        console.log("Finding rooms")
+
+        let { data: rooms, error } = await supabase
+            .from('rooms')
+            .select('room_name, room_code, aka, building(canonical, rooms_published)')
+        if (error) {
+            console.log(error)
+            throw error
+        }
+        else {
+
+            // Filter out the rooms from buildings with unpublished room data
+            let rooms_list = rooms.filter(r => r.building.rooms_published == true);
+
+            // Cycle through the buildings and add the rooms to them
+            for (let i = 0; i < buildings_list.length; i++) {
+                // Find the rooms that match the building
+                let building_rooms = rooms_list.filter(r => r.building.canonical == buildings_list[i].canonical);
+                // Add the rooms to the building
+                buildings_list[i].rooms = building_rooms;
+
+                console.log(buildings_list[i])
+            }
+
+            
+        }
+
+        return buildings_list;
     }
 
     async function getListOfSpaces() {
@@ -286,6 +328,7 @@ import {createClient} from '@supabase/supabase-js'
                 buildings_list: [],
                 spaces_list: [],
                 sort_list: [],
+                include_rooms: false,
                 // fuse: null,
                 sorted_list: [],
                 filtered_list: [],
@@ -310,9 +353,80 @@ import {createClient} from '@supabase/supabase-js'
 
             // Gather the list of buildings and spaces
             this.formSearchList()
+
+            // Add rooms for testing
+            // find the fitzgerald-building by canonical
+            let fitz = this.sort_list.find(b => b.canonical == "fitzgerald-building");
+            // Find the sniam by canonical
+            let sniam = this.sort_list.find(b => b.canonical == "sami-nasr-institute-of-advanced-materials");
+
+
+            // Add rooms to fitz
+            fitz.rooms =[
+                {
+                    "roomName": "FITZGERALD LIBRARY ",
+                    "aka": "",
+                    "cmis": "FITZLIB",
+                    "roomType": "Flat",
+                    "capacity": 22,
+                    "hearingLoop": false,
+                    "wheelchair": true,
+                    "outlets": false,
+                    "projector": true,
+                    "whiteboard": true,
+                    "lecturn": true
+
+                },
+                {
+                    "roomName": "PHYSICS LARGE LECTURE THEATRE",
+                    "aka": "The Shro",
+                    "cmis": "PHYLLT",
+                    "roomType": "Tiered",
+                    "capacity": 148,
+                    "hearingLoop": false,
+                    "wheelchair": false,
+                    "outlets": false,
+                    "projector": true,
+                    "whiteboard": true,
+                    "lecturn": true
+
+                }
+            ];
+            // Add rooms to sniam
+            sniam.rooms = [
+                {
+                    "roomName": "SNIAM COMPUTATIONAL PHYSICS LAB (0.19)",
+                    "aka": "SNIAM PC Room",
+                    "cmis": "SNIAM CPL",
+                    "roomType": "Lab",
+                    "capacity": 35,
+                    "hearingLoop": false,
+                    "wheelchair": true,
+                    "outlets": true,
+                    "projector": true,
+                    "whiteboard": true,
+                    "lecturn": true
+
+                },
+                {
+                    "roomName": "SNIAM LECTURE THEATRE",
+                    "aka": "SNIAM Basement",
+                    "cmis": "SNIAM LT",
+                    "roomType": "Flat",
+                    "capacity": 122,
+                    "hearingLoop": false,
+                    "wheelchair": true,
+                    "outlets": true,
+                    "projector": true,
+                    "whiteboard": true,
+                    "lecturn": true
+
+                },
+            ]
+
+            // console.log(JSON.parse(JSON.stringify(this.sort_list)))
             // Check if there is a search param from a redirect
             this.checkForSearchParam()
-
 
         },
         methods: {
@@ -325,6 +439,11 @@ import {createClient} from '@supabase/supabase-js'
                 this.spaces_list = useState("spaces_list").value;
                 // console.log("Spaces List")
                 // console.log(this.spaces_list)
+
+                // Set up the buildings_list with an empty sorted_rooms array
+                for (let i = 0; i < this.buildings_list.length; i++) {
+                    this.buildings_list[i].sorted_rooms = [];
+                }
 
 
                 // Wait for them all to be loaded
@@ -349,13 +468,13 @@ import {createClient} from '@supabase/supabase-js'
 
             async checkForSearchParam() {
                 // Check if there is a search param
-                console.log("Checking for search param")
-                console.log(this.$route.query.search)
+                // console.log("Checking for search param")
+                // console.log(this.$route.query.search)
                 if (this.$route.query.search) {
                     // If there is, set the search bar to that value
                     this.searchTerm = this.normaliseSearchTerm(this.$route.query.search);
 
-                    // And search for it, is the sort list is available
+                    // And search for it, if the sort list is available
                     while (this.sort_list.length == 0){
                         await new Promise(r => setTimeout(r, 100));
                     }
@@ -470,7 +589,7 @@ import {createClient} from '@supabase/supabase-js'
 
                 let { data: buildings, error } = await this.supabase
                     .from('buildings')
-                    .select('display_name, canonical, description, aka')
+                    .select('display_name, canonical, description, aka, rooms_published')
                     .eq("published", true)
                 if (error) {
                     console.log(error)
@@ -480,9 +599,12 @@ import {createClient} from '@supabase/supabase-js'
                     // Add them to the buildings list
                     this.buildings_list = buildings;
 
+                    // Get the rooms for the buildings with floors
+                    this.buildings_list = this.getRoomsForBuildings();
+
                     // console.log(buildings);
                     // Add a show property to each building, so that it can later be controlled with the search function
-                    this.initList(this.buildings_list, true);
+                    // this.initList(this.buildings_list, true);
 
                     // Add to the sort list initially to speed up page draw
                     this.sort_list = this.sort_list.concat(this.buildings_list);
@@ -539,7 +661,10 @@ import {createClient} from '@supabase/supabase-js'
                         {name:'display_name', weight:5},
                         {name:'aka', weight:2},
                         {name:'building_display_name', weight:1},
-                        // {name:'ZoomedInLabel', weight:1},
+                        {name:'', weight:1},
+                        {name:"rooms.roomName", weight:3},
+                        {name:"rooms.aka", weight:2},
+                        {name:"rooms.cmis", weight:4},
                         // {name:'ZoomedOutLabel', weight:1}
                     ]
                 }
@@ -548,7 +673,7 @@ import {createClient} from '@supabase/supabase-js'
 
                 //Use the static generated Fuse instance to get a list of matches
                 let result = fuse.search(this.searchTerm)
-                console.log(result)
+                // console.log(result)
 
                 // Check there is a result
                 // If there's no result and no text in the textbox, show everything except the apology
@@ -573,8 +698,60 @@ import {createClient} from '@supabase/supabase-js'
                         this.sorted_list.push(result[i].item);
                     }
 
+                    // Then add in the room results
+                    for (let i = 0; i < this.sorted_list.length; i++) {
+                        // For each building in the primary search...
+                        if (this.sorted_list[i].type == "building") {
+                            // If the building has a rooms array, search it
+                            this.sorted_list[i].sorted_rooms = this.search_roomsOnly(this.sorted_list[i]);
+                        }
+                    }
+
                     this.showApology = false;
                 }
+
+            },
+
+            search_roomsOnly(sorted_building_item){
+                // For the given building result from the original search,
+                // Search the rooms array specifically so that they can be surfaced in the search results
+
+                // First, check the building has rooms
+
+                if (!sorted_building_item.rooms || sorted_building_item.rooms.length == 0){
+                    return [];
+                }
+
+                let rooms_to_search = sorted_building_item.rooms;
+                let sorted_rooms = [];
+
+                const fuse_options = {
+                    includeScore: true,
+                    // threshold: 1,
+                    keys: [ 
+                        {name:"roomName", weight:3},
+                        {name:"aka", weight:2},
+                        {name:"cmis", weight:5},
+                    ]
+                }
+                // Create a new Fuse object
+                let fuse = new Fuse(rooms_to_search, fuse_options);
+
+                //Use the static generated Fuse instance to get a list of matches
+                let result = fuse.search(this.searchTerm)
+                console.log(result)
+
+                // Check there is a result
+                if(result.length != 0){
+
+                    // If the result is nonzero, add them to the sorted_rooms array
+                    for (let i = 0; i < result.length; i++) {
+                        sorted_rooms.push(result[i].item);
+                    }
+                }
+
+                return sorted_rooms;
+
 
             },
 
