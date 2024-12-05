@@ -146,7 +146,7 @@
     padding-top: 2rem;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 
-        [row1] auto
+        [row1] 110px
         [row2] auto 
         [row3] auto
         [row4] auto
