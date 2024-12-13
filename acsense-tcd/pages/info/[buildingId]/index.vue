@@ -69,7 +69,7 @@
         <div style="grid-area: buttons;" class="px-5 m-0">
             <div v-if="building.rooms_published || building.floorplans_published" class="row">
             <div class="link-button link-button-top col" style="grid-area: rooms; align-self: center; justify-self: stretch;">
-                <NuxtLink :to="linkToRooms">
+                <NuxtLink to="rooms">
                     <button type="button" 
                     class="btn btn-primary btn-lg w-100 h-75"
                     :disabled="!building.rooms_published">Room info</button>
@@ -77,7 +77,7 @@
             </div>
                 
             <div class="link-button col" style="grid-area: floorplan; align-self: center; justify-self: stretch;">
-                <NuxtLink :to="linkToInternalMap">
+                <NuxtLink to="floorplans">
                     <button type="button" 
                     class="btn btn-primary btn-lg w-100"
                     :disabled="!building.floorplans_published">Internal Map
