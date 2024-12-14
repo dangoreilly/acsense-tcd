@@ -2,16 +2,16 @@
 <div class="container gallery mt-3">
     <h3 class="border-3 border-bottom mb-2">Gallery</h3>
     <!-- Grid Layout -->
-    <div class="row row-cols-1 row-cols-md-3 gy-4">
-        <div 
+    <div class="row row-cols-1 row-cols-md-3 gy-4" v-viewer="v_viewerOptions">
+        <div
         v-for="i in galleryImages"
         class="col themed-grid-col">
 
             <!-- Gallery card -->
             <div 
             class="border border-2 p-1 galleryPictureCard"
-            @click="highlightThis(i)"
-            >
+            
+            ><!-- @click="highlightThis(i)" -->
             <!-- If the card is clicked, the class of the image is updated -->
             <!-- to turn it into a modal -->
                 <img 
@@ -30,7 +30,7 @@
     <!-- creating a distinct component, since it doesn't interact -->
     <!-- with any other data -->
 
-    <div 
+    <!-- <div 
     class="modal modal-xl show" 
     tabindex="-1" 
     @click.self="modalVisible=false"
@@ -40,10 +40,10 @@
 
         <div class="modal-dialog modal-dialog-centered"
         style="max-height: 90vh;">
-            <div class="modal-content">
+            <div class="modal-content"> -->
 
                 <!-- Image with close button in top right corner -->
-                <div class="modal-body">
+                <!-- <div class="modal-body">
                     <button 
                     type="button" 
                     class="btn-close position-absolute top-0 end-0 m-4 border-pill border bg-light"  
@@ -52,22 +52,24 @@
                     aria-label="Close">
                     </button>
                     <img :src="modalPicture.url" class="ing-fluid modalPictureImg" :alt="modalPicture.alt">
-                </div>
+                </div> -->
                 <!-- Caption -->
-                <div v-if="modalPicture.caption" class="modal-footer">
+                <!-- <div v-if="modalPicture.caption" class="modal-footer">
                     <p class="text-center">{{ modalPicture.caption }}</p>
                 </div>
 
             </div>
         </div>
 
-    </div>
+    </div> -->
 
 </div>
 </template>
     
     
 <script>
+import 'viewerjs/dist/viewer.css'
+import { directive as viewer } from "v-viewer"
     
     // If the screen size is larger than a small tablet, then we will
     // open the modal for the gallery pictures. Otherwise, we will just
@@ -87,6 +89,45 @@
                 galleryImages: [],
                 modalPicture: {},
                 modalVisible: false,
+				v_viewerOptions: {
+					movable: true,
+					toolbar: {
+						zoomIn: {
+							show: 1,
+							size: 'large',
+						},
+						zoomOut: {
+							show: 1,
+							size: 'large',
+						},
+						oneToOne: 0,
+						reset: {
+							show: 1,
+							size: 'large',
+						},
+						prev: {
+							show: 1,
+							size: 'large',
+						},
+						play: 0,
+						next: {
+							show: 1,
+							size: 'large',
+						},
+						rotateLeft: {
+							show: 1,
+							size: 'large',
+						},
+						rotateRight: {
+							show: 1,
+							size: 'large',
+						},
+						flipHorizontal: 0,
+						flipVertical: 0,
+					},
+					title: false,
+					navbar: 1
+				} 
             }
         },
         created() {
@@ -132,7 +173,10 @@
             closeModal() {
                 this.modalVisible = false
             }
-        }
+        },
+		directives: {
+			viewer: viewer({})	
+		}
     }
     
     </script>
@@ -147,7 +191,7 @@
         border-bottom-right-radius: 0.5rem;
         border-top-left-radius: 0.5rem;
         margin:auto;
-        cursor: pointer;
+        /* cursor: pointer; */
         box-shadow: 10px 10px 15px rgba(0,0,0,0.15);
         
     }
@@ -161,6 +205,7 @@
         height:20rem; 
         overflow:hidden; 
         object-fit:cover;
+		cursor: zoom-in;
     }
 
     .modalPictureImg{

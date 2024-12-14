@@ -50,6 +50,8 @@
     "leaflet": "^1.9.4",
     "leaflet.fullscreen": "^3.0.2",
     "lodash": "^4.17.21",
-    "three": "^0.157.0"
+    "three": "^0.157.0",
+    "v-viewer": "^3.0.21",
+    "viewerjs": "^1.11.7"
   }
 }
