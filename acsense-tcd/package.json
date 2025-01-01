@@ -38,7 +38,7 @@
     "@geoman-io/leaflet-geoman-free": "^2.17.0",
     "@photo-sphere-viewer/autorotate-plugin": "^5.4.4",
     "@photo-sphere-viewer/core": "^5.4.4",
-    "@photo-sphere-viewer/visible-range-plugin": "^5.4.4",
+    "@photo-sphere-viewer/visible-range-plugin": "^5.11.4",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
     "@types/node": "^20.8.9",
