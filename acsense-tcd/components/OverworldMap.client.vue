@@ -71,8 +71,8 @@ export default {
                 maxZoom: 20,
                 renderer: L.canvas({padding: 1})
             }).fitBounds([
-                [53.345568, -6.259428],
-                [53.341853, -6.249477]
+                [53.370054, -6.233591],
+                [53.374764, -6.229748]
             ]);
 
             // Check if the user is in darkmode or lightmode, and set the map style accordingly

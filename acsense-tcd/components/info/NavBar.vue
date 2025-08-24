@@ -11,7 +11,7 @@
         href="/"
         >
         <!-- @click="$router.push('/')" -->
-            <strong>TCD Sense Map</strong>
+            <strong>MIE Sense Map</strong>
         </a>
 
         <form 

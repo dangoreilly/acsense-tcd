@@ -287,7 +287,7 @@
     
     // Set some meta data for the page
     useHead({
-        title: 'Map of ' + building.value.display_name + ' | TCDSense',
+        title: 'Map of ' + building.value.display_name + ' | MIE Sense',
         meta: [
             {
                 name: 'viewport',

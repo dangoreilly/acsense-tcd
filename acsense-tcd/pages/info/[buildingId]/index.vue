@@ -438,7 +438,7 @@ const { x, y } = useWindowScroll()
         infoBoxDisplays = ref(infoBoxDisplayCheck(infoBoxContent.value));
     }
 
-    let pageTitle = (building.value ? building.value.display_name : "Building not found") + '- TCD Sense';
+    let pageTitle = (building.value ? building.value.display_name : "Building not found") + '- MIE Sense';
     let pageDescription = (building.value ? building.value.description : "Building not found");
 
     useHead({

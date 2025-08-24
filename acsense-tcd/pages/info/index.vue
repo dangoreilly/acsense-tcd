@@ -121,7 +121,7 @@ import {createClient} from '@supabase/supabase-js'
     const supabase = createClient(supabaseUrl, supabaseKey)
     
     useHead({
-        title: 'TCD Sense Map - Search',
+        title: 'MIE Sense Map - Search',
         meta: [
             // {
             //     name: 'description',

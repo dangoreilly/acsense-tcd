@@ -254,12 +254,12 @@ import {createClient} from '@supabase/supabase-js';
 
     // Set the SEO and page title
 
-    let pageTitle = space.value ? space.value.name : "Space Not Found" + ' - TCD Sense';
+    let pageTitle = space.value ? space.value.name : "Space Not Found" + ' - MIE Sense';
     let pageDescription = space.value ? space.value.description : "This space does not exist";
     let keyword = space.value ? space.value.name : "";
 
     useHead({
-        title: pageTitle + ' - TCD Sense',
+        title: pageTitle + ' - MIE Sense',
         meta: [
             {
                 name: 'description',

@@ -127,7 +127,7 @@ import { createClient } from '@supabase/supabase-js';
                     ];
     // Set some meta data for the page
     useHead({
-        title: 'TCD Sense Map',
+        title: 'MIE Sense Map',
         meta: [
             {
                 name: 'viewport',
