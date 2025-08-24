@@ -16,28 +16,28 @@
 
     <!-- Info Modal -->
     <div 
-        class="modal fade show" 
-        id="buildingModal"
-        tabindex="-1" 
-        @click.self="closeModal()"
-        aria-modal="true" 
-        role="dialog" 
-        :style="infoModalOpen ? 'display: block;' : 'display: none;'">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
-                <div class="modal-content" >
+	class="modal fade show" 
+	id="buildingModal"
+	tabindex="-1" 
+	@click.self="closeModal()"
+	aria-modal="true" 
+	role="dialog" 
+	:style="infoModalOpen ? 'display: block;' : 'display: none;'">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
+			<div class="modal-content" >
 
-                    <div class="modal-header" style="width: 100%;">
-                        <h5 class="modal-title d-flex" id="mapModalLabel">{{infoModal.title}}</h5>
-                        <button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
-                    </div>
+				<div class="modal-header" style="width: 100%;">
+					<h5 class="modal-title d-flex" id="mapModalLabel">{{infoModal.title}}</h5>
+					<button type="button" class="btn-close d-flex" @click="closeModal()" aria-label="Close"></button>
+				</div>
 
-                    <div class="modal-body" style="align-self: baseline;" v-html="infoModal.mainContent"></div>
+				<div class="modal-body" style="align-self: baseline;" v-html="infoModal.mainContent"></div>
 
-                    <div class="modal-footer space-modal-badge-container" style="justify-content: center" v-html="infoModal.footer"></div>
-                
-                </div>
-            </div>
-        </div>
+				<div class="modal-footer space-modal-badge-container" style="justify-content: center" v-html="infoModal.footer"></div>
+			
+			</div>
+		</div>
+	</div>
 
     <!-- Space Modal -->
     <!-- <div 
@@ -371,6 +371,7 @@ export default {
         }
     }
 };
+
 </script>
 
 <style>
