@@ -1145,6 +1145,37 @@ const campusBounds = [
 
             },
 
+            updateGalleryImage(index){
+                // Deep copy the gallery image to update
+                let update_image = JSON.parse(JSON.stringify(this.gallery[index]));
+
+                // Update the image in the database
+                (async () => {
+                    const access_token = await getSessionAccessToken(this.supabase);
+                    const {data, error} = await updateTable(access_token, "building_gallery_images", update_image, {col: "id", eq: update_image.id})
+                    
+                    // If there is an error, log it
+                    if (error) {
+                        console.error(error)
+                        alert(error.message)
+                        throw error
+                    }
+                    else {
+                        // If the update was successful, update the clean gallery image object
+                        this.gallery_clean[index] = JSON.parse(JSON.stringify(this.gallery[index]));
+                        alert("Gallery image updated successfully")
+                        console.log(data)
+                    }
+                })();
+            },
+
+            revertGalleryImage(index)
+            {
+                // Deep copy the clean copy back into the gallery
+                this.gallery[index] = JSON.parse(JSON.stringify(this.gallery_clean[index]));
+
+            },
+
             // This function fetches the building from the database based on it's canonical name
             async getBuilding(canonical){
                 console.log("Fetching building: " + canonical);
