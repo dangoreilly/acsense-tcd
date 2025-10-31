@@ -630,8 +630,8 @@ import { addBuildings, addLabelsToMap, addOverlays, addSpaces, addZoomHandling }
 
 
 const campusBounds = [
-                    [53.345568, -6.259428],
-                    [53.341853, -6.249477]
+                    [53.370054, -6.233591],
+                    [53.374764, -6.229748]
                 ];
 
     export default {

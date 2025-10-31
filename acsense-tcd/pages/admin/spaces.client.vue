@@ -772,8 +772,8 @@ import { userHasPermission } from '~/utils/getChanges';
 import extractYoutubeID from '~/composables/extractYoutubeID';
 
 const campusBounds = [
-					[53.34631744552114, -6.255028994837502],
-					[53.34163690316516, -6.258745992827823]
+					[53.370054, -6.233591],
+                	[53.374764, -6.229748]
 				];
 
 	export default {
