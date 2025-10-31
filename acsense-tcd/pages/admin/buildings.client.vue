@@ -1185,13 +1185,18 @@ const campusBounds = [
             },
             mapDataLoaded(){
 
-                // Checks if the arrays for the map data have been populated
-                // Returns true if all are populated, false otherwise
-                if (this.space_types.length == 0) return false; 
-                if(this.buildings_list.length == 0) return false;
-                if(this.spaces_list.length == 0) return false;
-                if(this.overlays.length == 0) return false;
-                if(document.getElementById("building-placement-map") == null) return false;
+                // Checks that the map element has loaded
+                // Check that the map element is present
+				if(document.getElementById("building-placement-map") == null) {
+					console.log("Building placement map not loaded yet")
+					return false;
+				} 
+				
+				// Check that we're on the client side
+				if (!window) {
+					console.log("Window is not defined")
+					return false;
+				} 
 
                 return true
 
