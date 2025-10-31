@@ -37,9 +37,13 @@
             <div v-if="published_field == 'published'">
                 <hr>
                 <div class="input-group" v-if="permissions.is_admin">
-                    <input id="new-entity" type="text" class="form-control" 
-                    :placeholder="'new-' + entityType + 'ID'" 
-                    aria-label="New Entity" aria-describedby="button-addon2"
+                    <input 
+                    id="new-entity" 
+                    type="text" 
+                    class="form-control" 
+                    :placeholder="'new-' + entityType + '-id'" 
+                    aria-label="New Entity" 
+                    aria-describedby="button-addon2"
                     v-model="newEntityID">
                     <button 
                     :disabled="!newEntityIDValid" 
@@ -51,6 +55,11 @@
                         +
                     </button>
                 </div>
+                <span 
+                v-if="newEntityID.length > 0 && !newEntityIDValid" 
+                class="text-danger">
+                    {{ error_message }}
+                </span>
             </div>
             <!-- <div class="form-text" style="font-size: 0.75em;">spaceID cannot be updated</div> -->
         </div>
@@ -59,6 +68,7 @@
     
 <script lang="ts">
     import {createClient} from '@supabase/supabase-js';
+import { error } from 'console';
     import Fuse from 'fuse.js';
     import { space_template, building_template } from '~/assets/templates';
 import type { Building_Template, Space_Template } from '~/assets/types/supabase_types';
@@ -118,6 +128,7 @@ import type { Building_Template, Space_Template } from '~/assets/types/supabase_
                 entities: [] as (Space_List_Item | Building_List_Item)[],
                 entities_clean: [] as (Space_List_Item | Building_List_Item)[],
                 searchTerm: '',
+                error_message: '',
             }
         },
         created() {
@@ -125,7 +136,33 @@ import type { Building_Template, Space_Template } from '~/assets/types/supabase_
         },
         computed: {
             newEntityIDValid() {
-                return this.newEntityID.length > 4
+                // Checks if the newEntityID is valid
+
+                // Must be at least 5 characters long
+                if (this.newEntityID.length < 4) {
+                    this.error_message = "ID must be at least 5 characters long";
+                    return false;
+                }
+                
+                // must not already exist in the entities list
+                for (let i = 0; i < this.entities.length; i++) {
+                    if (this.entities[i].canonical == this.newEntityID) {
+                        this.error_message = "ID already exists";
+                        return false;
+                    }
+                }
+
+                // Must only contain alphanumeric characters, hyphens
+                const regex = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+                if (!regex.test(this.newEntityID)) {    
+                    this.error_message = "ID can only contain lowercase letters, numbers and hyphens";
+                    return false;
+                }
+
+                // If all checks pass, return true
+                this.error_message = '';
+                return true;
             }
         },
         methods: {
