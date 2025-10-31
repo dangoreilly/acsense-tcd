@@ -9,7 +9,7 @@
                 <p>Analytics for the site are provided by <a href="https://plausible.io">Plausible</a>. The data is collected anonymously and is not shared with any third parties.</p>
                 <p>Plausible is a privacy-friendly alternative to Google Analytics. It is open source and does not use cookies or collect any personal data.</p>
                 <p>For more information, see the <a href="https://plausible.io/data-policy">Plausible Data Policy</a>.</p>
-                <p><a href="https://docs.plausible.io/tcdsensemap.ie">Full Analytics Dashboard</a></p>
+                <p><a href="https://docs.plausible.io/mie.acsense.ie">Full Analytics Dashboard</a></p>
             </div>
             <div class="container">
                 <h3>Unique Visitors, last 30 days</h3>
@@ -17,7 +17,7 @@
                 <canvas class="border-bottom border-secondary p-1" id="analyticsChart"></canvas>
 
                 <h3 class="mt-2">Top 10 Pages, last 30 days</h3>
-                <a href="https://plausible.io/tcdsensemap.ie/pages">See all</a>
+                <a href="https://plausible.io/mie.acsense.ie/pages">See all</a>
                 <canvas id="topPagesChart"></canvas>
             </div>
         </main>

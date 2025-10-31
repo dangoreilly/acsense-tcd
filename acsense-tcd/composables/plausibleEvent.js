@@ -12,7 +12,7 @@ export default function (eventName, ) {
         body: JSON.stringify({
             "name": eventName,
             "url": window.location.href,
-            "domain": "tcdsensemap.ie",
+            "domain": "mie.acsense.ie",
             "User-Agent": userAgent,
             "referrer": document.referrer
         })
