@@ -315,7 +315,6 @@
 
 <script lang="ts">
 // import { createClient } from '@supabase/supabase-js';
-import { init } from '@plausible-analytics/tracker'
 
 import {openAreaModal} from '~/assets/modalFunctions.js';
 
@@ -343,11 +342,6 @@ export default {
         // console.log(this.$refs.welcome);
         // Check if the user has indicated they want to skip the welcome modal
         this.checkSkipWelcome();
-
-        // Start the plausible analytics tracker
-        init({
-            domain: 'mie.acsense.ie',
-        })
     },
     watch: {
         skipWelcome: function(){

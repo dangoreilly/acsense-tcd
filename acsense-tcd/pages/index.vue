@@ -294,10 +294,6 @@ export default {
 		// Check if the user has indicated they want to skip the welcome modal
 		this.checkSkipWelcome();
 		this.checkDarkMode();
-		// Start the plausible analytics tracker
-		init({
-			domain: 'mie.acsense.ie'
-		});
 
 	},
 	watch: {

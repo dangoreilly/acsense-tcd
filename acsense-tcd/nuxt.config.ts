@@ -11,10 +11,11 @@ export default defineNuxtConfig({
     },
     css: [ "~/assets/css/style.scss"],
     modules: [
-        '@vueuse/nuxt',
-        '@nuxt/content',
-        '@nuxt/test-utils/module'
-      ],
+        '@vueuse/nuxt', 
+        '@nuxt/content', 
+        '@nuxt/test-utils/module', 
+        '@nuxtjs/plausible'
+    ],
     components: [
         { path: '~/components/admin'},
         { path: '~/components/admin/maps'},

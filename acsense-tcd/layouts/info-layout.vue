@@ -67,7 +67,6 @@
 </script>
 	
 <script>
-	import { init } from '@plausible-analytics/tracker'
 
 	export default {
 		props: {
@@ -99,11 +98,6 @@
 		//         }
 		//     }
 		// },
-		mounted() {
-			init({
-				domain: 'mie.acsense.ie',
-			})
-		}
 	
 	}
 
