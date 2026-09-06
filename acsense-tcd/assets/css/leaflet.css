@@ -81,6 +81,7 @@
 .leaflet-tile {
 	filter: inherit;
 	visibility: hidden;
+	outline: 1px solid transparent;
 	}
 .leaflet-tile-loaded {
 	visibility: inherit;
