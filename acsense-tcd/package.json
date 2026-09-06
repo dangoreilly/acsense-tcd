@@ -26,7 +26,6 @@
     "@vueuse/core": "^10.5.0",
     "@vueuse/nuxt": "^10.9.0",
     "happy-dom": "^14.12.3",
-    "node-sass": "^9.0.0",
     "nuxt": "^3.12.4",
     "playwright-core": "^1.45.3",
     "sass": "1.77.6",
@@ -50,6 +49,7 @@
     "leaflet": "^1.9.4",
     "leaflet.fullscreen": "^3.0.2",
     "lodash": "^4.17.21",
+    "protomaps-leaflet": "^5.1.0",
     "three": "^0.157.0"
   }
 }

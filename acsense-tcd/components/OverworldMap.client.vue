@@ -6,6 +6,7 @@
 import L from 'leaflet';
 // import "leaflet/dist/leaflet.css";
 import '~/assets/css/leaflet.css'
+import * as protomapsL from 'protomaps-leaflet';
 
 export default {
     props: {
@@ -76,19 +77,27 @@ export default {
             ]);
 
             // Check if the user is in darkmode or lightmode, and set the map style accordingly
-            let tile_source;
+            // let tile_source;
+			let flavour = 'grayscale';
 
             if (this.isDarkMode){
-                tile_source = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
+                // tile_source = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
+				flavour = 'dark';
             }
-            else {
-                tile_source = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png';
-            }
+            // else {
+            //     tile_source = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png';
+            // }
 
-            L.tileLayer(tile_source, { //rastertiles/voyager_nolabels
-                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                maxZoom:20
-            }).addTo(map);
+            // L.tileLayer(tile_source, { //rastertiles/voyager_nolabels
+            //     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            //     maxZoom:20
+            // }).addTo(map);
+
+			// Get the browser language
+			let lang = navigator.language || 'en';
+			protomapsL.leafletLayer({url:'https://acsense-assets.fra1.cdn.digitaloceanspaces.com/basemap.pmtiles', flavor: flavour, lang: lang})
+			.addTo(map);
+			// https://acsense-assets.fra1.cdn.digitaloceanspaces.com/basemap.pmtiles
 
             // Check the zoom level, set it to >LABEL_PRIMARY_RANGE_LOWER if it's too high
             // This is to prevent the "Primary" label from being hidden
